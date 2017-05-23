@@ -4,7 +4,7 @@ go:
   - 1.8.x
 before_install:
   - sudo apt-get update -qq
-  - sudo apt-get install -qq protoc
+  - sudo apt-get install -qq protobuf
 install:
   - go get -u github.com/golang/protobuf/proto
   - go get -u github.com/golang/protobuf/protoc-gen-go
