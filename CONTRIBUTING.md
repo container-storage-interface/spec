@@ -9,6 +9,12 @@ To keep consistency throughout the Markdown files in the CSI spec, all files sho
 This fixes two things: it makes diffing easier with git and it resolves fights about line wrapping length.
 For example, this paragraph will span three lines in the Markdown source.
 
+## Code style
+
+This also applies to the code snippets in the markdown files.
+
+* Please wrap the code at 72 characters.
+
 ## Git commit
 
 ### Commit Style
