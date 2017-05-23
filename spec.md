@@ -1089,7 +1089,7 @@ message Error {
     // will cause it to succeed. If this value is false, the caller MAY
     // reissue the same call, but SHOULD implement exponential backoff
     // on retires.
-    bool caller_must_not_retry = 2
+    bool caller_must_not_retry = 2;
 
     // Human readable description of error, possibly with additional
     // information. This string MAY be surfaced by CO to end users.
@@ -1538,7 +1538,7 @@ message Error {
       MISSING_REQUIRED_HOST_DEPENDENCY = 2;
     }
     
-    GetNodeIDCode error_code = 1;
+    GetNodeIDErrorCode error_code = 1;
     string error_description = 2;
   }
 
