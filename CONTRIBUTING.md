@@ -19,6 +19,12 @@ This also applies to the code snippets in the markdown files.
 
 ### Commit Style
 
+Each commit should represent a single logical (atomic) change: this makes your changes easier to review. 
+
+* Try to avoid unrelated cleanups (e.g., typo fixes or style nits) in the same commit that makes functional changes.
+  While typo fixes are great, including them in the same commit as functional changes makes the commit history harder to read.
+* Developers often make incremental commits to save their progress when working on a change, and then “rewrite history” (e.g., using `git rebase -i`) to create a clean set of commits once the change is ready to be reviewed.
+
 Simple house-keeping for clean git history.
 Read more on [How to Write a Git Commit Message](http://chris.beams.io/posts/git-commit/) or the Discussion section of [`git-commit(1)`](http://git-scm.com/docs/git-commit).
 
