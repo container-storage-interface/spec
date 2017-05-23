@@ -1,0 +1,19 @@
+---
+language: go
+
+go:
+  - 1.8.x
+
+before_install:
+  - curl -LO https://github.com/google/protobuf/releases/download/v3.3.0/protoc-3.3.0-linux-x86_64.zip
+  - unzip protoc-3.3.0-linux-x86_64.zip
+  - chmod +x bin/protoc
+
+install:
+  - go get -u github.com/golang/protobuf/proto
+  - go get -u github.com/golang/protobuf/protoc-gen-go
+  - go get -u google.golang.org/grpc
+  - cat spec.md | sed -n -e '/```protobuf$/,/```$/ p' | sed -e '1i syntax = "proto3";\npackage spec;' -e 's@^```.*$@////////@g' > spec.proto
+
+script:
+  - bin/protoc --go_out=plugins=grpc:. *.proto
