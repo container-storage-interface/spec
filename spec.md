@@ -1538,7 +1538,7 @@ message Error {
       MISSING_REQUIRED_HOST_DEPENDENCY = 2;
     }
     
-    GetNodeIDCode error_code = 1;
+    GetNodeIDErrorCode error_code = 1;
     string error_description = 2;
   }
 
