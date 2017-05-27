@@ -383,7 +383,7 @@ message CreateVolumeRequest {
   CapacityRange capacity_range = 3;
 
   // The capabilities that the provisioned volume MUST have: the Plugin
-  // MUST provision a volume that could satisfy ANY ONE of the
+  // MUST provision a volume that could satisfy ALL of the
   // capabilities specified in this list. The Plugin MUST assume that
   // the CO MAY use the  provisioned volume later with ANY of the
   // capabilities specified in this list. This also enables the CO to do
@@ -557,7 +557,7 @@ The Plugin SHOULD perform the work that is necessary for making the volume avail
 The Plugin MUST NOT assume that this RPC will be executed on the node where the volume will be used.
 
 This operation MUST be idempotent.
-If the operation failed or the CO does not know if the operation has failed or not, it MAY choose to call `AttachVolume` again or choose to call `DetachVolume`.
+If the operation failed or the CO does not know if the operation has failed or not, it MAY choose to call `ControllerPublishVolume` again or choose to call `ControllerUnpublishVolume`.
 
 The CO MAY call this RPC for publishing a volume to multiple nodes if `multiple_nodes` is set to true in `AccessMode` for the volume.
 
@@ -603,7 +603,7 @@ message NodeID {
   // Information about a node in the form of key-value pairs. This
   // information is opaque to the CO. Given this information will be
   // passed around by the CO, it is RECOMMENDED that each Plugin keeps
-  // this information as small as possible.
+  // this information as small as possible. This field is REQUIRED.
   map<string, string> values = 1;
 }
 
@@ -612,7 +612,7 @@ message PublishVolumeInfo {
   // call. It is in the form of key-value pairs, and is opaque to the
   // CO. Given this information will be passed around by the CO, it is
   // RECOMMENDED that each Plugin keeps this information as small as
-  // possible.
+  // possible. This field is OPTIONAL.
   map<string, string> values = 1;
 }
 ```
@@ -682,7 +682,7 @@ message ValidateVolumeCapabilitiesRequest {
 
   // The capabilities that the CO wants to check for the volume. This
   // call SHALL return “supported” only if all the volume capabilities
-  // specified below are supported.
+  // specified below are supported. This field is REQUIRED.
   repeated VolumeCapability volume_capabilities = 3;
 }
 
@@ -726,7 +726,7 @@ message ListVolumesRequest {
 
   // A token to specify where to start paginating. Set this field to 
   // `next_token` returned by a previous `ListVolumes` call to get the
-  // next page of entries.
+  // next page of entries. This field is OPTIONAL.
   string starting_token = 3; 
 }
 
@@ -1066,7 +1066,7 @@ message Error {
       // be set to true.
       //
       // Recovery behavior: Caller MUST NOT retry; caller SHOULD call
-      // `GetPluginInfo` to discover which CSI versions the Plugin
+      // `GetSupportedVersions` to discover which CSI versions the Plugin
       // supports.
       UNSUPPORTED_REQUEST_VERSION = 2;
 
