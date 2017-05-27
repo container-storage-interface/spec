@@ -1317,7 +1317,7 @@ message Error {
       // information to detach the volume from the other node. Caller
       // SHOULD ensure the specified volume is not attached to any other
       // node before retrying with exponential back off.
-      VOLUME_ALREADY_ATTACHED = 6;
+      VOLUME_ALREADY_PUBLISHED = 6;
 
       // Indicates that a node corresponding to the specified `NodeID`
       // does not exist.
@@ -1339,6 +1339,15 @@ message Error {
       // information to detach the volume from one other node before
       // retrying with exponential backoff.
       MAX_ATTACHED_NODES = 8;
+
+      // Indicates that the specified `NodeID` is not allowed or
+      // understood by the Plugin, or the Plugin does not support the
+      // operation without a `NodeID`. More human-readable information
+      // MAY be provided in the `error_description` field.
+      //
+      // Recovery behavior: Caller MUST fix the `NodeID` before
+      // retrying.
+      INVALID_NODE_ID = 9;
     }
     
     // Machine parsable error code.
@@ -1422,8 +1431,21 @@ message Error {
       // terminated or deleted before retrying.
       NODE_DOES_NOT_EXIST = 6;
 
+      // Indicates that the specified `NodeID` is not allowed or
+      // understood by the Plugin. More human-readable information MAY
+      // be provided in the `error_description` field.
+      //
+      // Recovery behavior: Caller MUST fix the `NodeID` before
+      // retrying.
       INVALID_NODE_ID = 7;
+
       VOLUME_NOT_ATTACHED_TO_SPECIFIED_NODE = 8;
+
+      // Indicates that the Plugin does not support the operation
+      // without a `NodeID`.
+      //
+      // Recovery behavior: Caller MUST specify the `NodeID` before
+      // retrying.
       NODE_ID_REQUIRED = 9;
     }
     
@@ -1444,10 +1466,25 @@ message Error {
       // to match Plugin CSI version.
       UNKNOWN = 0;
 
+      // Indicates that a volume corresponding to the specified
+      // `VolumeInfo` does not exist.
+      //
+      // Recovery behavior: Caller SHOULD verify that the `VolumeInfo`
+      // is correct and that the volume is accessable and has not been
+      // deleted before retrying.
       VOLUME_DOES_NOT_EXIST = 1;
-      UNSUPPORTED_MOUNT_OPTION = 2;
+
+      UNSUPPORTED_MOUNT_FLAGS = 2;
       UNSUPPORTED_VOLUME_TYPE = 3;
       UNSUPPORTED_FS_TYPE = 4;
+
+      // Indicates that the specified `VolumeInfo` is not allowed or
+      // understood by the Plugin. More human-readable information MAY
+      // be provided in the `error_description` field.
+      //
+      // Recovery behavior: Caller MUST fix the `VolumeInfo` before
+      // retrying.
+      INVALID_VOLUME_INFO = 5;
     }
     
     ValidateVolumeCapabilitiesErrorCode error_code = 1;
@@ -1467,12 +1504,41 @@ message Error {
       // to match Plugin CSI version.
       UNKNOWN = 0;
 
+      // Indicates that there is a already an operation pending for the
+      // specified volume. In general the Cluster Orchestrator (CO) is
+      // responsible for ensuring that there is no more than one call
+      // “in-flight” per volume at a given time. However, in some
+      // circumstances, the CO MAY lose state (for example when the CO
+      // crashes and restarts), and MAY issue multiple calls
+      // simultaneously for the same volume. The Plugin, SHOULD handle
+      // this as gracefully as possible, and MAY return this error code
+      // to reject secondary calls.
+      //
+      // Recovery behavior: Caller SHOULD ensure that there are no other
+      // calls pending for the specified volume, and then retry with
+      // exponential back off.
       OPERATION_PENDING_FOR_VOLUME = 1;
+
+      // Indicates that a volume corresponding to the specified
+      // `VolumeID` does not exist.
+      //
+      // Recovery behavior: Caller SHOULD verify that the `VolumeID` is
+      // correct and that the volume is accessible and has not been
+      // deleted before retrying with exponential back off.
       VOLUME_DOES_NOT_EXIST = 2;
-      UNSUPPORTED_MOUNT_OPTION = 3;
+
+      UNSUPPORTED_MOUNT_FLAGS = 3;
       UNSUPPORTED_VOLUME_TYPE = 4;
       UNSUPPORTED_FS_TYPE = 5;
       MOUNT_ERROR = 6;
+
+      // Indicates that the specified `VolumeID` is not allowed or
+      // understood by the Plugin. More human-readable information MAY
+      // be provided in the `error_description` field.
+      //
+      // Recovery behavior: Caller MUST fix the `VolumeID` before
+      // retrying.
+      INVALID_VOLUME_ID = 7;
     }
     
     NodePublishVolumeErrorCode error_code = 1;
@@ -1492,9 +1558,38 @@ message Error {
       // to match Plugin CSI version.
       UNKNOWN = 0;
 
+      // Indicates that there is a already an operation pending for the
+      // specified volume. In general the Cluster Orchestrator (CO) is
+      // responsible for ensuring that there is no more than one call
+      // “in-flight” per volume at a given time. However, in some
+      // circumstances, the CO MAY lose state (for example when the CO
+      // crashes and restarts), and MAY issue multiple calls
+      // simultaneously for the same volume. The Plugin, SHOULD handle
+      // this as gracefully as possible, and MAY return this error code
+      // to reject secondary calls.
+      //
+      // Recovery behavior: Caller SHOULD ensure that there are no other
+      // calls pending for the specified volume, and then retry with
+      // exponential back off.
       OPERATION_PENDING_FOR_VOLUME = 1;
+
+      // Indicates that a volume corresponding to the specified
+      // `VolumeID` does not exist.
+      //
+      // Recovery behavior: Caller SHOULD verify that the `VolumeID` is
+      // correct and that the volume is accessible and has not been
+      // deleted before retrying with exponential back off.
       VOLUME_DOES_NOT_EXIST = 2;
+
       UNMOUNT_ERROR = 3;
+
+      // Indicates that the specified `VolumeID` is not allowed or
+      // understood by the Plugin. More human-readable information MAY
+      // be provided in the `error_description` field.
+      //
+      // Recovery behavior: Caller MUST fix the `VolumeID` before
+      // retrying.
+      INVALID_VOLUME_ID = 4;
     }
     
     NodeUnpublishVolumeErrorCode error_code = 1;
@@ -1548,13 +1643,14 @@ message Error {
 
     CreateVolumeError create_volume_error = 2;
     DeleteVolumeError delete_volume_error = 3;
-    ControllerPublishVolumeError controller_publish_volume_volume_error = 4;
-    ControllerUnpublishVolumeError controller_unpublish_volume_volume_error = 5;
+    ControllerPublishVolumeError controller_publish_volume_error = 4;
+    ControllerUnpublishVolumeError controller_unpublish_volume_error = 5;
     ValidateVolumeCapabilitiesError validate_volume_capabilities_error = 6;
 
     NodePublishVolumeError node_publish_volume_error = 7;
     NodeUnpublishVolumeError node_unpublish_volume_error = 8;
     ProbeNodeError probe_node_error = 9;
+    GetNodeIDError get_node_id_error = 10;
   }
 }
 ```
