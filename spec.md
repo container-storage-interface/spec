@@ -582,6 +582,20 @@ message ControllerPublishVolumeRequest {
   // Whether to publish the volume in readonly mode. This field is
   // REQUIRED.
   bool readonly = 5;
+
+  // OPTIONAL field for storing principal information to be used in
+  // this publishing of this volume. If the principal is present the
+  // plugin MAY ensure all access to the volumes contents through
+  // this mount is mapped to the identity specified by the principal.
+  // If no principal is provided the access ids are not mapped but handed
+  // through untouched.
+  // As this field is specific to a given publishing of a volume
+  // containers in a container hierarchy have to either have their own
+  // individual volume publishings or a parent container MAY provide
+  // access to his volume mount throught some CO specific internal
+  // mechanism. In the latter case still all access through that volume
+  // mount is mapped to the given principal, as in a standalone container.
+  Principal accessed_as = 6;
 }
 
 message ControllerPublishVolumeResponse {
@@ -614,6 +628,24 @@ message PublishVolumeInfo {
   // RECOMMENDED that each Plugin keeps this information as small as
   // possible. This field is OPTIONAL.
   map<string, string> values = 1;
+}
+
+message Principal {
+  // describes attributes for defining the principal identity of
+  // a volume binding for a container.
+
+  // This field is OPTIONAL. If specified it contains the CO namespace
+  // identity in which the the following identity information (user /
+  // group) exists.
+  string namespace = 1;
+  // This field is OPTIONAL. If specified it contains the CO user
+  // identity to which all access to a given volume through this publishings
+  // mounts is mapped to.
+  string user = 2;
+  // This field is OPTIONAL. If specified it contains the CO group
+  // identity to which all access to a given volume through this publishings
+  // mounts is mapped to.
+  string group = 3;
 }
 ```
 
@@ -875,6 +907,24 @@ message NodePublishVolumeRequest {
   // Whether to publish the volume in readonly mode. This field is
   // REQUIRED.
   bool readonly = 7;
+
+  // OPTIONAL field for storing principal information to be used in
+  // this publishing of this volume. If the principal is present the
+  // plugin MAY ensure all access to the volumes contents through
+  // this mount is mapped to the identity specified by the principal.
+  // If no principal is provided the access ids are not mapped but handed
+  // through untouched.
+  //
+  // The principal of the NodePublishVolumeRequest MUST match the
+  // principal in the corresponding ControllerPublishVolumeRequest.
+  //
+  // As this field is specific to a given publishing of a volume
+  // containers in a container hierarchy have to either have their own
+  // individual volume publishings or a parent container MAY provide
+  // access to his volume mount throught some CO specific internal
+  // mechanism. In the latter case still all access through that volume
+  // mount is mapped to the given principal, as in a standalone container.
+  Principal accessed_as = 8;
 }
 
 message NodePublishVolumeResponse {
