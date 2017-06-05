@@ -1,0 +1,28 @@
+'                            CO "Node" Host(s)
+'+-------------------------------------------+
+'|                                           |
+'|  +------------+           +------------+  |
+'|  |     CO     |   gRPC    | Controller |  |
+'|  |            +--+-------->   Plugin   |  |
+'|  +------------+  |        +------------+  |
+'|                  |                        |
+'|                  |                        |
+'|                  |        +------------+  |
+'|                  |        |    Node    |  |
+'|                  +-------->   Plugin   |  |
+'|                           +------------+  |
+'|                                           |
+'+-------------------------------------------+
+
+@startuml
+skinparam linetype ortho
+frame "Node Host(s)" as nodeHost {
+    rectangle CO as nodeClient
+    rectangle "Controller Plugin" as nodeController
+    rectangle "Node Plugin" as nodeAgent
+}
+nodeClient -right-> nodeController: gRPC
+nodeClient -down-> nodeAgent: gRPC
+nodeController -[hidden]-> nodeAgent
+nodeController -[hidden]- nodeAgent
+@enduml

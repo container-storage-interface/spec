@@ -1,0 +1,24 @@
+'    Controller                  Controller
+'       Publish                  Unpublish
+'        Volume  +------------+  Volume
+' +------------->+ NODE_READY +--------------+
+' |              +---+----^---+              |
+' |             Node |    | Node             v
+'+++         Publish |    | Unpublish       +++
+'|X| <-+      Volume |    | Volume          | |
+'+++   |         +---v----+---+             +-+
+' |    |         | PUBLISHED  |
+' |    |         +------------+
+' +----+
+'   Validate
+'   Volume
+'   Capabilities
+
+@startuml
+state CREATED {
+    [*] -r-> NODE_READY: ""Validate""\n""Volume""\n""Capabilities""
+    NODE_READY -d-> PUBLISHED: ""Node""\n""Publish""\n""Volume""
+    PUBLISHED -u-> NODE_READY: ""Node""\n""Unpublish""\n""Volume""
+    NODE_READY -r-> [*]: ""Controller""\n""Unpublish""\n""Volume""
+}
+@enduml

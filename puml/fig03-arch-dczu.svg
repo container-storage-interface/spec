@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" contentScriptType="application/ecmascript" contentStyleType="text/css" height="94px" preserveAspectRatio="none" style="width:398px;height:94px;" version="1.1" viewBox="0 0 398 94" width="398px" zoomAndPan="magnify"><defs><filter height="300%" id="f1jpl816lkdqwd" width="300%" x="-1" y="-1"><feGaussianBlur result="blurOut" stdDeviation="2.0"/><feColorMatrix in="blurOut" result="blurOut2" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .4 0"/><feOffset dx="4.0" dy="4.0" in="blurOut2" result="blurOut3"/><feBlend in="SourceGraphic" in2="blurOut3" mode="normal"/></filter></defs><g><!--cluster nodeHost--><rect fill="#FFFFFF" filter="url(#f1jpl816lkdqwd)" height="71" style="stroke: #000000; stroke-width: 2.0;" width="377" x="14" y="16"/><path d="M118,17 L118,25.4883 L108,35.4883 L14,35.4883 " fill="none" style="stroke: #000000; stroke-width: 2.0;"/><text fill="#000000" font-family="sans-serif" font-size="14" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="94" x="17" y="30.5352">Node Host(s)</text><!--entity nodeClient--><rect fill="#FEFECE" filter="url(#f1jpl816lkdqwd)" height="36.4883" style="stroke: #000000; stroke-width: 1.5;" width="41" x="22.5" y="43"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="21" x="32.5" y="66.5352">CO</text><!--entity nodeControllerAgent--><rect fill="#FEFECE" filter="url(#f1jpl816lkdqwd)" height="36.4883" style="stroke: #000000; stroke-width: 1.5;" width="180" x="203" y="43"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="160" x="213" y="66.5352">Controller/Node Plugin</text><!--link nodeClient to nodeControllerAgent--><path d="M63.8849,61 C93.2702,61 148.7134,61 197.6981,61 " fill="none" id="nodeClient-nodeControllerAgent" style="stroke: #A80036; stroke-width: 1.0;"/><polygon fill="#A80036" points="202.7208,61,193.7208,57,197.7208,61,193.7208,65,202.7208,61" style="stroke: #A80036; stroke-width: 1.0;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="32" x="117.25" y="54.5684">gRPC</text><!--
+@startuml
+frame "Node Host(s)" as nodeHost {
+    rectangle "CO" as nodeClient
+    rectangle "Controller/Node Plugin" as nodeControllerAgent
+}
+nodeClient -> nodeControllerAgent: gRPC
+@enduml
+
+PlantUML version 1.2017.13(Wed May 10 11:52:33 CDT 2017)
+(GPL source distribution)
+Java Runtime: Java(TM) SE Runtime Environment
+JVM: Java HotSpot(TM) 64-Bit Server VM
+Java Version: 1.8.0_20-b26
+Operating System: Mac OS X
+OS Version: 10.12.5
+Default Encoding: UTF-8
+Language: en
+Country: US
+--></g></svg>

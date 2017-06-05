@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" contentScriptType="application/ecmascript" contentStyleType="text/css" height="194px" preserveAspectRatio="none" style="width:234px;height:194px;" version="1.1" viewBox="0 0 234 194" width="234px" zoomAndPan="magnify"><defs><filter height="300%" id="f41jjsf2r1qbv" width="300%" x="-1" y="-1"><feGaussianBlur result="blurOut" stdDeviation="2.0"/><feColorMatrix in="blurOut" result="blurOut2" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .4 0"/><feOffset dx="4.0" dy="4.0" in="blurOut2" result="blurOut3"/><feBlend in="SourceGraphic" in2="blurOut3" mode="normal"/></filter></defs><g><ellipse cx="52.5" cy="18" fill="#000000" filter="url(#f41jjsf2r1qbv)" rx="10" ry="10" style="stroke: none; stroke-width: 1.0;"/><rect fill="#FEFECE" filter="url(#f41jjsf2r1qbv)" height="50" rx="12.5" ry="12.5" style="stroke: #A80036; stroke-width: 1.5;" width="93" x="6" y="135"/><line style="stroke: #A80036; stroke-width: 1.5;" x1="6" x2="99" y1="161.4883" y2="161.4883"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="73" x="16" y="153.5352">PUBLISHED</text><ellipse cx="217.5" cy="160" fill="none" filter="url(#f41jjsf2r1qbv)" rx="10" ry="10" style="stroke: #000000; stroke-width: 1.0;"/><ellipse cx="218" cy="160.5" fill="#000000" rx="6" ry="6" style="stroke: none; stroke-width: 1.0;"/><!--link *start to PUBLISHED--><path d="M52.5,28.2123 C52.5,49.1322 52.5,97.575 52.5,129.5365 " fill="none" id="*start-PUBLISHED" style="stroke: #A80036; stroke-width: 1.0;"/><polygon fill="#A80036" points="52.5,134.9095,56.5,125.9095,52.5,129.9095,48.5,125.9095,52.5,134.9095" style="stroke: #A80036; stroke-width: 1.0;"/><text fill="#000000" font-family="monospace" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="32" x="65.5" y="71.0669">Node</text><text fill="#000000" font-family="monospace" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="56" x="53.5" y="86.1997">Publish</text><text fill="#000000" font-family="monospace" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="48" x="57.5" y="101.3325">Volume</text><!--link PUBLISHED to *end--><path d="M99.341,160 C133.9172,160 178.8411,160 202.0727,160 " fill="none" id="PUBLISHED-*end" style="stroke: #A80036; stroke-width: 1.0;"/><polygon fill="#A80036" points="207.2253,160,198.2253,156,202.2253,160,198.2253,164,207.2253,160" style="stroke: #A80036; stroke-width: 1.0;"/><text fill="#000000" font-family="monospace" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="32" x="137.25" y="123.0669">Node</text><text fill="#000000" font-family="monospace" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="72" x="117.25" y="138.1997">Unpublish</text><text fill="#000000" font-family="monospace" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="48" x="129.25" y="153.3325">Volume</text><!--
+@startuml
+[*] - -> PUBLISHED: ""Node""\n""Publish""\n""Volume""
+PUBLISHED -r-> [*]: ""Node""\n""Unpublish""\n""Volume""
+@enduml
+
+PlantUML version 1.2017.13(Wed May 10 11:52:33 CDT 2017)
+(GPL source distribution)
+Java Runtime: Java(TM) SE Runtime Environment
+JVM: Java HotSpot(TM) 64-Bit Server VM
+Java Version: 1.8.0_20-b26
+Operating System: Mac OS X
+OS Version: 10.12.5
+Default Encoding: UTF-8
+Language: en
+Country: US
+--></g></svg>

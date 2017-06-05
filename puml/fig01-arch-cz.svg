@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" contentScriptType="application/ecmascript" contentStyleType="text/css" height="196px" preserveAspectRatio="none" style="width:391px;height:196px;" version="1.1" viewBox="0 0 391 196" width="391px" zoomAndPan="magnify"><defs><filter height="300%" id="f304q84d4d82r" width="300%" x="-1" y="-1"><feGaussianBlur result="blurOut" stdDeviation="2.0"/><feColorMatrix in="blurOut" result="blurOut2" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .4 0"/><feOffset dx="4.0" dy="4.0" in="blurOut2" result="blurOut3"/><feBlend in="SourceGraphic" in2="blurOut3" mode="normal"/></filter></defs><g><!--cluster masterHost--><rect fill="#FFFFFF" filter="url(#f304q84d4d82r)" height="71" style="stroke: #000000; stroke-width: 2.0;" width="370" x="14" y="16"/><path d="M112,17 L112,25.4883 L102,35.4883 L14,35.4883 " fill="none" style="stroke: #000000; stroke-width: 2.0;"/><text fill="#000000" font-family="sans-serif" font-size="14" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="88" x="17" y="30.5352">Master Host</text><!--cluster nodeHost--><rect fill="#FFFFFF" filter="url(#f304q84d4d82r)" height="71" style="stroke: #000000; stroke-width: 2.0;" width="336" x="14" y="118"/><path d="M118,119 L118,127.4883 L108,137.4883 L14,137.4883 " fill="none" style="stroke: #000000; stroke-width: 2.0;"/><text fill="#000000" font-family="sans-serif" font-size="14" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="94" x="17" y="132.5352">Node Host(s)</text><!--entity masterClient--><rect fill="#FEFECE" filter="url(#f304q84d4d82r)" height="36.4883" style="stroke: #000000; stroke-width: 1.5;" width="41" x="57.5" y="43"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="21" x="67.5" y="66.5352">CO</text><!--entity masterController--><rect fill="#FEFECE" filter="url(#f304q84d4d82r)" height="36.4883" style="stroke: #000000; stroke-width: 1.5;" width="137" x="238.5" y="43"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="117" x="248.5" y="66.5352">Controller Plugin</text><!--entity nodeClient--><rect fill="#FEFECE" filter="url(#f304q84d4d82r)" height="36.4883" style="stroke: #000000; stroke-width: 1.5;" width="41" x="57.5" y="145"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="21" x="67.5" y="168.5352">CO</text><!--entity nodeAgent--><rect fill="#FEFECE" filter="url(#f304q84d4d82r)" height="36.4883" style="stroke: #000000; stroke-width: 1.5;" width="103" x="238.5" y="145"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="83" x="248.5" y="168.5352">Node Plugin</text><!--link masterHost to nodeHost--><!--link masterClient to masterController--><path d="M98.7261,61 C128.8948,61 186.4266,61 233.3916,61 " fill="none" id="masterClient-masterController" style="stroke: #A80036; stroke-width: 1.0;"/><polygon fill="#A80036" points="238.4815,61,229.4815,57,233.4815,61,229.4815,65,238.4815,61" style="stroke: #A80036; stroke-width: 1.0;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="32" x="152.5" y="54.5684">gRPC</text><!--link nodeClient to nodeAgent--><path d="M98.7135,163 C129.6128,163 188.8959,163 233.3136,163 " fill="none" id="nodeClient-nodeAgent" style="stroke: #A80036; stroke-width: 1.0;"/><polygon fill="#A80036" points="238.3804,163,229.3804,159,233.3804,163,229.3804,167,238.3804,163" style="stroke: #A80036; stroke-width: 1.0;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="32" x="152.5" y="156.5684">gRPC</text><!--
+@startuml
+frame "Master Host" as masterHost {
+    rectangle "CO" as masterClient
+    rectangle "Controller Plugin" as masterController
+}
+frame "Node Host(s)" as nodeHost {
+    rectangle "CO" as nodeClient
+    rectangle "Node Plugin" as nodeAgent
+}
+masterHost -[hidden]- nodeHost
+masterClient -> masterController : gRPC
+nodeClient -> nodeAgent : gRPC
+@enduml
+
+PlantUML version 1.2017.13(Wed May 10 11:52:33 CDT 2017)
+(GPL source distribution)
+Java Runtime: Java(TM) SE Runtime Environment
+JVM: Java HotSpot(TM) 64-Bit Server VM
+Java Version: 1.8.0_20-b26
+Operating System: Mac OS X
+OS Version: 10.12.5
+Default Encoding: UTF-8
+Language: en
+Country: US
+--></g></svg>

@@ -1,0 +1,15 @@
+'       +-+  +-+
+'       |X|  | |
+'       +++  +^+
+'        |    |
+'   Node |    | Node
+'Publish |    | Unpublish
+' Volume |    | Volume
+'    +---v----+---+
+'    | PUBLISHED  |
+'    +------------+
+
+@startuml
+[*] --> PUBLISHED: ""Node""\n""Publish""\n""Volume""
+PUBLISHED -r-> [*]: ""Node""\n""Unpublish""\n""Volume""
+@enduml

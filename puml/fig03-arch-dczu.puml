@@ -1,0 +1,18 @@
+'CO "Node" Host(s)
+'+-------------------------------------------+
+'|                                           |
+'|  +------------+           +------------+  |
+'|  |     CO     |   gRPC    | Controller |  |
+'|  |            +----------->    Node    |  |
+'|  +------------+           |   Plugin   |  |
+'|                           +------------+  |
+'|                                           |
+'+-------------------------------------------+
+
+@startuml
+frame "Node Host(s)" as nodeHost {
+    rectangle "CO" as nodeClient
+    rectangle "Controller/Node Plugin" as nodeControllerAgent
+}
+nodeClient -> nodeControllerAgent: gRPC
+@enduml

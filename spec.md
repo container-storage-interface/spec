@@ -76,6 +76,7 @@ It SHOULD be possible to ship cross-CO compatible Plugins for a variety of deplo
 A CO should be equipped to handle both centralized and headless plugins, as well as split-component and unified plugins.
 Several of these possibilities are illustrated in the following figures.
 
+#### Centralized ([uml](./puml/fig01-arch-cz.puml), [svg](./puml/fig01-arch-cz.svg))
 ```
                              CO "Master" Host
 +-------------------------------------------+
@@ -102,6 +103,7 @@ Controller Plugin is available on the CO master host and the Node
 Plugin is available on all of the CO Nodes.
 ```
 
+#### Decentralized, Split-Headless ([uml](./puml/fig02-arch-dczs.puml), [svg](./puml/fig02-arch-dczs.svg))
 ```
                             CO "Node" Host(s)
 +-------------------------------------------+
@@ -124,6 +126,7 @@ Plugins. Separate, split-component Plugins supply the Controller
 Service and the Node Service respectively.
 ```
 
+#### Decentralized, Unified-Headless ([uml](./puml/fig03-arch-dczu.puml), [svg](./puml/fig03-arch-dczu.svg))
 ```
                             CO "Node" Host(s)
 +-------------------------------------------+
@@ -142,6 +145,8 @@ Service and Node Service.
 ```
 
 ### Volume Lifecycle
+
+#### Dynamically Provisioned ([uml](./puml/fig04-vol-lifecycle-dyn.puml), [svg](./puml/fig04-vol-lifecycle-dyn.svg))
 
 ```
    CreateVolume +------------+ DeleteVolume
@@ -163,6 +168,8 @@ Service and Node Service.
 Figure 4: The lifecycle of a dynamically provisioned volume, from
 creation to destruction.
 ```
+
+#### Pre-Provisioned ([uml](./puml/fig05-vol-lifecycle-pre.puml), [svg](./puml/fig05-vol-lifecycle-pre.svg))
 
 ```
     Controller                  Controller
@@ -186,6 +193,8 @@ controller to publish to a node (`ControllerPublishVolume`) prior to
 publishing on the node (`NodePublishVolume`).
 ```
 
+#### Contraindicated ([uml](./puml/fig06-vol-lifecycle-contra.puml), [svg](./puml/fig06-vol-lifecycle-contra.svg))
+
 ```
        +-+  +-+
        |X|  | |
@@ -199,8 +208,8 @@ Publish |    | Unpublish
     +------------+
 
 Figure 6: Plugins may forego other lifecycle steps by contraindicating
-them via the capabilities API. Interactions with the volumes of such
-plugins is reduced to `NodePublishVolume` and `NodeUnpublishVolume`
+them via the API's capabilities. Interactions with the volumes of such
+plugins are reduced to `NodePublishVolume` and `NodeUnpublishVolume`
 calls.
 ```
 

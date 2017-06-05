@@ -1,0 +1,33 @@
+'                             CO "Master" Host
+'+-------------------------------------------+
+'|                                           |
+'|  +------------+           +------------+  |
+'|  |     CO     |   gRPC    | Controller |  |
+'|  |            +----------->   Plugin   |  |
+'|  +------------+           +------------+  |
+'|                                           |
+'+-------------------------------------------+
+'
+'                            CO "Node" Host(s)
+'+-------------------------------------------+
+'|                                           |
+'|  +------------+           +------------+  |
+'|  |     CO     |   gRPC    |    Node    |  |
+'|  |            +----------->   Plugin   |  |
+'|  +------------+           +------------+  |
+'|                                           |
+'+-------------------------------------------+
+
+@startuml
+frame "Master Host" as masterHost {
+    rectangle "CO" as masterClient
+    rectangle "Controller Plugin" as masterController
+}
+frame "Node Host(s)" as nodeHost {
+    rectangle "CO" as nodeClient
+    rectangle "Node Plugin" as nodeAgent
+}
+masterHost -[hidden]- nodeHost
+masterClient -> masterController : gRPC
+nodeClient -> nodeAgent : gRPC
+@enduml
