@@ -820,7 +820,7 @@ message ControllerServiceCapability {
   }
   
   oneof type {
-    // PRC that the controller supports.
+    // RPC that the controller supports.
     RPC rpc = 1;
     
     // Volume capability the Controller Plugin supports. An SP SHOULD
@@ -1020,7 +1020,7 @@ message NodeServiceCapability {
   }
   
   oneof type {
-    // PRC that the controller supports.
+    // RPC that the controller supports.
     RPC rpc = 1;
     
     // Volume capability the Node Plugin supports. An SP SHOULD avoid
