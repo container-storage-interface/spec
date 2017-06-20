@@ -646,6 +646,10 @@ message Principal {
   // identity to which all access to a given volume through this publishings
   // mounts is mapped to.
   string group = 3;
+
+  // This field is OPTIONAL. If specified it contains a CO specific
+  // credential string for authentication.
+  string credentials = 4;
 }
 ```
 
