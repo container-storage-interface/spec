@@ -1,19 +1,26 @@
----
+go_import_path: github.com/container-storage-interface/spec
+
 language: go
 
 go:
   - 1.8.x
 
 before_install:
+  - gem install gist
   - curl -LO https://github.com/google/protobuf/releases/download/v3.3.0/protoc-3.3.0-linux-x86_64.zip
   - unzip protoc-3.3.0-linux-x86_64.zip
   - chmod +x bin/protoc
+  - export PATH="$(pwd)/bin:$PATH"
 
 install:
   - go get -u github.com/golang/protobuf/proto
   - go get -u github.com/golang/protobuf/protoc-gen-go
   - go get -u google.golang.org/grpc
-  - cat spec.md | sed -n -e '/```protobuf$/,/```$/ p' | sed -e '1i syntax = "proto3";\npackage spec;' -e 's@^```.*$@////////@g' > spec.proto
+  - CSI_SPEC_FILE=spec.md make csi.proto
 
 script:
-  - bin/protoc --go_out=plugins=grpc:. *.proto
+  - make csi.pb.go
+
+after_success:
+  - printf "%s" "$GITHUB_API_TOKEN" > "${HOME}/.gist"
+  - gist -d "https://travis-ci.org/container-storage-interface/spec/jobs/${TRAVIS_BUILD_ID}" *.{proto,go}
