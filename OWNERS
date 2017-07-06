@@ -1,8 +1,8 @@
 approvers:
   - saad-ali # Representing Kubernetes
   - thockin # Representing Kubernetes
-  - jieyu # Representing Mesosphere
-  - jdef # Representing Mesosphere
+  - jieyu # Representing Mesos
+  - jdef # Representing Mesos
   - cpuguy83 # Representing Docker
   - mycure # Representing Docker
   - julian-hj # Representing Cloud Foundry 
