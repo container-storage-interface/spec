@@ -207,7 +207,7 @@ calls.
 The above diagrams illustrate a general expectation with respect to how a CO MAY manage the lifecycle of a volume via the API presented in this specification.
 Plugins should expose all RPCs for an interface: Controller plugins should implement all RPCs for the `Controller` service.
 Unsupported RPCs should return an appropriate error code that indicates such (e.g. `CALL_NOT_IMPLEMENTED`).
-The full list of plugin capabilities is documented in the `GetControllerServiceCapabilities` and `GetNodeServiceCapabilities` RPCs.
+The full list of plugin capabilities is documented in the `ControllerGetCapabilities` and `NodeGetCapabilities` RPCs.
 
 ## Container Storage Interface
 
