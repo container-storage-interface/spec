@@ -756,7 +756,7 @@ message ListVolumesResponse {
 
 #### `GetCapacity`
 
-A Controller Plugin MUST implement this RPC call if it has `GET_CAPABILITY` controller capability.
+A Controller Plugin MUST implement this RPC call if it has `GET_CAPACITY` controller capability.
 The RPC allows the CO to query the capacity of the storage pool from which the controller provisions volumes.
 
 ```protobuf
