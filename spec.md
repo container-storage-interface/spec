@@ -289,9 +289,13 @@ The error code `OPERATION_PENDING_FOR_VOLUME` may be returned by the plugin in t
 
 #### `GetSupportedVersions`
 
-A Plugin SHALL reply with a list of supported CSI versions. The initial version of the CSI specification is 0.1.0 (in *major.minor.patch* format).
+A Plugin SHALL reply with a list of supported CSI versions.
+The initial version of the CSI specification is 0.1.0 (in *major.minor.patch* format).
 A CO MAY execute plugin RPCs in the manner prescribed by any such supported CSI version.
 The versions returned by this call are orthogonal to any vendor-specific version metadata (see `vendor_version` in `GetPluginInfoResponse`).
+
+NOTE: Changes to this RPC should be approached very conservatively since the request/response protobufs here are critical for proper client-server version negotiation.
+Future changes to this RPC MUST **guarantee** backwards compatibility.
 
 ```protobuf
 message GetSupportedVersionsRequest {
@@ -299,7 +303,7 @@ message GetSupportedVersionsRequest {
 
 message GetSupportedVersionsResponse {
   message Result {
-    // All the versions that the Plugin supports. This field is
+    // All the CSI versions that the Plugin supports. This field is
     // REQUIRED.
     repeated Version supported_versions = 1;
   }
@@ -311,7 +315,8 @@ message GetSupportedVersionsResponse {
   }
 }
 
-// Specifies the version in Semantic Version 2.0 format.
+// Specifies a version in Semantic Version 2.0 format.
+// (http://semver.org/spec/v2.0.0.html)
 message Version {
   uint32 major = 1;  // This field is REQUIRED.
   uint32 minor = 2;  // This field is REQUIRED.
