@@ -15,6 +15,13 @@ This also applies to the code snippets in the markdown files.
 
 * Please wrap the code at 72 characters.
 
+## Comments
+
+This also applies to the code snippets in the markdown files.
+
+* End each sentence within a comment with a punctuation mark (please note that we generally prefer periods); this applies to incomplete sentences as well.
+* For trailing comments, leave one space between the end of the code and the beginning of the comment.
+
 ## Git commit
 
 Prior to committing code please run `make` in order to update the protobuf file and any language bindings.
