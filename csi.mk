@@ -121,10 +121,9 @@ endif # ifeq (true,$(TRAVIS))
 
 $(CSI_PROTO):
 	@mkdir -p $(@D)
-	printf "// time: %s\n// spec: %s\nsyntax = \"proto3\";\npackage %s;\n" \
+	printf "// time: %s\n// spec: %s\n" \
 	  "$$(date)" \
-	  "$(CSI_SPEC_REF)" \
-	  "$(CSI_IMPORT_PATH)" > $@ && \
+	  "$(CSI_SPEC_REF)" > $@ && \
 	cat $(CSI_SPEC_FILE) | \
 	sed -n -e '/```protobuf$$/,/```$$/ p' | \
 	sed -e 's@^```.*$$@////////@g' >> $@
@@ -135,10 +134,9 @@ $(CSI_PROTO):
 	@mkdir -p $(@D)
 	ref=$$(git ls-remote $(CSI_GIT_URI) $(CSI_GIT_REF) | awk '{print $$1}') && \
 	ref="$${ref:-$(CSI_GIT_REF)}" && \
-	printf "// time: %s\n// spec: %s\nsyntax = \"proto3\";\npackage %s;\n" \
+	printf "// time: %s\n// spec: %s\n" \
 	  "$$(date)" \
-	  "$(CSI_GIT_OWNER)/$(CSI_GIT_REPO):$${ref}" \
-	  "$(CSI_IMPORT_PATH)" > $@ && \
+	  "$(CSI_GIT_OWNER)/$(CSI_GIT_REPO):$${ref}" > $@ && \
 	curl -sSL $(CSI_SPEC_URI) | \
 	sed -n -e '/```protobuf$$/,/```$$/ p' | \
 	sed -e 's@^```.*$$@////////@g' >> $@

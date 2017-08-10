@@ -228,6 +228,9 @@ There are three sets of RPCs:
 * **Node Service**: The Node Plugin MUST implement this sets of RPCs.
 
 ```protobuf
+syntax = "proto3";
+package csi;
+
 service Identity {
   rpc GetSupportedVersions (GetSupportedVersionsRequest)
     returns (GetSupportedVersionsResponse) {}
