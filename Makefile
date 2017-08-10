@@ -27,5 +27,18 @@ endif
 
 build: $(CSI_PROTO)
 
+# if this is not running on travis-ci then for sake of convenience
+# go ahead and update the language bindings as well
+ifneq (true,$(TRAVIS))
+build:
+	$(MAKE) -C lib/go
+	$(MAKE) -C lib/cxx
+endif
+
 clean:
+	rm -f $(CSI_PROTO).tmp
+
+clobber: clean
 	rm -f $(CSI_PROTO)
+
+.PHONY: clean clobber

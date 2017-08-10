@@ -7,5 +7,28 @@ dist: trusty
 # selecting c as the language keeps the container to a minimum footprint
 language: c
 
-# run make
-script: make
+jobs:
+  include:
+
+    # the test stage validates that the protobuf file was updated
+    # prior to being committed
+    - stage:               test
+      script:              make
+
+    # the lang stages are used to validate the specification using
+    # language-specific bindings
+
+    # lang stage: cxx
+    - stage:               lang
+      script:              make -C lib/cxx
+
+    # lang stage: go
+    - stage:               lang
+      language:            go
+      go:                  1.8.3
+      go_import_path:      github.com/container-storage-interface/spec
+      install:
+        - make -C lib/go protoc
+        - make -C lib/go protoc-go
+      script:
+        - make -C lib/go

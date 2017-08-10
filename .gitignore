@@ -1,1 +1,5 @@
-csi.proto.tmp
+/csi.proto.tmp
+/protoc
+/.protoc
+
+.DS_Store
