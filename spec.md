@@ -316,6 +316,7 @@ message GetSupportedVersionsResponse {
 }
 
 // Specifies a version in Semantic Version 2.0 format.
+// (http://semver.org/spec/v2.0.0.html)
 message Version {
   uint32 major = 1;  // This field is REQUIRED.
   uint32 minor = 2;  // This field is REQUIRED.
