@@ -1,26 +1,34 @@
-go_import_path: github.com/container-storage-interface/spec
+# default to using the container infrastructure
+sudo: false
 
-language: go
+# use the newer travis-ci build templates
+dist: trusty
 
-go:
-  - 1.8.x
+# selecting c as the language keeps the container to a minimum footprint
+language: c
 
-before_install:
-  - gem install gist
-  - curl -LO https://github.com/google/protobuf/releases/download/v3.3.0/protoc-3.3.0-linux-x86_64.zip
-  - unzip protoc-3.3.0-linux-x86_64.zip
-  - chmod +x bin/protoc
-  - export PATH="$(pwd)/bin:$PATH"
+jobs:
+  include:
 
-install:
-  - go get -u github.com/golang/protobuf/proto
-  - go get -u github.com/golang/protobuf/protoc-gen-go
-  - go get -u google.golang.org/grpc
-  - CSI_SPEC_FILE=spec.md make csi.proto
+    # the test stage validates that the protobuf file was updated
+    # prior to being committed
+    - stage:               test
+      script:              make
 
-script:
-  - make csi.pb.go
+    # the lang stages are used to validate the specification using
+    # language-specific bindings
 
-after_success:
-  - printf "%s" "$GITHUB_API_TOKEN" > "${HOME}/.gist"
-  - gist -d "https://travis-ci.org/container-storage-interface/spec/jobs/${TRAVIS_BUILD_ID}" *.{proto,go}
+    # lang stage: cxx
+    - stage:               lang
+      script:              make -C lib/cxx
+
+    # lang stage: go
+    - stage:               lang
+      language:            go
+      go:                  1.8.3
+      go_import_path:      github.com/container-storage-interface/spec
+      install:
+        - make -C lib/go protoc
+        - make -C lib/go protoc-go
+      script:
+        - make -C lib/go
