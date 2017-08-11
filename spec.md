@@ -215,11 +215,17 @@ This section describes the interface between COs and Plugins.
 
 ### RPC Interface
 
-A CO interacts with an Plugin through RPCs. Each SP MUST provide:
+A CO interacts with an Plugin through RPCs.
+Each SP MUST provide:
 
 * **Node Plugin**: A gRPC endpoint serving CSI RPCs that MUST be run on the Node whereupon an SP-provisioned volume will be published.
 * **Controller Plugin**: A gRPC endpoint serving CSI RPCs that MAY be run anywhere.
 * In some circumstances a single gRPC endpoint MAY serve all CSI RPCs (see Figure 3 in [Architecture](#architecture)).
+
+```protobuf
+syntax = "proto3";
+package csi;
+```
 
 There are three sets of RPCs:
 
