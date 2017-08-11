@@ -48,4 +48,3 @@ is retrieved with the following environment variables:
 | `CSI_PROTO_NAME` | The name of the protobuf file to generate. This value should not include the file extension | `csi` |
 | `CSI_PROTO_DIR` | The path of the directory in which the protobuf and Go source files will be generated. If this directory does not exist it will be created. | `.` |
 | `CSI_PROTO_ADD` | A list of additional protobuf files used when building the Go source file | |
-| `CSI_IMPORT_PATH` | The package of the generated Go source | `csi` |
