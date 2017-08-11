@@ -1,2 +1,2 @@
-csi.proto
-csi.pb.go
+/csi.proto.tmp
+.DS_Store
