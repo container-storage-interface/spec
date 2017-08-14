@@ -287,15 +287,10 @@ The error code `OPERATION_PENDING_FOR_VOLUME` may be returned by the plugin in t
 
 ### Identity Service RPC
 
-Identity service RPCs allow a CO to negotiate an API protocol
-version that MAY be used for subsequent RPCs across all CSI services
-with respect to a particular CSI plugin. The general flow of the
-success case is as follows (protos illustrated in YAML for brevity):
+Identity service RPCs allow a CO to negotiate an API protocol version that MAY be used for subsequent RPCs across all CSI services with respect to a particular CSI plugin.
+The general flow of the success case is as follows (protos illustrated in YAML for brevity):
 
-1. CO queries supported versions via Identity RPC. The CO is expected
-   to gracefully handle, in the manner of its own choosing, the case
-   wherein the returned `supported_versions` from the plugin are not
-   supported by the CO.
+1. CO queries supported versions via Identity RPC. The CO is expected to gracefully handle, in the manner of its own choosing, the case wherein the returned `supported_versions` from the plugin are not supported by the CO.
 
 ```
    # CO --(GetSupportedVersions)--> Plugin
@@ -308,10 +303,7 @@ success case is as follows (protos illustrated in YAML for brevity):
            patch: 0
 ```
 
-2. CO queries metadata via Identity RPC, using a supported API
-   protocol version (as per the reply from the prior step): the
-   requested `version` MUST match an entry from the aforementioned
-   `supported_versions` array.
+2. CO queries metadata via Identity RPC, using a supported API protocol version (as per the reply from the prior step): the requested `version` MUST match an entry from the aforementioned `supported_versions` array.
 
 ```
    # CO --(GetPluginInfo)--> Plugin
