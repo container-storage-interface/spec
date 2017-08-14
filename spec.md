@@ -595,7 +595,7 @@ message DeleteVolumeResponse {
 
 #### `ControllerPublishVolume`
 
-A Controller Plugin MUST implement this RPC call if it has `PUBLISH_UNPUBLISH_VOLUME`controller capability.
+A Controller Plugin MUST implement this RPC call if it has `PUBLISH_UNPUBLISH_VOLUME` controller capability.
 This RPC will be called by the CO when it wants to place a workload that uses the volume onto a node.
 The Plugin SHOULD perform the work that is necessary for making the volume available on the given node.
 The Plugin MUST NOT assume that this RPC will be executed on the node where the volume will be used.
@@ -883,8 +883,7 @@ message ControllerServiceCapability {
 A Node Plugin MUST implement this RPC call.
 This RPC is typically called by the CO when it wants to place a workload that wants to use the volume on a node.
 The Plugin SHALL assume that this RPC will be executed on the node where the volume will be used.
-If the corresponding Controller Plugin has `PUBLISH_UNPUBLISH_VOLUME` controller capability, the CO MUST guarantee that this RPC is called after `ControllerPublishVolume` is
-called for the given volume on the given node and returns a success.
+If the corresponding Controller Plugin has `PUBLISH_UNPUBLISH_VOLUME` controller capability, the CO MUST guarantee that this RPC is called after `ControllerPublishVolume` is called for the given volume on the given node and returns a success.
 
 This operation MUST be idempotent.
 If this RPC failed, or the CO does not know if it failed or not, it MAY choose to call `NodePublishVolume` again, or choose to call `NodeUnpublishVolume`.
