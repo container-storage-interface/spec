@@ -30,15 +30,16 @@ endif
 
 build: $(CSI_PROTO)
 
-# If this is not running on Travis-CI then for sake of convenience
-# go ahead and update the language bindings as well.
-ifneq (true,$(TRAVIS))
-build:
-	$(MAKE) -C lib/go
-	$(MAKE) -C lib/cxx
-endif
+# the LANGS variable defines the languages for which bindings
+# are generated and used to validate the specification
+LANGS := $(notdir $(wildcard lib/*))
+$(addprefix build-,$(LANGS)):
+	$(MAKE) -C lib/$(@:build-%=%)
+$(addprefix clean-,$(LANGS)):
+	$(MAKE) -C lib/$(@:clean-%=%) clean
+.PHONY: $(foreach l,$(LANGS),build-$l clean-$l)
 
-clean:
+clean: $(addprefix clean-,$(LANGS))
 
 clobber: clean
 	rm -f $(CSI_PROTO) $(CSI_PROTO).tmp

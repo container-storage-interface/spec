@@ -17,7 +17,8 @@ This also applies to the code snippets in the markdown files.
 
 ## Git commit
 
-Prior to committing code please run `make` in order to update the protobuf file and any language bindings.
+Prior to committing code please run `make` in order to update the generated protobuf.
+Please also execute `make -C lib/cxx` and `make -C lib/go` to update the Cxx and Go language bindings. The latter will fail if this repository is cloned outside of a [valid `GOPATH`](https://golang.org/doc/code.html#GOPATH).
 
 ### Commit Style
 
