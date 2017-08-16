@@ -29,6 +29,7 @@ An implementation is compliant if it satisfies all the MUST, REQUIRED, and SHALL
 | Node              | A host where the user workload will be running, uniquely identifiable from the perspective of a Plugin by a `NodeID`. |
 | Plugin            | Aka “plugin implementation”, a gRPC endpoint that implements the CSI Services.                                        |
 | Plugin Supervisor | Process that governs the lifecycle of a Plugin, MAY be the CO.                                                        |
+| Workload          | The atomic unit of "work" scheduled by a CO. This may be a container or a collection of containers.                   |
 
 ## Objective
 
@@ -896,9 +897,9 @@ message ControllerServiceCapability {
 
 #### `NodePublishVolume`
 
-A Node Plugin MUST implement this RPC call.
-This RPC is typically called by the CO when it wants to place a workload that wants to use the volume on a node.
+This RPC is called by the CO when a workload that wants to use the specified volume is placed (scheduled) on a node.
 The Plugin SHALL assume that this RPC will be executed on the node where the volume will be used.
+This RPC MAY be called by the CO multiple times on the same node for the same volume with possibly different `target_path` and/or auth credentials.
 If the corresponding Controller Plugin has `PUBLISH_UNPUBLISH_VOLUME` controller capability, the CO MUST guarantee that this RPC is called after `ControllerPublishVolume` is called for the given volume on the given node and returns a success.
 
 This operation MUST be idempotent.
@@ -951,6 +952,8 @@ message NodePublishVolumeResponse {
 
 A Node Plugin MUST implement this RPC call.
 This RPC is a reverse operation of `NodePublishVolume`.
+This RPC MUST remove any mounts setup by the corresponding  `NodePublishVolume`.
+This Plugin SHALL assume that this RPC will be executed at least once for each successful `NodePublishVolume` call.
 If the corresponding Controller Plugin has `PUBLISH_UNPUBLISH_VOLUME` controller capability, the CO MUST guarantee that this RPC is called before `ControllerUnpublishVolume` is called for the given node and the given volume.
 The Plugin SHALL assume that this RPC will be executed on the node where the volume is being used.
 
