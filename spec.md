@@ -814,14 +814,29 @@ The RPC allows the CO to query the capacity of the storage pool from which the c
 message GetCapacityRequest {
   // The API version assumed by the CO. This is a REQUIRED field.
   Version version = 1;
+
+  // If specified, the Plugin SHALL report the capacity of the storage
+  // that can be used to provision volumes that satisfy ALL of the
+  // specified `volume_capabilities`. These are the same
+  // `volume_capabilities` the CO will use in `CreateVolumeRequest`.
+  // This field is OPTIONAL.
+  repeated VolumeCapability volume_capabilities = 2;
+
+  // If specified, the Plugin SHALL report the capacity of the storage
+  // that can be used to provision volumes with the given Plugin
+  // specific `parameters`. These are the same `parameters` the CO will
+  // use in `CreateVolumeRequest`. This field is OPTIONAL.
+  map<string, string> parameters = 3;
 }
 
 message GetCapacityResponse {
   message Result {
-    // The total capacity (available + used) of the storage pool from
-    // which the controller provisions volumes. This is a REQUIRED
-    // field.
-    uint64 total_capacity = 1;
+    // The available capacity of the storage that can be used to
+    // provision volumes. If `volume_capabilities` or `parameters` is
+    // specified in the request, the Plugin SHALL take those into
+    // consideration when calculating the available capacity of the
+    // storage. This field is REQUIRED.
+    uint64 available_capacity = 1;
   }
 
   // One of the following fields MUST be specified.
