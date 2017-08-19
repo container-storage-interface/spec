@@ -293,13 +293,27 @@ message DeleteVolumeRequest {
   Version version = 1;
 
   // The handle of the volume to be deprovisioned.
-  // This field is REQUIRED.
-  VolumeHandle volume_handle = 2;
+  // Either `name` or `volume_handle` SHALL be specified by the CO.
+  // A CO MAY specify the `name` when the `volume_handle` is unknown.
+  // For example, in the case where a `CreateVolume` RPC fails and the
+  // CO is unsure of the completion state of the request AND no longer
+  // needs the possibly-created volume. Alternatively, a CO MAY
+  // specify the `volume_handle` field when such information is
+  // available to it. This field is REQUIRED.
+  oneof handle {
+    // The CO-generated name of the volume to delete, same as in
+    // `CreateVolumeRequest`.
+    string name = 2;
+
+    // The plugin-generated handle to the volume, as returned in
+    // `CreateVolumeResponse`.
+    VolumeHandle volume_handle = 3;
+  }
 
   // End user credentials used to authenticate/authorize volume deletion
   // request.
   // This field is OPTIONAL.
-  Credentials user_credentials = 3;
+  Credentials user_credentials = 4;
 }
 
 message DeleteVolumeResponse {
