@@ -435,11 +435,20 @@ message CreateVolumeRequest {
   // not supported by the Plugin, the call SHALL fail. This field is
   // REQUIRED.
   repeated VolumeCapability volume_capabilities = 4;
-    
+
   // Plugin specific parameters passed in as opaque key-value pairs.
   // This field is OPTIONAL. The Plugin is responsible for parsing and
   // validating these parameters. COs will treat these as opaque.
   map<string, string> parameters = 5;
+
+  // The requested minimal access mode. The Plugin MAY return a volume
+  // that allows a broader access mode, e.g. MULTI_NODE_MULTI_WRITER
+  // when CO asked just for SINGLE_NODE_WRITER. The Plugin MUST NOT
+  // return a volume with more restrictive access mode than the CO
+  // requested in this field, e.g. return SINGLE_NODE_READER_ONLY
+  // volume when CO requested SINGLE_NODE_WRITER.
+  // This field is OPTIONAL.
+  AccessMode access_mode = 6;
 }
 
 message CreateVolumeResponse {
@@ -1208,6 +1217,14 @@ message Error {
       // Recovery behavior: Caller MUST fix the invalid value before
       // retrying.
       INVALID_PARAMETER_VALUE = 7;
+
+      // Indicates that the access mode is not allowed by the Plugin.
+      // More human-readable information MAY be provided in the
+      // `error_description` field.
+      //
+      // Recovery behavior: Caller MUST fix the access mode before
+      // retrying.
+      UNSUPPORTED_ACCESS_MODE = 8;
     }
     
     // Machine parsable error code.
