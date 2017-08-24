@@ -3384,7 +3384,8 @@ type NodePublishVolumeRequest struct {
 	PublishVolumeInfo *PublishVolumeInfo `protobuf:"bytes,4,opt,name=publish_volume_info,json=publishVolumeInfo" json:"publish_volume_info,omitempty"`
 	// The path to which the volume will be published. It MUST be an
 	// absolute path in the root filesystem of the process serving this
-	// request. This is a REQUIRED field.
+	// request. The CO SHALL ensure uniqueness of target_path per volume.
+	// This is a REQUIRED field.
 	TargetPath string `protobuf:"bytes,5,opt,name=target_path,json=targetPath" json:"target_path,omitempty"`
 	// The capability of the volume the CO expects the volume to have.
 	// This is a REQUIRED field.

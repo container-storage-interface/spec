@@ -590,7 +590,8 @@ message NodePublishVolumeRequest {
 
   // The path to which the volume will be published. It MUST be an
   // absolute path in the root filesystem of the process serving this
-  // request. This is a REQUIRED field.
+  // request. The CO SHALL ensure uniqueness of target_path per volume.
+  // This is a REQUIRED field.
   string target_path = 5;
 
   // The capability of the volume the CO expects the volume to have.
