@@ -1527,8 +1527,12 @@ message Error {
       // Recovery behavior: Caller MUST fix the `VolumeInfo` before
       // retrying.
       INVALID_VOLUME_INFO = 5;
+
+      // Indicates that the specified capacity in `VolumeInfo` is greater than
+      // the capacity of the pre-provisioned volume
+      VOLUME_TOO_SMALL = 6;
     }
-    
+
     ValidateVolumeCapabilitiesErrorCode error_code = 1;
     string error_description = 2;
   }
