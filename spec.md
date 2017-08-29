@@ -779,6 +779,18 @@ message ListVolumesRequest {
   // `next_token` returned by a previous `ListVolumes` call to get the
   // next page of entries. This field is OPTIONAL.
   string starting_token = 3; 
+
+  // If specified, the Plugin SHALL report all the volumes that it knows
+  // about that satisfy ALL of the specified `volume_capabilities`. CO
+  // MAY call `ControllerPublishVolume` or `NodePublishVolume` to
+  // publish ANY of the reported volumes with ANY of the capabilities
+  // specified in this list. This field is OPTIONAL.
+  repeated VolumeCapability volume_capabilities = 4;
+
+  // If specified, the Plugin SHALL report all the volumes that it knows
+  // about that are provisioned with the given Plugin specific
+  // `parameters`. This field is OPTIONAL.
+  map<string, string> parameters = 5;
 }
 
 message ListVolumesResponse {
