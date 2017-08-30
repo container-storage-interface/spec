@@ -146,6 +146,11 @@ message CreateVolumeRequest {
   // This field is OPTIONAL. The Plugin is responsible for parsing and
   // validating these parameters. COs will treat these as opaque.
   map<string, string> parameters = 5;
+
+  // End user credentials used to authenticate/authorize volume creation
+  // request.
+  // This field is OPTIONAL.
+  Credentials user_credentials = 6;
 }
 
 message CreateVolumeResponse {
@@ -267,6 +272,21 @@ message VolumeMetadata {
   // each Plugin keeps this information as small as possible.
   map<string, string> values = 1;
 }
+
+// A standard way to encode credential data. The total bytes of the values in
+// the Data field must be less than 1 Mebibyte.
+message Credentials {
+  // Data contains the credential data, for example username and password.
+  // Each key must consist of alphanumeric characters, '-', '_' or '.'.
+  // Each value MUST contain a valid string. An SP MAY choose to accept binary
+  // (non-string) data by using a binary-to-text encoding scheme, like base64.
+  // An SP SHALL advertise the requirements for credentials in documentation.
+  // COs SHALL permit users to pass through the required credentials.
+  // This information is sensitive and MUST be treated as such (not logged,
+  // etc.) by the CO.
+  // This field is REQUIRED.
+  map<string, string> data = 1;
+}
 ////////
 ////////
 message DeleteVolumeRequest {
@@ -279,6 +299,11 @@ message DeleteVolumeRequest {
   // The metadata of the volume to be deprovisioned. This field is
   // OPTIONAL.
   VolumeMetadata volume_metadata = 3;
+
+  // End user credentials used to authenticate/authorize volume deletion
+  // request.
+  // This field is OPTIONAL.
+  Credentials user_credentials = 4;
 }
 
 message DeleteVolumeResponse {
@@ -316,6 +341,11 @@ message ControllerPublishVolumeRequest {
   // Whether to publish the volume in readonly mode. This field is
   // REQUIRED.
   bool readonly = 5;
+
+  // End user credentials used to authenticate/authorize controller publish
+  // request.
+  // This field is OPTIONAL.
+  Credentials user_credentials = 7;
 }
 
 message ControllerPublishVolumeResponse {
@@ -371,6 +401,11 @@ message ControllerUnpublishVolumeRequest {
   // know which node the volume was previously used. The Plugin SHOULD
   // return an Error if this is not supported.
   NodeID node_id = 4;
+
+  // End user credentials used to authenticate/authorize controller unpublish
+  // request.
+  // This field is OPTIONAL.
+  Credentials user_credentials = 5;
 }
 
 message ControllerUnpublishVolumeResponse {
@@ -555,7 +590,8 @@ message NodePublishVolumeRequest {
 
   // The path to which the volume will be published. It MUST be an
   // absolute path in the root filesystem of the process serving this
-  // request. This is a REQUIRED field.
+  // request. The CO SHALL ensure uniqueness of target_path per volume.
+  // This is a REQUIRED field.
   string target_path = 5;
 
   // The capability of the volume the CO expects the volume to have.
@@ -565,6 +601,10 @@ message NodePublishVolumeRequest {
   // Whether to publish the volume in readonly mode. This field is
   // REQUIRED.
   bool readonly = 7;
+
+  // End user credentials used to authenticate/authorize node publish request.
+  // This field is OPTIONAL.
+  Credentials user_credentials = 8;
 }
 
 message NodePublishVolumeResponse {
@@ -592,6 +632,10 @@ message NodeUnpublishVolumeRequest {
   // path in the root filesystem of the process serving this request.
   // This is a REQUIRED field.
   string target_path = 4;
+
+  // End user credentials used to authenticate/authorize node unpublish request.
+  // This field is OPTIONAL.
+  Credentials user_credentials = 5;
 }
 
 message NodeUnpublishVolumeResponse {

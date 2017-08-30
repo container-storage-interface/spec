@@ -29,6 +29,7 @@ An implementation is compliant if it satisfies all the MUST, REQUIRED, and SHALL
 | Node              | A host where the user workload will be running, uniquely identifiable from the perspective of a Plugin by a `NodeID`. |
 | Plugin            | Aka “plugin implementation”, a gRPC endpoint that implements the CSI Services.                                        |
 | Plugin Supervisor | Process that governs the lifecycle of a Plugin, MAY be the CO.                                                        |
+| Workload          | The atomic unit of "work" scheduled by a CO. This may be a container or a collection of containers.                   |
 
 ## Objective
 
@@ -440,6 +441,11 @@ message CreateVolumeRequest {
   // This field is OPTIONAL. The Plugin is responsible for parsing and
   // validating these parameters. COs will treat these as opaque.
   map<string, string> parameters = 5;
+
+  // End user credentials used to authenticate/authorize volume creation
+  // request.
+  // This field is OPTIONAL.
+  Credentials user_credentials = 6;
 }
 
 message CreateVolumeResponse {
@@ -561,6 +567,21 @@ message VolumeMetadata {
   // each Plugin keeps this information as small as possible.
   map<string, string> values = 1;
 }
+
+// A standard way to encode credential data. The total bytes of the values in
+// the Data field must be less than 1 Mebibyte.
+message Credentials {
+  // Data contains the credential data, for example username and password.
+  // Each key must consist of alphanumeric characters, '-', '_' or '.'.
+  // Each value MUST contain a valid string. An SP MAY choose to accept binary
+  // (non-string) data by using a binary-to-text encoding scheme, like base64.
+  // An SP SHALL advertise the requirements for credentials in documentation.
+  // COs SHALL permit users to pass through the required credentials.
+  // This information is sensitive and MUST be treated as such (not logged,
+  // etc.) by the CO.
+  // This field is REQUIRED.
+  map<string, string> data = 1;
+}
 ```
 
 #### `DeleteVolume`
@@ -583,6 +604,11 @@ message DeleteVolumeRequest {
   // The metadata of the volume to be deprovisioned. This field is
   // OPTIONAL.
   VolumeMetadata volume_metadata = 3;
+
+  // End user credentials used to authenticate/authorize volume deletion
+  // request.
+  // This field is OPTIONAL.
+  Credentials user_credentials = 4;
 }
 
 message DeleteVolumeResponse {
@@ -633,6 +659,11 @@ message ControllerPublishVolumeRequest {
   // Whether to publish the volume in readonly mode. This field is
   // REQUIRED.
   bool readonly = 5;
+
+  // End user credentials used to authenticate/authorize controller publish
+  // request.
+  // This field is OPTIONAL.
+  Credentials user_credentials = 7;
 }
 
 message ControllerPublishVolumeResponse {
@@ -702,6 +733,11 @@ message ControllerUnpublishVolumeRequest {
   // know which node the volume was previously used. The Plugin SHOULD
   // return an Error if this is not supported.
   NodeID node_id = 4;
+
+  // End user credentials used to authenticate/authorize controller unpublish
+  // request.
+  // This field is OPTIONAL.
+  Credentials user_credentials = 5;
 }
 
 message ControllerUnpublishVolumeResponse {
@@ -896,9 +932,9 @@ message ControllerServiceCapability {
 
 #### `NodePublishVolume`
 
-A Node Plugin MUST implement this RPC call.
-This RPC is typically called by the CO when it wants to place a workload that wants to use the volume on a node.
+This RPC is called by the CO when a workload that wants to use the specified volume is placed (scheduled) on a node.
 The Plugin SHALL assume that this RPC will be executed on the node where the volume will be used.
+This RPC MAY be called by the CO multiple times on the same node for the same volume with possibly different `target_path` and/or auth credentials.
 If the corresponding Controller Plugin has `PUBLISH_UNPUBLISH_VOLUME` controller capability, the CO MUST guarantee that this RPC is called after `ControllerPublishVolume` is called for the given volume on the given node and returns a success.
 
 This operation MUST be idempotent.
@@ -924,7 +960,8 @@ message NodePublishVolumeRequest {
 
   // The path to which the volume will be published. It MUST be an
   // absolute path in the root filesystem of the process serving this
-  // request. This is a REQUIRED field.
+  // request. The CO SHALL ensure uniqueness of target_path per volume.
+  // This is a REQUIRED field.
   string target_path = 5;
 
   // The capability of the volume the CO expects the volume to have.
@@ -934,6 +971,10 @@ message NodePublishVolumeRequest {
   // Whether to publish the volume in readonly mode. This field is
   // REQUIRED.
   bool readonly = 7;
+
+  // End user credentials used to authenticate/authorize node publish request.
+  // This field is OPTIONAL.
+  Credentials user_credentials = 8;
 }
 
 message NodePublishVolumeResponse {
@@ -951,7 +992,9 @@ message NodePublishVolumeResponse {
 
 A Node Plugin MUST implement this RPC call.
 This RPC is a reverse operation of `NodePublishVolume`.
-If the corresponding Controller Plugin has `PUBLISH_UNPUBLISH_VOLUME` controller capability, the CO MUST guarantee that this RPC is called before `ControllerUnpublishVolume` is called for the given node and the given volume.
+This RPC MUST undo the work by the corresponding `NodePublishVolume`.
+This RPC SHALL be called by the CO at least once for each `target_path` that was successfully setup via `NodePublishVolume`.
+If the corresponding Controller Plugin has `PUBLISH_UNPUBLISH_VOLUME` controller capability, the CO SHOULD issue all `NodeUnpublishVolume` (as specified above) before calling `ControllerUnpublishVolume` for the given node and the given volume.
 The Plugin SHALL assume that this RPC will be executed on the node where the volume is being used.
 
 This RPC is typically called by the CO when the workload using the volume is being moved to a different node, or all the workload using the volume on a node has finished.
@@ -974,6 +1017,10 @@ message NodeUnpublishVolumeRequest {
   // path in the root filesystem of the process serving this request.
   // This is a REQUIRED field.
   string target_path = 4;
+
+  // End user credentials used to authenticate/authorize node unpublish request.
+  // This field is OPTIONAL.
+  Credentials user_credentials = 5;
 }
 
 message NodeUnpublishVolumeResponse {
