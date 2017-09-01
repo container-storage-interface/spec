@@ -85,7 +85,8 @@ const (
 	// Can be published at multiple nodes simultaneously. Only one of
 	// the node can be used as read/write. The rest will be readonly.
 	VolumeCapability_AccessMode_MULTI_NODE_SINGLE_WRITER VolumeCapability_AccessMode_Mode = 4
-	// Can be published as read/write at multiple nodes simultaneously.
+	// Can be published as read/write at multiple nodes
+	// simultaneously.
 	VolumeCapability_AccessMode_MULTI_NODE_MULTI_WRITER VolumeCapability_AccessMode_Mode = 5
 )
 
@@ -190,8 +191,8 @@ const (
 	// be set to true.
 	//
 	// Recovery behavior: Caller MUST NOT retry; caller SHOULD call
-	// `GetSupportedVersions` to discover which CSI versions the Plugin
-	// supports.
+	// `GetSupportedVersions` to discover which CSI versions the
+	// Plugin supports.
 	Error_GeneralError_UNSUPPORTED_REQUEST_VERSION Error_GeneralError_GeneralErrorCode = 2
 	// Indicates that a required field is missing from the request.
 	// More human-readable information MAY be provided in the
@@ -238,8 +239,8 @@ const (
 	// or disabled in the Plugin’s current mode of operation.
 	//
 	// Recovery behavior: Caller MUST not retry; caller MAY call
-	// `ControllerGetCapabilities` or `NodeGetCapabilities` to discover
-	// Plugin capabilities.
+	// `ControllerGetCapabilities` or `NodeGetCapabilities` to
+	// discover Plugin capabilities.
 	Error_CreateVolumeError_CALL_NOT_IMPLEMENTED Error_CreateVolumeError_CreateVolumeErrorCode = 1
 	// Indicates that there is a already an operation pending for the
 	// specified volume. In general the Cluster Orchestrator (CO) is
@@ -277,7 +278,8 @@ const (
 	// Indicates that a key in the opaque key/value parameters field
 	// is not supported by the Plugin. More human-readable information
 	// MAY be provided in the `error_description` field. This MAY
-	// occur, for example, due to caller error, Plugin version skew, etc.
+	// occur, for example, due to caller error, Plugin version skew,
+	// etc.
 	//
 	// Recovery behavior: Caller MUST remove the unsupported key/value
 	// pair from the list of parameters before retrying.
@@ -405,8 +407,8 @@ const (
 	// or disabled in the Plugin’s current mode of operation.
 	//
 	// Recovery behavior: Caller MUST not retry; caller MAY call
-	// `ControllerGetCapabilities` or `NodeGetCapabilities` to discover
-	// Plugin capabilities.
+	// `ControllerGetCapabilities` or `NodeGetCapabilities` to
+	// discover Plugin capabilities.
 	Error_ControllerPublishVolumeError_CALL_NOT_IMPLEMENTED Error_ControllerPublishVolumeError_ControllerPublishVolumeErrorCode = 1
 	// Indicates that there is a already an operation pending for the
 	// specified volume. In general the Cluster Orchestrator (CO) is
@@ -1254,7 +1256,7 @@ type CreateVolumeRequest struct {
 	//    Plugin should ensure that multiple `CreateVolume` calls for the
 	//    same name do not result in more than one piece of storage
 	//    provisioned corresponding to that name. If a Plugin is unable to
-	//    enforce idempotency, the CO’s error recovery logic could result
+	//    enforce idempotency, the CO's error recovery logic could result
 	//    in multiple (unused) volumes being provisioned.
 	// 2) Suggested name - Some storage systems allow callers to specify
 	//    an identifier by which to refer to the newly provisioned
@@ -1765,17 +1767,17 @@ func (m *VolumeHandle) GetMetadata() map[string]string {
 	return nil
 }
 
-// A standard way to encode credential data. The total bytes of the values in
-// the Data field must be less than 1 Mebibyte.
+// A standard way to encode credential data. The total bytes of the
+// values in the Data field must be less than 1 Mebibyte.
 type Credentials struct {
-	// Data contains the credential data, for example username and password.
-	// Each key must consist of alphanumeric characters, '-', '_' or '.'.
-	// Each value MUST contain a valid string. An SP MAY choose to accept binary
-	// (non-string) data by using a binary-to-text encoding scheme, like base64.
-	// An SP SHALL advertise the requirements for credentials in documentation.
-	// COs SHALL permit users to pass through the required credentials.
-	// This information is sensitive and MUST be treated as such (not logged,
-	// etc.) by the CO.
+	// Data contains the credential data, for example username and
+	// password. Each key must consist of alphanumeric characters, '-',
+	// '_' or '.'. Each value MUST contain a valid string. An SP MAY
+	// choose to accept binary (non-string) data by using a binary-to-text
+	// encoding scheme, like base64. An SP SHALL advertise the
+	// requirements for credentials in documentation. COs SHALL permit
+	// users to pass through the required credentials. This information is
+	// sensitive and MUST be treated as such (not logged, etc.) by the CO.
 	// This field is REQUIRED.
 	Data map[string]string `protobuf:"bytes,1,rep,name=data" json:"data,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
 }
@@ -1982,8 +1984,8 @@ type ControllerPublishVolumeRequest struct {
 	// Whether to publish the volume in readonly mode. This field is
 	// REQUIRED.
 	Readonly bool `protobuf:"varint,5,opt,name=readonly" json:"readonly,omitempty"`
-	// End user credentials used to authenticate/authorize controller publish
-	// request.
+	// End user credentials used to authenticate/authorize controller
+	// publish request.
 	// This field is OPTIONAL.
 	UserCredentials *Credentials `protobuf:"bytes,6,opt,name=user_credentials,json=userCredentials" json:"user_credentials,omitempty"`
 }
@@ -2241,8 +2243,8 @@ type ControllerUnpublishVolumeRequest struct {
 	// know which node the volume was previously used. The Plugin SHOULD
 	// return an Error if this is not supported.
 	NodeId *NodeID `protobuf:"bytes,3,opt,name=node_id,json=nodeId" json:"node_id,omitempty"`
-	// End user credentials used to authenticate/authorize controller unpublish
-	// request.
+	// End user credentials used to authenticate/authorize controller
+	// unpublish request.
 	// This field is OPTIONAL.
 	UserCredentials *Credentials `protobuf:"bytes,4,opt,name=user_credentials,json=userCredentials" json:"user_credentials,omitempty"`
 }
@@ -2428,7 +2430,7 @@ type ValidateVolumeCapabilitiesRequest struct {
 	// field.
 	VolumeInfo *VolumeInfo `protobuf:"bytes,2,opt,name=volume_info,json=volumeInfo" json:"volume_info,omitempty"`
 	// The capabilities that the CO wants to check for the volume. This
-	// call SHALL return “supported” only if all the volume capabilities
+	// call SHALL return "supported" only if all the volume capabilities
 	// specified below are supported. This field is REQUIRED.
 	VolumeCapabilities []*VolumeCapability `protobuf:"bytes,3,rep,name=volume_capabilities,json=volumeCapabilities" json:"volume_capabilities,omitempty"`
 }
@@ -3322,8 +3324,8 @@ type NodePublishVolumeRequest struct {
 	// Whether to publish the volume in readonly mode. This field is
 	// REQUIRED.
 	Readonly bool `protobuf:"varint,6,opt,name=readonly" json:"readonly,omitempty"`
-	// End user credentials used to authenticate/authorize node publish request.
-	// This field is OPTIONAL.
+	// End user credentials used to authenticate/authorize node publish
+	// request. This field is OPTIONAL.
 	UserCredentials *Credentials `protobuf:"bytes,7,opt,name=user_credentials,json=userCredentials" json:"user_credentials,omitempty"`
 }
 
@@ -3525,8 +3527,8 @@ type NodeUnpublishVolumeRequest struct {
 	// path in the root filesystem of the process serving this request.
 	// This is a REQUIRED field.
 	TargetPath string `protobuf:"bytes,3,opt,name=target_path,json=targetPath" json:"target_path,omitempty"`
-	// End user credentials used to authenticate/authorize node unpublish request.
-	// This field is OPTIONAL.
+	// End user credentials used to authenticate/authorize node unpublish
+	// request. This field is OPTIONAL.
 	UserCredentials *Credentials `protobuf:"bytes,4,opt,name=user_credentials,json=userCredentials" json:"user_credentials,omitempty"`
 }
 
