@@ -28,7 +28,7 @@ else
 	diff "$@" "$?" > /dev/null 2>&1 || cp -f "$?" "$@"
 endif
 
-build: $(CSI_PROTO)
+build: check
 
 # If this is not running on Travis-CI then for sake of convenience
 # go ahead and update the language bindings as well.
@@ -43,4 +43,8 @@ clean:
 clobber: clean
 	rm -f $(CSI_PROTO) $(CSI_PROTO).tmp
 
-.PHONY: clean clobber
+# check generated files for violation of standards
+check: $(CSI_PROTO)
+	awk '{ if (length > 72) print NR, $$0 }' $? | diff - /dev/null
+
+.PHONY: clean clobber check
