@@ -414,7 +414,7 @@ message CreateVolumeRequest {
   //    Plugin should ensure that multiple `CreateVolume` calls for the
   //    same name do not result in more than one piece of storage
   //    provisioned corresponding to that name. If a Plugin is unable to
-  //    enforce idempotency, the CO’s error recovery logic could result
+  //    enforce idempotency, the CO's error recovery logic could result
   //    in multiple (unused) volumes being provisioned.
   // 2) Suggested name - Some storage systems allow callers to specify
   //    an identifier by which to refer to the newly provisioned
@@ -500,7 +500,8 @@ message VolumeCapability {
       // the node can be used as read/write. The rest will be readonly.
       MULTI_NODE_SINGLE_WRITER = 4;
 
-      // Can be published as read/write at multiple nodes simultaneously.
+      // Can be published as read/write at multiple nodes
+      // simultaneously.
       MULTI_NODE_MULTI_WRITER = 5;
     }
 
@@ -566,17 +567,17 @@ message VolumeHandle {
   map<string, string> metadata = 2;
 }
 
-// A standard way to encode credential data. The total bytes of the values in
-// the Data field must be less than 1 Mebibyte.
+// A standard way to encode credential data. The total bytes of the
+// values in the Data field must be less than 1 Mebibyte.
 message Credentials {
-  // Data contains the credential data, for example username and password.
-  // Each key must consist of alphanumeric characters, '-', '_' or '.'.
-  // Each value MUST contain a valid string. An SP MAY choose to accept binary
-  // (non-string) data by using a binary-to-text encoding scheme, like base64.
-  // An SP SHALL advertise the requirements for credentials in documentation.
-  // COs SHALL permit users to pass through the required credentials.
-  // This information is sensitive and MUST be treated as such (not logged,
-  // etc.) by the CO.
+  // Data contains the credential data, for example username and
+  // password. Each key must consist of alphanumeric characters, '-',
+  // '_' or '.'. Each value MUST contain a valid string. An SP MAY
+  // choose to accept binary (non-string) data by using a binary-to-text
+  // encoding scheme, like base64. An SP SHALL advertise the
+  // requirements for credentials in documentation. COs SHALL permit
+  // users to pass through the required credentials. This information is
+  // sensitive and MUST be treated as such (not logged, etc.) by the CO.
   // This field is REQUIRED.
   map<string, string> data = 1;
 }
@@ -652,8 +653,8 @@ message ControllerPublishVolumeRequest {
   // REQUIRED.
   bool readonly = 5;
 
-  // End user credentials used to authenticate/authorize controller publish
-  // request.
+  // End user credentials used to authenticate/authorize controller
+  // publish request.
   // This field is OPTIONAL.
   Credentials user_credentials = 6;
 }
@@ -723,8 +724,8 @@ message ControllerUnpublishVolumeRequest {
   // return an Error if this is not supported.
   NodeID node_id = 3;
 
-  // End user credentials used to authenticate/authorize controller unpublish
-  // request.
+  // End user credentials used to authenticate/authorize controller
+  // unpublish request.
   // This field is OPTIONAL.
   Credentials user_credentials = 4;
 }
@@ -757,7 +758,7 @@ message ValidateVolumeCapabilitiesRequest {
   VolumeInfo volume_info = 2;
 
   // The capabilities that the CO wants to check for the volume. This
-  // call SHALL return “supported” only if all the volume capabilities
+  // call SHALL return "supported" only if all the volume capabilities
   // specified below are supported. This field is REQUIRED.
   repeated VolumeCapability volume_capabilities = 3;
 }
@@ -958,8 +959,8 @@ message NodePublishVolumeRequest {
   // REQUIRED.
   bool readonly = 6;
 
-  // End user credentials used to authenticate/authorize node publish request.
-  // This field is OPTIONAL.
+  // End user credentials used to authenticate/authorize node publish
+  // request. This field is OPTIONAL.
   Credentials user_credentials = 7;
 }
 
@@ -1001,8 +1002,8 @@ message NodeUnpublishVolumeRequest {
   // This is a REQUIRED field.
   string target_path = 3;
 
-  // End user credentials used to authenticate/authorize node unpublish request.
-  // This field is OPTIONAL.
+  // End user credentials used to authenticate/authorize node unpublish
+  // request. This field is OPTIONAL.
   Credentials user_credentials = 4;
 }
 
@@ -1149,8 +1150,8 @@ message Error {
       // be set to true.
       //
       // Recovery behavior: Caller MUST NOT retry; caller SHOULD call
-      // `GetSupportedVersions` to discover which CSI versions the Plugin
-      // supports.
+      // `GetSupportedVersions` to discover which CSI versions the
+      // Plugin supports.
       UNSUPPORTED_REQUEST_VERSION = 2;
 
       // Indicates that a required field is missing from the request.
@@ -1195,8 +1196,8 @@ message Error {
       // or disabled in the Plugin’s current mode of operation.
       //
       // Recovery behavior: Caller MUST not retry; caller MAY call
-      // `ControllerGetCapabilities` or `NodeGetCapabilities` to discover
-      // Plugin capabilities.
+      // `ControllerGetCapabilities` or `NodeGetCapabilities` to
+      // discover Plugin capabilities.
       CALL_NOT_IMPLEMENTED = 1;
 
       // Indicates that there is a already an operation pending for the
@@ -1239,7 +1240,8 @@ message Error {
       // Indicates that a key in the opaque key/value parameters field
       // is not supported by the Plugin. More human-readable information
       // MAY be provided in the `error_description` field. This MAY
-      // occur, for example, due to caller error, Plugin version skew, etc.
+      // occur, for example, due to caller error, Plugin version skew,
+      // etc.
       //
       // Recovery behavior: Caller MUST remove the unsupported key/value
       // pair from the list of parameters before retrying.
@@ -1339,8 +1341,8 @@ message Error {
       // or disabled in the Plugin’s current mode of operation.
       //
       // Recovery behavior: Caller MUST not retry; caller MAY call
-      // `ControllerGetCapabilities` or `NodeGetCapabilities` to discover
-      // Plugin capabilities.
+      // `ControllerGetCapabilities` or `NodeGetCapabilities` to
+      // discover Plugin capabilities.
       CALL_NOT_IMPLEMENTED = 1;
 
       // Indicates that there is a already an operation pending for the
@@ -1707,8 +1709,12 @@ message Error {
     CreateVolumeError create_volume_error = 2;
     DeleteVolumeError delete_volume_error = 3;
     ControllerPublishVolumeError controller_publish_volume_error = 4;
-    ControllerUnpublishVolumeError controller_unpublish_volume_error = 5;
-    ValidateVolumeCapabilitiesError validate_volume_capabilities_error = 6;
+
+    ControllerUnpublishVolumeError
+      controller_unpublish_volume_error = 5;
+
+    ValidateVolumeCapabilitiesError
+      validate_volume_capabilities_error = 6;
 
     NodePublishVolumeError node_publish_volume_error = 7;
     NodeUnpublishVolumeError node_unpublish_volume_error = 8;
