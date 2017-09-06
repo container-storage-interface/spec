@@ -1732,13 +1732,14 @@ func (m *VolumeInfo) GetHandle() *VolumeHandle {
 // by the CO.
 // Since this object will be passed around by the CO, it is RECOMMENDED
 // that each Plugin keeps the information herein as small as possible.
+// The total bytes of a serialized VolumeHandle must be less than 1 MiB.
 type VolumeHandle struct {
 	// ID is the identity of the provisioned volume specified by the
 	// Plugin. This field is REQUIRED.
 	// This information SHALL NOT be considered sensitive such that, for
 	// example, the CO MAY generate log messages that include this data.
 	Id string `protobuf:"bytes,1,opt,name=id" json:"id,omitempty"`
-	// Metadata captures additional, possibly sensitive information about
+	// Metadata captures additional, possibly sensitive, information about
 	// a volume in the form of key-value pairs. This field is OPTIONAL.
 	// Since this field MAY contain sensitive information, the CO MUST NOT
 	// leak this information to untrusted entities.

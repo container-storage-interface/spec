@@ -551,15 +551,15 @@ message VolumeInfo {
 // by the CO.
 // Since this object will be passed around by the CO, it is RECOMMENDED
 // that each Plugin keeps the information herein as small as possible.
+// The total bytes of a serialized VolumeHandle must be less than 1 MiB.
 message VolumeHandle {
-
   // ID is the identity of the provisioned volume specified by the
   // Plugin. This field is REQUIRED. 
   // This information SHALL NOT be considered sensitive such that, for
   // example, the CO MAY generate log messages that include this data.
   string id = 1;
 
-  // Metadata captures additional, possibly sensitive information about
+  // Metadata captures additional, possibly sensitive, information about
   // a volume in the form of key-value pairs. This field is OPTIONAL.
   // Since this field MAY contain sensitive information, the CO MUST NOT
   // leak this information to untrusted entities.
