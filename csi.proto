@@ -590,6 +590,23 @@ message ControllerPublishVolumeRequest {
   // OPTIONAL and MUST match the attributes of the Volume identified
   // by `volume_id`.
   map<string, string> volume_attributes = 6;
+
+  // If the volume_capability.access_type is of the type MountVolume
+  // the filesystem user to be used for all file access in this volume
+  // mount instance can be specified here.
+  // If the access_type is MountVolume and this field is omitted
+  // file system access uses whichever user_name and group_name are send
+  // by the incoming requests from the container.
+  // If this field is set the user_name and group_name of all
+  // incoming file system access requests are replaced by the supplied
+  // FilesystemUser information.
+  // If the volume_capability.access_type is of the type BlockVolume
+  // this field is ignored.
+  // This field is OPTIONAL.
+  // The filesystem user data is provided by the cluster admin via the
+  // COs configuration. The CO does not need to interpret these settings
+  // itself.
+  FilesystemUser user = 7;
 }
 
 message ControllerPublishVolumeResponse {
@@ -598,6 +615,22 @@ message ControllerPublishVolumeResponse {
   // for the given volume.
   // This information is opaque to the CO. This field is OPTIONAL.
   map<string, string> publish_info = 1;
+}
+
+message FilesystemUser {
+  // The user name to be used for file access in this volume mount
+  // instance. This field is REQUIRED
+  string user_name = 1;
+
+  // The group name(s) to be used for file access through this volume
+  // mount instance This field is OPTIONAL
+  repeated string group_name = 2;
+
+  // The namespace that the user and groups belong to. This allows using
+  // the same user and/or group names in different namespaces.
+  // This field is OPTIONAL, if not provided the SPs default namespace
+  // is used.
+  string namespace = 3;
 }
 message ControllerUnpublishVolumeRequest {
   // The ID of the volume. This field is REQUIRED.
