@@ -270,6 +270,30 @@ message VolumeHandle {
   // Since this field MAY contain sensitive information, the CO MUST NOT
   // leak this information to untrusted entities.
   map<string, string> metadata = 2;
+
+  // Checksum is the MD5 checksum of the handle's ID and metadata. The
+  // checksum should be calculated by writing the handle's ID to a
+  // buffer followed by writing the metadata's key/value pairs to the
+  // same buffer where the keys are sorted lexicographically.
+  //
+  // For example, take the following handle:
+  //
+  //         id =       "vol-00"
+  //         metadata = {"region":"US","alerts":"false","name":"MyVol"}
+  //
+  // The buffer used to calculate the checksum for the above handle
+  // would look like this:
+  //
+  //         vol-00alertsfalsenameMyVolregionUS
+  //
+  // The MD5 checksum for the above handle is therefore
+  // 81504c01d43ab67052fca49012875537.
+  //
+  // This field is REQUIRED.
+  //
+  // Since this field is a hash of information that MAY be sensitive,
+  // the CO MUST NOT leak this information to untrusted entities.
+  string checksum = 3;
 }
 
 // A standard way to encode credential data. The total bytes of the
