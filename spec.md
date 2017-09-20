@@ -1162,6 +1162,16 @@ message Error {
       // Recovery behavior: Caller MUST fix the request by adding the
       // missing required field before retrying.
       MISSING_REQUIRED_FIELD = 3;
+
+      // Indicates that a field provided in the request is not expected
+      // by the plugin.
+      // More human-readable information MAY be provided in the
+      // `error_description` field. The `caller_must_not_retry` field
+      // MUST be set to true.
+      //
+      // Recovery behavior: Caller MUST fix the request by removing the
+      // unexpected field before retrying.
+      UNEXPECTED_FIELD = 4;
     }
 
     // Machine parsable error code.
