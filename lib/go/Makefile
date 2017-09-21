@@ -15,15 +15,33 @@ endif
 export GOPATH
 
 
+################################################################################
+##                                   DEP                                      ##
+################################################################################
+
+DEP ?= ./dep
+DEP_VER ?= 0.3.1
+DEP_BIN := dep-$$GOHOSTOS-$$GOHOSTARCH
+DEP_URL := https://github.com/golang/dep/releases/download/v$(DEP_VER)/$$DEP_BIN
+
+$(DEP):
+	GOVERSION=$$(go version | awk '{print $$4}') && \
+	GOHOSTOS=$$(echo $$GOVERSION | awk -F/ '{print $$1}') && \
+	GOHOSTARCH=$$(echo $$GOVERSION | awk -F/ '{print $$2}') && \
+	DEP_BIN="$(DEP_BIN)" && \
+	DEP_URL="$(DEP_URL)" && \
+	curl -sSLO $$DEP_URL && \
+	chmod 0755 "$$DEP_BIN" && \
+	mv -f "$$DEP_BIN" "$@"
+
+vendor: | $(DEP)
+	$(DEP) ensure -v -vendor-only
+
+
 ########################################################################
 ##                             PROTOC                                 ##
 ########################################################################
-
-# Only set PROTOC_VER if it has an empty value.
-ifeq (,$(strip $(PROTOC_VER)))
-PROTOC_VER := 3.5.1
-endif
-
+PROTOC_VER ?= 3.5.1
 PROTOC_OS := $(shell uname -s)
 ifeq (Darwin,$(PROTOC_OS))
 PROTOC_OS := osx
@@ -57,10 +75,9 @@ $(PROTOC):
 # This is the recipe for getting and installing the go plug-in
 # for protoc
 PROTOC_GEN_GO_PKG := github.com/golang/protobuf/protoc-gen-go
-PROTOC_GEN_GO := protoc-gen-go
-$(PROTOC_GEN_GO):
-	go get -d $(PROTOC_GEN_GO_PKG) && \
-	go build -o "$@" $(PROTOC_GEN_GO_PKG)
+PROTOC_GEN_GO := ./protoc-gen-go
+$(PROTOC_GEN_GO): | vendor
+	go build -o "$@" ./vendor/$(PROTOC_GEN_GO_PKG)
 
 
 ########################################################################

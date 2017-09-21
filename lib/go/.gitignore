@@ -1,3 +1,5 @@
+/vendor
+/dep
 /protoc
 /protoc-gen-go
 /csi.a
