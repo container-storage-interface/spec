@@ -26,7 +26,7 @@ An implementation is compliant if it satisfies all the MUST, REQUIRED, and SHALL
 | CO                | Container Orchestration system, communicates with Plugins using CSI service RPCs.                                     |
 | SP                | Storage Provider, the vendor of a CSI plugin implementation.                                                          |
 | RPC               | [Remote Procedure Call](https://en.wikipedia.org/wiki/Remote_procedure_call).                                         |
-| Node              | A host where the user workload will be running, uniquely identifiable from the perspective of a Plugin by a `NodeID`. |
+| Node              | A host where the user workload will be running, uniquely identifiable from the perspective of a Plugin by a node ID. |
 | Plugin            | Aka “plugin implementation”, a gRPC endpoint that implements the CSI Services.                                        |
 | Plugin Supervisor | Process that governs the lifecycle of a Plugin, MAY be the CO.                                                        |
 | Workload          | The atomic unit of "work" scheduled by a CO. This may be a container or a collection of containers.                   |
@@ -631,10 +631,10 @@ message ControllerPublishVolumeRequest {
   string volume_id = 2;
 
   // The ID of the node. This field is OPTIONAL. The CO SHALL set (or
-  // clear) this field to match the `NodeID` returned by `GetNodeID`.
-  // `GetNodeID` is allowed to omit `NodeID` from a successful `Result`;
+  // clear) this field to match the node ID returned by `GetNodeID`.
+  // `GetNodeID` is allowed to omit node ID from a successful `Result`;
   // in such cases the CO SHALL NOT specify this field.
-  NodeID node_id = 3;
+  string node_id = 3;
 
   // The capability of the volume the CO expects the volume to have.
   // This is a REQUIRED field.
@@ -669,14 +669,6 @@ message ControllerPublishVolumeResponse {
     Error error = 2;
   }
 }
-
-message NodeID {
-  // Information about a node in the form of key-value pairs. This
-  // information is opaque to the CO. Given this information will be
-  // passed around by the CO, it is RECOMMENDED that each Plugin keeps
-  // this information as small as possible. This field is REQUIRED.
-  map<string, string> values = 1;
-}
 ```
 
 #### `ControllerUnpublishVolume`
@@ -701,15 +693,15 @@ message ControllerUnpublishVolumeRequest {
   string volume_id = 2;
 
   // The ID of the node. This field is OPTIONAL. The CO SHALL set (or
-  // clear) this field to match the `NodeID` returned by `GetNodeID`.
-  // `GetNodeID` is allowed to omit `NodeID` from a successful `Result`;
+  // clear) this field to match the node ID returned by `GetNodeID`.
+  // `GetNodeID` is allowed to omit node ID from a successful `Result`;
   // in such cases the CO SHALL NOT specify this field.
   //
-  // If `GetNodeID` does not omit `NodeID` from a successful `Result`,
+  // If `GetNodeID` does not omit node ID from a successful `Result`,
   // the CO MAY omit this field as well, indicating that it does not
   // know which node the volume was previously used. The Plugin SHOULD
   // return an Error if this is not supported.
-  NodeID node_id = 3;
+  string node_id = 3;
 
   // End user credentials used to authenticate/authorize controller
   // unpublish request.
@@ -1056,7 +1048,7 @@ message GetNodeIDResponse {
     // `ControllerPublishVolume`. This is an OPTIONAL field. If unset,
     // the CO SHALL leave the `node_id` field unset in
     // `ControllerPublishVolume`.
-    NodeID node_id = 1;
+    string node_id = 1;
   }
 
   // One of the following fields MUST be specified.
@@ -1407,10 +1399,10 @@ message Error {
       // node before retrying with exponential back off.
       VOLUME_ALREADY_PUBLISHED = 5;
 
-      // Indicates that a node corresponding to the specified `NodeID`
+      // Indicates that a node corresponding to the specified node ID
       // does not exist.
       //
-      // Recovery behavior: Caller SHOULD verify that the `NodeID` is
+      // Recovery behavior: Caller SHOULD verify that the node ID is
       // correct and that the node is available and has not been
       // terminated or deleted before retrying with exponential backoff.
       NODE_DOES_NOT_EXIST = 6;
@@ -1420,7 +1412,7 @@ message Error {
       // number of nodes and therefore this operation can not be
       // completed until the volume is detached from at least one of the
       // existing nodes. When this error code is returned, the Plugin
-      // MUST also specify the `NodeId` of all the nodes the volume is
+      // MUST also specify the node ID of all the nodes the volume is
       // attached to.
       //
       // Recovery behavior: Caller MAY use the provided `node_ids`
@@ -1432,12 +1424,12 @@ message Error {
       UNSUPPORTED_VOLUME_TYPE = 10;
       UNSUPPORTED_FS_TYPE = 11;
 
-      // Indicates that the specified `NodeID` is not allowed or
+      // Indicates that the specified node ID is not allowed or
       // understood by the Plugin, or the Plugin does not support the
-      // operation without a `NodeID`. More human-readable information
+      // operation without a node ID. More human-readable information
       // MAY be provided in the `error_description` field.
       //
-      // Recovery behavior: Caller MUST fix the `NodeID` before
+      // Recovery behavior: Caller MUST fix the node ID before
       // retrying.
       INVALID_NODE_ID = 8;
     }
@@ -1452,7 +1444,7 @@ message Error {
     // On `VOLUME_ALREADY_ATTACHED` and `MAX_ATTACHED_NODES` errors,
     // this field contains the node(s) that the specified volume is
     // already attached to.
-    repeated NodeID node_ids = 3;
+    repeated string node_ids = 3;
   }
 
   // `ControllerUnpublishVolume` specific error.
@@ -1507,28 +1499,28 @@ message Error {
       // deleted before retrying with exponential back off.
       VOLUME_DOES_NOT_EXIST = 4;
 
-      // Indicates that a node corresponding to the specified `NodeID`
+      // Indicates that a node corresponding to the specified node ID
       // does not exist.
       //
-      // Recovery behavior: Caller SHOULD verify that the `NodeID` is
+      // Recovery behavior: Caller SHOULD verify that the node ID is
       // correct and that the node is available and has not been
       // terminated or deleted before retrying.
       NODE_DOES_NOT_EXIST = 5;
 
-      // Indicates that the specified `NodeID` is not allowed or
+      // Indicates that the specified node ID is not allowed or
       // understood by the Plugin. More human-readable information MAY
       // be provided in the `error_description` field.
       //
-      // Recovery behavior: Caller MUST fix the `NodeID` before
+      // Recovery behavior: Caller MUST fix the node ID before
       // retrying.
       INVALID_NODE_ID = 6;
 
       VOLUME_NOT_ATTACHED_TO_SPECIFIED_NODE = 7;
 
       // Indicates that the Plugin does not support the operation
-      // without a `NodeID`.
+      // without a node ID.
       //
-      // Recovery behavior: Caller MUST specify the `NodeID` before
+      // Recovery behavior: Caller MUST specify the node ID before
       // retrying.
       NODE_ID_REQUIRED = 8;
     }
