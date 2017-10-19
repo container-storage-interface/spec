@@ -160,7 +160,7 @@ message CreateVolumeResponse {
   message Result {
     // Contains all attributes of the newly created volume that are
     // relevant to the CO along with information required by the Plugin
-    // to uniquely identifying the volume. This field is REQUIRED.
+    // to uniquely identify the volume. This field is REQUIRED.
     VolumeInfo volume_info = 1;
   }
 
@@ -251,6 +251,16 @@ message VolumeInfo {
   // subsequent calls to refer to the provisioned volume. This field
   // should not exceed 1MiB.
   string id = 2;
+
+  // Attributes reflect static properties of a volume and MUST be passed
+  // to volume validation and publishing calls.
+  // Attributes SHALL be opaque to a CO. Attributes SHALL NOT be mutable
+  // and SHALL be safe for the CO to cache. Attributes SHOULD NOT
+  // contain sensitive information. Attributes MAY NOT uniquely identify
+  // a volume. A volume uniquely identified by `id` SHALL always report
+  // the same attributes. This field is OPTIONAL and when present MUST
+  // be passed to volume validation and publishing calls.
+  map<string,string> attributes = 3;
 }
 
 // A standard way to encode credential data. The total bytes of the
@@ -320,6 +330,11 @@ message ControllerPublishVolumeRequest {
   // publish request.
   // This field is OPTIONAL.
   Credentials user_credentials = 6;
+
+  // Attributes of the volume to be used on a node. This field is
+  // OPTIONAL and MUST match the attributes of the VolumeInfo identified
+  // by `volume_id`.
+  map<string,string> volume_attributes = 7;
 }
 
 message ControllerPublishVolumeResponse {
@@ -392,6 +407,10 @@ message ValidateVolumeCapabilitiesRequest {
   // call SHALL return "supported" only if all the volume capabilities
   // specified below are supported. This field is REQUIRED.
   repeated VolumeCapability volume_capabilities = 3;
+
+  // Attributes of the volume to check. This field is OPTIONAL and MUST
+  // match the attributes of the VolumeInfo identified by `volume_id`.
+  map<string,string> volume_attributes = 4;
 }
 
 message ValidateVolumeCapabilitiesResponse {
@@ -579,6 +598,11 @@ message NodePublishVolumeRequest {
   // End user credentials used to authenticate/authorize node publish
   // request. This field is OPTIONAL.
   Credentials user_credentials = 7;
+
+  // Attributes of the volume to publish. This field is OPTIONAL and
+  // MUST match the attributes of the VolumeInfo identified by
+  // `volume_id`.
+  map<string,string> volume_attributes = 8;
 }
 
 message NodePublishVolumeResponse {
