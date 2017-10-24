@@ -664,7 +664,7 @@ message ControllerPublishVolumeResponse {
     // The SP specific information that will be passed to the Plugin in
     // the subsequent `NodePublishVolume` call for the given volume.
     // This information is opaque to the CO. This field is OPTIONAL.
-    PublishVolumeInfo publish_volume_info = 1;
+    map<string, string> publish_volume_info = 1;
   }
 
   // One of the following fields MUST be specified.
@@ -679,15 +679,6 @@ message NodeID {
   // information is opaque to the CO. Given this information will be
   // passed around by the CO, it is RECOMMENDED that each Plugin keeps
   // this information as small as possible. This field is REQUIRED.
-  map<string, string> values = 1;
-}
-
-message PublishVolumeInfo {
-  // Information returned by the Plugin in `ControllerPublishVolume`
-  // call. It is in the form of key-value pairs, and is opaque to the
-  // CO. Given this information will be passed around by the CO, it is
-  // RECOMMENDED that each Plugin keeps this information as small as
-  // possible. This field is OPTIONAL.
   map<string, string> values = 1;
 }
 ```
@@ -943,7 +934,7 @@ message NodePublishVolumeRequest {
   // has `PUBLISH_UNPUBLISH_VOLUME` controller capability, and SHALL be
   // left unset if the corresponding Controller Plugin does not have
   // this capability. This is an OPTIONAL field.
-  PublishVolumeInfo publish_volume_info = 3;
+  map<string, string> publish_volume_info = 3;
 
   // The path to which the volume will be published. It MUST be an
   // absolute path in the root filesystem of the process serving this
