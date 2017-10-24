@@ -166,6 +166,34 @@ creation to destruction.
 ```
 
 ```
+   CreateVolume +------------+ DeleteVolume
+ +------------->|  CREATED   +--------------+
+ |              +---+----+---+              |
+ |       Controller |    | Controller       v
++++         Publish |    | Unpublish       +++
+|X|          Volume |    | Volume          | |
++-+             +---v----+---+             +-+
+                | NODE_READY |
+                +---+----^---+
+               Node |    | Node
+            Publish |    | Unpublish
+             Device |    | Device
+                +---v----+---+
+                |  VOL_READY  |
+                +------------+
+               Node |    | Node
+            Publish |    | Unpublish
+             Volume |    | Volume
+                +---v----+---+
+                | PUBLISHED  |
+                +------------+
+
+Figure 5: The lifecycle of a dynamically provisioned volume, from
+creation to destruction, when the Node Plugin advertises the
+PUBLISH_UNPUBLISH_DEVICE capability.
+```
+
+```
     Controller                  Controller
        Publish                  Unpublish
         Volume  +------------+  Volume
@@ -182,7 +210,7 @@ creation to destruction.
    Volume
    Capabilities
 
-Figure 5: The lifecycle of a pre-provisioned volume that requires
+Figure 6: The lifecycle of a pre-provisioned volume that requires
 controller to publish to a node (`ControllerPublishVolume`) prior to
 publishing on the node (`NodePublishVolume`).
 ```
@@ -199,7 +227,7 @@ Publish |    | Unpublish
     | PUBLISHED  |
     +------------+
 
-Figure 6: Plugins may forego other lifecycle steps by contraindicating
+Figure 7: Plugins may forego other lifecycle steps by contraindicating
 them via the capabilities API. Interactions with the volumes of such
 plugins is reduced to `NodePublishVolume` and `NodeUnpublishVolume`
 calls.
@@ -270,6 +298,12 @@ service Controller {
 }
 
 service Node {
+  rpc NodePublishDevice (NodePublishDeviceRequest)
+    returns (NodePublishDeviceResponse) {}
+
+  rpc NodeUnpublishDevice (NodeUnpublishDeviceRequest)
+    returns (NodeUnpublishDeviceResponse) {}
+
   rpc NodePublishVolume (NodePublishVolumeRequest)
     returns (NodePublishVolumeResponse) {}
 
@@ -662,7 +696,8 @@ message ControllerPublishVolumeRequest {
 message ControllerPublishVolumeResponse {
   message Result {
     // The SP specific information that will be passed to the Plugin in
-    // the subsequent `NodePublishVolume` call for the given volume.
+    // the subsequent `NodePublishDevice` and `NodePublishVolume` calls
+    // for the given volume.
     // This information is opaque to the CO. This field is OPTIONAL.
     PublishVolumeInfo publish_volume_info = 1;
   }
@@ -696,7 +731,7 @@ message PublishVolumeInfo {
 
 Controller Plugin MUST implement this RPC call if it has `PUBLISH_UNPUBLISH_VOLUME` controller capability.
 This RPC is a reverse operation of `ControllerPublishVolume`.
-It MUST be called after `NodeUnpublishVolume` on the volume is called and succeeds.
+It MUST be called after `NodeUnpublishDevice` on the volume is called and succeeds.
 The Plugin SHOULD perform the work that is necessary for making the volume ready to be consumed by a different node.
 The Plugin MUST NOT assume that this RPC will be executed on the node where the volume was previously used.
 
@@ -920,6 +955,94 @@ message ControllerServiceCapability {
 
 ### Node Service RPC
 
+#### `NodePublishDevice`
+
+A Node Plugin MUST implement this RPC call if it has `PUBLISH_UNPUBLISH_DEVICE` node capability.
+This RPC is called by the CO when a workload that wants to use the specified volume is placed (scheduled) on a node.
+The Plugin SHALL assume that this RPC will be executed on the node where the volume will be used.
+This RPC MUST be called by the CO once per node, per volume.
+If the corresponding Controller Plugin has `PUBLISH_UNPUBLISH_VOLUME` controller capability and the Node Plugin has `PUBLISH_UNPUBLISH_DEVICE`, then the CO MUST guarantee that this RPC is called after `ControllerPublishVolume` is called for the given volume on the given node and returns a success.
+The CO MUST guarantee that this RPC is called and returns a success before `NodePublishVolume` is called for the given volume on the given node.
+This operation MUST be idempotent.
+If this RPC failed, or the CO does not know if it failed or not, it MAY choose to call `NodePublishDevice` again, or choose to call `NodeUnpublishDevice`.
+
+```protobuf
+message NodePublishDeviceRequest {
+  // The API version assumed by the CO. This is a REQUIRED field.
+  Version version = 1;
+
+  // The ID of the volume to publish. This field is REQUIRED.
+  string volume_id = 2;
+
+  // The CO SHALL set this field to the value returned by
+  // `ControllerPublishVolume` if the corresponding Controller Plugin
+  // has `PUBLISH_UNPUBLISH_VOLUME` controller capability, and SHALL be
+  // left unset if the corresponding Controller Plugin does not have
+  // this capability. This is an OPTIONAL field.
+  PublishVolumeInfo publish_volume_info = 3;
+
+  // The path to which the volume will be published. It MUST be an
+  // absolute path in the root filesystem of the process serving this
+  // request. The CO SHALL ensure uniqueness of global_target_path per
+  // volume.
+  // This is a REQUIRED field.
+  string global_target_path = 4;
+
+  // The capability of the volume the CO expects the volume to have.
+  // This is a REQUIRED field.
+  VolumeCapability volume_capability = 5;
+}
+
+message NodePublishDeviceResponse {
+  message Result {}
+
+  // One of the following fields MUST be specified.
+  oneof reply {
+    Result result = 1;
+    Error error = 2;
+  }
+}
+```
+
+#### `NodeUnpublishDevice`
+
+A Node Plugin MUST implement this RPC call if it has `PUBLISH_UNPUBLISH_DEVICE` node capability.
+This RPC is a reverse operation of `NodePublishDevice`.
+This RPC MUST undo the work by the corresponding `NodePublishDevice`.
+This RPC SHALL be called by the CO once for each `global_target_path` that was successfully setup via `NodePublishDevice`.
+If the corresponding Controller Plugin has `PUBLISH_UNPUBLISH_VOLUME` controller capability, the CO SHOULD issue all `NodeUnpublishDevice` (as specified above) before calling `ControllerUnpublishVolume` for the given node and the given volume.
+The Plugin SHALL assume that this RPC will be executed on the node where the volume is being used.
+
+This RPC is typically called by the CO when the workload using the volume is being moved to a different node, or all the workload using the volume on a node has finished.
+
+This operation MUST be idempotent.
+If this RPC failed, or the CO does not know if it failed or not, it can choose to call `NodeUnpublishDevice` again.
+
+```protobuf
+message NodeUnpublishDeviceRequest {
+  // The API version assumed by the CO. This is a REQUIRED field.
+  Version version = 1;
+
+  // The ID of the volume. This field is REQUIRED.
+  string volume_id = 2;
+
+  // The path at which the volume was published. It MUST be an absolute
+  // path in the root filesystem of the process serving this request.
+  // This is a REQUIRED field.
+  string global_target_path = 3;
+}
+
+message NodeUnpublishDeviceResponse {
+  message Result {}
+
+  // One of the following fields MUST be specified.
+  oneof reply {
+    Result result = 1;
+    Error error = 2;
+  }
+}
+```
+
 #### `NodePublishVolume`
 
 This RPC is called by the CO when a workload that wants to use the specified volume is placed (scheduled) on a node.
@@ -945,23 +1068,29 @@ message NodePublishVolumeRequest {
   // this capability. This is an OPTIONAL field.
   PublishVolumeInfo publish_volume_info = 3;
 
+  // The path to which the device was mounted by `NodePublishDevice`.
+  // It MUST be an absolute path in the root filesystem of the process
+  // serving this request.
+  // This is an OPTIONAL field.
+  string global_target_path = 4;
+
   // The path to which the volume will be published. It MUST be an
   // absolute path in the root filesystem of the process serving this
   // request. The CO SHALL ensure uniqueness of target_path per volume.
   // This is a REQUIRED field.
-  string target_path = 4;
+  string target_path = 5;
 
   // The capability of the volume the CO expects the volume to have.
   // This is a REQUIRED field.
-  VolumeCapability volume_capability = 5;
+  VolumeCapability volume_capability = 6;
 
   // Whether to publish the volume in readonly mode. This field is
   // REQUIRED.
-  bool readonly = 6;
+  bool readonly = 7;
 
   // End user credentials used to authenticate/authorize node publish
   // request. This field is OPTIONAL.
-  Credentials user_credentials = 7;
+  Credentials user_credentials = 8;
 }
 
 message NodePublishVolumeResponse {
@@ -997,14 +1126,20 @@ message NodeUnpublishVolumeRequest {
   // The handle of the volume. This field is REQUIRED.
   VolumeHandle volume_handle = 2;
 
+  // The path to which the device was mounted by `NodePublishDevice`.
+  // It MUST be an absolute path in the root filesystem of the process
+  // serving this request.
+  // This is an OPTIONAL field.
+  string global_target_path = 3;
+
   // The path at which the volume was published. It MUST be an absolute
   // path in the root filesystem of the process serving this request.
   // This is a REQUIRED field.
-  string target_path = 3;
+  string target_path = 4;
 
   // End user credentials used to authenticate/authorize node unpublish
   // request. This field is OPTIONAL.
-  Credentials user_credentials = 4;
+  Credentials user_credentials = 5;
 }
 
 message NodeUnpublishVolumeResponse {
@@ -1104,6 +1239,7 @@ message NodeServiceCapability {
   message RPC {
     enum Type {
       UNKNOWN = 0;
+      PUBLISH_UNPUBLISH_DEVICE = 1;
     }
 
     Type type = 1;
@@ -1553,6 +1689,111 @@ message Error {
     }
 
     ValidateVolumeCapabilitiesErrorCode error_code = 1;
+    string error_description = 2;
+  }
+
+  // `NodePublishDevice` specific error.
+  message NodePublishDeviceError {
+    enum NodePublishDeviceErrorCode {
+      // Default value for backwards compatibility. SHOULD NOT be
+      // returned by Plugins. However, if a Plugin returns a
+      // `NodePublishDeviceErrorCode` code that an older CSI
+      // client is not aware of, the client will see this code (the
+      // default fallback).
+      //
+      // Recovery behavior: Caller SHOULD consider updating CSI client
+      // to match Plugin CSI version.
+      UNKNOWN = 0;
+
+      // Indicates that there is a already an operation pending for the
+      // specified volume. In general the Cluster Orchestrator (CO) is
+      // responsible for ensuring that there is no more than one call
+      // “in-flight” per volume at a given time. However, in some
+      // circumstances, the CO MAY lose state (for example when the CO
+      // crashes and restarts), and MAY issue multiple calls
+      // simultaneously for the same volume. The Plugin, SHOULD handle
+      // this as gracefully as possible, and MAY return this error code
+      // to reject secondary calls.
+      //
+      // Recovery behavior: Caller SHOULD ensure that there are no other
+      // calls pending for the specified volume, and then retry with
+      // exponential back off.
+      OPERATION_PENDING_FOR_VOLUME = 1;
+
+      // Indicates that a volume corresponding to the specified
+      // volume ID does not exist.
+      //
+      // Recovery behavior: Caller SHOULD verify that the volume ID
+      // is correct and that the volume is accessible and has not been
+      // deleted before retrying with exponential back off.
+      VOLUME_DOES_NOT_EXIST = 2;
+
+      UNSUPPORTED_MOUNT_FLAGS = 3;
+      UNSUPPORTED_VOLUME_TYPE = 4;
+      UNSUPPORTED_FS_TYPE = 5;
+      MOUNT_ERROR = 6;
+
+      // Indicates that the specified volume ID is not allowed or
+      // understood by the Plugin. More human-readable information MAY
+      // be provided in the `error_description` field.
+      //
+      // Recovery behavior: Caller MUST fix the volume ID before
+      // retrying.
+      INVALID_VOLUME_ID = 7;
+    }
+
+    NodePublishDeviceErrorCode error_code = 1;
+    string error_description = 2;
+  }
+
+  // `NodeUnpublishDevice` specific error.
+  message NodeUnpublishDeviceError {
+    enum NodeUnpublishDeviceErrorCode {
+      // Default value for backwards compatibility. SHOULD NOT be
+      // returned by Plugins. However, if a Plugin returns a
+      // `NodeUnpublishDeviceErrorCode` code that an older CSI
+      // client is not aware of, the client will see this code (the
+      // default fallback).
+      //
+      // Recovery behavior: Caller SHOULD consider updating CSI client
+      // to match Plugin CSI version.
+      UNKNOWN = 0;
+
+      // Indicates that there is a already an operation pending for the
+      // specified volume. In general the Cluster Orchestrator (CO) is
+      // responsible for ensuring that there is no more than one call
+      // “in-flight” per volume at a given time. However, in some
+      // circumstances, the CO MAY lose state (for example when the CO
+      // crashes and restarts), and MAY issue multiple calls
+      // simultaneously for the same volume. The Plugin, SHOULD handle
+      // this as gracefully as possible, and MAY return this error code
+      // to reject secondary calls.
+      //
+      // Recovery behavior: Caller SHOULD ensure that there are no other
+      // calls pending for the specified volume, and then retry with
+      // exponential back off.
+      OPERATION_PENDING_FOR_VOLUME = 1;
+
+      // Indicates that a volume corresponding to the specified
+      // volume ID does not exist.
+      //
+      // Recovery behavior: Caller SHOULD verify that the volume ID
+      // is correct and that the volume is accessible and has not been
+      // deleted before retrying with exponential back off.
+      VOLUME_DOES_NOT_EXIST = 2;
+
+      UNMOUNT_ERROR = 3;
+
+      // Indicates that the specified volume ID is not allowed or
+      // understood by the Plugin. More human-readable information MAY
+      // be provided in the `error_description` field.
+      //
+      // Recovery behavior: Caller MUST fix the volume ID before
+      // retrying.
+      INVALID_VOLUME_ID = 4;
+    }
+
+    NodeUnpublishDeviceErrorCode error_code = 1;
     string error_description = 2;
   }
 
