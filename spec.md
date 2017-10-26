@@ -265,6 +265,9 @@ service Controller {
   rpc GetCapacity (GetCapacityRequest)
     returns (GetCapacityResponse) {}
 
+  rpc ProbeController (ProbeControllerRequest)
+    returns (ProbeControllerResponse) {}
+
   rpc ControllerGetCapabilities (ControllerGetCapabilitiesRequest)
     returns (ControllerGetCapabilitiesResponse) {}  
 }
@@ -855,6 +858,30 @@ message GetCapacityResponse {
     // storage. This field is REQUIRED.
     uint64 available_capacity = 1;
   }
+
+  // One of the following fields MUST be specified.
+  oneof reply {
+    Result result = 1;
+    Error error = 2;
+  }
+}
+```
+
+#### `ProbeController`
+
+A Controller Plugin MUST implement this RPC call.
+The Plugin SHOULD verify if it has the right configurations, devices, dependencies and drivers in order to run the controller service, and return a success if the validation succeeds.
+The CO SHALL invoke this RPC prior to any other controller service RPC in order to allow the CO to determine the readiness of the controller service.
+A CO MAY invoke this call multiple times with the understanding that a plugin's implementation MAY NOT be trivial and there MAY be overhead incurred by such repeated calls.
+
+```protobuf
+message ProbeControllerRequest {
+  // The API version assumed by the CO. This is a REQUIRED field.
+  Version version = 1;
+}
+
+message ProbeControllerResponse {
+  message Result {}
 
   // One of the following fields MUST be specified.
   oneof reply {
@@ -1547,6 +1574,27 @@ message Error {
     string error_description = 2;
   }
 
+  // `ProbeController` specific error.
+  message ProbeControllerError {
+    enum ProbeControllerErrorCode {
+      // Default value for backwards compatibility. SHOULD NOT be
+      // returned by Plugins. However, if a Plugin returns a
+      // `ProbeControllerErrorCode` code that an older CSI
+      // client is not aware of, the client will see this code (the
+      // default fallback).
+      //
+      // Recovery behavior: Caller SHOULD consider updating CSI client
+      // to match Plugin CSI version.
+      UNKNOWN = 0;
+
+      BAD_PLUGIN_CONFIG = 1;
+      MISSING_REQUIRED_HOST_DEPENDENCY = 2;
+    }
+
+    ProbeControllerErrorCode error_code = 1;
+    string error_description = 2;
+  }
+
   // `NodePublishVolume` specific error.
   message NodePublishVolumeError {
     enum NodePublishVolumeErrorCode {
@@ -1707,10 +1755,12 @@ message Error {
     ValidateVolumeCapabilitiesError
       validate_volume_capabilities_error = 6;
 
-    NodePublishVolumeError node_publish_volume_error = 7;
-    NodeUnpublishVolumeError node_unpublish_volume_error = 8;
-    ProbeNodeError probe_node_error = 9;
-    GetNodeIDError get_node_id_error = 10;
+    ProbeControllerError probe_controller_error = 7;
+
+    NodePublishVolumeError node_publish_volume_error = 8;
+    NodeUnpublishVolumeError node_unpublish_volume_error = 9;
+    ProbeNodeError probe_node_error = 10;
+    GetNodeIDError get_node_id_error = 11;
   }
 }
 ```
