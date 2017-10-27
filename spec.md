@@ -265,8 +265,8 @@ service Controller {
   rpc GetCapacity (GetCapacityRequest)
     returns (GetCapacityResponse) {}
 
-  rpc ProbeController (ProbeControllerRequest)
-    returns (ProbeControllerResponse) {}
+  rpc ControllerProbe (ControllerProbeRequest)
+    returns (ControllerProbeResponse) {}
 
   rpc ControllerGetCapabilities (ControllerGetCapabilitiesRequest)
     returns (ControllerGetCapabilitiesResponse) {}  
@@ -282,8 +282,8 @@ service Node {
   rpc GetNodeID (GetNodeIDRequest)
     returns (GetNodeIDResponse) {}
 
-  rpc ProbeNode (ProbeNodeRequest)
-    returns (ProbeNodeResponse) {}
+  rpc NodeProbe (NodeProbeRequest)
+    returns (NodeProbeResponse) {}
 
   rpc NodeGetCapabilities (NodeGetCapabilitiesRequest)
     returns (NodeGetCapabilitiesResponse) {}
@@ -867,7 +867,7 @@ message GetCapacityResponse {
 }
 ```
 
-#### `ProbeController`
+#### `ControllerProbe`
 
 A Controller Plugin MUST implement this RPC call.
 The Plugin SHOULD verify if it has the right configurations, devices, dependencies and drivers in order to run the controller service, and return a success if the validation succeeds.
@@ -875,12 +875,12 @@ The CO SHALL invoke this RPC prior to any other controller service RPC in order 
 A CO MAY invoke this call multiple times with the understanding that a plugin's implementation MAY NOT be trivial and there MAY be overhead incurred by such repeated calls.
 
 ```protobuf
-message ProbeControllerRequest {
+message ControllerProbeRequest {
   // The API version assumed by the CO. This is a REQUIRED field.
   Version version = 1;
 }
 
-message ProbeControllerResponse {
+message ControllerProbeResponse {
   message Result {}
 
   // One of the following fields MUST be specified.
@@ -1066,7 +1066,7 @@ message GetNodeIDResponse {
 }
 ```
 
-#### `ProbeNode`
+#### `NodeProbe`
 
 A Node Plugin MUST implement this RPC call.
 The Plugin SHALL assume that this RPC will be executed on the node where the volume will be used.
@@ -1076,12 +1076,12 @@ The Plugin SHOULD verify if it has everything it needs (binaries, kernel module,
 The CO MAY use this RPC to probe which machines can support specific Plugins and schedule workloads accordingly.
 
 ```protobuf
-message ProbeNodeRequest {
+message NodeProbeRequest {
   // The API version assumed by the CO. This is a REQUIRED field.
   Version version = 1;
 }
 
-message ProbeNodeResponse {
+message NodeProbeResponse {
   message Result {}
 
   // One of the following fields MUST be specified.
@@ -1574,12 +1574,12 @@ message Error {
     string error_description = 2;
   }
 
-  // `ProbeController` specific error.
-  message ProbeControllerError {
-    enum ProbeControllerErrorCode {
+  // `ControllerProbe` specific error.
+  message ControllerProbeError {
+    enum ControllerProbeErrorCode {
       // Default value for backwards compatibility. SHOULD NOT be
       // returned by Plugins. However, if a Plugin returns a
-      // `ProbeControllerErrorCode` code that an older CSI
+      // `ControllerProbeErrorCode` code that an older CSI
       // client is not aware of, the client will see this code (the
       // default fallback).
       //
@@ -1591,7 +1591,7 @@ message Error {
       MISSING_REQUIRED_HOST_DEPENDENCY = 2;
     }
 
-    ProbeControllerErrorCode error_code = 1;
+    ControllerProbeErrorCode error_code = 1;
     string error_description = 2;
   }
 
@@ -1700,12 +1700,12 @@ message Error {
     string error_description = 2;
   }
 
-  // `ProbeNode` specific error.
-  message ProbeNodeError {
-    enum ProbeNodeErrorCode {
+  // `NodeProbe` specific error.
+  message NodeProbeError {
+    enum NodeProbeErrorCode {
       // Default value for backwards compatibility. SHOULD NOT be
       // returned by Plugins. However, if a Plugin returns a
-      // `ProbeNodeErrorCode` code that an older CSI
+      // `NodeProbeErrorCode` code that an older CSI
       // client is not aware of, the client will see this code (the
       // default fallback).
       //
@@ -1717,7 +1717,7 @@ message Error {
       MISSING_REQUIRED_HOST_DEPENDENCY = 2;
     }
 
-    ProbeNodeErrorCode error_code = 1;
+    NodeProbeErrorCode error_code = 1;
     string error_description = 2;
   }
 
@@ -1755,11 +1755,11 @@ message Error {
     ValidateVolumeCapabilitiesError
       validate_volume_capabilities_error = 6;
 
-    ProbeControllerError probe_controller_error = 7;
+    ControllerProbeError controller_probe_error = 7;
 
     NodePublishVolumeError node_publish_volume_error = 8;
     NodeUnpublishVolumeError node_unpublish_volume_error = 9;
-    ProbeNodeError probe_node_error = 10;
+    NodeProbeError node_probe_error = 10;
     GetNodeIDError get_node_id_error = 11;
   }
 }
