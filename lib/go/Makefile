@@ -79,12 +79,25 @@ export PATH := $(shell pwd):$(PATH)
 CSI_GO := csi/csi.pb.go
 CSI_A := csi.a
 CSI_PROTO := ../../csi.proto
+CSI_PROTO_TMP := csi/.build/csi.proto
 CSI_GO_TMP := csi/.build/csi.pb.go
 
 # This recipe generates the go language bindings to a temp area.
+#
+# `sed` is used because the standard protobuf wrapper types actually
+# alias the golang package for this, so we need to swap this out before
+# attempting to use the golang plugin for protoc.
+#
+$(CSI_GO_TMP): STDWRAP = google/protobuf/wrappers.proto
+$(CSI_GO_TMP): GOWRAP_PKG = github.com/golang/protobuf/ptypes/wrappers
+$(CSI_GO_TMP): GOWRAP = $(STDWRAP:%.proto=$(GOWRAP_PKG)/wrappers.proto)
+$(CSI_GO_TMP): PROTO_REWRITES = -e 's@"$(STDWRAP)"@"$(GOWRAP)"@g'
 $(CSI_GO_TMP): $(CSI_PROTO) | $(PROTOC) $(PROTOC_GEN_GO)
 	@mkdir -p "$(@D)"
-	$(PROTOC) -I "$(<D)" --go_out=plugins=grpc:"$(@D)" "$<"
+	cat "$<" | sed $(PROTO_REWRITES) >"$(CSI_PROTO_TMP)"
+	$(PROTOC) -I "$(@D)" \
+		-I$(GOPATH)/src --go_out=plugins=grpc:"$(@D)" \
+		"$(CSI_PROTO_TMP)"
 
 # The temp language bindings are compared to the ones that are
 # versioned. If they are different then it means the language

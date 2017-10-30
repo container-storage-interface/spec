@@ -226,6 +226,8 @@ Each SP MUST provide:
 ```protobuf
 syntax = "proto3";
 package csi;
+
+import "google/protobuf/wrappers.proto";
 ```
 
 There are three sets of RPCs:
@@ -358,9 +360,9 @@ message GetSupportedVersionsResponse {
 // Specifies a version in Semantic Version 2.0 format.
 // (http://semver.org/spec/v2.0.0.html)
 message Version {
-  uint32 major = 1;  // This field is REQUIRED.
-  uint32 minor = 2;  // This field is REQUIRED.
-  uint32 patch = 3;  // This field is REQUIRED.
+  .google.protobuf.UInt32Value major = 1;  // This field is REQUIRED.
+  .google.protobuf.UInt32Value minor = 2;  // This field is REQUIRED.
+  .google.protobuf.UInt32Value patch = 3;  // This field is REQUIRED.
 }
 ```
 
@@ -375,10 +377,10 @@ message GetPluginInfoRequest {
 message GetPluginInfoResponse {
   message Result {
     // This field is REQUIRED.
-    string name = 1;
+    .google.protobuf.StringValue name = 1;
 
     // This field is REQUIRED. Value of this field is opaque to the CO.
-    string vendor_version = 2;
+    .google.protobuf.StringValue vendor_version = 2;
 
     // This field is OPTIONAL. Values are opaque to the CO.
     map<string, string> manifest = 3;
@@ -420,7 +422,7 @@ message CreateVolumeRequest {
   //    an identifier by which to refer to the newly provisioned
   //    storage. If a storage system supports this, it can optionally
   //    use this name as the identifier for the new volume.
-  string name = 2;
+  .google.protobuf.StringValue name = 2;
 
   // This field is OPTIONAL. This allows the CO to specify the capacity
   // requirement of the volume to be provisioned. If not specified, the
@@ -473,7 +475,7 @@ message VolumeCapability {
   // Indicate that the volume will be accessed via the filesystem API.
   message MountVolume {
     // The filesystem type. This field is OPTIONAL.
-    string fs_type = 1;
+    .google.protobuf.StringValue fs_type = 1;
 
     // The mount options that can be used for the volume. This field is
     // OPTIONAL. `mount_flags` MAY contain sensitive information.
@@ -525,10 +527,10 @@ message VolumeCapability {
 // least one of the these fields MUST be specified.
 message CapacityRange {
   // Volume must be at least this big.
-  uint64 required_bytes = 1;
+  .google.protobuf.UInt64Value required_bytes = 1;
 
   // Volume must not be bigger than this.
-  uint64 limit_bytes = 2;
+  .google.protobuf.UInt64Value limit_bytes = 2;
 }
 
 // The information about a provisioned volume.
@@ -536,7 +538,7 @@ message VolumeInfo {
   // The capacity of the volume in bytes. This field is OPTIONAL. If not
   // set, it indicates that the capacity of the volume is unknown (e.g.,
   // NFS share). If set, it MUST be non-zero.
-  uint64 capacity_bytes = 1;
+  .google.protobuf.UInt64Value capacity_bytes = 1;
 
   // Contains identity information for the created volume. This field is
   // REQUIRED. The identity information will be used by the CO in
@@ -558,7 +560,7 @@ message VolumeHandle {
   // Plugin. This field is REQUIRED.
   // This information SHALL NOT be considered sensitive such that, for
   // example, the CO MAY generate log messages that include this data.
-  string id = 1;
+  .google.protobuf.StringValue id = 1;
 
   // Metadata captures additional, possibly sensitive, information about
   // a volume in the form of key-value pairs. This field is OPTIONAL.
@@ -651,7 +653,7 @@ message ControllerPublishVolumeRequest {
 
   // Whether to publish the volume in readonly mode. This field is
   // REQUIRED.
-  bool readonly = 5;
+  .google.protobuf.BoolValue readonly = 5;
 
   // End user credentials used to authenticate/authorize controller
   // publish request.
@@ -758,11 +760,11 @@ message ValidateVolumeCapabilitiesResponse {
   message Result {
     // True if the Plugin supports the specified capabilities for the
     // given volume. This field is REQUIRED.
-    bool supported = 1;
+    .google.protobuf.BoolValue supported = 1;
 
     // Message to the CO if `supported` above is false. This field is
     // OPTIONAL.
-    string message = 2;
+    .google.protobuf.StringValue message = 2;
   }
 
   // One of the following fields MUST be specified.
@@ -790,12 +792,12 @@ message ListVolumesRequest {
   // `ListVolumes` call. This field is OPTIONAL. If not specified, it
   // means there is no restriction on the number of entries that can be
   // returned.
-  uint32 max_entries = 2;
+  .google.protobuf.UInt32Value max_entries = 2;
 
   // A token to specify where to start paginating. Set this field to
   // `next_token` returned by a previous `ListVolumes` call to get the
   // next page of entries. This field is OPTIONAL.
-  string starting_token = 3;
+  .google.protobuf.StringValue starting_token = 3;
 }
 
 message ListVolumesResponse {
@@ -811,7 +813,7 @@ message ListVolumesResponse {
     // `max_entries`, use the `next_token` as a value for the
     // `starting_token` field in the next `ListVolumes` request. This
     // field is OPTIONAL.
-    string next_token = 2;
+    .google.protobuf.StringValue next_token = 2;
   }
 
   // One of the following fields MUST be specified.
@@ -853,7 +855,7 @@ message GetCapacityResponse {
     // specified in the request, the Plugin SHALL take those into
     // consideration when calculating the available capacity of the
     // storage. This field is REQUIRED.
-    uint64 available_capacity = 1;
+    .google.protobuf.UInt64Value available_capacity = 1;
   }
 
   // One of the following fields MUST be specified.
@@ -940,7 +942,7 @@ message NodePublishVolumeRequest {
   // absolute path in the root filesystem of the process serving this
   // request. The CO SHALL ensure uniqueness of target_path per volume.
   // This is a REQUIRED field.
-  string target_path = 4;
+  .google.protobuf.StringValue target_path = 4;
 
   // The capability of the volume the CO expects the volume to have.
   // This is a REQUIRED field.
@@ -948,7 +950,7 @@ message NodePublishVolumeRequest {
 
   // Whether to publish the volume in readonly mode. This field is
   // REQUIRED.
-  bool readonly = 6;
+  .google.protobuf.BoolValue readonly = 6;
 
   // End user credentials used to authenticate/authorize node publish
   // request. This field is OPTIONAL.
@@ -991,7 +993,7 @@ message NodeUnpublishVolumeRequest {
   // The path at which the volume was published. It MUST be an absolute
   // path in the root filesystem of the process serving this request.
   // This is a REQUIRED field.
-  string target_path = 3;
+  .google.protobuf.StringValue target_path = 3;
 
   // End user credentials used to authenticate/authorize node unpublish
   // request. This field is OPTIONAL.
@@ -1164,11 +1166,11 @@ message Error {
     // will cause it to succeed. If this value is false, the caller MAY
     // reissue the same call, but SHOULD implement exponential backoff
     // on retires.
-    bool caller_must_not_retry = 2;
+    .google.protobuf.BoolValue caller_must_not_retry = 2;
 
     // Human readable description of error, possibly with additional
     // information. This string MAY be surfaced by CO to end users.
-    string error_description = 3;
+    .google.protobuf.StringValue error_description = 3;
   }
 
   // `CreateVolume` specific error.
@@ -1253,7 +1255,7 @@ message Error {
 
     // Human readable description of error, possibly with additional
     // information. This string maybe surfaced by CO to end users.
-    string error_description = 2;
+    .google.protobuf.StringValue error_description = 2;
   }
 
   // `DeleteVolume` specific error.
@@ -1312,7 +1314,7 @@ message Error {
 
     // Human readable description of error, possibly with additional
     // information. This string maybe surfaced by CO to end users.
-    string error_description = 2;
+    .google.protobuf.StringValue error_description = 2;
   }
 
   // `ControllerPublishVolume` specific error.
@@ -1419,7 +1421,7 @@ message Error {
 
     // Human readable description of error, possibly with additional
     // information. This string maybe surfaced by CO to end users.
-    string error_description = 2;
+    .google.protobuf.StringValue error_description = 2;
 
     // On `VOLUME_ALREADY_ATTACHED` and `MAX_ATTACHED_NODES` errors,
     // this field contains the node(s) that the specified volume is
@@ -1506,7 +1508,7 @@ message Error {
     }
 
     ControllerUnpublishVolumeErrorCode error_code = 1;
-    string error_description = 2;
+    .google.protobuf.StringValue error_description = 2;
   }
 
   // `ValidateVolumeCapabilities` specific error.
@@ -1544,7 +1546,7 @@ message Error {
     }
 
     ValidateVolumeCapabilitiesErrorCode error_code = 1;
-    string error_description = 2;
+    .google.protobuf.StringValue error_description = 2;
   }
 
   // `NodePublishVolume` specific error.
@@ -1598,7 +1600,7 @@ message Error {
     }
 
     NodePublishVolumeErrorCode error_code = 1;
-    string error_description = 2;
+    .google.protobuf.StringValue error_description = 2;
   }
 
   // `NodeUnpublishVolume` specific error.
@@ -1649,7 +1651,7 @@ message Error {
     }
 
     NodeUnpublishVolumeErrorCode error_code = 1;
-    string error_description = 2;
+    .google.protobuf.StringValue error_description = 2;
   }
 
   // `ProbeNode` specific error.
@@ -1670,7 +1672,7 @@ message Error {
     }
 
     ProbeNodeErrorCode error_code = 1;
-    string error_description = 2;
+    .google.protobuf.StringValue error_description = 2;
   }
 
   // `GetNodeID` specific error.
@@ -1690,7 +1692,7 @@ message Error {
     }
 
     GetNodeIDErrorCode error_code = 1;
-    string error_description = 2;
+    .google.protobuf.StringValue error_description = 2;
   }
 
   // One of the following fields MUST be specified.
