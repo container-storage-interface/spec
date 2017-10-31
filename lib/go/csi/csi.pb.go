@@ -1655,6 +1655,7 @@ func (*VolumeCapability_BlockVolume) Descriptor() ([]byte, []int) { return fileD
 // Indicate that the volume will be accessed via the filesystem API.
 type VolumeCapability_MountVolume struct {
 	// The filesystem type. This field is OPTIONAL.
+	// An empty string is equal to an unspecified field value.
 	FsType string `protobuf:"bytes,1,opt,name=fs_type,json=fsType" json:"fs_type,omitempty"`
 	// The mount options that can be used for the volume. This field is
 	// OPTIONAL. `mount_flags` MAY contain sensitive information.
@@ -1704,9 +1705,11 @@ func (m *VolumeCapability_AccessMode) GetMode() VolumeCapability_AccessMode_Mode
 // `required_bytes` and `limit_bytes` can be set to the same value. At
 // least one of the these fields MUST be specified.
 type CapacityRange struct {
-	// Volume must be at least this big.
+	// Volume must be at least this big. This field is OPTIONAL.
+	// A value of 0 is equal to an unspecified field value.
 	RequiredBytes uint64 `protobuf:"varint,1,opt,name=required_bytes,json=requiredBytes" json:"required_bytes,omitempty"`
-	// Volume must not be bigger than this.
+	// Volume must not be bigger than this. This field is OPTIONAL.
+	// A value of 0 is equal to an unspecified field value.
 	LimitBytes uint64 `protobuf:"varint,2,opt,name=limit_bytes,json=limitBytes" json:"limit_bytes,omitempty"`
 }
 
@@ -1732,13 +1735,12 @@ func (m *CapacityRange) GetLimitBytes() uint64 {
 // The information about a provisioned volume.
 type VolumeInfo struct {
 	// The capacity of the volume in bytes. This field is OPTIONAL. If not
-	// set, it indicates that the capacity of the volume is unknown (e.g.,
-	// NFS share). If set, it MUST be non-zero.
+	// set (value of 0), it indicates that the capacity of the volume is
+	// unknown (e.g., NFS share).
 	CapacityBytes uint64 `protobuf:"varint,1,opt,name=capacity_bytes,json=capacityBytes" json:"capacity_bytes,omitempty"`
 	// Contains identity information for the created volume. This field is
 	// REQUIRED. The identity information will be used by the CO in
-	// subsequent calls to refer to the provisioned volume. This field
-	// should not exceed 1MiB.
+	// subsequent calls to refer to the provisioned volume.
 	Id string `protobuf:"bytes,2,opt,name=id" json:"id,omitempty"`
 	// Attributes reflect static properties of a volume and MUST be passed
 	// to volume validation and publishing calls.
@@ -2603,6 +2605,7 @@ type ValidateVolumeCapabilitiesResponse_Result struct {
 	Supported bool `protobuf:"varint,1,opt,name=supported" json:"supported,omitempty"`
 	// Message to the CO if `supported` above is false. This field is
 	// OPTIONAL.
+	// An empty string is equal to an unspecified field value.
 	Message string `protobuf:"bytes,2,opt,name=message" json:"message,omitempty"`
 }
 
@@ -2634,17 +2637,18 @@ func (m *ValidateVolumeCapabilitiesResponse_Result) GetMessage() string {
 type ListVolumesRequest struct {
 	// The API version assumed by the CO. This field is REQUIRED.
 	Version *Version `protobuf:"bytes,1,opt,name=version" json:"version,omitempty"`
-	// If specified, the Plugin MUST NOT return more entries than this
-	// number in the response. If the actual number of entries is more
-	// than this number, the Plugin MUST set `next_token` in the response
-	// which can be used to get the next page of entries in the subsequent
-	// `ListVolumes` call. This field is OPTIONAL. If not specified, it
-	// means there is no restriction on the number of entries that can be
-	// returned.
+	// If specified (non-zero value), the Plugin MUST NOT return more
+	// entries than this number in the response. If the actual number of
+	// entries is more than this number, the Plugin MUST set `next_token`
+	// in the response which can be used to get the next page of entries
+	// in the subsequent `ListVolumes` call. This field is OPTIONAL. If
+	// not specified (zero value), it means there is no restriction on the
+	// number of entries that can be returned.
 	MaxEntries uint32 `protobuf:"varint,2,opt,name=max_entries,json=maxEntries" json:"max_entries,omitempty"`
 	// A token to specify where to start paginating. Set this field to
 	// `next_token` returned by a previous `ListVolumes` call to get the
 	// next page of entries. This field is OPTIONAL.
+	// An empty string is equal to an unspecified field value.
 	StartingToken string `protobuf:"bytes,3,opt,name=starting_token,json=startingToken" json:"starting_token,omitempty"`
 }
 
@@ -2804,6 +2808,7 @@ type ListVolumesResponse_Result struct {
 	// `max_entries`, use the `next_token` as a value for the
 	// `starting_token` field in the next `ListVolumes` request. This
 	// field is OPTIONAL.
+	// An empty string is equal to an unspecified field value.
 	NextToken string `protobuf:"bytes,2,opt,name=next_token,json=nextToken" json:"next_token,omitempty"`
 }
 
