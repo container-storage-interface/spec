@@ -1804,8 +1804,8 @@ message Error {
 
 #### Plugin Bootstrap Example
 
-* Supervisor -> Plugin: `CSI_ENDPOINT=unix://path/to/unix/domain/socket.sock`.
-* Operator -> CO: use plugin at endpoint `unix://path/to/unix/domain/socket.sock`.
+* Supervisor -> Plugin: `CSI_ENDPOINT=unix:///path/to/unix/domain/socket.sock`.
+* Operator -> CO: use plugin at endpoint `unix:///path/to/unix/domain/socket.sock`.
 * CO: monitor `/path/to/unix/domain/socket.sock`.
 * Plugin: read `CSI_ENDPOINT`, create UNIX socket at specified path, bind and listen.
 * CO: observe that socket now exists, establish connection.
@@ -1841,7 +1841,7 @@ Network endpoint at which a Plugin SHALL host CSI RPC services. The general form
 
 The following address types SHALL be supported by Plugins:
 
-    unix://path/to/unix/socket.sock
+    unix:///path/to/unix/socket.sock
 
 Note: All UNIX endpoints SHALL end with `.sock`. See [gRPC Name Resolution](https://github.com/grpc/grpc/blob/master/doc/naming.md).  
 
