@@ -1660,7 +1660,8 @@ type VolumeCapability_MountVolume struct {
 	// The mount options that can be used for the volume. This field is
 	// OPTIONAL. `mount_flags` MAY contain sensitive information.
 	// Therefore, the CO and the Plugin MUST NOT leak this information
-	// to untrusted entities.
+	// to untrusted entities. The total size of this repeated field
+	// SHALL NOT exceed 4 KiB.
 	MountFlags []string `protobuf:"bytes,2,rep,name=mount_flags,json=mountFlags" json:"mount_flags,omitempty"`
 }
 
