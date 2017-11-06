@@ -1595,13 +1595,13 @@ message Error {
       UNSUPPORTED_VOLUME_TYPE = 3;
       UNSUPPORTED_FS_TYPE = 4;
 
-      // Indicates that the specified `VolumeInfo` is not allowed or
+      // Indicates that the specified volume ID is not allowed or
       // understood by the Plugin. More human-readable information MAY
       // be provided in the `error_description` field.
       //
-      // Recovery behavior: Caller MUST fix the `VolumeInfo` before
+      // Recovery behavior: Caller MUST fix the volume ID before
       // retrying.
-      INVALID_VOLUME_INFO = 5;
+      INVALID_VOLUME_ID = 5;
     }
 
     ValidateVolumeCapabilitiesErrorCode error_code = 1;
