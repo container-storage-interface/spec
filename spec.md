@@ -447,8 +447,17 @@ message CreateVolumeRequest {
 
   // End user credentials used to authenticate/authorize volume creation
   // request.
+  // This field contains credential data, for example username and
+  // password. Each key must consist of alphanumeric characters, '-',
+  // '_' or '.'. Each value MUST contain a valid string. An SP MAY
+  // choose to accept binary (non-string) data by using a binary-to-text
+  // encoding scheme, like base64. An SP SHALL advertise the
+  // requirements for credentials in documentation. COs SHALL permit
+  // users to pass through the required credentials. This information is
+  // sensitive and MUST be treated as such (not logged, etc.) by the CO.
   // This field is OPTIONAL.
-  Credentials user_credentials = 6;
+  // The total bytes this field must be less than 1 Mebibyte.
+  map<string, string> user_credentials = 6;
 }
 
 message CreateVolumeResponse {
@@ -557,21 +566,6 @@ message VolumeInfo {
   // be passed to volume validation and publishing calls.
   map<string,string> attributes = 3;
 }
-
-// A standard way to encode credential data. The total bytes of the
-// values in the Data field must be less than 1 Mebibyte.
-message Credentials {
-  // Data contains the credential data, for example username and
-  // password. Each key must consist of alphanumeric characters, '-',
-  // '_' or '.'. Each value MUST contain a valid string. An SP MAY
-  // choose to accept binary (non-string) data by using a binary-to-text
-  // encoding scheme, like base64. An SP SHALL advertise the
-  // requirements for credentials in documentation. COs SHALL permit
-  // users to pass through the required credentials. This information is
-  // sensitive and MUST be treated as such (not logged, etc.) by the CO.
-  // This field is REQUIRED.
-  map<string, string> data = 1;
-}
 ```
 
 #### `DeleteVolume`
@@ -594,8 +588,17 @@ message DeleteVolumeRequest {
 
   // End user credentials used to authenticate/authorize volume deletion
   // request.
+  // This field contains credential data, for example username and
+  // password. Each key must consist of alphanumeric characters, '-',
+  // '_' or '.'. Each value MUST contain a valid string. An SP MAY
+  // choose to accept binary (non-string) data by using a binary-to-text
+  // encoding scheme, like base64. An SP SHALL advertise the
+  // requirements for credentials in documentation. COs SHALL permit
+  // users to pass through the required credentials. This information is
+  // sensitive and MUST be treated as such (not logged, etc.) by the CO.
   // This field is OPTIONAL.
-  Credentials user_credentials = 3;
+  // The total bytes this field must be less than 1 Mebibyte.
+  map<string, string> user_credentials = 3;
 }
 
 message DeleteVolumeResponse {
@@ -646,8 +649,17 @@ message ControllerPublishVolumeRequest {
 
   // End user credentials used to authenticate/authorize controller
   // publish request.
+  // This field contains credential data, for example username and
+  // password. Each key must consist of alphanumeric characters, '-',
+  // '_' or '.'. Each value MUST contain a valid string. An SP MAY
+  // choose to accept binary (non-string) data by using a binary-to-text
+  // encoding scheme, like base64. An SP SHALL advertise the
+  // requirements for credentials in documentation. COs SHALL permit
+  // users to pass through the required credentials. This information is
+  // sensitive and MUST be treated as such (not logged, etc.) by the CO.
   // This field is OPTIONAL.
-  Credentials user_credentials = 6;
+  // The total bytes this field must be less than 1 Mebibyte.
+  map<string, string> user_credentials = 6;
 
   // Attributes of the volume to be used on a node. This field is
   // OPTIONAL and MUST match the attributes of the VolumeInfo identified
@@ -705,8 +717,17 @@ message ControllerUnpublishVolumeRequest {
 
   // End user credentials used to authenticate/authorize controller
   // unpublish request.
+  // This field contains credential data, for example username and
+  // password. Each key must consist of alphanumeric characters, '-',
+  // '_' or '.'. Each value MUST contain a valid string. An SP MAY
+  // choose to accept binary (non-string) data by using a binary-to-text
+  // encoding scheme, like base64. An SP SHALL advertise the
+  // requirements for credentials in documentation. COs SHALL permit
+  // users to pass through the required credentials. This information is
+  // sensitive and MUST be treated as such (not logged, etc.) by the CO.
   // This field is OPTIONAL.
-  Credentials user_credentials = 4;
+  // The total bytes this field must be less than 1 Mebibyte.
+  map<string, string> user_credentials = 4;
 }
 
 message ControllerUnpublishVolumeResponse {
@@ -965,9 +986,19 @@ message NodePublishVolumeRequest {
   // REQUIRED.
   bool readonly = 6;
 
-  // End user credentials used to authenticate/authorize node publish
-  // request. This field is OPTIONAL.
-  Credentials user_credentials = 7;
+  // End user credentials used to authenticate/authorize node
+  // publish request.
+  // This field contains credential data, for example username and
+  // password. Each key must consist of alphanumeric characters, '-',
+  // '_' or '.'. Each value MUST contain a valid string. An SP MAY
+  // choose to accept binary (non-string) data by using a binary-to-text
+  // encoding scheme, like base64. An SP SHALL advertise the
+  // requirements for credentials in documentation. COs SHALL permit
+  // users to pass through the required credentials. This information is
+  // sensitive and MUST be treated as such (not logged, etc.) by the CO.
+  // This field is OPTIONAL.
+  // The total bytes this field must be less than 1 Mebibyte.
+  map<string, string> user_credentials = 7;
 
   // Attributes of the volume to publish. This field is OPTIONAL and
   // MUST match the attributes of the VolumeInfo identified by
@@ -1013,9 +1044,19 @@ message NodeUnpublishVolumeRequest {
   // This is a REQUIRED field.
   string target_path = 3;
 
-  // End user credentials used to authenticate/authorize node unpublish
-  // request. This field is OPTIONAL.
-  Credentials user_credentials = 4;
+  // End user credentials used to authenticate/authorize node
+  // unpublish request.
+  // This field contains credential data, for example username and
+  // password. Each key must consist of alphanumeric characters, '-',
+  // '_' or '.'. Each value MUST contain a valid string. An SP MAY
+  // choose to accept binary (non-string) data by using a binary-to-text
+  // encoding scheme, like base64. An SP SHALL advertise the
+  // requirements for credentials in documentation. COs SHALL permit
+  // users to pass through the required credentials. This information is
+  // sensitive and MUST be treated as such (not logged, etc.) by the CO.
+  // This field is OPTIONAL.
+  // The total bytes this field must be less than 1 Mebibyte.
+  map<string, string> user_credentials = 4;
 }
 
 message NodeUnpublishVolumeResponse {
