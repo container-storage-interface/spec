@@ -1272,7 +1272,7 @@ message Error {
     CreateVolumeErrorCode error_code = 1;
 
     // Human readable description of error, possibly with additional
-    // information. This string maybe surfaced by CO to end users.
+    // information. This string MAY be surfaced by CO to end users.
     string error_description = 2;
   }
 
@@ -1331,7 +1331,7 @@ message Error {
     DeleteVolumeErrorCode error_code = 1;
 
     // Human readable description of error, possibly with additional
-    // information. This string maybe surfaced by CO to end users.
+    // information. This string MAY be surfaced by CO to end users.
     string error_description = 2;
   }
 
@@ -1438,7 +1438,7 @@ message Error {
     ControllerPublishVolumeErrorCode error_code = 1;
 
     // Human readable description of error, possibly with additional
-    // information. This string maybe surfaced by CO to end users.
+    // information. This string MAY be surfaced by CO to end users.
     string error_description = 2;
 
     // On `VOLUME_ALREADY_ATTACHED` and `MAX_ATTACHED_NODES` errors,
