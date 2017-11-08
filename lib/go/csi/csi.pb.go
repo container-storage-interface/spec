@@ -2789,8 +2789,10 @@ type ListVolumesResponse_Result struct {
 	// This token allows you to get the next page of entries for
 	// `ListVolumes` request. If the number of entries is larger than
 	// `max_entries`, use the `next_token` as a value for the
-	// `starting_token` field in the next `ListVolumes` request. This
-	// field is OPTIONAL.
+	// `starting_token` field in the next `ListVolumes` request. The
+	// Plugin my choose to use the token to contain all the necessary
+	// information to satisfy subsequent requests. This field
+	// is OPTIONAL.
 	NextToken string `protobuf:"bytes,2,opt,name=next_token,json=nextToken" json:"next_token,omitempty"`
 }
 
