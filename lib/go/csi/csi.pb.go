@@ -631,7 +631,7 @@ const (
 	// `VolumeInfo` does not exist.
 	//
 	// Recovery behavior: Caller SHOULD verify that the `VolumeInfo`
-	// is correct and that the volume is accessable and has not been
+	// is correct and that the volume is accessible and has not been
 	// deleted before retrying.
 	Error_ValidateVolumeCapabilitiesError_VOLUME_DOES_NOT_EXIST   Error_ValidateVolumeCapabilitiesError_ValidateVolumeCapabilitiesErrorCode = 1
 	Error_ValidateVolumeCapabilitiesError_UNSUPPORTED_MOUNT_FLAGS Error_ValidateVolumeCapabilitiesError_ValidateVolumeCapabilitiesErrorCode = 2
