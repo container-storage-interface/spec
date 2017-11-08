@@ -821,8 +821,10 @@ message ListVolumesResponse {
     // This token allows you to get the next page of entries for
     // `ListVolumes` request. If the number of entries is larger than
     // `max_entries`, use the `next_token` as a value for the
-    // `starting_token` field in the next `ListVolumes` request. This
-    // field is OPTIONAL.
+    // `starting_token` field in the next `ListVolumes` request. The
+    // Plugin my choose to use the token to contain all the necessary
+    // information to satisfy subsequent requests. This field
+    // is OPTIONAL.
     string next_token = 2;
   }
 
