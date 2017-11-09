@@ -476,7 +476,6 @@ message CreateVolumeRequest {
   // users to pass through the required credentials. This information is
   // sensitive and MUST be treated as such (not logged, etc.) by the CO.
   // This field is OPTIONAL.
-  // The total bytes this field must be less than 1 Mebibyte.
   map<string, string> user_credentials = 6;
 }
 
@@ -626,7 +625,6 @@ message DeleteVolumeRequest {
   // users to pass through the required credentials. This information is
   // sensitive and MUST be treated as such (not logged, etc.) by the CO.
   // This field is OPTIONAL.
-  // The total bytes this field must be less than 1 Mebibyte.
   map<string, string> user_credentials = 3;
 }
 
@@ -693,7 +691,6 @@ message ControllerPublishVolumeRequest {
   // users to pass through the required credentials. This information is
   // sensitive and MUST be treated as such (not logged, etc.) by the CO.
   // This field is OPTIONAL.
-  // The total bytes this field must be less than 1 Mebibyte.
   map<string, string> user_credentials = 6;
 
   // Attributes of the volume to be used on a node. This field is
@@ -768,7 +765,6 @@ message ControllerUnpublishVolumeRequest {
   // users to pass through the required credentials. This information is
   // sensitive and MUST be treated as such (not logged, etc.) by the CO.
   // This field is OPTIONAL.
-  // The total bytes this field must be less than 1 Mebibyte.
   map<string, string> user_credentials = 4;
 }
 
@@ -1048,7 +1044,6 @@ message NodePublishVolumeRequest {
   // users to pass through the required credentials. This information is
   // sensitive and MUST be treated as such (not logged, etc.) by the CO.
   // This field is OPTIONAL.
-  // The total bytes this field must be less than 1 Mebibyte.
   map<string, string> user_credentials = 7;
 
   // Attributes of the volume to publish. This field is OPTIONAL and
@@ -1109,7 +1104,6 @@ message NodeUnpublishVolumeRequest {
   // users to pass through the required credentials. This information is
   // sensitive and MUST be treated as such (not logged, etc.) by the CO.
   // This field is OPTIONAL.
-  // The total bytes this field must be less than 1 Mebibyte.
   map<string, string> user_credentials = 4;
 }
 

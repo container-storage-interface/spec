@@ -328,7 +328,6 @@ type CreateVolumeRequest struct {
 	// users to pass through the required credentials. This information is
 	// sensitive and MUST be treated as such (not logged, etc.) by the CO.
 	// This field is OPTIONAL.
-	// The total bytes this field must be less than 1 Mebibyte.
 	UserCredentials map[string]string `protobuf:"bytes,6,rep,name=user_credentials,json=userCredentials" json:"user_credentials,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
 }
 
@@ -688,7 +687,6 @@ type DeleteVolumeRequest struct {
 	// users to pass through the required credentials. This information is
 	// sensitive and MUST be treated as such (not logged, etc.) by the CO.
 	// This field is OPTIONAL.
-	// The total bytes this field must be less than 1 Mebibyte.
 	UserCredentials map[string]string `protobuf:"bytes,3,rep,name=user_credentials,json=userCredentials" json:"user_credentials,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
 }
 
@@ -756,7 +754,6 @@ type ControllerPublishVolumeRequest struct {
 	// users to pass through the required credentials. This information is
 	// sensitive and MUST be treated as such (not logged, etc.) by the CO.
 	// This field is OPTIONAL.
-	// The total bytes this field must be less than 1 Mebibyte.
 	UserCredentials map[string]string `protobuf:"bytes,6,rep,name=user_credentials,json=userCredentials" json:"user_credentials,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
 	// Attributes of the volume to be used on a node. This field is
 	// OPTIONAL and MUST match the attributes of the VolumeInfo identified
@@ -867,7 +864,6 @@ type ControllerUnpublishVolumeRequest struct {
 	// users to pass through the required credentials. This information is
 	// sensitive and MUST be treated as such (not logged, etc.) by the CO.
 	// This field is OPTIONAL.
-	// The total bytes this field must be less than 1 Mebibyte.
 	UserCredentials map[string]string `protobuf:"bytes,4,rep,name=user_credentials,json=userCredentials" json:"user_credentials,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
 }
 
@@ -1367,7 +1363,6 @@ type NodePublishVolumeRequest struct {
 	// users to pass through the required credentials. This information is
 	// sensitive and MUST be treated as such (not logged, etc.) by the CO.
 	// This field is OPTIONAL.
-	// The total bytes this field must be less than 1 Mebibyte.
 	UserCredentials map[string]string `protobuf:"bytes,7,rep,name=user_credentials,json=userCredentials" json:"user_credentials,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
 	// Attributes of the volume to publish. This field is OPTIONAL and
 	// MUST match the attributes of the VolumeInfo identified by
@@ -1466,7 +1461,6 @@ type NodeUnpublishVolumeRequest struct {
 	// users to pass through the required credentials. This information is
 	// sensitive and MUST be treated as such (not logged, etc.) by the CO.
 	// This field is OPTIONAL.
-	// The total bytes this field must be less than 1 Mebibyte.
 	UserCredentials map[string]string `protobuf:"bytes,4,rep,name=user_credentials,json=userCredentials" json:"user_credentials,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
 }
 
