@@ -190,12 +190,14 @@ message VolumeCapability {
   // Indicate that the volume will be accessed via the filesystem API.
   message MountVolume {
     // The filesystem type. This field is OPTIONAL.
+    // An empty string is equal to an unspecified field value.
     string fs_type = 1;
 
     // The mount options that can be used for the volume. This field is
     // OPTIONAL. `mount_flags` MAY contain sensitive information.
     // Therefore, the CO and the Plugin MUST NOT leak this information
-    // to untrusted entities.
+    // to untrusted entities. The total size of this repeated field
+    // SHALL NOT exceed 4 KiB.
     repeated string mount_flags = 2;    
   }
 
@@ -241,24 +243,25 @@ message VolumeCapability {
 // `required_bytes` and `limit_bytes` can be set to the same value. At
 // least one of the these fields MUST be specified.
 message CapacityRange {
-  // Volume must be at least this big.
+  // Volume must be at least this big. This field is OPTIONAL.
+  // A value of 0 is equal to an unspecified field value.
   uint64 required_bytes = 1;
 
-  // Volume must not be bigger than this.
+  // Volume must not be bigger than this. This field is OPTIONAL.
+  // A value of 0 is equal to an unspecified field value.
   uint64 limit_bytes = 2;
 }
 
 // The information about a provisioned volume.
 message VolumeInfo {
   // The capacity of the volume in bytes. This field is OPTIONAL. If not
-  // set, it indicates that the capacity of the volume is unknown (e.g.,
-  // NFS share). If set, it MUST be non-zero.
+  // set (value of 0), it indicates that the capacity of the volume is
+  // unknown (e.g., NFS share).
   uint64 capacity_bytes = 1;
 
   // Contains identity information for the created volume. This field is
   // REQUIRED. The identity information will be used by the CO in
-  // subsequent calls to refer to the provisioned volume. This field
-  // should not exceed 1MiB.
+  // subsequent calls to refer to the provisioned volume.
   string id = 2;
 
   // Attributes reflect static properties of a volume and MUST be passed
@@ -434,6 +437,7 @@ message ValidateVolumeCapabilitiesResponse {
 
     // Message to the CO if `supported` above is false. This field is
     // OPTIONAL.
+    // An empty string is equal to an unspecified field value.
     string message = 2;
   }
 
@@ -449,18 +453,19 @@ message ListVolumesRequest {
   // The API version assumed by the CO. This field is REQUIRED.
   Version version = 1;
 
-  // If specified, the Plugin MUST NOT return more entries than this
-  // number in the response. If the actual number of entries is more
-  // than this number, the Plugin MUST set `next_token` in the response
-  // which can be used to get the next page of entries in the subsequent
-  // `ListVolumes` call. This field is OPTIONAL. If not specified, it
-  // means there is no restriction on the number of entries that can be
-  // returned.
+  // If specified (non-zero value), the Plugin MUST NOT return more
+  // entries than this number in the response. If the actual number of
+  // entries is more than this number, the Plugin MUST set `next_token`
+  // in the response which can be used to get the next page of entries
+  // in the subsequent `ListVolumes` call. This field is OPTIONAL. If
+  // not specified (zero value), it means there is no restriction on the
+  // number of entries that can be returned.
   uint32 max_entries = 2;
 
   // A token to specify where to start paginating. Set this field to
   // `next_token` returned by a previous `ListVolumes` call to get the
   // next page of entries. This field is OPTIONAL.
+  // An empty string is equal to an unspecified field value.
   string starting_token = 3;
 }
 
@@ -477,6 +482,7 @@ message ListVolumesResponse {
     // `max_entries`, use the `next_token` as a value for the
     // `starting_token` field in the next `ListVolumes` request. This
     // field is OPTIONAL.
+    // An empty string is equal to an unspecified field value.
     string next_token = 2;
   }
 
