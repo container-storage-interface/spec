@@ -1139,8 +1139,6 @@ message Error {
       // retrying.
       INVALID_NODE_ID = 6;
 
-      VOLUME_NOT_ATTACHED_TO_SPECIFIED_NODE = 7;
-
       // Indicates that the Plugin does not support the operation
       // without a node ID.
       //
