@@ -1500,7 +1500,7 @@ message Error {
     // information. This string maybe surfaced by CO to end users.
     string error_description = 2;
 
-    // On `VOLUME_ALREADY_ATTACHED` and `MAX_ATTACHED_NODES` errors,
+    // On `VOLUME_ALREADY_PUBLISHED` and `MAX_ATTACHED_NODES` errors,
     // this field contains the node(s) that the specified volume is
     // already attached to.
     repeated string node_ids = 3;
@@ -1573,8 +1573,6 @@ message Error {
       // Recovery behavior: Caller MUST fix the node ID before
       // retrying.
       INVALID_NODE_ID = 6;
-
-      VOLUME_NOT_ATTACHED_TO_SPECIFIED_NODE = 7;
 
       // Indicates that the Plugin does not support the operation
       // without a node ID.
