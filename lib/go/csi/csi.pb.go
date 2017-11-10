@@ -4684,7 +4684,7 @@ type Error_ControllerPublishVolumeError struct {
 	// Human readable description of error, possibly with additional
 	// information. This string maybe surfaced by CO to end users.
 	ErrorDescription string `protobuf:"bytes,2,opt,name=error_description,json=errorDescription" json:"error_description,omitempty"`
-	// On `VOLUME_ALREADY_ATTACHED` and `MAX_ATTACHED_NODES` errors,
+	// On `VOLUME_ALREADY_PUBLISHED` and `MAX_ATTACHED_NODES` errors,
 	// this field contains the node(s) that the specified volume is
 	// already attached to.
 	NodeIds []string `protobuf:"bytes,3,rep,name=node_ids,json=nodeIds" json:"node_ids,omitempty"`

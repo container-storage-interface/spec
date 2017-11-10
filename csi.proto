@@ -1065,7 +1065,7 @@ message Error {
     // information. This string maybe surfaced by CO to end users.
     string error_description = 2;
 
-    // On `VOLUME_ALREADY_ATTACHED` and `MAX_ATTACHED_NODES` errors,
+    // On `VOLUME_ALREADY_PUBLISHED` and `MAX_ATTACHED_NODES` errors,
     // this field contains the node(s) that the specified volume is
     // already attached to.
     repeated string node_ids = 3;
