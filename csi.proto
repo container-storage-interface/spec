@@ -62,17 +62,9 @@ message GetSupportedVersionsRequest {
 }
 
 message GetSupportedVersionsResponse {
-  message Result {
-    // All the CSI versions that the Plugin supports. This field is
-    // REQUIRED.
-    repeated Version supported_versions = 1;
-  }
-
-  // One of the following fields MUST be specified.
-  oneof reply {
-    Result result = 1;
-    Error error = 2;
-  }
+  // All the CSI versions that the Plugin supports. This field is
+  // REQUIRED.
+  repeated Version supported_versions = 1;
 }
 
 // Specifies a version in Semantic Version 2.0 format.
@@ -90,22 +82,14 @@ message GetPluginInfoRequest {
 }
 
 message GetPluginInfoResponse {
-  message Result {
-    // This field is REQUIRED.
-    string name = 1;
+  // This field is REQUIRED.
+  string name = 1;
 
-    // This field is REQUIRED. Value of this field is opaque to the CO.
-    string vendor_version = 2;
+  // This field is REQUIRED. Value of this field is opaque to the CO.
+  string vendor_version = 2;
 
-    // This field is OPTIONAL. Values are opaque to the CO.
-    map<string, string> manifest = 3;
-  }
-
-  // One of the following fields MUST be specified.
-  oneof reply {
-    Result result = 1;
-    Error error = 2;
-  }
+  // This field is OPTIONAL. Values are opaque to the CO.
+  map<string, string> manifest = 3;
 }
 ////////
 ////////
@@ -166,18 +150,10 @@ message CreateVolumeRequest {
 }
 
 message CreateVolumeResponse {
-  message Result {
-    // Contains all attributes of the newly created volume that are
-    // relevant to the CO along with information required by the Plugin
-    // to uniquely identify the volume. This field is REQUIRED.
-    VolumeInfo volume_info = 1;
-  }
-
-  // One of the following fields MUST be specified.
-  oneof reply {
-    Result result = 1;
-    Error error = 2;
-  }
+  // Contains all attributes of the newly created volume that are
+  // relevant to the CO along with information required by the Plugin
+  // to uniquely identify the volume. This field is REQUIRED.
+  VolumeInfo volume_info = 1;
 }
 
 // Specify a capability of a volume.
@@ -299,15 +275,7 @@ message DeleteVolumeRequest {
   map<string, string> user_credentials = 3;
 }
 
-message DeleteVolumeResponse {
-  message Result {}
-
-  // One of the following fields MUST be specified.
-  oneof reply {
-    Result result = 1;
-    Error error = 2;
-  }
-}
+message DeleteVolumeResponse {}
 ////////
 ////////
 message ControllerPublishVolumeRequest {
@@ -320,7 +288,7 @@ message ControllerPublishVolumeRequest {
 
   // The ID of the node. This field is OPTIONAL. The CO SHALL set (or
   // clear) this field to match the node ID returned by `GetNodeID`.
-  // `GetNodeID` is allowed to omit node ID from a successful `Result`;
+  // `GetNodeID` is allowed to omit node ID from a successful response;
   // in such cases the CO SHALL NOT specify this field.
   string node_id = 3;
 
@@ -353,18 +321,10 @@ message ControllerPublishVolumeRequest {
 }
 
 message ControllerPublishVolumeResponse {
-  message Result {
-    // The SP specific information that will be passed to the Plugin in
-    // the subsequent `NodePublishVolume` call for the given volume.
-    // This information is opaque to the CO. This field is OPTIONAL.
-    map<string, string> publish_volume_info = 1;
-  }
-
-  // One of the following fields MUST be specified.
-  oneof reply {
-    Result result = 1;
-    Error error = 2;
-  }
+  // The SP specific information that will be passed to the Plugin in
+  // the subsequent `NodePublishVolume` call for the given volume.
+  // This information is opaque to the CO. This field is OPTIONAL.
+  map<string, string> publish_volume_info = 1;
 }
 ////////
 ////////
@@ -377,10 +337,10 @@ message ControllerUnpublishVolumeRequest {
 
   // The ID of the node. This field is OPTIONAL. The CO SHALL set (or
   // clear) this field to match the node ID returned by `GetNodeID`.
-  // `GetNodeID` is allowed to omit node ID from a successful `Result`;
+  // `GetNodeID` is allowed to omit node ID from a successful response;
   // in such cases the CO SHALL NOT specify this field.
   //
-  // If `GetNodeID` does not omit node ID from a successful `Result`,
+  // If `GetNodeID` does not omit node ID from a successful response,
   // the CO MAY omit this field as well, indicating that it does not
   // know which node the volume was previously used. The Plugin SHOULD
   // return an Error if this is not supported.
@@ -401,15 +361,7 @@ message ControllerUnpublishVolumeRequest {
   map<string, string> user_credentials = 4;
 }
 
-message ControllerUnpublishVolumeResponse {
-  message Result {}
-
-  // One of the following fields MUST be specified.
-  oneof reply {
-    Result result = 1;
-    Error error = 2;
-  }
-}
+message ControllerUnpublishVolumeResponse {}
 ////////
 ////////
 message ValidateVolumeCapabilitiesRequest {
@@ -430,22 +382,14 @@ message ValidateVolumeCapabilitiesRequest {
 }
 
 message ValidateVolumeCapabilitiesResponse {
-  message Result {
-    // True if the Plugin supports the specified capabilities for the
-    // given volume. This field is REQUIRED.
-    bool supported = 1;
+  // True if the Plugin supports the specified capabilities for the
+  // given volume. This field is REQUIRED.
+  bool supported = 1;
 
-    // Message to the CO if `supported` above is false. This field is
-    // OPTIONAL.
-    // An empty string is equal to an unspecified field value.
-    string message = 2;
-  }
-
-  // One of the following fields MUST be specified.
-  oneof reply {
-    Result result = 1;
-    Error error = 2;
-  }
+  // Message to the CO if `supported` above is false. This field is
+  // OPTIONAL.
+  // An empty string is equal to an unspecified field value.
+  string message = 2;
 }
 ////////
 ////////
@@ -470,27 +414,19 @@ message ListVolumesRequest {
 }
 
 message ListVolumesResponse {
-  message Result {
-    message Entry {
-      VolumeInfo volume_info = 1;
-    }
-
-    repeated Entry entries = 1;
-
-    // This token allows you to get the next page of entries for
-    // `ListVolumes` request. If the number of entries is larger than
-    // `max_entries`, use the `next_token` as a value for the
-    // `starting_token` field in the next `ListVolumes` request. This
-    // field is OPTIONAL.
-    // An empty string is equal to an unspecified field value.
-    string next_token = 2;
+  message Entry {
+    VolumeInfo volume_info = 1;
   }
 
-  // One of the following fields MUST be specified.
-  oneof reply {
-    Result result = 1;
-    Error error = 2;
-  }
+  repeated Entry entries = 1;
+
+  // This token allows you to get the next page of entries for
+  // `ListVolumes` request. If the number of entries is larger than
+  // `max_entries`, use the `next_token` as a value for the
+  // `starting_token` field in the next `ListVolumes` request. This
+  // field is OPTIONAL.
+  // An empty string is equal to an unspecified field value.
+  string next_token = 2;
 }
 ////////
 ////////
@@ -513,20 +449,12 @@ message GetCapacityRequest {
 }
 
 message GetCapacityResponse {
-  message Result {
-    // The available capacity of the storage that can be used to
-    // provision volumes. If `volume_capabilities` or `parameters` is
-    // specified in the request, the Plugin SHALL take those into
-    // consideration when calculating the available capacity of the
-    // storage. This field is REQUIRED.
-    uint64 available_capacity = 1;
-  }
-
-  // One of the following fields MUST be specified.
-  oneof reply {
-    Result result = 1;
-    Error error = 2;
-  }
+  // The available capacity of the storage that can be used to
+  // provision volumes. If `volume_capabilities` or `parameters` is
+  // specified in the request, the Plugin SHALL take those into
+  // consideration when calculating the available capacity of the
+  // storage. This field is REQUIRED.
+  uint64 available_capacity = 1;
 }
 ////////
 ////////
@@ -535,15 +463,7 @@ message ControllerProbeRequest {
   Version version = 1;
 }
 
-message ControllerProbeResponse {
-  message Result {}
-
-  // One of the following fields MUST be specified.
-  oneof reply {
-    Result result = 1;
-    Error error = 2;
-  }
-}
+message ControllerProbeResponse {}
 ////////
 ////////
 message ControllerGetCapabilitiesRequest {
@@ -552,17 +472,9 @@ message ControllerGetCapabilitiesRequest {
 }
 
 message ControllerGetCapabilitiesResponse {
-  message Result {
-    // All the capabilities that the controller service supports. This
-    // field is OPTIONAL.
-    repeated ControllerServiceCapability capabilities = 2;
-  }
-
-  // One of the following fields MUST be specified.
-  oneof reply {
-    Result result = 1;
-    Error error = 2;
-  }
+  // All the capabilities that the controller service supports. This
+  // field is OPTIONAL.
+  repeated ControllerServiceCapability capabilities = 2;
 }
 
 // Specifies a capability of the controller service.
@@ -634,15 +546,7 @@ message NodePublishVolumeRequest {
   map<string,string> volume_attributes = 8;
 }
 
-message NodePublishVolumeResponse {
-  message Result {}
-
-  // One of the following fields MUST be specified.
-  oneof reply {
-    Result result = 1;
-    Error error = 2;
-  }
-}
+message NodePublishVolumeResponse {}
 ////////
 ////////
 message NodeUnpublishVolumeRequest {
@@ -672,15 +576,7 @@ message NodeUnpublishVolumeRequest {
   map<string, string> user_credentials = 4;
 }
 
-message NodeUnpublishVolumeResponse {
-  message Result {}
-
-  // One of the following fields MUST be specified.
-  oneof reply {
-    Result result = 1;
-    Error error = 2;
-  }
-}
+message NodeUnpublishVolumeResponse {}
 ////////
 ////////
 message GetNodeIDRequest {
@@ -689,19 +585,11 @@ message GetNodeIDRequest {
 }
 
 message GetNodeIDResponse {
-  message Result {
-    // The ID of the node which SHALL be used by CO in
-    // `ControllerPublishVolume`. This is an OPTIONAL field. If unset,
-    // the CO SHALL leave the `node_id` field unset in
-    // `ControllerPublishVolume`.
-    string node_id = 1;
-  }
-
-  // One of the following fields MUST be specified.
-  oneof reply {
-    Result result = 1;
-    Error error = 2;
-  }
+  // The ID of the node which SHALL be used by CO in
+  // `ControllerPublishVolume`. This is an OPTIONAL field. If unset,
+  // the CO SHALL leave the `node_id` field unset in
+  // `ControllerPublishVolume`.
+  string node_id = 1;
 }
 ////////
 ////////
@@ -710,15 +598,7 @@ message NodeProbeRequest {
   Version version = 1;
 }
 
-message NodeProbeResponse {
-  message Result {}
-
-  // One of the following fields MUST be specified.
-  oneof reply {
-    Result result = 1;
-    Error error = 2;
-  }
-}
+message NodeProbeResponse {}
 ////////
 ////////
 message NodeGetCapabilitiesRequest {
@@ -727,17 +607,9 @@ message NodeGetCapabilitiesRequest {
 }
 
 message NodeGetCapabilitiesResponse {
-  message Result {
-    // All the capabilities that the node service supports. This field
-    // is OPTIONAL.
-    repeated NodeServiceCapability capabilities = 2;
-  }
-
-  // One of the following fields MUST be specified.
-  oneof reply {
-    Result result = 1;
-    Error error = 2;
-  }
+  // All the capabilities that the node service supports. This field
+  // is OPTIONAL.
+  repeated NodeServiceCapability capabilities = 1;
 }
 
 // Specifies a capability of the node service.
@@ -753,631 +625,6 @@ message NodeServiceCapability {
   oneof type {
     // RPC that the controller supports.
     RPC rpc = 1;
-  }
-}
-////////
-////////
-message Error {
-  // General Error that MAY be returned by any RPC.
-  message GeneralError {
-    enum GeneralErrorCode {
-      // Default value for backwards compatibility. SHOULD NOT be
-      // returned by Plugins. However, if a Plugin returns a
-      // `GeneralErrorCode` code that an older CSI client is not aware
-      // of, the client will see this code (the default fallback).
-      //
-      // Recovery behavior: Caller SHOULD consider updating CSI client
-      // to match Plugin CSI version.
-      UNKNOWN = 0;
-
-      // Indicates that an undefined error occurred. More human-readable
-      // information MAY be provided in the `error_description` field.
-      // The `caller_must_not_retry` field MUST be set appropriately by
-      // the Plugin to provide callers expected recovery behavior.
-      //
-      // Recovery behavior: Caller MAY retry (with exponential backoff),
-      // if `caller_must_not_retry` is set to false. Otherwise, the
-      // caller MUST not reissue the same request.
-      UNDEFINED = 1;
-
-      // Indicates that the version specified in the request is not
-      // supported by the Plugin. The `caller_must_not_retry` field MUST
-      // be set to true.
-      //
-      // Recovery behavior: Caller MUST NOT retry; caller SHOULD call
-      // `GetSupportedVersions` to discover which CSI versions the
-      // Plugin supports.
-      UNSUPPORTED_REQUEST_VERSION = 2;
-
-      // Indicates that a required field is missing from the request.
-      // More human-readable information MAY be provided in the
-      // `error_description` field. The `caller_must_not_retry` field
-      // MUST be set to true.
-      //
-      // Recovery behavior: Caller MUST fix the request by adding the
-      // missing required field before retrying.
-      MISSING_REQUIRED_FIELD = 3;
-    }
-
-    // Machine parsable error code.
-    GeneralErrorCode error_code = 1;
-
-    // When set to true, `caller_must_not_retry` indicates that the
-    // caller MUST not retry the same call again. This MAY be because
-    // the call is deemed invalid by the Plugin and no amount of retries
-    // will cause it to succeed. If this value is false, the caller MAY
-    // reissue the same call, but SHOULD implement exponential backoff
-    // on retires.
-    bool caller_must_not_retry = 2;
-
-    // Human readable description of error, possibly with additional
-    // information. This string MAY be surfaced by CO to end users.
-    string error_description = 3;
-  }
-
-  // `CreateVolume` specific error.
-  message CreateVolumeError {
-    enum CreateVolumeErrorCode {
-      // Default value for backwards compatibility. SHOULD NOT be
-      // returned by Plugins. However, if a Plugin returns a
-      // `CreateVolumeErrorCode` code that an older CSI client is not
-      // aware of, the client will see this code (the default fallback).
-      //
-      // Recovery behavior: Caller SHOULD consider updating CSI client
-      // to match Plugin CSI version.
-      UNKNOWN = 0;
-
-      // Indicates that the call is either not implemented by the Plugin
-      // or disabled in the Plugin’s current mode of operation.
-      //
-      // Recovery behavior: Caller MUST not retry; caller MAY call
-      // `ControllerGetCapabilities` or `NodeGetCapabilities` to
-      // discover Plugin capabilities.
-      CALL_NOT_IMPLEMENTED = 1;
-
-      // Indicates that there is a already an operation pending for the
-      // specified volume. In general the Cluster Orchestrator (CO) is
-      // responsible for ensuring that there is no more than one call
-      // “in-flight” per volume at a given time. However, in some
-      // circumstances, the CO MAY lose state (for example when the CO
-      // crashes and restarts), and MAY issue multiple calls
-      // simultaneously for the same volume. The Plugin, SHOULD handle
-      // this as gracefully as possible, and MAY return this error code
-      // to reject secondary calls.
-      //
-      // Recovery behavior: Caller SHOULD ensure that there are no other
-      // calls pending for the specified volume, and then retry with
-      // exponential back off.
-      OPERATION_PENDING_FOR_VOLUME = 2;
-
-      // Indicates that the specified volume name is not allowed by the
-      // Plugin. More human-readable information MAY be provided in the
-      // `error_description` field.
-      //
-      // Recovery behavior: Caller MUST fix the name before retrying.
-      INVALID_VOLUME_NAME = 3;
-
-      // Indicates that the capacity range is not allowed by the Plugin.
-      // More human-readable information MAY be provided in the
-      // `error_description` field.
-      //
-      // Recovery behavior: Caller MUST fix the capacity range before //
-      // retrying.
-      UNSUPPORTED_CAPACITY_RANGE = 4;
-
-      // Indicates that a volume corresponding to the specified volume
-      // name already exists.
-      //
-      // Recovery behavior: Caller MAY assume the `CreateVolume`
-      // call succeeded.
-      VOLUME_ALREADY_EXISTS = 5;
-
-      // Indicates that a key in the opaque key/value parameters field
-      // is not supported by the Plugin. More human-readable information
-      // MAY be provided in the `error_description` field. This MAY
-      // occur, for example, due to caller error, Plugin version skew,
-      // etc.
-      //
-      // Recovery behavior: Caller MUST remove the unsupported key/value
-      // pair from the list of parameters before retrying.
-      UNSUPPORTED_PARAMETER_KEY = 6;
-
-      // Indicates that a value in one of the opaque key/value pairs
-      // parameter contains invalid data. More human-readable
-      // information (such as the corresponding key) MAY be provided in
-      // the `error_description` field.
-      //
-      // Recovery behavior: Caller MUST fix the invalid value before
-      // retrying.
-      INVALID_PARAMETER_VALUE = 7;
-    }
-
-    // Machine parsable error code.
-    CreateVolumeErrorCode error_code = 1;
-
-    // Human readable description of error, possibly with additional
-    // information. This string maybe surfaced by CO to end users.
-    string error_description = 2;
-  }
-
-  // `DeleteVolume` specific error.
-  message DeleteVolumeError {
-    enum DeleteVolumeErrorCode {
-      // Default value for backwards compatibility. SHOULD NOT be
-      // returned by Plugins. However, if a Plugin returns a
-      // `DeleteVolumeErrorCode` code that an older CSI client is not
-      // aware of, the client will see this code (the default fallback).
-      //
-      // Recovery behavior: Caller SHOULD consider updating CSI client
-      // to match Plugin CSI version.
-      UNKNOWN = 0;
-
-      // Indicates that the call is either not implemented by the Plugin
-      // or disabled in the Plugin’s current mode of operation.
-      //
-      // Recovery behavior: Caller MUST not retry; caller MAY call
-      // `ControllerGetCapabilities` or `NodeGetCapabilities` to
-      // discover Plugin capabilities.
-      CALL_NOT_IMPLEMENTED = 1;
-
-      // Indicates that there is a already an operation pending for the
-      // specified volume. In general the Cluster Orchestrator (CO) is
-      // responsible for ensuring that there is no more than one call
-      // “in-flight” per volume at a given time. However, in some
-      // circumstances, the CO MAY lose state (for example when the CO
-      // crashes and restarts), and MAY issue multiple calls
-      // simultaneously for the same volume. The Plugin, SHOULD handle
-      // this as gracefully as possible, and MAY return this error code
-      // to reject secondary calls.
-      //
-      // Recovery behavior: Caller SHOULD ensure that there are no other
-      // calls pending for the specified volume, and then retry with
-      // exponential back off.
-      OPERATION_PENDING_FOR_VOLUME = 2;
-
-      // Indicates that the specified volume ID is not allowed or
-      // understood by the Plugin. More human-readable information MAY
-      // be provided in the `error_description` field.
-      //
-      // Recovery behavior: Caller MUST fix the volume ID before
-      // retrying.
-      INVALID_VOLUME_ID = 3;
-
-      // Indicates that a volume corresponding to the specified
-      // volume ID does not exist.
-      //
-      // Recovery behavior: Caller SHOULD assume the `DeleteVolume` call
-      // succeeded.
-      VOLUME_DOES_NOT_EXIST = 4;
-    }
-
-    // Machine parsable error code.
-    DeleteVolumeErrorCode error_code = 1;
-
-    // Human readable description of error, possibly with additional
-    // information. This string maybe surfaced by CO to end users.
-    string error_description = 2;
-  }
-
-  // `ControllerPublishVolume` specific error.
-  message ControllerPublishVolumeError {
-    enum ControllerPublishVolumeErrorCode {
-      // Default value for backwards compatibility. SHOULD NOT be
-      // returned by Plugins. However, if a Plugin returns a
-      // `ControllerPublishVolumeErrorCode` code that an older CSI
-      // client is not aware of, the client will see this code (the
-      // default fallback).
-      //
-      // Recovery behavior: Caller SHOULD consider updating CSI client
-      // to match Plugin CSI version.
-      UNKNOWN = 0;
-
-      // Indicates that the call is either not implemented by the Plugin
-      // or disabled in the Plugin’s current mode of operation.
-      //
-      // Recovery behavior: Caller MUST not retry; caller MAY call
-      // `ControllerGetCapabilities` or `NodeGetCapabilities` to
-      // discover Plugin capabilities.
-      CALL_NOT_IMPLEMENTED = 1;
-
-      // Indicates that there is a already an operation pending for the
-      // specified volume. In general the Cluster Orchestrator (CO) is
-      // responsible for ensuring that there is no more than one call
-      // “in-flight” per volume at a given time. However, in some
-      // circumstances, the CO MAY lose state (for example when the CO
-      // crashes and restarts), and MAY issue multiple calls
-      // simultaneously for the same volume. The Plugin, SHOULD handle
-      // this as gracefully as possible, and MAY return this error code
-      // to reject secondary calls.
-      //
-      // Recovery behavior: Caller SHOULD ensure that there are no other
-      // calls pending for the specified volume, and then retry with
-      // exponential back off.
-      OPERATION_PENDING_FOR_VOLUME = 2;
-
-      // Indicates that the specified volume ID is not allowed or
-      // understood by the Plugin. More human-readable information MAY
-      // be provided in the `error_description` field.
-      //
-      // Recovery behavior: Caller MUST fix the volume ID before
-      // retrying.
-      INVALID_VOLUME_ID = 3;
-
-      // Indicates that a volume corresponding to the specified
-      // volume ID does not exist.
-      //
-      // Recovery behavior: Caller SHOULD verify that the volume ID
-      // is correct and that the volume is accessible and has not been
-      // deleted before retrying with exponential back off.
-      VOLUME_DOES_NOT_EXIST = 4;
-
-      // Indicates that a volume corresponding to the specified
-      // volume ID is already attached to another node and does not
-      // support multi-node attach. If this error code is returned, the
-      // Plugin MUST also specify the `node_id` of the node the volume
-      // is already attached to.
-      //
-      // Recovery behavior: Caller MAY use the provided `node_ids`
-      // information to detach the volume from the other node. Caller
-      // SHOULD ensure the specified volume is not attached to any other
-      // node before retrying with exponential back off.
-      VOLUME_ALREADY_PUBLISHED = 5;
-
-      // Indicates that a node corresponding to the specified node ID
-      // does not exist.
-      //
-      // Recovery behavior: Caller SHOULD verify that the node ID is
-      // correct and that the node is available and has not been
-      // terminated or deleted before retrying with exponential backoff.
-      NODE_DOES_NOT_EXIST = 6;
-
-      // Indicates that a volume corresponding to the specified
-      // volume ID is already attached to the maximum supported
-      // number of nodes and therefore this operation can not be
-      // completed until the volume is detached from at least one of the
-      // existing nodes. When this error code is returned, the Plugin
-      // MUST also specify the node ID of all the nodes the volume is
-      // attached to.
-      //
-      // Recovery behavior: Caller MAY use the provided `node_ids`
-      // information to detach the volume from one other node before
-      // retrying with exponential backoff.
-      MAX_ATTACHED_NODES = 7;
-
-      UNSUPPORTED_MOUNT_FLAGS = 9;
-      UNSUPPORTED_VOLUME_TYPE = 10;
-      UNSUPPORTED_FS_TYPE = 11;
-
-      // Indicates that the specified node ID is not allowed or
-      // understood by the Plugin, or the Plugin does not support the
-      // operation without a node ID. More human-readable information
-      // MAY be provided in the `error_description` field.
-      //
-      // Recovery behavior: Caller MUST fix the node ID before
-      // retrying.
-      INVALID_NODE_ID = 8;
-    }
-
-    // Machine parsable error code.
-    ControllerPublishVolumeErrorCode error_code = 1;
-
-    // Human readable description of error, possibly with additional
-    // information. This string maybe surfaced by CO to end users.
-    string error_description = 2;
-
-    // On `VOLUME_ALREADY_ATTACHED` and `MAX_ATTACHED_NODES` errors,
-    // this field contains the node(s) that the specified volume is
-    // already attached to.
-    repeated string node_ids = 3;
-  }
-
-  // `ControllerUnpublishVolume` specific error.
-  message ControllerUnpublishVolumeError {
-    enum ControllerUnpublishVolumeErrorCode {
-      // Default value for backwards compatibility. SHOULD NOT be
-      // returned by Plugins. However, if a Plugin returns a
-      // `ControllerUnpublishVolumeErrorCode` code that an older CSI
-      // client is not aware of, the client will see this code (the
-      // default fallback).
-      //
-      // Recovery behavior: Caller SHOULD consider updating CSI client
-      // to match Plugin CSI version.
-      UNKNOWN = 0;
-
-      // Indicates that the call is either not implemented by the Plugin
-      // or disabled in the Plugin’s current mode of operation.
-      //
-      // Recovery behavior: Caller MUST not retry; caller MAY call
-      // `ControllerGetCapabilities` or `NodeGetCapabilities` to
-      // discover Plugin capabilities.
-      CALL_NOT_IMPLEMENTED = 1;
-
-      // Indicates that there is a already an operation pending for the
-      // specified volume. In general the Cluster Orchestrator (CO) is
-      // responsible for ensuring that there is no more than one call
-      // “in-flight” per volume at a given time. However, in some
-      // circumstances, the CO MAY lose state (for example when the CO
-      // crashes and restarts), and MAY issue multiple calls
-      // simultaneously for the same volume. The Plugin, SHOULD handle
-      // this as gracefully as possible, and MAY return this error code
-      // to reject secondary calls.
-      //
-      // Recovery behavior: Caller SHOULD ensure that there are no other
-      // calls pending for the specified volume, and then retry with
-      // exponential back off.
-      OPERATION_PENDING_FOR_VOLUME = 2;
-
-      // Indicates that the specified volume ID is not allowed or
-      // understood by the Plugin. More human-readable information MAY
-      // be provided in the `error_description` field.
-      //
-      // Recovery behavior: Caller MUST fix the volume ID before
-      // retrying.
-      INVALID_VOLUME_ID = 3;
-
-      // Indicates that a volume corresponding to the specified
-      // volume ID does not exist.
-      //
-      // Recovery behavior: Caller SHOULD verify that the volume ID
-      // is correct and that the volume is accessible and has not been
-      // deleted before retrying with exponential back off.
-      VOLUME_DOES_NOT_EXIST = 4;
-
-      // Indicates that a node corresponding to the specified node ID
-      // does not exist.
-      //
-      // Recovery behavior: Caller SHOULD verify that the node ID is
-      // correct and that the node is available and has not been
-      // terminated or deleted before retrying.
-      NODE_DOES_NOT_EXIST = 5;
-
-      // Indicates that the specified node ID is not allowed or
-      // understood by the Plugin. More human-readable information MAY
-      // be provided in the `error_description` field.
-      //
-      // Recovery behavior: Caller MUST fix the node ID before
-      // retrying.
-      INVALID_NODE_ID = 6;
-
-      VOLUME_NOT_ATTACHED_TO_SPECIFIED_NODE = 7;
-
-      // Indicates that the Plugin does not support the operation
-      // without a node ID.
-      //
-      // Recovery behavior: Caller MUST specify the node ID before
-      // retrying.
-      NODE_ID_REQUIRED = 8;
-    }
-
-    ControllerUnpublishVolumeErrorCode error_code = 1;
-    string error_description = 2;
-  }
-
-  // `ValidateVolumeCapabilities` specific error.
-  message ValidateVolumeCapabilitiesError {
-    enum ValidateVolumeCapabilitiesErrorCode {
-      // Default value for backwards compatibility. SHOULD NOT be
-      // returned by Plugins. However, if a Plugin returns a
-      // `ValidateVolumeCapabilitiesErrorCode` code that an older CSI
-      // client is not aware of, the client will see this code (the
-      // default fallback).
-      //
-      // Recovery behavior: Caller SHOULD consider updating CSI client
-      // to match Plugin CSI version.
-      UNKNOWN = 0;
-
-      // Indicates that a volume corresponding to the specified
-      // `VolumeInfo` does not exist.
-      //
-      // Recovery behavior: Caller SHOULD verify that the `VolumeInfo`
-      // is correct and that the volume is accessible and has not been
-      // deleted before retrying.
-      VOLUME_DOES_NOT_EXIST = 1;
-
-      UNSUPPORTED_MOUNT_FLAGS = 2;
-      UNSUPPORTED_VOLUME_TYPE = 3;
-      UNSUPPORTED_FS_TYPE = 4;
-
-      // Indicates that the specified volume ID is not allowed or
-      // understood by the Plugin. More human-readable information MAY
-      // be provided in the `error_description` field.
-      //
-      // Recovery behavior: Caller MUST fix the volume ID before
-      // retrying.
-      INVALID_VOLUME_ID = 5;
-    }
-
-    ValidateVolumeCapabilitiesErrorCode error_code = 1;
-    string error_description = 2;
-  }
-
-  // `ControllerProbe` specific error.
-  message ControllerProbeError {
-    enum ControllerProbeErrorCode {
-      // Default value for backwards compatibility. SHOULD NOT be
-      // returned by Plugins. However, if a Plugin returns a
-      // `ControllerProbeErrorCode` code that an older CSI
-      // client is not aware of, the client will see this code (the
-      // default fallback).
-      //
-      // Recovery behavior: Caller SHOULD consider updating CSI client
-      // to match Plugin CSI version.
-      UNKNOWN = 0;
-
-      BAD_PLUGIN_CONFIG = 1;
-      MISSING_REQUIRED_HOST_DEPENDENCY = 2;
-    }
-
-    ControllerProbeErrorCode error_code = 1;
-    string error_description = 2;
-  }
-
-  // `NodePublishVolume` specific error.
-  message NodePublishVolumeError {
-    enum NodePublishVolumeErrorCode {
-      // Default value for backwards compatibility. SHOULD NOT be
-      // returned by Plugins. However, if a Plugin returns a
-      // `NodePublishVolumeErrorCode` code that an older CSI
-      // client is not aware of, the client will see this code (the
-      // default fallback).
-      //
-      // Recovery behavior: Caller SHOULD consider updating CSI client
-      // to match Plugin CSI version.
-      UNKNOWN = 0;
-
-      // Indicates that there is a already an operation pending for the
-      // specified volume. In general the Cluster Orchestrator (CO) is
-      // responsible for ensuring that there is no more than one call
-      // “in-flight” per volume at a given time. However, in some
-      // circumstances, the CO MAY lose state (for example when the CO
-      // crashes and restarts), and MAY issue multiple calls
-      // simultaneously for the same volume. The Plugin, SHOULD handle
-      // this as gracefully as possible, and MAY return this error code
-      // to reject secondary calls.
-      //
-      // Recovery behavior: Caller SHOULD ensure that there are no other
-      // calls pending for the specified volume, and then retry with
-      // exponential back off.
-      OPERATION_PENDING_FOR_VOLUME = 1;
-
-      // Indicates that a volume corresponding to the specified
-      // volume ID does not exist.
-      //
-      // Recovery behavior: Caller SHOULD verify that the volume ID
-      // is correct and that the volume is accessible and has not been
-      // deleted before retrying with exponential back off.
-      VOLUME_DOES_NOT_EXIST = 2;
-
-      UNSUPPORTED_MOUNT_FLAGS = 3;
-      UNSUPPORTED_VOLUME_TYPE = 4;
-      UNSUPPORTED_FS_TYPE = 5;
-      MOUNT_ERROR = 6;
-
-      // Indicates that the specified volume ID is not allowed or
-      // understood by the Plugin. More human-readable information MAY
-      // be provided in the `error_description` field.
-      //
-      // Recovery behavior: Caller MUST fix the volume ID before
-      // retrying.
-      INVALID_VOLUME_ID = 7;
-    }
-
-    NodePublishVolumeErrorCode error_code = 1;
-    string error_description = 2;
-  }
-
-  // `NodeUnpublishVolume` specific error.
-  message NodeUnpublishVolumeError {
-    enum NodeUnpublishVolumeErrorCode {
-      // Default value for backwards compatibility. SHOULD NOT be
-      // returned by Plugins. However, if a Plugin returns a
-      // `NodeUnpublishVolumeErrorCode` code that an older CSI
-      // client is not aware of, the client will see this code (the
-      // default fallback).
-      //
-      // Recovery behavior: Caller SHOULD consider updating CSI client
-      // to match Plugin CSI version.
-      UNKNOWN = 0;
-
-      // Indicates that there is a already an operation pending for the
-      // specified volume. In general the Cluster Orchestrator (CO) is
-      // responsible for ensuring that there is no more than one call
-      // “in-flight” per volume at a given time. However, in some
-      // circumstances, the CO MAY lose state (for example when the CO
-      // crashes and restarts), and MAY issue multiple calls
-      // simultaneously for the same volume. The Plugin, SHOULD handle
-      // this as gracefully as possible, and MAY return this error code
-      // to reject secondary calls.
-      //
-      // Recovery behavior: Caller SHOULD ensure that there are no other
-      // calls pending for the specified volume, and then retry with
-      // exponential back off.
-      OPERATION_PENDING_FOR_VOLUME = 1;
-
-      // Indicates that a volume corresponding to the specified
-      // volume ID does not exist.
-      //
-      // Recovery behavior: Caller SHOULD verify that the volume ID
-      // is correct and that the volume is accessible and has not been
-      // deleted before retrying with exponential back off.
-      VOLUME_DOES_NOT_EXIST = 2;
-
-      UNMOUNT_ERROR = 3;
-
-      // Indicates that the specified volume ID is not allowed or
-      // understood by the Plugin. More human-readable information MAY
-      // be provided in the `error_description` field.
-      //
-      // Recovery behavior: Caller MUST fix the volume ID before
-      // retrying.
-      INVALID_VOLUME_ID = 4;
-    }
-
-    NodeUnpublishVolumeErrorCode error_code = 1;
-    string error_description = 2;
-  }
-
-  // `NodeProbe` specific error.
-  message NodeProbeError {
-    enum NodeProbeErrorCode {
-      // Default value for backwards compatibility. SHOULD NOT be
-      // returned by Plugins. However, if a Plugin returns a
-      // `NodeProbeErrorCode` code that an older CSI
-      // client is not aware of, the client will see this code (the
-      // default fallback).
-      //
-      // Recovery behavior: Caller SHOULD consider updating CSI client
-      // to match Plugin CSI version.
-      UNKNOWN = 0;
-
-      BAD_PLUGIN_CONFIG = 1;
-      MISSING_REQUIRED_HOST_DEPENDENCY = 2;
-    }
-
-    NodeProbeErrorCode error_code = 1;
-    string error_description = 2;
-  }
-
-  // `GetNodeID` specific error.
-  message GetNodeIDError {
-    enum GetNodeIDErrorCode {
-      // Default value for backwards compatibility. SHOULD NOT be
-      // returned by Plugins. However, if a Plugin returns a
-      // `GetNodeIDErrorCode` code that an older CSI client is not aware
-      // of, the client will see this code (the default fallback).
-      //
-      // Recovery behavior: Caller SHOULD consider updating CSI client
-      // to match Plugin CSI version.
-      UNKNOWN = 0;
-
-      BAD_PLUGIN_CONFIG = 1;
-      MISSING_REQUIRED_HOST_DEPENDENCY = 2;
-    }
-
-    GetNodeIDErrorCode error_code = 1;
-    string error_description = 2;
-  }
-
-  // One of the following fields MUST be specified.
-  oneof value {
-    GeneralError general_error = 1;
-
-    CreateVolumeError create_volume_error = 2;
-    DeleteVolumeError delete_volume_error = 3;
-    ControllerPublishVolumeError controller_publish_volume_error = 4;
-
-    ControllerUnpublishVolumeError
-      controller_unpublish_volume_error = 5;
-
-    ValidateVolumeCapabilitiesError
-      validate_volume_capabilities_error = 6;
-
-    ControllerProbeError controller_probe_error = 7;
-
-    NodePublishVolumeError node_publish_volume_error = 8;
-    NodeUnpublishVolumeError node_unpublish_volume_error = 9;
-    NodeProbeError node_probe_error = 10;
-    GetNodeIDError get_node_id_error = 11;
   }
 }
 ////////

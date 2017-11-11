@@ -46,7 +46,6 @@ It has these top-level messages:
 	NodeGetCapabilitiesRequest
 	NodeGetCapabilitiesResponse
 	NodeServiceCapability
-	Error
 */
 package csi
 
@@ -164,752 +163,6 @@ func (NodeServiceCapability_RPC_Type) EnumDescriptor() ([]byte, []int) {
 	return fileDescriptor0, []int{37, 0, 0}
 }
 
-type Error_GeneralError_GeneralErrorCode int32
-
-const (
-	// Default value for backwards compatibility. SHOULD NOT be
-	// returned by Plugins. However, if a Plugin returns a
-	// `GeneralErrorCode` code that an older CSI client is not aware
-	// of, the client will see this code (the default fallback).
-	//
-	// Recovery behavior: Caller SHOULD consider updating CSI client
-	// to match Plugin CSI version.
-	Error_GeneralError_UNKNOWN Error_GeneralError_GeneralErrorCode = 0
-	// Indicates that an undefined error occurred. More human-readable
-	// information MAY be provided in the `error_description` field.
-	// The `caller_must_not_retry` field MUST be set appropriately by
-	// the Plugin to provide callers expected recovery behavior.
-	//
-	// Recovery behavior: Caller MAY retry (with exponential backoff),
-	// if `caller_must_not_retry` is set to false. Otherwise, the
-	// caller MUST not reissue the same request.
-	Error_GeneralError_UNDEFINED Error_GeneralError_GeneralErrorCode = 1
-	// Indicates that the version specified in the request is not
-	// supported by the Plugin. The `caller_must_not_retry` field MUST
-	// be set to true.
-	//
-	// Recovery behavior: Caller MUST NOT retry; caller SHOULD call
-	// `GetSupportedVersions` to discover which CSI versions the
-	// Plugin supports.
-	Error_GeneralError_UNSUPPORTED_REQUEST_VERSION Error_GeneralError_GeneralErrorCode = 2
-	// Indicates that a required field is missing from the request.
-	// More human-readable information MAY be provided in the
-	// `error_description` field. The `caller_must_not_retry` field
-	// MUST be set to true.
-	//
-	// Recovery behavior: Caller MUST fix the request by adding the
-	// missing required field before retrying.
-	Error_GeneralError_MISSING_REQUIRED_FIELD Error_GeneralError_GeneralErrorCode = 3
-)
-
-var Error_GeneralError_GeneralErrorCode_name = map[int32]string{
-	0: "UNKNOWN",
-	1: "UNDEFINED",
-	2: "UNSUPPORTED_REQUEST_VERSION",
-	3: "MISSING_REQUIRED_FIELD",
-}
-var Error_GeneralError_GeneralErrorCode_value = map[string]int32{
-	"UNKNOWN":                     0,
-	"UNDEFINED":                   1,
-	"UNSUPPORTED_REQUEST_VERSION": 2,
-	"MISSING_REQUIRED_FIELD":      3,
-}
-
-func (x Error_GeneralError_GeneralErrorCode) String() string {
-	return proto.EnumName(Error_GeneralError_GeneralErrorCode_name, int32(x))
-}
-func (Error_GeneralError_GeneralErrorCode) EnumDescriptor() ([]byte, []int) {
-	return fileDescriptor0, []int{38, 0, 0}
-}
-
-type Error_CreateVolumeError_CreateVolumeErrorCode int32
-
-const (
-	// Default value for backwards compatibility. SHOULD NOT be
-	// returned by Plugins. However, if a Plugin returns a
-	// `CreateVolumeErrorCode` code that an older CSI client is not
-	// aware of, the client will see this code (the default fallback).
-	//
-	// Recovery behavior: Caller SHOULD consider updating CSI client
-	// to match Plugin CSI version.
-	Error_CreateVolumeError_UNKNOWN Error_CreateVolumeError_CreateVolumeErrorCode = 0
-	// Indicates that the call is either not implemented by the Plugin
-	// or disabled in the Plugin’s current mode of operation.
-	//
-	// Recovery behavior: Caller MUST not retry; caller MAY call
-	// `ControllerGetCapabilities` or `NodeGetCapabilities` to
-	// discover Plugin capabilities.
-	Error_CreateVolumeError_CALL_NOT_IMPLEMENTED Error_CreateVolumeError_CreateVolumeErrorCode = 1
-	// Indicates that there is a already an operation pending for the
-	// specified volume. In general the Cluster Orchestrator (CO) is
-	// responsible for ensuring that there is no more than one call
-	// “in-flight” per volume at a given time. However, in some
-	// circumstances, the CO MAY lose state (for example when the CO
-	// crashes and restarts), and MAY issue multiple calls
-	// simultaneously for the same volume. The Plugin, SHOULD handle
-	// this as gracefully as possible, and MAY return this error code
-	// to reject secondary calls.
-	//
-	// Recovery behavior: Caller SHOULD ensure that there are no other
-	// calls pending for the specified volume, and then retry with
-	// exponential back off.
-	Error_CreateVolumeError_OPERATION_PENDING_FOR_VOLUME Error_CreateVolumeError_CreateVolumeErrorCode = 2
-	// Indicates that the specified volume name is not allowed by the
-	// Plugin. More human-readable information MAY be provided in the
-	// `error_description` field.
-	//
-	// Recovery behavior: Caller MUST fix the name before retrying.
-	Error_CreateVolumeError_INVALID_VOLUME_NAME Error_CreateVolumeError_CreateVolumeErrorCode = 3
-	// Indicates that the capacity range is not allowed by the Plugin.
-	// More human-readable information MAY be provided in the
-	// `error_description` field.
-	//
-	// Recovery behavior: Caller MUST fix the capacity range before //
-	// retrying.
-	Error_CreateVolumeError_UNSUPPORTED_CAPACITY_RANGE Error_CreateVolumeError_CreateVolumeErrorCode = 4
-	// Indicates that a volume corresponding to the specified volume
-	// name already exists.
-	//
-	// Recovery behavior: Caller MAY assume the `CreateVolume`
-	// call succeeded.
-	Error_CreateVolumeError_VOLUME_ALREADY_EXISTS Error_CreateVolumeError_CreateVolumeErrorCode = 5
-	// Indicates that a key in the opaque key/value parameters field
-	// is not supported by the Plugin. More human-readable information
-	// MAY be provided in the `error_description` field. This MAY
-	// occur, for example, due to caller error, Plugin version skew,
-	// etc.
-	//
-	// Recovery behavior: Caller MUST remove the unsupported key/value
-	// pair from the list of parameters before retrying.
-	Error_CreateVolumeError_UNSUPPORTED_PARAMETER_KEY Error_CreateVolumeError_CreateVolumeErrorCode = 6
-	// Indicates that a value in one of the opaque key/value pairs
-	// parameter contains invalid data. More human-readable
-	// information (such as the corresponding key) MAY be provided in
-	// the `error_description` field.
-	//
-	// Recovery behavior: Caller MUST fix the invalid value before
-	// retrying.
-	Error_CreateVolumeError_INVALID_PARAMETER_VALUE Error_CreateVolumeError_CreateVolumeErrorCode = 7
-)
-
-var Error_CreateVolumeError_CreateVolumeErrorCode_name = map[int32]string{
-	0: "UNKNOWN",
-	1: "CALL_NOT_IMPLEMENTED",
-	2: "OPERATION_PENDING_FOR_VOLUME",
-	3: "INVALID_VOLUME_NAME",
-	4: "UNSUPPORTED_CAPACITY_RANGE",
-	5: "VOLUME_ALREADY_EXISTS",
-	6: "UNSUPPORTED_PARAMETER_KEY",
-	7: "INVALID_PARAMETER_VALUE",
-}
-var Error_CreateVolumeError_CreateVolumeErrorCode_value = map[string]int32{
-	"UNKNOWN":                      0,
-	"CALL_NOT_IMPLEMENTED":         1,
-	"OPERATION_PENDING_FOR_VOLUME": 2,
-	"INVALID_VOLUME_NAME":          3,
-	"UNSUPPORTED_CAPACITY_RANGE":   4,
-	"VOLUME_ALREADY_EXISTS":        5,
-	"UNSUPPORTED_PARAMETER_KEY":    6,
-	"INVALID_PARAMETER_VALUE":      7,
-}
-
-func (x Error_CreateVolumeError_CreateVolumeErrorCode) String() string {
-	return proto.EnumName(Error_CreateVolumeError_CreateVolumeErrorCode_name, int32(x))
-}
-func (Error_CreateVolumeError_CreateVolumeErrorCode) EnumDescriptor() ([]byte, []int) {
-	return fileDescriptor0, []int{38, 1, 0}
-}
-
-type Error_DeleteVolumeError_DeleteVolumeErrorCode int32
-
-const (
-	// Default value for backwards compatibility. SHOULD NOT be
-	// returned by Plugins. However, if a Plugin returns a
-	// `DeleteVolumeErrorCode` code that an older CSI client is not
-	// aware of, the client will see this code (the default fallback).
-	//
-	// Recovery behavior: Caller SHOULD consider updating CSI client
-	// to match Plugin CSI version.
-	Error_DeleteVolumeError_UNKNOWN Error_DeleteVolumeError_DeleteVolumeErrorCode = 0
-	// Indicates that the call is either not implemented by the Plugin
-	// or disabled in the Plugin’s current mode of operation.
-	//
-	// Recovery behavior: Caller MUST not retry; caller MAY call
-	// `ControllerGetCapabilities` or `NodeGetCapabilities` to
-	// discover Plugin capabilities.
-	Error_DeleteVolumeError_CALL_NOT_IMPLEMENTED Error_DeleteVolumeError_DeleteVolumeErrorCode = 1
-	// Indicates that there is a already an operation pending for the
-	// specified volume. In general the Cluster Orchestrator (CO) is
-	// responsible for ensuring that there is no more than one call
-	// “in-flight” per volume at a given time. However, in some
-	// circumstances, the CO MAY lose state (for example when the CO
-	// crashes and restarts), and MAY issue multiple calls
-	// simultaneously for the same volume. The Plugin, SHOULD handle
-	// this as gracefully as possible, and MAY return this error code
-	// to reject secondary calls.
-	//
-	// Recovery behavior: Caller SHOULD ensure that there are no other
-	// calls pending for the specified volume, and then retry with
-	// exponential back off.
-	Error_DeleteVolumeError_OPERATION_PENDING_FOR_VOLUME Error_DeleteVolumeError_DeleteVolumeErrorCode = 2
-	// Indicates that the specified volume ID is not allowed or
-	// understood by the Plugin. More human-readable information MAY
-	// be provided in the `error_description` field.
-	//
-	// Recovery behavior: Caller MUST fix the volume ID before
-	// retrying.
-	Error_DeleteVolumeError_INVALID_VOLUME_ID Error_DeleteVolumeError_DeleteVolumeErrorCode = 3
-	// Indicates that a volume corresponding to the specified
-	// volume ID does not exist.
-	//
-	// Recovery behavior: Caller SHOULD assume the `DeleteVolume` call
-	// succeeded.
-	Error_DeleteVolumeError_VOLUME_DOES_NOT_EXIST Error_DeleteVolumeError_DeleteVolumeErrorCode = 4
-)
-
-var Error_DeleteVolumeError_DeleteVolumeErrorCode_name = map[int32]string{
-	0: "UNKNOWN",
-	1: "CALL_NOT_IMPLEMENTED",
-	2: "OPERATION_PENDING_FOR_VOLUME",
-	3: "INVALID_VOLUME_ID",
-	4: "VOLUME_DOES_NOT_EXIST",
-}
-var Error_DeleteVolumeError_DeleteVolumeErrorCode_value = map[string]int32{
-	"UNKNOWN":                      0,
-	"CALL_NOT_IMPLEMENTED":         1,
-	"OPERATION_PENDING_FOR_VOLUME": 2,
-	"INVALID_VOLUME_ID":            3,
-	"VOLUME_DOES_NOT_EXIST":        4,
-}
-
-func (x Error_DeleteVolumeError_DeleteVolumeErrorCode) String() string {
-	return proto.EnumName(Error_DeleteVolumeError_DeleteVolumeErrorCode_name, int32(x))
-}
-func (Error_DeleteVolumeError_DeleteVolumeErrorCode) EnumDescriptor() ([]byte, []int) {
-	return fileDescriptor0, []int{38, 2, 0}
-}
-
-type Error_ControllerPublishVolumeError_ControllerPublishVolumeErrorCode int32
-
-const (
-	// Default value for backwards compatibility. SHOULD NOT be
-	// returned by Plugins. However, if a Plugin returns a
-	// `ControllerPublishVolumeErrorCode` code that an older CSI
-	// client is not aware of, the client will see this code (the
-	// default fallback).
-	//
-	// Recovery behavior: Caller SHOULD consider updating CSI client
-	// to match Plugin CSI version.
-	Error_ControllerPublishVolumeError_UNKNOWN Error_ControllerPublishVolumeError_ControllerPublishVolumeErrorCode = 0
-	// Indicates that the call is either not implemented by the Plugin
-	// or disabled in the Plugin’s current mode of operation.
-	//
-	// Recovery behavior: Caller MUST not retry; caller MAY call
-	// `ControllerGetCapabilities` or `NodeGetCapabilities` to
-	// discover Plugin capabilities.
-	Error_ControllerPublishVolumeError_CALL_NOT_IMPLEMENTED Error_ControllerPublishVolumeError_ControllerPublishVolumeErrorCode = 1
-	// Indicates that there is a already an operation pending for the
-	// specified volume. In general the Cluster Orchestrator (CO) is
-	// responsible for ensuring that there is no more than one call
-	// “in-flight” per volume at a given time. However, in some
-	// circumstances, the CO MAY lose state (for example when the CO
-	// crashes and restarts), and MAY issue multiple calls
-	// simultaneously for the same volume. The Plugin, SHOULD handle
-	// this as gracefully as possible, and MAY return this error code
-	// to reject secondary calls.
-	//
-	// Recovery behavior: Caller SHOULD ensure that there are no other
-	// calls pending for the specified volume, and then retry with
-	// exponential back off.
-	Error_ControllerPublishVolumeError_OPERATION_PENDING_FOR_VOLUME Error_ControllerPublishVolumeError_ControllerPublishVolumeErrorCode = 2
-	// Indicates that the specified volume ID is not allowed or
-	// understood by the Plugin. More human-readable information MAY
-	// be provided in the `error_description` field.
-	//
-	// Recovery behavior: Caller MUST fix the volume ID before
-	// retrying.
-	Error_ControllerPublishVolumeError_INVALID_VOLUME_ID Error_ControllerPublishVolumeError_ControllerPublishVolumeErrorCode = 3
-	// Indicates that a volume corresponding to the specified
-	// volume ID does not exist.
-	//
-	// Recovery behavior: Caller SHOULD verify that the volume ID
-	// is correct and that the volume is accessible and has not been
-	// deleted before retrying with exponential back off.
-	Error_ControllerPublishVolumeError_VOLUME_DOES_NOT_EXIST Error_ControllerPublishVolumeError_ControllerPublishVolumeErrorCode = 4
-	// Indicates that a volume corresponding to the specified
-	// volume ID is already attached to another node and does not
-	// support multi-node attach. If this error code is returned, the
-	// Plugin MUST also specify the `node_id` of the node the volume
-	// is already attached to.
-	//
-	// Recovery behavior: Caller MAY use the provided `node_ids`
-	// information to detach the volume from the other node. Caller
-	// SHOULD ensure the specified volume is not attached to any other
-	// node before retrying with exponential back off.
-	Error_ControllerPublishVolumeError_VOLUME_ALREADY_PUBLISHED Error_ControllerPublishVolumeError_ControllerPublishVolumeErrorCode = 5
-	// Indicates that a node corresponding to the specified node ID
-	// does not exist.
-	//
-	// Recovery behavior: Caller SHOULD verify that the node ID is
-	// correct and that the node is available and has not been
-	// terminated or deleted before retrying with exponential backoff.
-	Error_ControllerPublishVolumeError_NODE_DOES_NOT_EXIST Error_ControllerPublishVolumeError_ControllerPublishVolumeErrorCode = 6
-	// Indicates that a volume corresponding to the specified
-	// volume ID is already attached to the maximum supported
-	// number of nodes and therefore this operation can not be
-	// completed until the volume is detached from at least one of the
-	// existing nodes. When this error code is returned, the Plugin
-	// MUST also specify the node ID of all the nodes the volume is
-	// attached to.
-	//
-	// Recovery behavior: Caller MAY use the provided `node_ids`
-	// information to detach the volume from one other node before
-	// retrying with exponential backoff.
-	Error_ControllerPublishVolumeError_MAX_ATTACHED_NODES      Error_ControllerPublishVolumeError_ControllerPublishVolumeErrorCode = 7
-	Error_ControllerPublishVolumeError_UNSUPPORTED_MOUNT_FLAGS Error_ControllerPublishVolumeError_ControllerPublishVolumeErrorCode = 9
-	Error_ControllerPublishVolumeError_UNSUPPORTED_VOLUME_TYPE Error_ControllerPublishVolumeError_ControllerPublishVolumeErrorCode = 10
-	Error_ControllerPublishVolumeError_UNSUPPORTED_FS_TYPE     Error_ControllerPublishVolumeError_ControllerPublishVolumeErrorCode = 11
-	// Indicates that the specified node ID is not allowed or
-	// understood by the Plugin, or the Plugin does not support the
-	// operation without a node ID. More human-readable information
-	// MAY be provided in the `error_description` field.
-	//
-	// Recovery behavior: Caller MUST fix the node ID before
-	// retrying.
-	Error_ControllerPublishVolumeError_INVALID_NODE_ID Error_ControllerPublishVolumeError_ControllerPublishVolumeErrorCode = 8
-)
-
-var Error_ControllerPublishVolumeError_ControllerPublishVolumeErrorCode_name = map[int32]string{
-	0:  "UNKNOWN",
-	1:  "CALL_NOT_IMPLEMENTED",
-	2:  "OPERATION_PENDING_FOR_VOLUME",
-	3:  "INVALID_VOLUME_ID",
-	4:  "VOLUME_DOES_NOT_EXIST",
-	5:  "VOLUME_ALREADY_PUBLISHED",
-	6:  "NODE_DOES_NOT_EXIST",
-	7:  "MAX_ATTACHED_NODES",
-	9:  "UNSUPPORTED_MOUNT_FLAGS",
-	10: "UNSUPPORTED_VOLUME_TYPE",
-	11: "UNSUPPORTED_FS_TYPE",
-	8:  "INVALID_NODE_ID",
-}
-var Error_ControllerPublishVolumeError_ControllerPublishVolumeErrorCode_value = map[string]int32{
-	"UNKNOWN":                      0,
-	"CALL_NOT_IMPLEMENTED":         1,
-	"OPERATION_PENDING_FOR_VOLUME": 2,
-	"INVALID_VOLUME_ID":            3,
-	"VOLUME_DOES_NOT_EXIST":        4,
-	"VOLUME_ALREADY_PUBLISHED":     5,
-	"NODE_DOES_NOT_EXIST":          6,
-	"MAX_ATTACHED_NODES":           7,
-	"UNSUPPORTED_MOUNT_FLAGS":      9,
-	"UNSUPPORTED_VOLUME_TYPE":      10,
-	"UNSUPPORTED_FS_TYPE":          11,
-	"INVALID_NODE_ID":              8,
-}
-
-func (x Error_ControllerPublishVolumeError_ControllerPublishVolumeErrorCode) String() string {
-	return proto.EnumName(Error_ControllerPublishVolumeError_ControllerPublishVolumeErrorCode_name, int32(x))
-}
-func (Error_ControllerPublishVolumeError_ControllerPublishVolumeErrorCode) EnumDescriptor() ([]byte, []int) {
-	return fileDescriptor0, []int{38, 3, 0}
-}
-
-type Error_ControllerUnpublishVolumeError_ControllerUnpublishVolumeErrorCode int32
-
-const (
-	// Default value for backwards compatibility. SHOULD NOT be
-	// returned by Plugins. However, if a Plugin returns a
-	// `ControllerUnpublishVolumeErrorCode` code that an older CSI
-	// client is not aware of, the client will see this code (the
-	// default fallback).
-	//
-	// Recovery behavior: Caller SHOULD consider updating CSI client
-	// to match Plugin CSI version.
-	Error_ControllerUnpublishVolumeError_UNKNOWN Error_ControllerUnpublishVolumeError_ControllerUnpublishVolumeErrorCode = 0
-	// Indicates that the call is either not implemented by the Plugin
-	// or disabled in the Plugin’s current mode of operation.
-	//
-	// Recovery behavior: Caller MUST not retry; caller MAY call
-	// `ControllerGetCapabilities` or `NodeGetCapabilities` to
-	// discover Plugin capabilities.
-	Error_ControllerUnpublishVolumeError_CALL_NOT_IMPLEMENTED Error_ControllerUnpublishVolumeError_ControllerUnpublishVolumeErrorCode = 1
-	// Indicates that there is a already an operation pending for the
-	// specified volume. In general the Cluster Orchestrator (CO) is
-	// responsible for ensuring that there is no more than one call
-	// “in-flight” per volume at a given time. However, in some
-	// circumstances, the CO MAY lose state (for example when the CO
-	// crashes and restarts), and MAY issue multiple calls
-	// simultaneously for the same volume. The Plugin, SHOULD handle
-	// this as gracefully as possible, and MAY return this error code
-	// to reject secondary calls.
-	//
-	// Recovery behavior: Caller SHOULD ensure that there are no other
-	// calls pending for the specified volume, and then retry with
-	// exponential back off.
-	Error_ControllerUnpublishVolumeError_OPERATION_PENDING_FOR_VOLUME Error_ControllerUnpublishVolumeError_ControllerUnpublishVolumeErrorCode = 2
-	// Indicates that the specified volume ID is not allowed or
-	// understood by the Plugin. More human-readable information MAY
-	// be provided in the `error_description` field.
-	//
-	// Recovery behavior: Caller MUST fix the volume ID before
-	// retrying.
-	Error_ControllerUnpublishVolumeError_INVALID_VOLUME_ID Error_ControllerUnpublishVolumeError_ControllerUnpublishVolumeErrorCode = 3
-	// Indicates that a volume corresponding to the specified
-	// volume ID does not exist.
-	//
-	// Recovery behavior: Caller SHOULD verify that the volume ID
-	// is correct and that the volume is accessible and has not been
-	// deleted before retrying with exponential back off.
-	Error_ControllerUnpublishVolumeError_VOLUME_DOES_NOT_EXIST Error_ControllerUnpublishVolumeError_ControllerUnpublishVolumeErrorCode = 4
-	// Indicates that a node corresponding to the specified node ID
-	// does not exist.
-	//
-	// Recovery behavior: Caller SHOULD verify that the node ID is
-	// correct and that the node is available and has not been
-	// terminated or deleted before retrying.
-	Error_ControllerUnpublishVolumeError_NODE_DOES_NOT_EXIST Error_ControllerUnpublishVolumeError_ControllerUnpublishVolumeErrorCode = 5
-	// Indicates that the specified node ID is not allowed or
-	// understood by the Plugin. More human-readable information MAY
-	// be provided in the `error_description` field.
-	//
-	// Recovery behavior: Caller MUST fix the node ID before
-	// retrying.
-	Error_ControllerUnpublishVolumeError_INVALID_NODE_ID                       Error_ControllerUnpublishVolumeError_ControllerUnpublishVolumeErrorCode = 6
-	Error_ControllerUnpublishVolumeError_VOLUME_NOT_ATTACHED_TO_SPECIFIED_NODE Error_ControllerUnpublishVolumeError_ControllerUnpublishVolumeErrorCode = 7
-	// Indicates that the Plugin does not support the operation
-	// without a node ID.
-	//
-	// Recovery behavior: Caller MUST specify the node ID before
-	// retrying.
-	Error_ControllerUnpublishVolumeError_NODE_ID_REQUIRED Error_ControllerUnpublishVolumeError_ControllerUnpublishVolumeErrorCode = 8
-)
-
-var Error_ControllerUnpublishVolumeError_ControllerUnpublishVolumeErrorCode_name = map[int32]string{
-	0: "UNKNOWN",
-	1: "CALL_NOT_IMPLEMENTED",
-	2: "OPERATION_PENDING_FOR_VOLUME",
-	3: "INVALID_VOLUME_ID",
-	4: "VOLUME_DOES_NOT_EXIST",
-	5: "NODE_DOES_NOT_EXIST",
-	6: "INVALID_NODE_ID",
-	7: "VOLUME_NOT_ATTACHED_TO_SPECIFIED_NODE",
-	8: "NODE_ID_REQUIRED",
-}
-var Error_ControllerUnpublishVolumeError_ControllerUnpublishVolumeErrorCode_value = map[string]int32{
-	"UNKNOWN":                               0,
-	"CALL_NOT_IMPLEMENTED":                  1,
-	"OPERATION_PENDING_FOR_VOLUME":          2,
-	"INVALID_VOLUME_ID":                     3,
-	"VOLUME_DOES_NOT_EXIST":                 4,
-	"NODE_DOES_NOT_EXIST":                   5,
-	"INVALID_NODE_ID":                       6,
-	"VOLUME_NOT_ATTACHED_TO_SPECIFIED_NODE": 7,
-	"NODE_ID_REQUIRED":                      8,
-}
-
-func (x Error_ControllerUnpublishVolumeError_ControllerUnpublishVolumeErrorCode) String() string {
-	return proto.EnumName(Error_ControllerUnpublishVolumeError_ControllerUnpublishVolumeErrorCode_name, int32(x))
-}
-func (Error_ControllerUnpublishVolumeError_ControllerUnpublishVolumeErrorCode) EnumDescriptor() ([]byte, []int) {
-	return fileDescriptor0, []int{38, 4, 0}
-}
-
-type Error_ValidateVolumeCapabilitiesError_ValidateVolumeCapabilitiesErrorCode int32
-
-const (
-	// Default value for backwards compatibility. SHOULD NOT be
-	// returned by Plugins. However, if a Plugin returns a
-	// `ValidateVolumeCapabilitiesErrorCode` code that an older CSI
-	// client is not aware of, the client will see this code (the
-	// default fallback).
-	//
-	// Recovery behavior: Caller SHOULD consider updating CSI client
-	// to match Plugin CSI version.
-	Error_ValidateVolumeCapabilitiesError_UNKNOWN Error_ValidateVolumeCapabilitiesError_ValidateVolumeCapabilitiesErrorCode = 0
-	// Indicates that a volume corresponding to the specified
-	// `VolumeInfo` does not exist.
-	//
-	// Recovery behavior: Caller SHOULD verify that the `VolumeInfo`
-	// is correct and that the volume is accessible and has not been
-	// deleted before retrying.
-	Error_ValidateVolumeCapabilitiesError_VOLUME_DOES_NOT_EXIST   Error_ValidateVolumeCapabilitiesError_ValidateVolumeCapabilitiesErrorCode = 1
-	Error_ValidateVolumeCapabilitiesError_UNSUPPORTED_MOUNT_FLAGS Error_ValidateVolumeCapabilitiesError_ValidateVolumeCapabilitiesErrorCode = 2
-	Error_ValidateVolumeCapabilitiesError_UNSUPPORTED_VOLUME_TYPE Error_ValidateVolumeCapabilitiesError_ValidateVolumeCapabilitiesErrorCode = 3
-	Error_ValidateVolumeCapabilitiesError_UNSUPPORTED_FS_TYPE     Error_ValidateVolumeCapabilitiesError_ValidateVolumeCapabilitiesErrorCode = 4
-	// Indicates that the specified volume ID is not allowed or
-	// understood by the Plugin. More human-readable information MAY
-	// be provided in the `error_description` field.
-	//
-	// Recovery behavior: Caller MUST fix the volume ID before
-	// retrying.
-	Error_ValidateVolumeCapabilitiesError_INVALID_VOLUME_ID Error_ValidateVolumeCapabilitiesError_ValidateVolumeCapabilitiesErrorCode = 5
-)
-
-var Error_ValidateVolumeCapabilitiesError_ValidateVolumeCapabilitiesErrorCode_name = map[int32]string{
-	0: "UNKNOWN",
-	1: "VOLUME_DOES_NOT_EXIST",
-	2: "UNSUPPORTED_MOUNT_FLAGS",
-	3: "UNSUPPORTED_VOLUME_TYPE",
-	4: "UNSUPPORTED_FS_TYPE",
-	5: "INVALID_VOLUME_ID",
-}
-var Error_ValidateVolumeCapabilitiesError_ValidateVolumeCapabilitiesErrorCode_value = map[string]int32{
-	"UNKNOWN":                 0,
-	"VOLUME_DOES_NOT_EXIST":   1,
-	"UNSUPPORTED_MOUNT_FLAGS": 2,
-	"UNSUPPORTED_VOLUME_TYPE": 3,
-	"UNSUPPORTED_FS_TYPE":     4,
-	"INVALID_VOLUME_ID":       5,
-}
-
-func (x Error_ValidateVolumeCapabilitiesError_ValidateVolumeCapabilitiesErrorCode) String() string {
-	return proto.EnumName(Error_ValidateVolumeCapabilitiesError_ValidateVolumeCapabilitiesErrorCode_name, int32(x))
-}
-func (Error_ValidateVolumeCapabilitiesError_ValidateVolumeCapabilitiesErrorCode) EnumDescriptor() ([]byte, []int) {
-	return fileDescriptor0, []int{38, 5, 0}
-}
-
-type Error_ControllerProbeError_ControllerProbeErrorCode int32
-
-const (
-	// Default value for backwards compatibility. SHOULD NOT be
-	// returned by Plugins. However, if a Plugin returns a
-	// `ControllerProbeErrorCode` code that an older CSI
-	// client is not aware of, the client will see this code (the
-	// default fallback).
-	//
-	// Recovery behavior: Caller SHOULD consider updating CSI client
-	// to match Plugin CSI version.
-	Error_ControllerProbeError_UNKNOWN                          Error_ControllerProbeError_ControllerProbeErrorCode = 0
-	Error_ControllerProbeError_BAD_PLUGIN_CONFIG                Error_ControllerProbeError_ControllerProbeErrorCode = 1
-	Error_ControllerProbeError_MISSING_REQUIRED_HOST_DEPENDENCY Error_ControllerProbeError_ControllerProbeErrorCode = 2
-)
-
-var Error_ControllerProbeError_ControllerProbeErrorCode_name = map[int32]string{
-	0: "UNKNOWN",
-	1: "BAD_PLUGIN_CONFIG",
-	2: "MISSING_REQUIRED_HOST_DEPENDENCY",
-}
-var Error_ControllerProbeError_ControllerProbeErrorCode_value = map[string]int32{
-	"UNKNOWN":                          0,
-	"BAD_PLUGIN_CONFIG":                1,
-	"MISSING_REQUIRED_HOST_DEPENDENCY": 2,
-}
-
-func (x Error_ControllerProbeError_ControllerProbeErrorCode) String() string {
-	return proto.EnumName(Error_ControllerProbeError_ControllerProbeErrorCode_name, int32(x))
-}
-func (Error_ControllerProbeError_ControllerProbeErrorCode) EnumDescriptor() ([]byte, []int) {
-	return fileDescriptor0, []int{38, 6, 0}
-}
-
-type Error_NodePublishVolumeError_NodePublishVolumeErrorCode int32
-
-const (
-	// Default value for backwards compatibility. SHOULD NOT be
-	// returned by Plugins. However, if a Plugin returns a
-	// `NodePublishVolumeErrorCode` code that an older CSI
-	// client is not aware of, the client will see this code (the
-	// default fallback).
-	//
-	// Recovery behavior: Caller SHOULD consider updating CSI client
-	// to match Plugin CSI version.
-	Error_NodePublishVolumeError_UNKNOWN Error_NodePublishVolumeError_NodePublishVolumeErrorCode = 0
-	// Indicates that there is a already an operation pending for the
-	// specified volume. In general the Cluster Orchestrator (CO) is
-	// responsible for ensuring that there is no more than one call
-	// “in-flight” per volume at a given time. However, in some
-	// circumstances, the CO MAY lose state (for example when the CO
-	// crashes and restarts), and MAY issue multiple calls
-	// simultaneously for the same volume. The Plugin, SHOULD handle
-	// this as gracefully as possible, and MAY return this error code
-	// to reject secondary calls.
-	//
-	// Recovery behavior: Caller SHOULD ensure that there are no other
-	// calls pending for the specified volume, and then retry with
-	// exponential back off.
-	Error_NodePublishVolumeError_OPERATION_PENDING_FOR_VOLUME Error_NodePublishVolumeError_NodePublishVolumeErrorCode = 1
-	// Indicates that a volume corresponding to the specified
-	// volume ID does not exist.
-	//
-	// Recovery behavior: Caller SHOULD verify that the volume ID
-	// is correct and that the volume is accessible and has not been
-	// deleted before retrying with exponential back off.
-	Error_NodePublishVolumeError_VOLUME_DOES_NOT_EXIST   Error_NodePublishVolumeError_NodePublishVolumeErrorCode = 2
-	Error_NodePublishVolumeError_UNSUPPORTED_MOUNT_FLAGS Error_NodePublishVolumeError_NodePublishVolumeErrorCode = 3
-	Error_NodePublishVolumeError_UNSUPPORTED_VOLUME_TYPE Error_NodePublishVolumeError_NodePublishVolumeErrorCode = 4
-	Error_NodePublishVolumeError_UNSUPPORTED_FS_TYPE     Error_NodePublishVolumeError_NodePublishVolumeErrorCode = 5
-	Error_NodePublishVolumeError_MOUNT_ERROR             Error_NodePublishVolumeError_NodePublishVolumeErrorCode = 6
-	// Indicates that the specified volume ID is not allowed or
-	// understood by the Plugin. More human-readable information MAY
-	// be provided in the `error_description` field.
-	//
-	// Recovery behavior: Caller MUST fix the volume ID before
-	// retrying.
-	Error_NodePublishVolumeError_INVALID_VOLUME_ID Error_NodePublishVolumeError_NodePublishVolumeErrorCode = 7
-)
-
-var Error_NodePublishVolumeError_NodePublishVolumeErrorCode_name = map[int32]string{
-	0: "UNKNOWN",
-	1: "OPERATION_PENDING_FOR_VOLUME",
-	2: "VOLUME_DOES_NOT_EXIST",
-	3: "UNSUPPORTED_MOUNT_FLAGS",
-	4: "UNSUPPORTED_VOLUME_TYPE",
-	5: "UNSUPPORTED_FS_TYPE",
-	6: "MOUNT_ERROR",
-	7: "INVALID_VOLUME_ID",
-}
-var Error_NodePublishVolumeError_NodePublishVolumeErrorCode_value = map[string]int32{
-	"UNKNOWN":                      0,
-	"OPERATION_PENDING_FOR_VOLUME": 1,
-	"VOLUME_DOES_NOT_EXIST":        2,
-	"UNSUPPORTED_MOUNT_FLAGS":      3,
-	"UNSUPPORTED_VOLUME_TYPE":      4,
-	"UNSUPPORTED_FS_TYPE":          5,
-	"MOUNT_ERROR":                  6,
-	"INVALID_VOLUME_ID":            7,
-}
-
-func (x Error_NodePublishVolumeError_NodePublishVolumeErrorCode) String() string {
-	return proto.EnumName(Error_NodePublishVolumeError_NodePublishVolumeErrorCode_name, int32(x))
-}
-func (Error_NodePublishVolumeError_NodePublishVolumeErrorCode) EnumDescriptor() ([]byte, []int) {
-	return fileDescriptor0, []int{38, 7, 0}
-}
-
-type Error_NodeUnpublishVolumeError_NodeUnpublishVolumeErrorCode int32
-
-const (
-	// Default value for backwards compatibility. SHOULD NOT be
-	// returned by Plugins. However, if a Plugin returns a
-	// `NodeUnpublishVolumeErrorCode` code that an older CSI
-	// client is not aware of, the client will see this code (the
-	// default fallback).
-	//
-	// Recovery behavior: Caller SHOULD consider updating CSI client
-	// to match Plugin CSI version.
-	Error_NodeUnpublishVolumeError_UNKNOWN Error_NodeUnpublishVolumeError_NodeUnpublishVolumeErrorCode = 0
-	// Indicates that there is a already an operation pending for the
-	// specified volume. In general the Cluster Orchestrator (CO) is
-	// responsible for ensuring that there is no more than one call
-	// “in-flight” per volume at a given time. However, in some
-	// circumstances, the CO MAY lose state (for example when the CO
-	// crashes and restarts), and MAY issue multiple calls
-	// simultaneously for the same volume. The Plugin, SHOULD handle
-	// this as gracefully as possible, and MAY return this error code
-	// to reject secondary calls.
-	//
-	// Recovery behavior: Caller SHOULD ensure that there are no other
-	// calls pending for the specified volume, and then retry with
-	// exponential back off.
-	Error_NodeUnpublishVolumeError_OPERATION_PENDING_FOR_VOLUME Error_NodeUnpublishVolumeError_NodeUnpublishVolumeErrorCode = 1
-	// Indicates that a volume corresponding to the specified
-	// volume ID does not exist.
-	//
-	// Recovery behavior: Caller SHOULD verify that the volume ID
-	// is correct and that the volume is accessible and has not been
-	// deleted before retrying with exponential back off.
-	Error_NodeUnpublishVolumeError_VOLUME_DOES_NOT_EXIST Error_NodeUnpublishVolumeError_NodeUnpublishVolumeErrorCode = 2
-	Error_NodeUnpublishVolumeError_UNMOUNT_ERROR         Error_NodeUnpublishVolumeError_NodeUnpublishVolumeErrorCode = 3
-	// Indicates that the specified volume ID is not allowed or
-	// understood by the Plugin. More human-readable information MAY
-	// be provided in the `error_description` field.
-	//
-	// Recovery behavior: Caller MUST fix the volume ID before
-	// retrying.
-	Error_NodeUnpublishVolumeError_INVALID_VOLUME_ID Error_NodeUnpublishVolumeError_NodeUnpublishVolumeErrorCode = 4
-)
-
-var Error_NodeUnpublishVolumeError_NodeUnpublishVolumeErrorCode_name = map[int32]string{
-	0: "UNKNOWN",
-	1: "OPERATION_PENDING_FOR_VOLUME",
-	2: "VOLUME_DOES_NOT_EXIST",
-	3: "UNMOUNT_ERROR",
-	4: "INVALID_VOLUME_ID",
-}
-var Error_NodeUnpublishVolumeError_NodeUnpublishVolumeErrorCode_value = map[string]int32{
-	"UNKNOWN":                      0,
-	"OPERATION_PENDING_FOR_VOLUME": 1,
-	"VOLUME_DOES_NOT_EXIST":        2,
-	"UNMOUNT_ERROR":                3,
-	"INVALID_VOLUME_ID":            4,
-}
-
-func (x Error_NodeUnpublishVolumeError_NodeUnpublishVolumeErrorCode) String() string {
-	return proto.EnumName(Error_NodeUnpublishVolumeError_NodeUnpublishVolumeErrorCode_name, int32(x))
-}
-func (Error_NodeUnpublishVolumeError_NodeUnpublishVolumeErrorCode) EnumDescriptor() ([]byte, []int) {
-	return fileDescriptor0, []int{38, 8, 0}
-}
-
-type Error_NodeProbeError_NodeProbeErrorCode int32
-
-const (
-	// Default value for backwards compatibility. SHOULD NOT be
-	// returned by Plugins. However, if a Plugin returns a
-	// `NodeProbeErrorCode` code that an older CSI
-	// client is not aware of, the client will see this code (the
-	// default fallback).
-	//
-	// Recovery behavior: Caller SHOULD consider updating CSI client
-	// to match Plugin CSI version.
-	Error_NodeProbeError_UNKNOWN                          Error_NodeProbeError_NodeProbeErrorCode = 0
-	Error_NodeProbeError_BAD_PLUGIN_CONFIG                Error_NodeProbeError_NodeProbeErrorCode = 1
-	Error_NodeProbeError_MISSING_REQUIRED_HOST_DEPENDENCY Error_NodeProbeError_NodeProbeErrorCode = 2
-)
-
-var Error_NodeProbeError_NodeProbeErrorCode_name = map[int32]string{
-	0: "UNKNOWN",
-	1: "BAD_PLUGIN_CONFIG",
-	2: "MISSING_REQUIRED_HOST_DEPENDENCY",
-}
-var Error_NodeProbeError_NodeProbeErrorCode_value = map[string]int32{
-	"UNKNOWN":                          0,
-	"BAD_PLUGIN_CONFIG":                1,
-	"MISSING_REQUIRED_HOST_DEPENDENCY": 2,
-}
-
-func (x Error_NodeProbeError_NodeProbeErrorCode) String() string {
-	return proto.EnumName(Error_NodeProbeError_NodeProbeErrorCode_name, int32(x))
-}
-func (Error_NodeProbeError_NodeProbeErrorCode) EnumDescriptor() ([]byte, []int) {
-	return fileDescriptor0, []int{38, 9, 0}
-}
-
-type Error_GetNodeIDError_GetNodeIDErrorCode int32
-
-const (
-	// Default value for backwards compatibility. SHOULD NOT be
-	// returned by Plugins. However, if a Plugin returns a
-	// `GetNodeIDErrorCode` code that an older CSI client is not aware
-	// of, the client will see this code (the default fallback).
-	//
-	// Recovery behavior: Caller SHOULD consider updating CSI client
-	// to match Plugin CSI version.
-	Error_GetNodeIDError_UNKNOWN                          Error_GetNodeIDError_GetNodeIDErrorCode = 0
-	Error_GetNodeIDError_BAD_PLUGIN_CONFIG                Error_GetNodeIDError_GetNodeIDErrorCode = 1
-	Error_GetNodeIDError_MISSING_REQUIRED_HOST_DEPENDENCY Error_GetNodeIDError_GetNodeIDErrorCode = 2
-)
-
-var Error_GetNodeIDError_GetNodeIDErrorCode_name = map[int32]string{
-	0: "UNKNOWN",
-	1: "BAD_PLUGIN_CONFIG",
-	2: "MISSING_REQUIRED_HOST_DEPENDENCY",
-}
-var Error_GetNodeIDError_GetNodeIDErrorCode_value = map[string]int32{
-	"UNKNOWN":                          0,
-	"BAD_PLUGIN_CONFIG":                1,
-	"MISSING_REQUIRED_HOST_DEPENDENCY": 2,
-}
-
-func (x Error_GetNodeIDError_GetNodeIDErrorCode) String() string {
-	return proto.EnumName(Error_GetNodeIDError_GetNodeIDErrorCode_name, int32(x))
-}
-func (Error_GetNodeIDError_GetNodeIDErrorCode) EnumDescriptor() ([]byte, []int) {
-	return fileDescriptor0, []int{38, 10, 0}
-}
-
 // //////
 // //////
 type GetSupportedVersionsRequest struct {
@@ -921,12 +174,9 @@ func (*GetSupportedVersionsRequest) ProtoMessage()               {}
 func (*GetSupportedVersionsRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{0} }
 
 type GetSupportedVersionsResponse struct {
-	// One of the following fields MUST be specified.
-	//
-	// Types that are valid to be assigned to Reply:
-	//	*GetSupportedVersionsResponse_Result_
-	//	*GetSupportedVersionsResponse_Error
-	Reply isGetSupportedVersionsResponse_Reply `protobuf_oneof:"reply"`
+	// All the CSI versions that the Plugin supports. This field is
+	// REQUIRED.
+	SupportedVersions []*Version `protobuf:"bytes,1,rep,name=supported_versions,json=supportedVersions" json:"supported_versions,omitempty"`
 }
 
 func (m *GetSupportedVersionsResponse) Reset()                    { *m = GetSupportedVersionsResponse{} }
@@ -934,129 +184,7 @@ func (m *GetSupportedVersionsResponse) String() string            { return proto
 func (*GetSupportedVersionsResponse) ProtoMessage()               {}
 func (*GetSupportedVersionsResponse) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{1} }
 
-type isGetSupportedVersionsResponse_Reply interface {
-	isGetSupportedVersionsResponse_Reply()
-}
-
-type GetSupportedVersionsResponse_Result_ struct {
-	Result *GetSupportedVersionsResponse_Result `protobuf:"bytes,1,opt,name=result,oneof"`
-}
-type GetSupportedVersionsResponse_Error struct {
-	Error *Error `protobuf:"bytes,2,opt,name=error,oneof"`
-}
-
-func (*GetSupportedVersionsResponse_Result_) isGetSupportedVersionsResponse_Reply() {}
-func (*GetSupportedVersionsResponse_Error) isGetSupportedVersionsResponse_Reply()   {}
-
-func (m *GetSupportedVersionsResponse) GetReply() isGetSupportedVersionsResponse_Reply {
-	if m != nil {
-		return m.Reply
-	}
-	return nil
-}
-
-func (m *GetSupportedVersionsResponse) GetResult() *GetSupportedVersionsResponse_Result {
-	if x, ok := m.GetReply().(*GetSupportedVersionsResponse_Result_); ok {
-		return x.Result
-	}
-	return nil
-}
-
-func (m *GetSupportedVersionsResponse) GetError() *Error {
-	if x, ok := m.GetReply().(*GetSupportedVersionsResponse_Error); ok {
-		return x.Error
-	}
-	return nil
-}
-
-// XXX_OneofFuncs is for the internal use of the proto package.
-func (*GetSupportedVersionsResponse) XXX_OneofFuncs() (func(msg proto.Message, b *proto.Buffer) error, func(msg proto.Message, tag, wire int, b *proto.Buffer) (bool, error), func(msg proto.Message) (n int), []interface{}) {
-	return _GetSupportedVersionsResponse_OneofMarshaler, _GetSupportedVersionsResponse_OneofUnmarshaler, _GetSupportedVersionsResponse_OneofSizer, []interface{}{
-		(*GetSupportedVersionsResponse_Result_)(nil),
-		(*GetSupportedVersionsResponse_Error)(nil),
-	}
-}
-
-func _GetSupportedVersionsResponse_OneofMarshaler(msg proto.Message, b *proto.Buffer) error {
-	m := msg.(*GetSupportedVersionsResponse)
-	// reply
-	switch x := m.Reply.(type) {
-	case *GetSupportedVersionsResponse_Result_:
-		b.EncodeVarint(1<<3 | proto.WireBytes)
-		if err := b.EncodeMessage(x.Result); err != nil {
-			return err
-		}
-	case *GetSupportedVersionsResponse_Error:
-		b.EncodeVarint(2<<3 | proto.WireBytes)
-		if err := b.EncodeMessage(x.Error); err != nil {
-			return err
-		}
-	case nil:
-	default:
-		return fmt.Errorf("GetSupportedVersionsResponse.Reply has unexpected type %T", x)
-	}
-	return nil
-}
-
-func _GetSupportedVersionsResponse_OneofUnmarshaler(msg proto.Message, tag, wire int, b *proto.Buffer) (bool, error) {
-	m := msg.(*GetSupportedVersionsResponse)
-	switch tag {
-	case 1: // reply.result
-		if wire != proto.WireBytes {
-			return true, proto.ErrInternalBadWireType
-		}
-		msg := new(GetSupportedVersionsResponse_Result)
-		err := b.DecodeMessage(msg)
-		m.Reply = &GetSupportedVersionsResponse_Result_{msg}
-		return true, err
-	case 2: // reply.error
-		if wire != proto.WireBytes {
-			return true, proto.ErrInternalBadWireType
-		}
-		msg := new(Error)
-		err := b.DecodeMessage(msg)
-		m.Reply = &GetSupportedVersionsResponse_Error{msg}
-		return true, err
-	default:
-		return false, nil
-	}
-}
-
-func _GetSupportedVersionsResponse_OneofSizer(msg proto.Message) (n int) {
-	m := msg.(*GetSupportedVersionsResponse)
-	// reply
-	switch x := m.Reply.(type) {
-	case *GetSupportedVersionsResponse_Result_:
-		s := proto.Size(x.Result)
-		n += proto.SizeVarint(1<<3 | proto.WireBytes)
-		n += proto.SizeVarint(uint64(s))
-		n += s
-	case *GetSupportedVersionsResponse_Error:
-		s := proto.Size(x.Error)
-		n += proto.SizeVarint(2<<3 | proto.WireBytes)
-		n += proto.SizeVarint(uint64(s))
-		n += s
-	case nil:
-	default:
-		panic(fmt.Sprintf("proto: unexpected type %T in oneof", x))
-	}
-	return n
-}
-
-type GetSupportedVersionsResponse_Result struct {
-	// All the CSI versions that the Plugin supports. This field is
-	// REQUIRED.
-	SupportedVersions []*Version `protobuf:"bytes,1,rep,name=supported_versions,json=supportedVersions" json:"supported_versions,omitempty"`
-}
-
-func (m *GetSupportedVersionsResponse_Result) Reset()         { *m = GetSupportedVersionsResponse_Result{} }
-func (m *GetSupportedVersionsResponse_Result) String() string { return proto.CompactTextString(m) }
-func (*GetSupportedVersionsResponse_Result) ProtoMessage()    {}
-func (*GetSupportedVersionsResponse_Result) Descriptor() ([]byte, []int) {
-	return fileDescriptor0, []int{1, 0}
-}
-
-func (m *GetSupportedVersionsResponse_Result) GetSupportedVersions() []*Version {
+func (m *GetSupportedVersionsResponse) GetSupportedVersions() []*Version {
 	if m != nil {
 		return m.SupportedVersions
 	}
@@ -1117,129 +245,6 @@ func (m *GetPluginInfoRequest) GetVersion() *Version {
 }
 
 type GetPluginInfoResponse struct {
-	// One of the following fields MUST be specified.
-	//
-	// Types that are valid to be assigned to Reply:
-	//	*GetPluginInfoResponse_Result_
-	//	*GetPluginInfoResponse_Error
-	Reply isGetPluginInfoResponse_Reply `protobuf_oneof:"reply"`
-}
-
-func (m *GetPluginInfoResponse) Reset()                    { *m = GetPluginInfoResponse{} }
-func (m *GetPluginInfoResponse) String() string            { return proto.CompactTextString(m) }
-func (*GetPluginInfoResponse) ProtoMessage()               {}
-func (*GetPluginInfoResponse) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{4} }
-
-type isGetPluginInfoResponse_Reply interface {
-	isGetPluginInfoResponse_Reply()
-}
-
-type GetPluginInfoResponse_Result_ struct {
-	Result *GetPluginInfoResponse_Result `protobuf:"bytes,1,opt,name=result,oneof"`
-}
-type GetPluginInfoResponse_Error struct {
-	Error *Error `protobuf:"bytes,2,opt,name=error,oneof"`
-}
-
-func (*GetPluginInfoResponse_Result_) isGetPluginInfoResponse_Reply() {}
-func (*GetPluginInfoResponse_Error) isGetPluginInfoResponse_Reply()   {}
-
-func (m *GetPluginInfoResponse) GetReply() isGetPluginInfoResponse_Reply {
-	if m != nil {
-		return m.Reply
-	}
-	return nil
-}
-
-func (m *GetPluginInfoResponse) GetResult() *GetPluginInfoResponse_Result {
-	if x, ok := m.GetReply().(*GetPluginInfoResponse_Result_); ok {
-		return x.Result
-	}
-	return nil
-}
-
-func (m *GetPluginInfoResponse) GetError() *Error {
-	if x, ok := m.GetReply().(*GetPluginInfoResponse_Error); ok {
-		return x.Error
-	}
-	return nil
-}
-
-// XXX_OneofFuncs is for the internal use of the proto package.
-func (*GetPluginInfoResponse) XXX_OneofFuncs() (func(msg proto.Message, b *proto.Buffer) error, func(msg proto.Message, tag, wire int, b *proto.Buffer) (bool, error), func(msg proto.Message) (n int), []interface{}) {
-	return _GetPluginInfoResponse_OneofMarshaler, _GetPluginInfoResponse_OneofUnmarshaler, _GetPluginInfoResponse_OneofSizer, []interface{}{
-		(*GetPluginInfoResponse_Result_)(nil),
-		(*GetPluginInfoResponse_Error)(nil),
-	}
-}
-
-func _GetPluginInfoResponse_OneofMarshaler(msg proto.Message, b *proto.Buffer) error {
-	m := msg.(*GetPluginInfoResponse)
-	// reply
-	switch x := m.Reply.(type) {
-	case *GetPluginInfoResponse_Result_:
-		b.EncodeVarint(1<<3 | proto.WireBytes)
-		if err := b.EncodeMessage(x.Result); err != nil {
-			return err
-		}
-	case *GetPluginInfoResponse_Error:
-		b.EncodeVarint(2<<3 | proto.WireBytes)
-		if err := b.EncodeMessage(x.Error); err != nil {
-			return err
-		}
-	case nil:
-	default:
-		return fmt.Errorf("GetPluginInfoResponse.Reply has unexpected type %T", x)
-	}
-	return nil
-}
-
-func _GetPluginInfoResponse_OneofUnmarshaler(msg proto.Message, tag, wire int, b *proto.Buffer) (bool, error) {
-	m := msg.(*GetPluginInfoResponse)
-	switch tag {
-	case 1: // reply.result
-		if wire != proto.WireBytes {
-			return true, proto.ErrInternalBadWireType
-		}
-		msg := new(GetPluginInfoResponse_Result)
-		err := b.DecodeMessage(msg)
-		m.Reply = &GetPluginInfoResponse_Result_{msg}
-		return true, err
-	case 2: // reply.error
-		if wire != proto.WireBytes {
-			return true, proto.ErrInternalBadWireType
-		}
-		msg := new(Error)
-		err := b.DecodeMessage(msg)
-		m.Reply = &GetPluginInfoResponse_Error{msg}
-		return true, err
-	default:
-		return false, nil
-	}
-}
-
-func _GetPluginInfoResponse_OneofSizer(msg proto.Message) (n int) {
-	m := msg.(*GetPluginInfoResponse)
-	// reply
-	switch x := m.Reply.(type) {
-	case *GetPluginInfoResponse_Result_:
-		s := proto.Size(x.Result)
-		n += proto.SizeVarint(1<<3 | proto.WireBytes)
-		n += proto.SizeVarint(uint64(s))
-		n += s
-	case *GetPluginInfoResponse_Error:
-		s := proto.Size(x.Error)
-		n += proto.SizeVarint(2<<3 | proto.WireBytes)
-		n += proto.SizeVarint(uint64(s))
-		n += s
-	case nil:
-	default:
-		panic(fmt.Sprintf("proto: unexpected type %T in oneof", x))
-	}
-	return n
-}
-
-type GetPluginInfoResponse_Result struct {
 	// This field is REQUIRED.
 	Name string `protobuf:"bytes,1,opt,name=name" json:"name,omitempty"`
 	// This field is REQUIRED. Value of this field is opaque to the CO.
@@ -1248,26 +253,26 @@ type GetPluginInfoResponse_Result struct {
 	Manifest map[string]string `protobuf:"bytes,3,rep,name=manifest" json:"manifest,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
 }
 
-func (m *GetPluginInfoResponse_Result) Reset()                    { *m = GetPluginInfoResponse_Result{} }
-func (m *GetPluginInfoResponse_Result) String() string            { return proto.CompactTextString(m) }
-func (*GetPluginInfoResponse_Result) ProtoMessage()               {}
-func (*GetPluginInfoResponse_Result) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{4, 0} }
+func (m *GetPluginInfoResponse) Reset()                    { *m = GetPluginInfoResponse{} }
+func (m *GetPluginInfoResponse) String() string            { return proto.CompactTextString(m) }
+func (*GetPluginInfoResponse) ProtoMessage()               {}
+func (*GetPluginInfoResponse) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{4} }
 
-func (m *GetPluginInfoResponse_Result) GetName() string {
+func (m *GetPluginInfoResponse) GetName() string {
 	if m != nil {
 		return m.Name
 	}
 	return ""
 }
 
-func (m *GetPluginInfoResponse_Result) GetVendorVersion() string {
+func (m *GetPluginInfoResponse) GetVendorVersion() string {
 	if m != nil {
 		return m.VendorVersion
 	}
 	return ""
 }
 
-func (m *GetPluginInfoResponse_Result) GetManifest() map[string]string {
+func (m *GetPluginInfoResponse) GetManifest() map[string]string {
 	if m != nil {
 		return m.Manifest
 	}
@@ -1375,12 +380,10 @@ func (m *CreateVolumeRequest) GetUserCredentials() map[string]string {
 }
 
 type CreateVolumeResponse struct {
-	// One of the following fields MUST be specified.
-	//
-	// Types that are valid to be assigned to Reply:
-	//	*CreateVolumeResponse_Result_
-	//	*CreateVolumeResponse_Error
-	Reply isCreateVolumeResponse_Reply `protobuf_oneof:"reply"`
+	// Contains all attributes of the newly created volume that are
+	// relevant to the CO along with information required by the Plugin
+	// to uniquely identify the volume. This field is REQUIRED.
+	VolumeInfo *VolumeInfo `protobuf:"bytes,1,opt,name=volume_info,json=volumeInfo" json:"volume_info,omitempty"`
 }
 
 func (m *CreateVolumeResponse) Reset()                    { *m = CreateVolumeResponse{} }
@@ -1388,128 +391,7 @@ func (m *CreateVolumeResponse) String() string            { return proto.Compact
 func (*CreateVolumeResponse) ProtoMessage()               {}
 func (*CreateVolumeResponse) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{6} }
 
-type isCreateVolumeResponse_Reply interface {
-	isCreateVolumeResponse_Reply()
-}
-
-type CreateVolumeResponse_Result_ struct {
-	Result *CreateVolumeResponse_Result `protobuf:"bytes,1,opt,name=result,oneof"`
-}
-type CreateVolumeResponse_Error struct {
-	Error *Error `protobuf:"bytes,2,opt,name=error,oneof"`
-}
-
-func (*CreateVolumeResponse_Result_) isCreateVolumeResponse_Reply() {}
-func (*CreateVolumeResponse_Error) isCreateVolumeResponse_Reply()   {}
-
-func (m *CreateVolumeResponse) GetReply() isCreateVolumeResponse_Reply {
-	if m != nil {
-		return m.Reply
-	}
-	return nil
-}
-
-func (m *CreateVolumeResponse) GetResult() *CreateVolumeResponse_Result {
-	if x, ok := m.GetReply().(*CreateVolumeResponse_Result_); ok {
-		return x.Result
-	}
-	return nil
-}
-
-func (m *CreateVolumeResponse) GetError() *Error {
-	if x, ok := m.GetReply().(*CreateVolumeResponse_Error); ok {
-		return x.Error
-	}
-	return nil
-}
-
-// XXX_OneofFuncs is for the internal use of the proto package.
-func (*CreateVolumeResponse) XXX_OneofFuncs() (func(msg proto.Message, b *proto.Buffer) error, func(msg proto.Message, tag, wire int, b *proto.Buffer) (bool, error), func(msg proto.Message) (n int), []interface{}) {
-	return _CreateVolumeResponse_OneofMarshaler, _CreateVolumeResponse_OneofUnmarshaler, _CreateVolumeResponse_OneofSizer, []interface{}{
-		(*CreateVolumeResponse_Result_)(nil),
-		(*CreateVolumeResponse_Error)(nil),
-	}
-}
-
-func _CreateVolumeResponse_OneofMarshaler(msg proto.Message, b *proto.Buffer) error {
-	m := msg.(*CreateVolumeResponse)
-	// reply
-	switch x := m.Reply.(type) {
-	case *CreateVolumeResponse_Result_:
-		b.EncodeVarint(1<<3 | proto.WireBytes)
-		if err := b.EncodeMessage(x.Result); err != nil {
-			return err
-		}
-	case *CreateVolumeResponse_Error:
-		b.EncodeVarint(2<<3 | proto.WireBytes)
-		if err := b.EncodeMessage(x.Error); err != nil {
-			return err
-		}
-	case nil:
-	default:
-		return fmt.Errorf("CreateVolumeResponse.Reply has unexpected type %T", x)
-	}
-	return nil
-}
-
-func _CreateVolumeResponse_OneofUnmarshaler(msg proto.Message, tag, wire int, b *proto.Buffer) (bool, error) {
-	m := msg.(*CreateVolumeResponse)
-	switch tag {
-	case 1: // reply.result
-		if wire != proto.WireBytes {
-			return true, proto.ErrInternalBadWireType
-		}
-		msg := new(CreateVolumeResponse_Result)
-		err := b.DecodeMessage(msg)
-		m.Reply = &CreateVolumeResponse_Result_{msg}
-		return true, err
-	case 2: // reply.error
-		if wire != proto.WireBytes {
-			return true, proto.ErrInternalBadWireType
-		}
-		msg := new(Error)
-		err := b.DecodeMessage(msg)
-		m.Reply = &CreateVolumeResponse_Error{msg}
-		return true, err
-	default:
-		return false, nil
-	}
-}
-
-func _CreateVolumeResponse_OneofSizer(msg proto.Message) (n int) {
-	m := msg.(*CreateVolumeResponse)
-	// reply
-	switch x := m.Reply.(type) {
-	case *CreateVolumeResponse_Result_:
-		s := proto.Size(x.Result)
-		n += proto.SizeVarint(1<<3 | proto.WireBytes)
-		n += proto.SizeVarint(uint64(s))
-		n += s
-	case *CreateVolumeResponse_Error:
-		s := proto.Size(x.Error)
-		n += proto.SizeVarint(2<<3 | proto.WireBytes)
-		n += proto.SizeVarint(uint64(s))
-		n += s
-	case nil:
-	default:
-		panic(fmt.Sprintf("proto: unexpected type %T in oneof", x))
-	}
-	return n
-}
-
-type CreateVolumeResponse_Result struct {
-	// Contains all attributes of the newly created volume that are
-	// relevant to the CO along with information required by the Plugin
-	// to uniquely identify the volume. This field is REQUIRED.
-	VolumeInfo *VolumeInfo `protobuf:"bytes,1,opt,name=volume_info,json=volumeInfo" json:"volume_info,omitempty"`
-}
-
-func (m *CreateVolumeResponse_Result) Reset()                    { *m = CreateVolumeResponse_Result{} }
-func (m *CreateVolumeResponse_Result) String() string            { return proto.CompactTextString(m) }
-func (*CreateVolumeResponse_Result) ProtoMessage()               {}
-func (*CreateVolumeResponse_Result) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{6, 0} }
-
-func (m *CreateVolumeResponse_Result) GetVolumeInfo() *VolumeInfo {
+func (m *CreateVolumeResponse) GetVolumeInfo() *VolumeInfo {
 	if m != nil {
 		return m.VolumeInfo
 	}
@@ -1837,135 +719,12 @@ func (m *DeleteVolumeRequest) GetUserCredentials() map[string]string {
 }
 
 type DeleteVolumeResponse struct {
-	// One of the following fields MUST be specified.
-	//
-	// Types that are valid to be assigned to Reply:
-	//	*DeleteVolumeResponse_Result_
-	//	*DeleteVolumeResponse_Error
-	Reply isDeleteVolumeResponse_Reply `protobuf_oneof:"reply"`
 }
 
 func (m *DeleteVolumeResponse) Reset()                    { *m = DeleteVolumeResponse{} }
 func (m *DeleteVolumeResponse) String() string            { return proto.CompactTextString(m) }
 func (*DeleteVolumeResponse) ProtoMessage()               {}
 func (*DeleteVolumeResponse) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{11} }
-
-type isDeleteVolumeResponse_Reply interface {
-	isDeleteVolumeResponse_Reply()
-}
-
-type DeleteVolumeResponse_Result_ struct {
-	Result *DeleteVolumeResponse_Result `protobuf:"bytes,1,opt,name=result,oneof"`
-}
-type DeleteVolumeResponse_Error struct {
-	Error *Error `protobuf:"bytes,2,opt,name=error,oneof"`
-}
-
-func (*DeleteVolumeResponse_Result_) isDeleteVolumeResponse_Reply() {}
-func (*DeleteVolumeResponse_Error) isDeleteVolumeResponse_Reply()   {}
-
-func (m *DeleteVolumeResponse) GetReply() isDeleteVolumeResponse_Reply {
-	if m != nil {
-		return m.Reply
-	}
-	return nil
-}
-
-func (m *DeleteVolumeResponse) GetResult() *DeleteVolumeResponse_Result {
-	if x, ok := m.GetReply().(*DeleteVolumeResponse_Result_); ok {
-		return x.Result
-	}
-	return nil
-}
-
-func (m *DeleteVolumeResponse) GetError() *Error {
-	if x, ok := m.GetReply().(*DeleteVolumeResponse_Error); ok {
-		return x.Error
-	}
-	return nil
-}
-
-// XXX_OneofFuncs is for the internal use of the proto package.
-func (*DeleteVolumeResponse) XXX_OneofFuncs() (func(msg proto.Message, b *proto.Buffer) error, func(msg proto.Message, tag, wire int, b *proto.Buffer) (bool, error), func(msg proto.Message) (n int), []interface{}) {
-	return _DeleteVolumeResponse_OneofMarshaler, _DeleteVolumeResponse_OneofUnmarshaler, _DeleteVolumeResponse_OneofSizer, []interface{}{
-		(*DeleteVolumeResponse_Result_)(nil),
-		(*DeleteVolumeResponse_Error)(nil),
-	}
-}
-
-func _DeleteVolumeResponse_OneofMarshaler(msg proto.Message, b *proto.Buffer) error {
-	m := msg.(*DeleteVolumeResponse)
-	// reply
-	switch x := m.Reply.(type) {
-	case *DeleteVolumeResponse_Result_:
-		b.EncodeVarint(1<<3 | proto.WireBytes)
-		if err := b.EncodeMessage(x.Result); err != nil {
-			return err
-		}
-	case *DeleteVolumeResponse_Error:
-		b.EncodeVarint(2<<3 | proto.WireBytes)
-		if err := b.EncodeMessage(x.Error); err != nil {
-			return err
-		}
-	case nil:
-	default:
-		return fmt.Errorf("DeleteVolumeResponse.Reply has unexpected type %T", x)
-	}
-	return nil
-}
-
-func _DeleteVolumeResponse_OneofUnmarshaler(msg proto.Message, tag, wire int, b *proto.Buffer) (bool, error) {
-	m := msg.(*DeleteVolumeResponse)
-	switch tag {
-	case 1: // reply.result
-		if wire != proto.WireBytes {
-			return true, proto.ErrInternalBadWireType
-		}
-		msg := new(DeleteVolumeResponse_Result)
-		err := b.DecodeMessage(msg)
-		m.Reply = &DeleteVolumeResponse_Result_{msg}
-		return true, err
-	case 2: // reply.error
-		if wire != proto.WireBytes {
-			return true, proto.ErrInternalBadWireType
-		}
-		msg := new(Error)
-		err := b.DecodeMessage(msg)
-		m.Reply = &DeleteVolumeResponse_Error{msg}
-		return true, err
-	default:
-		return false, nil
-	}
-}
-
-func _DeleteVolumeResponse_OneofSizer(msg proto.Message) (n int) {
-	m := msg.(*DeleteVolumeResponse)
-	// reply
-	switch x := m.Reply.(type) {
-	case *DeleteVolumeResponse_Result_:
-		s := proto.Size(x.Result)
-		n += proto.SizeVarint(1<<3 | proto.WireBytes)
-		n += proto.SizeVarint(uint64(s))
-		n += s
-	case *DeleteVolumeResponse_Error:
-		s := proto.Size(x.Error)
-		n += proto.SizeVarint(2<<3 | proto.WireBytes)
-		n += proto.SizeVarint(uint64(s))
-		n += s
-	case nil:
-	default:
-		panic(fmt.Sprintf("proto: unexpected type %T in oneof", x))
-	}
-	return n
-}
-
-type DeleteVolumeResponse_Result struct {
-}
-
-func (m *DeleteVolumeResponse_Result) Reset()                    { *m = DeleteVolumeResponse_Result{} }
-func (m *DeleteVolumeResponse_Result) String() string            { return proto.CompactTextString(m) }
-func (*DeleteVolumeResponse_Result) ProtoMessage()               {}
-func (*DeleteVolumeResponse_Result) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{11, 0} }
 
 // //////
 // //////
@@ -1977,7 +736,7 @@ type ControllerPublishVolumeRequest struct {
 	VolumeId string `protobuf:"bytes,2,opt,name=volume_id,json=volumeId" json:"volume_id,omitempty"`
 	// The ID of the node. This field is OPTIONAL. The CO SHALL set (or
 	// clear) this field to match the node ID returned by `GetNodeID`.
-	// `GetNodeID` is allowed to omit node ID from a successful `Result`;
+	// `GetNodeID` is allowed to omit node ID from a successful response;
 	// in such cases the CO SHALL NOT specify this field.
 	NodeId string `protobuf:"bytes,3,opt,name=node_id,json=nodeId" json:"node_id,omitempty"`
 	// The capability of the volume the CO expects the volume to have.
@@ -2060,12 +819,10 @@ func (m *ControllerPublishVolumeRequest) GetVolumeAttributes() map[string]string
 }
 
 type ControllerPublishVolumeResponse struct {
-	// One of the following fields MUST be specified.
-	//
-	// Types that are valid to be assigned to Reply:
-	//	*ControllerPublishVolumeResponse_Result_
-	//	*ControllerPublishVolumeResponse_Error
-	Reply isControllerPublishVolumeResponse_Reply `protobuf_oneof:"reply"`
+	// The SP specific information that will be passed to the Plugin in
+	// the subsequent `NodePublishVolume` call for the given volume.
+	// This information is opaque to the CO. This field is OPTIONAL.
+	PublishVolumeInfo map[string]string `protobuf:"bytes,1,rep,name=publish_volume_info,json=publishVolumeInfo" json:"publish_volume_info,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
 }
 
 func (m *ControllerPublishVolumeResponse) Reset()         { *m = ControllerPublishVolumeResponse{} }
@@ -2075,132 +832,7 @@ func (*ControllerPublishVolumeResponse) Descriptor() ([]byte, []int) {
 	return fileDescriptor0, []int{13}
 }
 
-type isControllerPublishVolumeResponse_Reply interface {
-	isControllerPublishVolumeResponse_Reply()
-}
-
-type ControllerPublishVolumeResponse_Result_ struct {
-	Result *ControllerPublishVolumeResponse_Result `protobuf:"bytes,1,opt,name=result,oneof"`
-}
-type ControllerPublishVolumeResponse_Error struct {
-	Error *Error `protobuf:"bytes,2,opt,name=error,oneof"`
-}
-
-func (*ControllerPublishVolumeResponse_Result_) isControllerPublishVolumeResponse_Reply() {}
-func (*ControllerPublishVolumeResponse_Error) isControllerPublishVolumeResponse_Reply()   {}
-
-func (m *ControllerPublishVolumeResponse) GetReply() isControllerPublishVolumeResponse_Reply {
-	if m != nil {
-		return m.Reply
-	}
-	return nil
-}
-
-func (m *ControllerPublishVolumeResponse) GetResult() *ControllerPublishVolumeResponse_Result {
-	if x, ok := m.GetReply().(*ControllerPublishVolumeResponse_Result_); ok {
-		return x.Result
-	}
-	return nil
-}
-
-func (m *ControllerPublishVolumeResponse) GetError() *Error {
-	if x, ok := m.GetReply().(*ControllerPublishVolumeResponse_Error); ok {
-		return x.Error
-	}
-	return nil
-}
-
-// XXX_OneofFuncs is for the internal use of the proto package.
-func (*ControllerPublishVolumeResponse) XXX_OneofFuncs() (func(msg proto.Message, b *proto.Buffer) error, func(msg proto.Message, tag, wire int, b *proto.Buffer) (bool, error), func(msg proto.Message) (n int), []interface{}) {
-	return _ControllerPublishVolumeResponse_OneofMarshaler, _ControllerPublishVolumeResponse_OneofUnmarshaler, _ControllerPublishVolumeResponse_OneofSizer, []interface{}{
-		(*ControllerPublishVolumeResponse_Result_)(nil),
-		(*ControllerPublishVolumeResponse_Error)(nil),
-	}
-}
-
-func _ControllerPublishVolumeResponse_OneofMarshaler(msg proto.Message, b *proto.Buffer) error {
-	m := msg.(*ControllerPublishVolumeResponse)
-	// reply
-	switch x := m.Reply.(type) {
-	case *ControllerPublishVolumeResponse_Result_:
-		b.EncodeVarint(1<<3 | proto.WireBytes)
-		if err := b.EncodeMessage(x.Result); err != nil {
-			return err
-		}
-	case *ControllerPublishVolumeResponse_Error:
-		b.EncodeVarint(2<<3 | proto.WireBytes)
-		if err := b.EncodeMessage(x.Error); err != nil {
-			return err
-		}
-	case nil:
-	default:
-		return fmt.Errorf("ControllerPublishVolumeResponse.Reply has unexpected type %T", x)
-	}
-	return nil
-}
-
-func _ControllerPublishVolumeResponse_OneofUnmarshaler(msg proto.Message, tag, wire int, b *proto.Buffer) (bool, error) {
-	m := msg.(*ControllerPublishVolumeResponse)
-	switch tag {
-	case 1: // reply.result
-		if wire != proto.WireBytes {
-			return true, proto.ErrInternalBadWireType
-		}
-		msg := new(ControllerPublishVolumeResponse_Result)
-		err := b.DecodeMessage(msg)
-		m.Reply = &ControllerPublishVolumeResponse_Result_{msg}
-		return true, err
-	case 2: // reply.error
-		if wire != proto.WireBytes {
-			return true, proto.ErrInternalBadWireType
-		}
-		msg := new(Error)
-		err := b.DecodeMessage(msg)
-		m.Reply = &ControllerPublishVolumeResponse_Error{msg}
-		return true, err
-	default:
-		return false, nil
-	}
-}
-
-func _ControllerPublishVolumeResponse_OneofSizer(msg proto.Message) (n int) {
-	m := msg.(*ControllerPublishVolumeResponse)
-	// reply
-	switch x := m.Reply.(type) {
-	case *ControllerPublishVolumeResponse_Result_:
-		s := proto.Size(x.Result)
-		n += proto.SizeVarint(1<<3 | proto.WireBytes)
-		n += proto.SizeVarint(uint64(s))
-		n += s
-	case *ControllerPublishVolumeResponse_Error:
-		s := proto.Size(x.Error)
-		n += proto.SizeVarint(2<<3 | proto.WireBytes)
-		n += proto.SizeVarint(uint64(s))
-		n += s
-	case nil:
-	default:
-		panic(fmt.Sprintf("proto: unexpected type %T in oneof", x))
-	}
-	return n
-}
-
-type ControllerPublishVolumeResponse_Result struct {
-	// The SP specific information that will be passed to the Plugin in
-	// the subsequent `NodePublishVolume` call for the given volume.
-	// This information is opaque to the CO. This field is OPTIONAL.
-	PublishVolumeInfo map[string]string `protobuf:"bytes,1,rep,name=publish_volume_info,json=publishVolumeInfo" json:"publish_volume_info,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
-}
-
-func (m *ControllerPublishVolumeResponse_Result) Reset() {
-	*m = ControllerPublishVolumeResponse_Result{}
-}
-func (m *ControllerPublishVolumeResponse_Result) String() string { return proto.CompactTextString(m) }
-func (*ControllerPublishVolumeResponse_Result) ProtoMessage()    {}
-func (*ControllerPublishVolumeResponse_Result) Descriptor() ([]byte, []int) {
-	return fileDescriptor0, []int{13, 0}
-}
-
-func (m *ControllerPublishVolumeResponse_Result) GetPublishVolumeInfo() map[string]string {
+func (m *ControllerPublishVolumeResponse) GetPublishVolumeInfo() map[string]string {
 	if m != nil {
 		return m.PublishVolumeInfo
 	}
@@ -2216,10 +848,10 @@ type ControllerUnpublishVolumeRequest struct {
 	VolumeId string `protobuf:"bytes,2,opt,name=volume_id,json=volumeId" json:"volume_id,omitempty"`
 	// The ID of the node. This field is OPTIONAL. The CO SHALL set (or
 	// clear) this field to match the node ID returned by `GetNodeID`.
-	// `GetNodeID` is allowed to omit node ID from a successful `Result`;
+	// `GetNodeID` is allowed to omit node ID from a successful response;
 	// in such cases the CO SHALL NOT specify this field.
 	//
-	// If `GetNodeID` does not omit node ID from a successful `Result`,
+	// If `GetNodeID` does not omit node ID from a successful response,
 	// the CO MAY omit this field as well, indicating that it does not
 	// know which node the volume was previously used. The Plugin SHOULD
 	// return an Error if this is not supported.
@@ -2275,12 +907,6 @@ func (m *ControllerUnpublishVolumeRequest) GetUserCredentials() map[string]strin
 }
 
 type ControllerUnpublishVolumeResponse struct {
-	// One of the following fields MUST be specified.
-	//
-	// Types that are valid to be assigned to Reply:
-	//	*ControllerUnpublishVolumeResponse_Result_
-	//	*ControllerUnpublishVolumeResponse_Error
-	Reply isControllerUnpublishVolumeResponse_Reply `protobuf_oneof:"reply"`
 }
 
 func (m *ControllerUnpublishVolumeResponse) Reset()         { *m = ControllerUnpublishVolumeResponse{} }
@@ -2288,127 +914,6 @@ func (m *ControllerUnpublishVolumeResponse) String() string { return proto.Compa
 func (*ControllerUnpublishVolumeResponse) ProtoMessage()    {}
 func (*ControllerUnpublishVolumeResponse) Descriptor() ([]byte, []int) {
 	return fileDescriptor0, []int{15}
-}
-
-type isControllerUnpublishVolumeResponse_Reply interface {
-	isControllerUnpublishVolumeResponse_Reply()
-}
-
-type ControllerUnpublishVolumeResponse_Result_ struct {
-	Result *ControllerUnpublishVolumeResponse_Result `protobuf:"bytes,1,opt,name=result,oneof"`
-}
-type ControllerUnpublishVolumeResponse_Error struct {
-	Error *Error `protobuf:"bytes,2,opt,name=error,oneof"`
-}
-
-func (*ControllerUnpublishVolumeResponse_Result_) isControllerUnpublishVolumeResponse_Reply() {}
-func (*ControllerUnpublishVolumeResponse_Error) isControllerUnpublishVolumeResponse_Reply()   {}
-
-func (m *ControllerUnpublishVolumeResponse) GetReply() isControllerUnpublishVolumeResponse_Reply {
-	if m != nil {
-		return m.Reply
-	}
-	return nil
-}
-
-func (m *ControllerUnpublishVolumeResponse) GetResult() *ControllerUnpublishVolumeResponse_Result {
-	if x, ok := m.GetReply().(*ControllerUnpublishVolumeResponse_Result_); ok {
-		return x.Result
-	}
-	return nil
-}
-
-func (m *ControllerUnpublishVolumeResponse) GetError() *Error {
-	if x, ok := m.GetReply().(*ControllerUnpublishVolumeResponse_Error); ok {
-		return x.Error
-	}
-	return nil
-}
-
-// XXX_OneofFuncs is for the internal use of the proto package.
-func (*ControllerUnpublishVolumeResponse) XXX_OneofFuncs() (func(msg proto.Message, b *proto.Buffer) error, func(msg proto.Message, tag, wire int, b *proto.Buffer) (bool, error), func(msg proto.Message) (n int), []interface{}) {
-	return _ControllerUnpublishVolumeResponse_OneofMarshaler, _ControllerUnpublishVolumeResponse_OneofUnmarshaler, _ControllerUnpublishVolumeResponse_OneofSizer, []interface{}{
-		(*ControllerUnpublishVolumeResponse_Result_)(nil),
-		(*ControllerUnpublishVolumeResponse_Error)(nil),
-	}
-}
-
-func _ControllerUnpublishVolumeResponse_OneofMarshaler(msg proto.Message, b *proto.Buffer) error {
-	m := msg.(*ControllerUnpublishVolumeResponse)
-	// reply
-	switch x := m.Reply.(type) {
-	case *ControllerUnpublishVolumeResponse_Result_:
-		b.EncodeVarint(1<<3 | proto.WireBytes)
-		if err := b.EncodeMessage(x.Result); err != nil {
-			return err
-		}
-	case *ControllerUnpublishVolumeResponse_Error:
-		b.EncodeVarint(2<<3 | proto.WireBytes)
-		if err := b.EncodeMessage(x.Error); err != nil {
-			return err
-		}
-	case nil:
-	default:
-		return fmt.Errorf("ControllerUnpublishVolumeResponse.Reply has unexpected type %T", x)
-	}
-	return nil
-}
-
-func _ControllerUnpublishVolumeResponse_OneofUnmarshaler(msg proto.Message, tag, wire int, b *proto.Buffer) (bool, error) {
-	m := msg.(*ControllerUnpublishVolumeResponse)
-	switch tag {
-	case 1: // reply.result
-		if wire != proto.WireBytes {
-			return true, proto.ErrInternalBadWireType
-		}
-		msg := new(ControllerUnpublishVolumeResponse_Result)
-		err := b.DecodeMessage(msg)
-		m.Reply = &ControllerUnpublishVolumeResponse_Result_{msg}
-		return true, err
-	case 2: // reply.error
-		if wire != proto.WireBytes {
-			return true, proto.ErrInternalBadWireType
-		}
-		msg := new(Error)
-		err := b.DecodeMessage(msg)
-		m.Reply = &ControllerUnpublishVolumeResponse_Error{msg}
-		return true, err
-	default:
-		return false, nil
-	}
-}
-
-func _ControllerUnpublishVolumeResponse_OneofSizer(msg proto.Message) (n int) {
-	m := msg.(*ControllerUnpublishVolumeResponse)
-	// reply
-	switch x := m.Reply.(type) {
-	case *ControllerUnpublishVolumeResponse_Result_:
-		s := proto.Size(x.Result)
-		n += proto.SizeVarint(1<<3 | proto.WireBytes)
-		n += proto.SizeVarint(uint64(s))
-		n += s
-	case *ControllerUnpublishVolumeResponse_Error:
-		s := proto.Size(x.Error)
-		n += proto.SizeVarint(2<<3 | proto.WireBytes)
-		n += proto.SizeVarint(uint64(s))
-		n += s
-	case nil:
-	default:
-		panic(fmt.Sprintf("proto: unexpected type %T in oneof", x))
-	}
-	return n
-}
-
-type ControllerUnpublishVolumeResponse_Result struct {
-}
-
-func (m *ControllerUnpublishVolumeResponse_Result) Reset() {
-	*m = ControllerUnpublishVolumeResponse_Result{}
-}
-func (m *ControllerUnpublishVolumeResponse_Result) String() string { return proto.CompactTextString(m) }
-func (*ControllerUnpublishVolumeResponse_Result) ProtoMessage()    {}
-func (*ControllerUnpublishVolumeResponse_Result) Descriptor() ([]byte, []int) {
-	return fileDescriptor0, []int{15, 0}
 }
 
 // //////
@@ -2463,131 +968,6 @@ func (m *ValidateVolumeCapabilitiesRequest) GetVolumeAttributes() map[string]str
 }
 
 type ValidateVolumeCapabilitiesResponse struct {
-	// One of the following fields MUST be specified.
-	//
-	// Types that are valid to be assigned to Reply:
-	//	*ValidateVolumeCapabilitiesResponse_Result_
-	//	*ValidateVolumeCapabilitiesResponse_Error
-	Reply isValidateVolumeCapabilitiesResponse_Reply `protobuf_oneof:"reply"`
-}
-
-func (m *ValidateVolumeCapabilitiesResponse) Reset()         { *m = ValidateVolumeCapabilitiesResponse{} }
-func (m *ValidateVolumeCapabilitiesResponse) String() string { return proto.CompactTextString(m) }
-func (*ValidateVolumeCapabilitiesResponse) ProtoMessage()    {}
-func (*ValidateVolumeCapabilitiesResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor0, []int{17}
-}
-
-type isValidateVolumeCapabilitiesResponse_Reply interface {
-	isValidateVolumeCapabilitiesResponse_Reply()
-}
-
-type ValidateVolumeCapabilitiesResponse_Result_ struct {
-	Result *ValidateVolumeCapabilitiesResponse_Result `protobuf:"bytes,1,opt,name=result,oneof"`
-}
-type ValidateVolumeCapabilitiesResponse_Error struct {
-	Error *Error `protobuf:"bytes,2,opt,name=error,oneof"`
-}
-
-func (*ValidateVolumeCapabilitiesResponse_Result_) isValidateVolumeCapabilitiesResponse_Reply() {}
-func (*ValidateVolumeCapabilitiesResponse_Error) isValidateVolumeCapabilitiesResponse_Reply()   {}
-
-func (m *ValidateVolumeCapabilitiesResponse) GetReply() isValidateVolumeCapabilitiesResponse_Reply {
-	if m != nil {
-		return m.Reply
-	}
-	return nil
-}
-
-func (m *ValidateVolumeCapabilitiesResponse) GetResult() *ValidateVolumeCapabilitiesResponse_Result {
-	if x, ok := m.GetReply().(*ValidateVolumeCapabilitiesResponse_Result_); ok {
-		return x.Result
-	}
-	return nil
-}
-
-func (m *ValidateVolumeCapabilitiesResponse) GetError() *Error {
-	if x, ok := m.GetReply().(*ValidateVolumeCapabilitiesResponse_Error); ok {
-		return x.Error
-	}
-	return nil
-}
-
-// XXX_OneofFuncs is for the internal use of the proto package.
-func (*ValidateVolumeCapabilitiesResponse) XXX_OneofFuncs() (func(msg proto.Message, b *proto.Buffer) error, func(msg proto.Message, tag, wire int, b *proto.Buffer) (bool, error), func(msg proto.Message) (n int), []interface{}) {
-	return _ValidateVolumeCapabilitiesResponse_OneofMarshaler, _ValidateVolumeCapabilitiesResponse_OneofUnmarshaler, _ValidateVolumeCapabilitiesResponse_OneofSizer, []interface{}{
-		(*ValidateVolumeCapabilitiesResponse_Result_)(nil),
-		(*ValidateVolumeCapabilitiesResponse_Error)(nil),
-	}
-}
-
-func _ValidateVolumeCapabilitiesResponse_OneofMarshaler(msg proto.Message, b *proto.Buffer) error {
-	m := msg.(*ValidateVolumeCapabilitiesResponse)
-	// reply
-	switch x := m.Reply.(type) {
-	case *ValidateVolumeCapabilitiesResponse_Result_:
-		b.EncodeVarint(1<<3 | proto.WireBytes)
-		if err := b.EncodeMessage(x.Result); err != nil {
-			return err
-		}
-	case *ValidateVolumeCapabilitiesResponse_Error:
-		b.EncodeVarint(2<<3 | proto.WireBytes)
-		if err := b.EncodeMessage(x.Error); err != nil {
-			return err
-		}
-	case nil:
-	default:
-		return fmt.Errorf("ValidateVolumeCapabilitiesResponse.Reply has unexpected type %T", x)
-	}
-	return nil
-}
-
-func _ValidateVolumeCapabilitiesResponse_OneofUnmarshaler(msg proto.Message, tag, wire int, b *proto.Buffer) (bool, error) {
-	m := msg.(*ValidateVolumeCapabilitiesResponse)
-	switch tag {
-	case 1: // reply.result
-		if wire != proto.WireBytes {
-			return true, proto.ErrInternalBadWireType
-		}
-		msg := new(ValidateVolumeCapabilitiesResponse_Result)
-		err := b.DecodeMessage(msg)
-		m.Reply = &ValidateVolumeCapabilitiesResponse_Result_{msg}
-		return true, err
-	case 2: // reply.error
-		if wire != proto.WireBytes {
-			return true, proto.ErrInternalBadWireType
-		}
-		msg := new(Error)
-		err := b.DecodeMessage(msg)
-		m.Reply = &ValidateVolumeCapabilitiesResponse_Error{msg}
-		return true, err
-	default:
-		return false, nil
-	}
-}
-
-func _ValidateVolumeCapabilitiesResponse_OneofSizer(msg proto.Message) (n int) {
-	m := msg.(*ValidateVolumeCapabilitiesResponse)
-	// reply
-	switch x := m.Reply.(type) {
-	case *ValidateVolumeCapabilitiesResponse_Result_:
-		s := proto.Size(x.Result)
-		n += proto.SizeVarint(1<<3 | proto.WireBytes)
-		n += proto.SizeVarint(uint64(s))
-		n += s
-	case *ValidateVolumeCapabilitiesResponse_Error:
-		s := proto.Size(x.Error)
-		n += proto.SizeVarint(2<<3 | proto.WireBytes)
-		n += proto.SizeVarint(uint64(s))
-		n += s
-	case nil:
-	default:
-		panic(fmt.Sprintf("proto: unexpected type %T in oneof", x))
-	}
-	return n
-}
-
-type ValidateVolumeCapabilitiesResponse_Result struct {
 	// True if the Plugin supports the specified capabilities for the
 	// given volume. This field is REQUIRED.
 	Supported bool `protobuf:"varint,1,opt,name=supported" json:"supported,omitempty"`
@@ -2597,23 +977,21 @@ type ValidateVolumeCapabilitiesResponse_Result struct {
 	Message string `protobuf:"bytes,2,opt,name=message" json:"message,omitempty"`
 }
 
-func (m *ValidateVolumeCapabilitiesResponse_Result) Reset() {
-	*m = ValidateVolumeCapabilitiesResponse_Result{}
-}
-func (m *ValidateVolumeCapabilitiesResponse_Result) String() string { return proto.CompactTextString(m) }
-func (*ValidateVolumeCapabilitiesResponse_Result) ProtoMessage()    {}
-func (*ValidateVolumeCapabilitiesResponse_Result) Descriptor() ([]byte, []int) {
-	return fileDescriptor0, []int{17, 0}
+func (m *ValidateVolumeCapabilitiesResponse) Reset()         { *m = ValidateVolumeCapabilitiesResponse{} }
+func (m *ValidateVolumeCapabilitiesResponse) String() string { return proto.CompactTextString(m) }
+func (*ValidateVolumeCapabilitiesResponse) ProtoMessage()    {}
+func (*ValidateVolumeCapabilitiesResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor0, []int{17}
 }
 
-func (m *ValidateVolumeCapabilitiesResponse_Result) GetSupported() bool {
+func (m *ValidateVolumeCapabilitiesResponse) GetSupported() bool {
 	if m != nil {
 		return m.Supported
 	}
 	return false
 }
 
-func (m *ValidateVolumeCapabilitiesResponse_Result) GetMessage() string {
+func (m *ValidateVolumeCapabilitiesResponse) GetMessage() string {
 	if m != nil {
 		return m.Message
 	}
@@ -2667,130 +1045,7 @@ func (m *ListVolumesRequest) GetStartingToken() string {
 }
 
 type ListVolumesResponse struct {
-	// One of the following fields MUST be specified.
-	//
-	// Types that are valid to be assigned to Reply:
-	//	*ListVolumesResponse_Result_
-	//	*ListVolumesResponse_Error
-	Reply isListVolumesResponse_Reply `protobuf_oneof:"reply"`
-}
-
-func (m *ListVolumesResponse) Reset()                    { *m = ListVolumesResponse{} }
-func (m *ListVolumesResponse) String() string            { return proto.CompactTextString(m) }
-func (*ListVolumesResponse) ProtoMessage()               {}
-func (*ListVolumesResponse) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{19} }
-
-type isListVolumesResponse_Reply interface {
-	isListVolumesResponse_Reply()
-}
-
-type ListVolumesResponse_Result_ struct {
-	Result *ListVolumesResponse_Result `protobuf:"bytes,1,opt,name=result,oneof"`
-}
-type ListVolumesResponse_Error struct {
-	Error *Error `protobuf:"bytes,2,opt,name=error,oneof"`
-}
-
-func (*ListVolumesResponse_Result_) isListVolumesResponse_Reply() {}
-func (*ListVolumesResponse_Error) isListVolumesResponse_Reply()   {}
-
-func (m *ListVolumesResponse) GetReply() isListVolumesResponse_Reply {
-	if m != nil {
-		return m.Reply
-	}
-	return nil
-}
-
-func (m *ListVolumesResponse) GetResult() *ListVolumesResponse_Result {
-	if x, ok := m.GetReply().(*ListVolumesResponse_Result_); ok {
-		return x.Result
-	}
-	return nil
-}
-
-func (m *ListVolumesResponse) GetError() *Error {
-	if x, ok := m.GetReply().(*ListVolumesResponse_Error); ok {
-		return x.Error
-	}
-	return nil
-}
-
-// XXX_OneofFuncs is for the internal use of the proto package.
-func (*ListVolumesResponse) XXX_OneofFuncs() (func(msg proto.Message, b *proto.Buffer) error, func(msg proto.Message, tag, wire int, b *proto.Buffer) (bool, error), func(msg proto.Message) (n int), []interface{}) {
-	return _ListVolumesResponse_OneofMarshaler, _ListVolumesResponse_OneofUnmarshaler, _ListVolumesResponse_OneofSizer, []interface{}{
-		(*ListVolumesResponse_Result_)(nil),
-		(*ListVolumesResponse_Error)(nil),
-	}
-}
-
-func _ListVolumesResponse_OneofMarshaler(msg proto.Message, b *proto.Buffer) error {
-	m := msg.(*ListVolumesResponse)
-	// reply
-	switch x := m.Reply.(type) {
-	case *ListVolumesResponse_Result_:
-		b.EncodeVarint(1<<3 | proto.WireBytes)
-		if err := b.EncodeMessage(x.Result); err != nil {
-			return err
-		}
-	case *ListVolumesResponse_Error:
-		b.EncodeVarint(2<<3 | proto.WireBytes)
-		if err := b.EncodeMessage(x.Error); err != nil {
-			return err
-		}
-	case nil:
-	default:
-		return fmt.Errorf("ListVolumesResponse.Reply has unexpected type %T", x)
-	}
-	return nil
-}
-
-func _ListVolumesResponse_OneofUnmarshaler(msg proto.Message, tag, wire int, b *proto.Buffer) (bool, error) {
-	m := msg.(*ListVolumesResponse)
-	switch tag {
-	case 1: // reply.result
-		if wire != proto.WireBytes {
-			return true, proto.ErrInternalBadWireType
-		}
-		msg := new(ListVolumesResponse_Result)
-		err := b.DecodeMessage(msg)
-		m.Reply = &ListVolumesResponse_Result_{msg}
-		return true, err
-	case 2: // reply.error
-		if wire != proto.WireBytes {
-			return true, proto.ErrInternalBadWireType
-		}
-		msg := new(Error)
-		err := b.DecodeMessage(msg)
-		m.Reply = &ListVolumesResponse_Error{msg}
-		return true, err
-	default:
-		return false, nil
-	}
-}
-
-func _ListVolumesResponse_OneofSizer(msg proto.Message) (n int) {
-	m := msg.(*ListVolumesResponse)
-	// reply
-	switch x := m.Reply.(type) {
-	case *ListVolumesResponse_Result_:
-		s := proto.Size(x.Result)
-		n += proto.SizeVarint(1<<3 | proto.WireBytes)
-		n += proto.SizeVarint(uint64(s))
-		n += s
-	case *ListVolumesResponse_Error:
-		s := proto.Size(x.Error)
-		n += proto.SizeVarint(2<<3 | proto.WireBytes)
-		n += proto.SizeVarint(uint64(s))
-		n += s
-	case nil:
-	default:
-		panic(fmt.Sprintf("proto: unexpected type %T in oneof", x))
-	}
-	return n
-}
-
-type ListVolumesResponse_Result struct {
-	Entries []*ListVolumesResponse_Result_Entry `protobuf:"bytes,1,rep,name=entries" json:"entries,omitempty"`
+	Entries []*ListVolumesResponse_Entry `protobuf:"bytes,1,rep,name=entries" json:"entries,omitempty"`
 	// This token allows you to get the next page of entries for
 	// `ListVolumes` request. If the number of entries is larger than
 	// `max_entries`, use the `next_token` as a value for the
@@ -2800,37 +1055,35 @@ type ListVolumesResponse_Result struct {
 	NextToken string `protobuf:"bytes,2,opt,name=next_token,json=nextToken" json:"next_token,omitempty"`
 }
 
-func (m *ListVolumesResponse_Result) Reset()                    { *m = ListVolumesResponse_Result{} }
-func (m *ListVolumesResponse_Result) String() string            { return proto.CompactTextString(m) }
-func (*ListVolumesResponse_Result) ProtoMessage()               {}
-func (*ListVolumesResponse_Result) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{19, 0} }
+func (m *ListVolumesResponse) Reset()                    { *m = ListVolumesResponse{} }
+func (m *ListVolumesResponse) String() string            { return proto.CompactTextString(m) }
+func (*ListVolumesResponse) ProtoMessage()               {}
+func (*ListVolumesResponse) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{19} }
 
-func (m *ListVolumesResponse_Result) GetEntries() []*ListVolumesResponse_Result_Entry {
+func (m *ListVolumesResponse) GetEntries() []*ListVolumesResponse_Entry {
 	if m != nil {
 		return m.Entries
 	}
 	return nil
 }
 
-func (m *ListVolumesResponse_Result) GetNextToken() string {
+func (m *ListVolumesResponse) GetNextToken() string {
 	if m != nil {
 		return m.NextToken
 	}
 	return ""
 }
 
-type ListVolumesResponse_Result_Entry struct {
+type ListVolumesResponse_Entry struct {
 	VolumeInfo *VolumeInfo `protobuf:"bytes,1,opt,name=volume_info,json=volumeInfo" json:"volume_info,omitempty"`
 }
 
-func (m *ListVolumesResponse_Result_Entry) Reset()         { *m = ListVolumesResponse_Result_Entry{} }
-func (m *ListVolumesResponse_Result_Entry) String() string { return proto.CompactTextString(m) }
-func (*ListVolumesResponse_Result_Entry) ProtoMessage()    {}
-func (*ListVolumesResponse_Result_Entry) Descriptor() ([]byte, []int) {
-	return fileDescriptor0, []int{19, 0, 0}
-}
+func (m *ListVolumesResponse_Entry) Reset()                    { *m = ListVolumesResponse_Entry{} }
+func (m *ListVolumesResponse_Entry) String() string            { return proto.CompactTextString(m) }
+func (*ListVolumesResponse_Entry) ProtoMessage()               {}
+func (*ListVolumesResponse_Entry) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{19, 0} }
 
-func (m *ListVolumesResponse_Result_Entry) GetVolumeInfo() *VolumeInfo {
+func (m *ListVolumesResponse_Entry) GetVolumeInfo() *VolumeInfo {
 	if m != nil {
 		return m.VolumeInfo
 	}
@@ -2882,129 +1135,6 @@ func (m *GetCapacityRequest) GetParameters() map[string]string {
 }
 
 type GetCapacityResponse struct {
-	// One of the following fields MUST be specified.
-	//
-	// Types that are valid to be assigned to Reply:
-	//	*GetCapacityResponse_Result_
-	//	*GetCapacityResponse_Error
-	Reply isGetCapacityResponse_Reply `protobuf_oneof:"reply"`
-}
-
-func (m *GetCapacityResponse) Reset()                    { *m = GetCapacityResponse{} }
-func (m *GetCapacityResponse) String() string            { return proto.CompactTextString(m) }
-func (*GetCapacityResponse) ProtoMessage()               {}
-func (*GetCapacityResponse) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{21} }
-
-type isGetCapacityResponse_Reply interface {
-	isGetCapacityResponse_Reply()
-}
-
-type GetCapacityResponse_Result_ struct {
-	Result *GetCapacityResponse_Result `protobuf:"bytes,1,opt,name=result,oneof"`
-}
-type GetCapacityResponse_Error struct {
-	Error *Error `protobuf:"bytes,2,opt,name=error,oneof"`
-}
-
-func (*GetCapacityResponse_Result_) isGetCapacityResponse_Reply() {}
-func (*GetCapacityResponse_Error) isGetCapacityResponse_Reply()   {}
-
-func (m *GetCapacityResponse) GetReply() isGetCapacityResponse_Reply {
-	if m != nil {
-		return m.Reply
-	}
-	return nil
-}
-
-func (m *GetCapacityResponse) GetResult() *GetCapacityResponse_Result {
-	if x, ok := m.GetReply().(*GetCapacityResponse_Result_); ok {
-		return x.Result
-	}
-	return nil
-}
-
-func (m *GetCapacityResponse) GetError() *Error {
-	if x, ok := m.GetReply().(*GetCapacityResponse_Error); ok {
-		return x.Error
-	}
-	return nil
-}
-
-// XXX_OneofFuncs is for the internal use of the proto package.
-func (*GetCapacityResponse) XXX_OneofFuncs() (func(msg proto.Message, b *proto.Buffer) error, func(msg proto.Message, tag, wire int, b *proto.Buffer) (bool, error), func(msg proto.Message) (n int), []interface{}) {
-	return _GetCapacityResponse_OneofMarshaler, _GetCapacityResponse_OneofUnmarshaler, _GetCapacityResponse_OneofSizer, []interface{}{
-		(*GetCapacityResponse_Result_)(nil),
-		(*GetCapacityResponse_Error)(nil),
-	}
-}
-
-func _GetCapacityResponse_OneofMarshaler(msg proto.Message, b *proto.Buffer) error {
-	m := msg.(*GetCapacityResponse)
-	// reply
-	switch x := m.Reply.(type) {
-	case *GetCapacityResponse_Result_:
-		b.EncodeVarint(1<<3 | proto.WireBytes)
-		if err := b.EncodeMessage(x.Result); err != nil {
-			return err
-		}
-	case *GetCapacityResponse_Error:
-		b.EncodeVarint(2<<3 | proto.WireBytes)
-		if err := b.EncodeMessage(x.Error); err != nil {
-			return err
-		}
-	case nil:
-	default:
-		return fmt.Errorf("GetCapacityResponse.Reply has unexpected type %T", x)
-	}
-	return nil
-}
-
-func _GetCapacityResponse_OneofUnmarshaler(msg proto.Message, tag, wire int, b *proto.Buffer) (bool, error) {
-	m := msg.(*GetCapacityResponse)
-	switch tag {
-	case 1: // reply.result
-		if wire != proto.WireBytes {
-			return true, proto.ErrInternalBadWireType
-		}
-		msg := new(GetCapacityResponse_Result)
-		err := b.DecodeMessage(msg)
-		m.Reply = &GetCapacityResponse_Result_{msg}
-		return true, err
-	case 2: // reply.error
-		if wire != proto.WireBytes {
-			return true, proto.ErrInternalBadWireType
-		}
-		msg := new(Error)
-		err := b.DecodeMessage(msg)
-		m.Reply = &GetCapacityResponse_Error{msg}
-		return true, err
-	default:
-		return false, nil
-	}
-}
-
-func _GetCapacityResponse_OneofSizer(msg proto.Message) (n int) {
-	m := msg.(*GetCapacityResponse)
-	// reply
-	switch x := m.Reply.(type) {
-	case *GetCapacityResponse_Result_:
-		s := proto.Size(x.Result)
-		n += proto.SizeVarint(1<<3 | proto.WireBytes)
-		n += proto.SizeVarint(uint64(s))
-		n += s
-	case *GetCapacityResponse_Error:
-		s := proto.Size(x.Error)
-		n += proto.SizeVarint(2<<3 | proto.WireBytes)
-		n += proto.SizeVarint(uint64(s))
-		n += s
-	case nil:
-	default:
-		panic(fmt.Sprintf("proto: unexpected type %T in oneof", x))
-	}
-	return n
-}
-
-type GetCapacityResponse_Result struct {
 	// The available capacity of the storage that can be used to
 	// provision volumes. If `volume_capabilities` or `parameters` is
 	// specified in the request, the Plugin SHALL take those into
@@ -3013,12 +1143,12 @@ type GetCapacityResponse_Result struct {
 	AvailableCapacity uint64 `protobuf:"varint,1,opt,name=available_capacity,json=availableCapacity" json:"available_capacity,omitempty"`
 }
 
-func (m *GetCapacityResponse_Result) Reset()                    { *m = GetCapacityResponse_Result{} }
-func (m *GetCapacityResponse_Result) String() string            { return proto.CompactTextString(m) }
-func (*GetCapacityResponse_Result) ProtoMessage()               {}
-func (*GetCapacityResponse_Result) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{21, 0} }
+func (m *GetCapacityResponse) Reset()                    { *m = GetCapacityResponse{} }
+func (m *GetCapacityResponse) String() string            { return proto.CompactTextString(m) }
+func (*GetCapacityResponse) ProtoMessage()               {}
+func (*GetCapacityResponse) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{21} }
 
-func (m *GetCapacityResponse_Result) GetAvailableCapacity() uint64 {
+func (m *GetCapacityResponse) GetAvailableCapacity() uint64 {
 	if m != nil {
 		return m.AvailableCapacity
 	}
@@ -3045,137 +1175,12 @@ func (m *ControllerProbeRequest) GetVersion() *Version {
 }
 
 type ControllerProbeResponse struct {
-	// One of the following fields MUST be specified.
-	//
-	// Types that are valid to be assigned to Reply:
-	//	*ControllerProbeResponse_Result_
-	//	*ControllerProbeResponse_Error
-	Reply isControllerProbeResponse_Reply `protobuf_oneof:"reply"`
 }
 
 func (m *ControllerProbeResponse) Reset()                    { *m = ControllerProbeResponse{} }
 func (m *ControllerProbeResponse) String() string            { return proto.CompactTextString(m) }
 func (*ControllerProbeResponse) ProtoMessage()               {}
 func (*ControllerProbeResponse) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{23} }
-
-type isControllerProbeResponse_Reply interface {
-	isControllerProbeResponse_Reply()
-}
-
-type ControllerProbeResponse_Result_ struct {
-	Result *ControllerProbeResponse_Result `protobuf:"bytes,1,opt,name=result,oneof"`
-}
-type ControllerProbeResponse_Error struct {
-	Error *Error `protobuf:"bytes,2,opt,name=error,oneof"`
-}
-
-func (*ControllerProbeResponse_Result_) isControllerProbeResponse_Reply() {}
-func (*ControllerProbeResponse_Error) isControllerProbeResponse_Reply()   {}
-
-func (m *ControllerProbeResponse) GetReply() isControllerProbeResponse_Reply {
-	if m != nil {
-		return m.Reply
-	}
-	return nil
-}
-
-func (m *ControllerProbeResponse) GetResult() *ControllerProbeResponse_Result {
-	if x, ok := m.GetReply().(*ControllerProbeResponse_Result_); ok {
-		return x.Result
-	}
-	return nil
-}
-
-func (m *ControllerProbeResponse) GetError() *Error {
-	if x, ok := m.GetReply().(*ControllerProbeResponse_Error); ok {
-		return x.Error
-	}
-	return nil
-}
-
-// XXX_OneofFuncs is for the internal use of the proto package.
-func (*ControllerProbeResponse) XXX_OneofFuncs() (func(msg proto.Message, b *proto.Buffer) error, func(msg proto.Message, tag, wire int, b *proto.Buffer) (bool, error), func(msg proto.Message) (n int), []interface{}) {
-	return _ControllerProbeResponse_OneofMarshaler, _ControllerProbeResponse_OneofUnmarshaler, _ControllerProbeResponse_OneofSizer, []interface{}{
-		(*ControllerProbeResponse_Result_)(nil),
-		(*ControllerProbeResponse_Error)(nil),
-	}
-}
-
-func _ControllerProbeResponse_OneofMarshaler(msg proto.Message, b *proto.Buffer) error {
-	m := msg.(*ControllerProbeResponse)
-	// reply
-	switch x := m.Reply.(type) {
-	case *ControllerProbeResponse_Result_:
-		b.EncodeVarint(1<<3 | proto.WireBytes)
-		if err := b.EncodeMessage(x.Result); err != nil {
-			return err
-		}
-	case *ControllerProbeResponse_Error:
-		b.EncodeVarint(2<<3 | proto.WireBytes)
-		if err := b.EncodeMessage(x.Error); err != nil {
-			return err
-		}
-	case nil:
-	default:
-		return fmt.Errorf("ControllerProbeResponse.Reply has unexpected type %T", x)
-	}
-	return nil
-}
-
-func _ControllerProbeResponse_OneofUnmarshaler(msg proto.Message, tag, wire int, b *proto.Buffer) (bool, error) {
-	m := msg.(*ControllerProbeResponse)
-	switch tag {
-	case 1: // reply.result
-		if wire != proto.WireBytes {
-			return true, proto.ErrInternalBadWireType
-		}
-		msg := new(ControllerProbeResponse_Result)
-		err := b.DecodeMessage(msg)
-		m.Reply = &ControllerProbeResponse_Result_{msg}
-		return true, err
-	case 2: // reply.error
-		if wire != proto.WireBytes {
-			return true, proto.ErrInternalBadWireType
-		}
-		msg := new(Error)
-		err := b.DecodeMessage(msg)
-		m.Reply = &ControllerProbeResponse_Error{msg}
-		return true, err
-	default:
-		return false, nil
-	}
-}
-
-func _ControllerProbeResponse_OneofSizer(msg proto.Message) (n int) {
-	m := msg.(*ControllerProbeResponse)
-	// reply
-	switch x := m.Reply.(type) {
-	case *ControllerProbeResponse_Result_:
-		s := proto.Size(x.Result)
-		n += proto.SizeVarint(1<<3 | proto.WireBytes)
-		n += proto.SizeVarint(uint64(s))
-		n += s
-	case *ControllerProbeResponse_Error:
-		s := proto.Size(x.Error)
-		n += proto.SizeVarint(2<<3 | proto.WireBytes)
-		n += proto.SizeVarint(uint64(s))
-		n += s
-	case nil:
-	default:
-		panic(fmt.Sprintf("proto: unexpected type %T in oneof", x))
-	}
-	return n
-}
-
-type ControllerProbeResponse_Result struct {
-}
-
-func (m *ControllerProbeResponse_Result) Reset()         { *m = ControllerProbeResponse_Result{} }
-func (m *ControllerProbeResponse_Result) String() string { return proto.CompactTextString(m) }
-func (*ControllerProbeResponse_Result) ProtoMessage()    {}
-func (*ControllerProbeResponse_Result) Descriptor() ([]byte, []int) {
-	return fileDescriptor0, []int{23, 0}
-}
 
 // //////
 // //////
@@ -3199,12 +1204,9 @@ func (m *ControllerGetCapabilitiesRequest) GetVersion() *Version {
 }
 
 type ControllerGetCapabilitiesResponse struct {
-	// One of the following fields MUST be specified.
-	//
-	// Types that are valid to be assigned to Reply:
-	//	*ControllerGetCapabilitiesResponse_Result_
-	//	*ControllerGetCapabilitiesResponse_Error
-	Reply isControllerGetCapabilitiesResponse_Reply `protobuf_oneof:"reply"`
+	// All the capabilities that the controller service supports. This
+	// field is OPTIONAL.
+	Capabilities []*ControllerServiceCapability `protobuf:"bytes,2,rep,name=capabilities" json:"capabilities,omitempty"`
 }
 
 func (m *ControllerGetCapabilitiesResponse) Reset()         { *m = ControllerGetCapabilitiesResponse{} }
@@ -3214,131 +1216,7 @@ func (*ControllerGetCapabilitiesResponse) Descriptor() ([]byte, []int) {
 	return fileDescriptor0, []int{25}
 }
 
-type isControllerGetCapabilitiesResponse_Reply interface {
-	isControllerGetCapabilitiesResponse_Reply()
-}
-
-type ControllerGetCapabilitiesResponse_Result_ struct {
-	Result *ControllerGetCapabilitiesResponse_Result `protobuf:"bytes,1,opt,name=result,oneof"`
-}
-type ControllerGetCapabilitiesResponse_Error struct {
-	Error *Error `protobuf:"bytes,2,opt,name=error,oneof"`
-}
-
-func (*ControllerGetCapabilitiesResponse_Result_) isControllerGetCapabilitiesResponse_Reply() {}
-func (*ControllerGetCapabilitiesResponse_Error) isControllerGetCapabilitiesResponse_Reply()   {}
-
-func (m *ControllerGetCapabilitiesResponse) GetReply() isControllerGetCapabilitiesResponse_Reply {
-	if m != nil {
-		return m.Reply
-	}
-	return nil
-}
-
-func (m *ControllerGetCapabilitiesResponse) GetResult() *ControllerGetCapabilitiesResponse_Result {
-	if x, ok := m.GetReply().(*ControllerGetCapabilitiesResponse_Result_); ok {
-		return x.Result
-	}
-	return nil
-}
-
-func (m *ControllerGetCapabilitiesResponse) GetError() *Error {
-	if x, ok := m.GetReply().(*ControllerGetCapabilitiesResponse_Error); ok {
-		return x.Error
-	}
-	return nil
-}
-
-// XXX_OneofFuncs is for the internal use of the proto package.
-func (*ControllerGetCapabilitiesResponse) XXX_OneofFuncs() (func(msg proto.Message, b *proto.Buffer) error, func(msg proto.Message, tag, wire int, b *proto.Buffer) (bool, error), func(msg proto.Message) (n int), []interface{}) {
-	return _ControllerGetCapabilitiesResponse_OneofMarshaler, _ControllerGetCapabilitiesResponse_OneofUnmarshaler, _ControllerGetCapabilitiesResponse_OneofSizer, []interface{}{
-		(*ControllerGetCapabilitiesResponse_Result_)(nil),
-		(*ControllerGetCapabilitiesResponse_Error)(nil),
-	}
-}
-
-func _ControllerGetCapabilitiesResponse_OneofMarshaler(msg proto.Message, b *proto.Buffer) error {
-	m := msg.(*ControllerGetCapabilitiesResponse)
-	// reply
-	switch x := m.Reply.(type) {
-	case *ControllerGetCapabilitiesResponse_Result_:
-		b.EncodeVarint(1<<3 | proto.WireBytes)
-		if err := b.EncodeMessage(x.Result); err != nil {
-			return err
-		}
-	case *ControllerGetCapabilitiesResponse_Error:
-		b.EncodeVarint(2<<3 | proto.WireBytes)
-		if err := b.EncodeMessage(x.Error); err != nil {
-			return err
-		}
-	case nil:
-	default:
-		return fmt.Errorf("ControllerGetCapabilitiesResponse.Reply has unexpected type %T", x)
-	}
-	return nil
-}
-
-func _ControllerGetCapabilitiesResponse_OneofUnmarshaler(msg proto.Message, tag, wire int, b *proto.Buffer) (bool, error) {
-	m := msg.(*ControllerGetCapabilitiesResponse)
-	switch tag {
-	case 1: // reply.result
-		if wire != proto.WireBytes {
-			return true, proto.ErrInternalBadWireType
-		}
-		msg := new(ControllerGetCapabilitiesResponse_Result)
-		err := b.DecodeMessage(msg)
-		m.Reply = &ControllerGetCapabilitiesResponse_Result_{msg}
-		return true, err
-	case 2: // reply.error
-		if wire != proto.WireBytes {
-			return true, proto.ErrInternalBadWireType
-		}
-		msg := new(Error)
-		err := b.DecodeMessage(msg)
-		m.Reply = &ControllerGetCapabilitiesResponse_Error{msg}
-		return true, err
-	default:
-		return false, nil
-	}
-}
-
-func _ControllerGetCapabilitiesResponse_OneofSizer(msg proto.Message) (n int) {
-	m := msg.(*ControllerGetCapabilitiesResponse)
-	// reply
-	switch x := m.Reply.(type) {
-	case *ControllerGetCapabilitiesResponse_Result_:
-		s := proto.Size(x.Result)
-		n += proto.SizeVarint(1<<3 | proto.WireBytes)
-		n += proto.SizeVarint(uint64(s))
-		n += s
-	case *ControllerGetCapabilitiesResponse_Error:
-		s := proto.Size(x.Error)
-		n += proto.SizeVarint(2<<3 | proto.WireBytes)
-		n += proto.SizeVarint(uint64(s))
-		n += s
-	case nil:
-	default:
-		panic(fmt.Sprintf("proto: unexpected type %T in oneof", x))
-	}
-	return n
-}
-
-type ControllerGetCapabilitiesResponse_Result struct {
-	// All the capabilities that the controller service supports. This
-	// field is OPTIONAL.
-	Capabilities []*ControllerServiceCapability `protobuf:"bytes,2,rep,name=capabilities" json:"capabilities,omitempty"`
-}
-
-func (m *ControllerGetCapabilitiesResponse_Result) Reset() {
-	*m = ControllerGetCapabilitiesResponse_Result{}
-}
-func (m *ControllerGetCapabilitiesResponse_Result) String() string { return proto.CompactTextString(m) }
-func (*ControllerGetCapabilitiesResponse_Result) ProtoMessage()    {}
-func (*ControllerGetCapabilitiesResponse_Result) Descriptor() ([]byte, []int) {
-	return fileDescriptor0, []int{25, 0}
-}
-
-func (m *ControllerGetCapabilitiesResponse_Result) GetCapabilities() []*ControllerServiceCapability {
+func (m *ControllerGetCapabilitiesResponse) GetCapabilities() []*ControllerServiceCapability {
 	if m != nil {
 		return m.Capabilities
 	}
@@ -3559,137 +1437,12 @@ func (m *NodePublishVolumeRequest) GetVolumeAttributes() map[string]string {
 }
 
 type NodePublishVolumeResponse struct {
-	// One of the following fields MUST be specified.
-	//
-	// Types that are valid to be assigned to Reply:
-	//	*NodePublishVolumeResponse_Result_
-	//	*NodePublishVolumeResponse_Error
-	Reply isNodePublishVolumeResponse_Reply `protobuf_oneof:"reply"`
 }
 
 func (m *NodePublishVolumeResponse) Reset()                    { *m = NodePublishVolumeResponse{} }
 func (m *NodePublishVolumeResponse) String() string            { return proto.CompactTextString(m) }
 func (*NodePublishVolumeResponse) ProtoMessage()               {}
 func (*NodePublishVolumeResponse) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{28} }
-
-type isNodePublishVolumeResponse_Reply interface {
-	isNodePublishVolumeResponse_Reply()
-}
-
-type NodePublishVolumeResponse_Result_ struct {
-	Result *NodePublishVolumeResponse_Result `protobuf:"bytes,1,opt,name=result,oneof"`
-}
-type NodePublishVolumeResponse_Error struct {
-	Error *Error `protobuf:"bytes,2,opt,name=error,oneof"`
-}
-
-func (*NodePublishVolumeResponse_Result_) isNodePublishVolumeResponse_Reply() {}
-func (*NodePublishVolumeResponse_Error) isNodePublishVolumeResponse_Reply()   {}
-
-func (m *NodePublishVolumeResponse) GetReply() isNodePublishVolumeResponse_Reply {
-	if m != nil {
-		return m.Reply
-	}
-	return nil
-}
-
-func (m *NodePublishVolumeResponse) GetResult() *NodePublishVolumeResponse_Result {
-	if x, ok := m.GetReply().(*NodePublishVolumeResponse_Result_); ok {
-		return x.Result
-	}
-	return nil
-}
-
-func (m *NodePublishVolumeResponse) GetError() *Error {
-	if x, ok := m.GetReply().(*NodePublishVolumeResponse_Error); ok {
-		return x.Error
-	}
-	return nil
-}
-
-// XXX_OneofFuncs is for the internal use of the proto package.
-func (*NodePublishVolumeResponse) XXX_OneofFuncs() (func(msg proto.Message, b *proto.Buffer) error, func(msg proto.Message, tag, wire int, b *proto.Buffer) (bool, error), func(msg proto.Message) (n int), []interface{}) {
-	return _NodePublishVolumeResponse_OneofMarshaler, _NodePublishVolumeResponse_OneofUnmarshaler, _NodePublishVolumeResponse_OneofSizer, []interface{}{
-		(*NodePublishVolumeResponse_Result_)(nil),
-		(*NodePublishVolumeResponse_Error)(nil),
-	}
-}
-
-func _NodePublishVolumeResponse_OneofMarshaler(msg proto.Message, b *proto.Buffer) error {
-	m := msg.(*NodePublishVolumeResponse)
-	// reply
-	switch x := m.Reply.(type) {
-	case *NodePublishVolumeResponse_Result_:
-		b.EncodeVarint(1<<3 | proto.WireBytes)
-		if err := b.EncodeMessage(x.Result); err != nil {
-			return err
-		}
-	case *NodePublishVolumeResponse_Error:
-		b.EncodeVarint(2<<3 | proto.WireBytes)
-		if err := b.EncodeMessage(x.Error); err != nil {
-			return err
-		}
-	case nil:
-	default:
-		return fmt.Errorf("NodePublishVolumeResponse.Reply has unexpected type %T", x)
-	}
-	return nil
-}
-
-func _NodePublishVolumeResponse_OneofUnmarshaler(msg proto.Message, tag, wire int, b *proto.Buffer) (bool, error) {
-	m := msg.(*NodePublishVolumeResponse)
-	switch tag {
-	case 1: // reply.result
-		if wire != proto.WireBytes {
-			return true, proto.ErrInternalBadWireType
-		}
-		msg := new(NodePublishVolumeResponse_Result)
-		err := b.DecodeMessage(msg)
-		m.Reply = &NodePublishVolumeResponse_Result_{msg}
-		return true, err
-	case 2: // reply.error
-		if wire != proto.WireBytes {
-			return true, proto.ErrInternalBadWireType
-		}
-		msg := new(Error)
-		err := b.DecodeMessage(msg)
-		m.Reply = &NodePublishVolumeResponse_Error{msg}
-		return true, err
-	default:
-		return false, nil
-	}
-}
-
-func _NodePublishVolumeResponse_OneofSizer(msg proto.Message) (n int) {
-	m := msg.(*NodePublishVolumeResponse)
-	// reply
-	switch x := m.Reply.(type) {
-	case *NodePublishVolumeResponse_Result_:
-		s := proto.Size(x.Result)
-		n += proto.SizeVarint(1<<3 | proto.WireBytes)
-		n += proto.SizeVarint(uint64(s))
-		n += s
-	case *NodePublishVolumeResponse_Error:
-		s := proto.Size(x.Error)
-		n += proto.SizeVarint(2<<3 | proto.WireBytes)
-		n += proto.SizeVarint(uint64(s))
-		n += s
-	case nil:
-	default:
-		panic(fmt.Sprintf("proto: unexpected type %T in oneof", x))
-	}
-	return n
-}
-
-type NodePublishVolumeResponse_Result struct {
-}
-
-func (m *NodePublishVolumeResponse_Result) Reset()         { *m = NodePublishVolumeResponse_Result{} }
-func (m *NodePublishVolumeResponse_Result) String() string { return proto.CompactTextString(m) }
-func (*NodePublishVolumeResponse_Result) ProtoMessage()    {}
-func (*NodePublishVolumeResponse_Result) Descriptor() ([]byte, []int) {
-	return fileDescriptor0, []int{28, 0}
-}
 
 // //////
 // //////
@@ -3751,137 +1504,12 @@ func (m *NodeUnpublishVolumeRequest) GetUserCredentials() map[string]string {
 }
 
 type NodeUnpublishVolumeResponse struct {
-	// One of the following fields MUST be specified.
-	//
-	// Types that are valid to be assigned to Reply:
-	//	*NodeUnpublishVolumeResponse_Result_
-	//	*NodeUnpublishVolumeResponse_Error
-	Reply isNodeUnpublishVolumeResponse_Reply `protobuf_oneof:"reply"`
 }
 
 func (m *NodeUnpublishVolumeResponse) Reset()                    { *m = NodeUnpublishVolumeResponse{} }
 func (m *NodeUnpublishVolumeResponse) String() string            { return proto.CompactTextString(m) }
 func (*NodeUnpublishVolumeResponse) ProtoMessage()               {}
 func (*NodeUnpublishVolumeResponse) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{30} }
-
-type isNodeUnpublishVolumeResponse_Reply interface {
-	isNodeUnpublishVolumeResponse_Reply()
-}
-
-type NodeUnpublishVolumeResponse_Result_ struct {
-	Result *NodeUnpublishVolumeResponse_Result `protobuf:"bytes,1,opt,name=result,oneof"`
-}
-type NodeUnpublishVolumeResponse_Error struct {
-	Error *Error `protobuf:"bytes,2,opt,name=error,oneof"`
-}
-
-func (*NodeUnpublishVolumeResponse_Result_) isNodeUnpublishVolumeResponse_Reply() {}
-func (*NodeUnpublishVolumeResponse_Error) isNodeUnpublishVolumeResponse_Reply()   {}
-
-func (m *NodeUnpublishVolumeResponse) GetReply() isNodeUnpublishVolumeResponse_Reply {
-	if m != nil {
-		return m.Reply
-	}
-	return nil
-}
-
-func (m *NodeUnpublishVolumeResponse) GetResult() *NodeUnpublishVolumeResponse_Result {
-	if x, ok := m.GetReply().(*NodeUnpublishVolumeResponse_Result_); ok {
-		return x.Result
-	}
-	return nil
-}
-
-func (m *NodeUnpublishVolumeResponse) GetError() *Error {
-	if x, ok := m.GetReply().(*NodeUnpublishVolumeResponse_Error); ok {
-		return x.Error
-	}
-	return nil
-}
-
-// XXX_OneofFuncs is for the internal use of the proto package.
-func (*NodeUnpublishVolumeResponse) XXX_OneofFuncs() (func(msg proto.Message, b *proto.Buffer) error, func(msg proto.Message, tag, wire int, b *proto.Buffer) (bool, error), func(msg proto.Message) (n int), []interface{}) {
-	return _NodeUnpublishVolumeResponse_OneofMarshaler, _NodeUnpublishVolumeResponse_OneofUnmarshaler, _NodeUnpublishVolumeResponse_OneofSizer, []interface{}{
-		(*NodeUnpublishVolumeResponse_Result_)(nil),
-		(*NodeUnpublishVolumeResponse_Error)(nil),
-	}
-}
-
-func _NodeUnpublishVolumeResponse_OneofMarshaler(msg proto.Message, b *proto.Buffer) error {
-	m := msg.(*NodeUnpublishVolumeResponse)
-	// reply
-	switch x := m.Reply.(type) {
-	case *NodeUnpublishVolumeResponse_Result_:
-		b.EncodeVarint(1<<3 | proto.WireBytes)
-		if err := b.EncodeMessage(x.Result); err != nil {
-			return err
-		}
-	case *NodeUnpublishVolumeResponse_Error:
-		b.EncodeVarint(2<<3 | proto.WireBytes)
-		if err := b.EncodeMessage(x.Error); err != nil {
-			return err
-		}
-	case nil:
-	default:
-		return fmt.Errorf("NodeUnpublishVolumeResponse.Reply has unexpected type %T", x)
-	}
-	return nil
-}
-
-func _NodeUnpublishVolumeResponse_OneofUnmarshaler(msg proto.Message, tag, wire int, b *proto.Buffer) (bool, error) {
-	m := msg.(*NodeUnpublishVolumeResponse)
-	switch tag {
-	case 1: // reply.result
-		if wire != proto.WireBytes {
-			return true, proto.ErrInternalBadWireType
-		}
-		msg := new(NodeUnpublishVolumeResponse_Result)
-		err := b.DecodeMessage(msg)
-		m.Reply = &NodeUnpublishVolumeResponse_Result_{msg}
-		return true, err
-	case 2: // reply.error
-		if wire != proto.WireBytes {
-			return true, proto.ErrInternalBadWireType
-		}
-		msg := new(Error)
-		err := b.DecodeMessage(msg)
-		m.Reply = &NodeUnpublishVolumeResponse_Error{msg}
-		return true, err
-	default:
-		return false, nil
-	}
-}
-
-func _NodeUnpublishVolumeResponse_OneofSizer(msg proto.Message) (n int) {
-	m := msg.(*NodeUnpublishVolumeResponse)
-	// reply
-	switch x := m.Reply.(type) {
-	case *NodeUnpublishVolumeResponse_Result_:
-		s := proto.Size(x.Result)
-		n += proto.SizeVarint(1<<3 | proto.WireBytes)
-		n += proto.SizeVarint(uint64(s))
-		n += s
-	case *NodeUnpublishVolumeResponse_Error:
-		s := proto.Size(x.Error)
-		n += proto.SizeVarint(2<<3 | proto.WireBytes)
-		n += proto.SizeVarint(uint64(s))
-		n += s
-	case nil:
-	default:
-		panic(fmt.Sprintf("proto: unexpected type %T in oneof", x))
-	}
-	return n
-}
-
-type NodeUnpublishVolumeResponse_Result struct {
-}
-
-func (m *NodeUnpublishVolumeResponse_Result) Reset()         { *m = NodeUnpublishVolumeResponse_Result{} }
-func (m *NodeUnpublishVolumeResponse_Result) String() string { return proto.CompactTextString(m) }
-func (*NodeUnpublishVolumeResponse_Result) ProtoMessage()    {}
-func (*NodeUnpublishVolumeResponse_Result) Descriptor() ([]byte, []int) {
-	return fileDescriptor0, []int{30, 0}
-}
 
 // //////
 // //////
@@ -3903,129 +1531,6 @@ func (m *GetNodeIDRequest) GetVersion() *Version {
 }
 
 type GetNodeIDResponse struct {
-	// One of the following fields MUST be specified.
-	//
-	// Types that are valid to be assigned to Reply:
-	//	*GetNodeIDResponse_Result_
-	//	*GetNodeIDResponse_Error
-	Reply isGetNodeIDResponse_Reply `protobuf_oneof:"reply"`
-}
-
-func (m *GetNodeIDResponse) Reset()                    { *m = GetNodeIDResponse{} }
-func (m *GetNodeIDResponse) String() string            { return proto.CompactTextString(m) }
-func (*GetNodeIDResponse) ProtoMessage()               {}
-func (*GetNodeIDResponse) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{32} }
-
-type isGetNodeIDResponse_Reply interface {
-	isGetNodeIDResponse_Reply()
-}
-
-type GetNodeIDResponse_Result_ struct {
-	Result *GetNodeIDResponse_Result `protobuf:"bytes,1,opt,name=result,oneof"`
-}
-type GetNodeIDResponse_Error struct {
-	Error *Error `protobuf:"bytes,2,opt,name=error,oneof"`
-}
-
-func (*GetNodeIDResponse_Result_) isGetNodeIDResponse_Reply() {}
-func (*GetNodeIDResponse_Error) isGetNodeIDResponse_Reply()   {}
-
-func (m *GetNodeIDResponse) GetReply() isGetNodeIDResponse_Reply {
-	if m != nil {
-		return m.Reply
-	}
-	return nil
-}
-
-func (m *GetNodeIDResponse) GetResult() *GetNodeIDResponse_Result {
-	if x, ok := m.GetReply().(*GetNodeIDResponse_Result_); ok {
-		return x.Result
-	}
-	return nil
-}
-
-func (m *GetNodeIDResponse) GetError() *Error {
-	if x, ok := m.GetReply().(*GetNodeIDResponse_Error); ok {
-		return x.Error
-	}
-	return nil
-}
-
-// XXX_OneofFuncs is for the internal use of the proto package.
-func (*GetNodeIDResponse) XXX_OneofFuncs() (func(msg proto.Message, b *proto.Buffer) error, func(msg proto.Message, tag, wire int, b *proto.Buffer) (bool, error), func(msg proto.Message) (n int), []interface{}) {
-	return _GetNodeIDResponse_OneofMarshaler, _GetNodeIDResponse_OneofUnmarshaler, _GetNodeIDResponse_OneofSizer, []interface{}{
-		(*GetNodeIDResponse_Result_)(nil),
-		(*GetNodeIDResponse_Error)(nil),
-	}
-}
-
-func _GetNodeIDResponse_OneofMarshaler(msg proto.Message, b *proto.Buffer) error {
-	m := msg.(*GetNodeIDResponse)
-	// reply
-	switch x := m.Reply.(type) {
-	case *GetNodeIDResponse_Result_:
-		b.EncodeVarint(1<<3 | proto.WireBytes)
-		if err := b.EncodeMessage(x.Result); err != nil {
-			return err
-		}
-	case *GetNodeIDResponse_Error:
-		b.EncodeVarint(2<<3 | proto.WireBytes)
-		if err := b.EncodeMessage(x.Error); err != nil {
-			return err
-		}
-	case nil:
-	default:
-		return fmt.Errorf("GetNodeIDResponse.Reply has unexpected type %T", x)
-	}
-	return nil
-}
-
-func _GetNodeIDResponse_OneofUnmarshaler(msg proto.Message, tag, wire int, b *proto.Buffer) (bool, error) {
-	m := msg.(*GetNodeIDResponse)
-	switch tag {
-	case 1: // reply.result
-		if wire != proto.WireBytes {
-			return true, proto.ErrInternalBadWireType
-		}
-		msg := new(GetNodeIDResponse_Result)
-		err := b.DecodeMessage(msg)
-		m.Reply = &GetNodeIDResponse_Result_{msg}
-		return true, err
-	case 2: // reply.error
-		if wire != proto.WireBytes {
-			return true, proto.ErrInternalBadWireType
-		}
-		msg := new(Error)
-		err := b.DecodeMessage(msg)
-		m.Reply = &GetNodeIDResponse_Error{msg}
-		return true, err
-	default:
-		return false, nil
-	}
-}
-
-func _GetNodeIDResponse_OneofSizer(msg proto.Message) (n int) {
-	m := msg.(*GetNodeIDResponse)
-	// reply
-	switch x := m.Reply.(type) {
-	case *GetNodeIDResponse_Result_:
-		s := proto.Size(x.Result)
-		n += proto.SizeVarint(1<<3 | proto.WireBytes)
-		n += proto.SizeVarint(uint64(s))
-		n += s
-	case *GetNodeIDResponse_Error:
-		s := proto.Size(x.Error)
-		n += proto.SizeVarint(2<<3 | proto.WireBytes)
-		n += proto.SizeVarint(uint64(s))
-		n += s
-	case nil:
-	default:
-		panic(fmt.Sprintf("proto: unexpected type %T in oneof", x))
-	}
-	return n
-}
-
-type GetNodeIDResponse_Result struct {
 	// The ID of the node which SHALL be used by CO in
 	// `ControllerPublishVolume`. This is an OPTIONAL field. If unset,
 	// the CO SHALL leave the `node_id` field unset in
@@ -4033,12 +1538,12 @@ type GetNodeIDResponse_Result struct {
 	NodeId string `protobuf:"bytes,1,opt,name=node_id,json=nodeId" json:"node_id,omitempty"`
 }
 
-func (m *GetNodeIDResponse_Result) Reset()                    { *m = GetNodeIDResponse_Result{} }
-func (m *GetNodeIDResponse_Result) String() string            { return proto.CompactTextString(m) }
-func (*GetNodeIDResponse_Result) ProtoMessage()               {}
-func (*GetNodeIDResponse_Result) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{32, 0} }
+func (m *GetNodeIDResponse) Reset()                    { *m = GetNodeIDResponse{} }
+func (m *GetNodeIDResponse) String() string            { return proto.CompactTextString(m) }
+func (*GetNodeIDResponse) ProtoMessage()               {}
+func (*GetNodeIDResponse) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{32} }
 
-func (m *GetNodeIDResponse_Result) GetNodeId() string {
+func (m *GetNodeIDResponse) GetNodeId() string {
 	if m != nil {
 		return m.NodeId
 	}
@@ -4065,135 +1570,12 @@ func (m *NodeProbeRequest) GetVersion() *Version {
 }
 
 type NodeProbeResponse struct {
-	// One of the following fields MUST be specified.
-	//
-	// Types that are valid to be assigned to Reply:
-	//	*NodeProbeResponse_Result_
-	//	*NodeProbeResponse_Error
-	Reply isNodeProbeResponse_Reply `protobuf_oneof:"reply"`
 }
 
 func (m *NodeProbeResponse) Reset()                    { *m = NodeProbeResponse{} }
 func (m *NodeProbeResponse) String() string            { return proto.CompactTextString(m) }
 func (*NodeProbeResponse) ProtoMessage()               {}
 func (*NodeProbeResponse) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{34} }
-
-type isNodeProbeResponse_Reply interface {
-	isNodeProbeResponse_Reply()
-}
-
-type NodeProbeResponse_Result_ struct {
-	Result *NodeProbeResponse_Result `protobuf:"bytes,1,opt,name=result,oneof"`
-}
-type NodeProbeResponse_Error struct {
-	Error *Error `protobuf:"bytes,2,opt,name=error,oneof"`
-}
-
-func (*NodeProbeResponse_Result_) isNodeProbeResponse_Reply() {}
-func (*NodeProbeResponse_Error) isNodeProbeResponse_Reply()   {}
-
-func (m *NodeProbeResponse) GetReply() isNodeProbeResponse_Reply {
-	if m != nil {
-		return m.Reply
-	}
-	return nil
-}
-
-func (m *NodeProbeResponse) GetResult() *NodeProbeResponse_Result {
-	if x, ok := m.GetReply().(*NodeProbeResponse_Result_); ok {
-		return x.Result
-	}
-	return nil
-}
-
-func (m *NodeProbeResponse) GetError() *Error {
-	if x, ok := m.GetReply().(*NodeProbeResponse_Error); ok {
-		return x.Error
-	}
-	return nil
-}
-
-// XXX_OneofFuncs is for the internal use of the proto package.
-func (*NodeProbeResponse) XXX_OneofFuncs() (func(msg proto.Message, b *proto.Buffer) error, func(msg proto.Message, tag, wire int, b *proto.Buffer) (bool, error), func(msg proto.Message) (n int), []interface{}) {
-	return _NodeProbeResponse_OneofMarshaler, _NodeProbeResponse_OneofUnmarshaler, _NodeProbeResponse_OneofSizer, []interface{}{
-		(*NodeProbeResponse_Result_)(nil),
-		(*NodeProbeResponse_Error)(nil),
-	}
-}
-
-func _NodeProbeResponse_OneofMarshaler(msg proto.Message, b *proto.Buffer) error {
-	m := msg.(*NodeProbeResponse)
-	// reply
-	switch x := m.Reply.(type) {
-	case *NodeProbeResponse_Result_:
-		b.EncodeVarint(1<<3 | proto.WireBytes)
-		if err := b.EncodeMessage(x.Result); err != nil {
-			return err
-		}
-	case *NodeProbeResponse_Error:
-		b.EncodeVarint(2<<3 | proto.WireBytes)
-		if err := b.EncodeMessage(x.Error); err != nil {
-			return err
-		}
-	case nil:
-	default:
-		return fmt.Errorf("NodeProbeResponse.Reply has unexpected type %T", x)
-	}
-	return nil
-}
-
-func _NodeProbeResponse_OneofUnmarshaler(msg proto.Message, tag, wire int, b *proto.Buffer) (bool, error) {
-	m := msg.(*NodeProbeResponse)
-	switch tag {
-	case 1: // reply.result
-		if wire != proto.WireBytes {
-			return true, proto.ErrInternalBadWireType
-		}
-		msg := new(NodeProbeResponse_Result)
-		err := b.DecodeMessage(msg)
-		m.Reply = &NodeProbeResponse_Result_{msg}
-		return true, err
-	case 2: // reply.error
-		if wire != proto.WireBytes {
-			return true, proto.ErrInternalBadWireType
-		}
-		msg := new(Error)
-		err := b.DecodeMessage(msg)
-		m.Reply = &NodeProbeResponse_Error{msg}
-		return true, err
-	default:
-		return false, nil
-	}
-}
-
-func _NodeProbeResponse_OneofSizer(msg proto.Message) (n int) {
-	m := msg.(*NodeProbeResponse)
-	// reply
-	switch x := m.Reply.(type) {
-	case *NodeProbeResponse_Result_:
-		s := proto.Size(x.Result)
-		n += proto.SizeVarint(1<<3 | proto.WireBytes)
-		n += proto.SizeVarint(uint64(s))
-		n += s
-	case *NodeProbeResponse_Error:
-		s := proto.Size(x.Error)
-		n += proto.SizeVarint(2<<3 | proto.WireBytes)
-		n += proto.SizeVarint(uint64(s))
-		n += s
-	case nil:
-	default:
-		panic(fmt.Sprintf("proto: unexpected type %T in oneof", x))
-	}
-	return n
-}
-
-type NodeProbeResponse_Result struct {
-}
-
-func (m *NodeProbeResponse_Result) Reset()                    { *m = NodeProbeResponse_Result{} }
-func (m *NodeProbeResponse_Result) String() string            { return proto.CompactTextString(m) }
-func (*NodeProbeResponse_Result) ProtoMessage()               {}
-func (*NodeProbeResponse_Result) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{34, 0} }
 
 // //////
 // //////
@@ -4215,12 +1597,9 @@ func (m *NodeGetCapabilitiesRequest) GetVersion() *Version {
 }
 
 type NodeGetCapabilitiesResponse struct {
-	// One of the following fields MUST be specified.
-	//
-	// Types that are valid to be assigned to Reply:
-	//	*NodeGetCapabilitiesResponse_Result_
-	//	*NodeGetCapabilitiesResponse_Error
-	Reply isNodeGetCapabilitiesResponse_Reply `protobuf_oneof:"reply"`
+	// All the capabilities that the node service supports. This field
+	// is OPTIONAL.
+	Capabilities []*NodeServiceCapability `protobuf:"bytes,1,rep,name=capabilities" json:"capabilities,omitempty"`
 }
 
 func (m *NodeGetCapabilitiesResponse) Reset()                    { *m = NodeGetCapabilitiesResponse{} }
@@ -4228,129 +1607,7 @@ func (m *NodeGetCapabilitiesResponse) String() string            { return proto.
 func (*NodeGetCapabilitiesResponse) ProtoMessage()               {}
 func (*NodeGetCapabilitiesResponse) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{36} }
 
-type isNodeGetCapabilitiesResponse_Reply interface {
-	isNodeGetCapabilitiesResponse_Reply()
-}
-
-type NodeGetCapabilitiesResponse_Result_ struct {
-	Result *NodeGetCapabilitiesResponse_Result `protobuf:"bytes,1,opt,name=result,oneof"`
-}
-type NodeGetCapabilitiesResponse_Error struct {
-	Error *Error `protobuf:"bytes,2,opt,name=error,oneof"`
-}
-
-func (*NodeGetCapabilitiesResponse_Result_) isNodeGetCapabilitiesResponse_Reply() {}
-func (*NodeGetCapabilitiesResponse_Error) isNodeGetCapabilitiesResponse_Reply()   {}
-
-func (m *NodeGetCapabilitiesResponse) GetReply() isNodeGetCapabilitiesResponse_Reply {
-	if m != nil {
-		return m.Reply
-	}
-	return nil
-}
-
-func (m *NodeGetCapabilitiesResponse) GetResult() *NodeGetCapabilitiesResponse_Result {
-	if x, ok := m.GetReply().(*NodeGetCapabilitiesResponse_Result_); ok {
-		return x.Result
-	}
-	return nil
-}
-
-func (m *NodeGetCapabilitiesResponse) GetError() *Error {
-	if x, ok := m.GetReply().(*NodeGetCapabilitiesResponse_Error); ok {
-		return x.Error
-	}
-	return nil
-}
-
-// XXX_OneofFuncs is for the internal use of the proto package.
-func (*NodeGetCapabilitiesResponse) XXX_OneofFuncs() (func(msg proto.Message, b *proto.Buffer) error, func(msg proto.Message, tag, wire int, b *proto.Buffer) (bool, error), func(msg proto.Message) (n int), []interface{}) {
-	return _NodeGetCapabilitiesResponse_OneofMarshaler, _NodeGetCapabilitiesResponse_OneofUnmarshaler, _NodeGetCapabilitiesResponse_OneofSizer, []interface{}{
-		(*NodeGetCapabilitiesResponse_Result_)(nil),
-		(*NodeGetCapabilitiesResponse_Error)(nil),
-	}
-}
-
-func _NodeGetCapabilitiesResponse_OneofMarshaler(msg proto.Message, b *proto.Buffer) error {
-	m := msg.(*NodeGetCapabilitiesResponse)
-	// reply
-	switch x := m.Reply.(type) {
-	case *NodeGetCapabilitiesResponse_Result_:
-		b.EncodeVarint(1<<3 | proto.WireBytes)
-		if err := b.EncodeMessage(x.Result); err != nil {
-			return err
-		}
-	case *NodeGetCapabilitiesResponse_Error:
-		b.EncodeVarint(2<<3 | proto.WireBytes)
-		if err := b.EncodeMessage(x.Error); err != nil {
-			return err
-		}
-	case nil:
-	default:
-		return fmt.Errorf("NodeGetCapabilitiesResponse.Reply has unexpected type %T", x)
-	}
-	return nil
-}
-
-func _NodeGetCapabilitiesResponse_OneofUnmarshaler(msg proto.Message, tag, wire int, b *proto.Buffer) (bool, error) {
-	m := msg.(*NodeGetCapabilitiesResponse)
-	switch tag {
-	case 1: // reply.result
-		if wire != proto.WireBytes {
-			return true, proto.ErrInternalBadWireType
-		}
-		msg := new(NodeGetCapabilitiesResponse_Result)
-		err := b.DecodeMessage(msg)
-		m.Reply = &NodeGetCapabilitiesResponse_Result_{msg}
-		return true, err
-	case 2: // reply.error
-		if wire != proto.WireBytes {
-			return true, proto.ErrInternalBadWireType
-		}
-		msg := new(Error)
-		err := b.DecodeMessage(msg)
-		m.Reply = &NodeGetCapabilitiesResponse_Error{msg}
-		return true, err
-	default:
-		return false, nil
-	}
-}
-
-func _NodeGetCapabilitiesResponse_OneofSizer(msg proto.Message) (n int) {
-	m := msg.(*NodeGetCapabilitiesResponse)
-	// reply
-	switch x := m.Reply.(type) {
-	case *NodeGetCapabilitiesResponse_Result_:
-		s := proto.Size(x.Result)
-		n += proto.SizeVarint(1<<3 | proto.WireBytes)
-		n += proto.SizeVarint(uint64(s))
-		n += s
-	case *NodeGetCapabilitiesResponse_Error:
-		s := proto.Size(x.Error)
-		n += proto.SizeVarint(2<<3 | proto.WireBytes)
-		n += proto.SizeVarint(uint64(s))
-		n += s
-	case nil:
-	default:
-		panic(fmt.Sprintf("proto: unexpected type %T in oneof", x))
-	}
-	return n
-}
-
-type NodeGetCapabilitiesResponse_Result struct {
-	// All the capabilities that the node service supports. This field
-	// is OPTIONAL.
-	Capabilities []*NodeServiceCapability `protobuf:"bytes,2,rep,name=capabilities" json:"capabilities,omitempty"`
-}
-
-func (m *NodeGetCapabilitiesResponse_Result) Reset()         { *m = NodeGetCapabilitiesResponse_Result{} }
-func (m *NodeGetCapabilitiesResponse_Result) String() string { return proto.CompactTextString(m) }
-func (*NodeGetCapabilitiesResponse_Result) ProtoMessage()    {}
-func (*NodeGetCapabilitiesResponse_Result) Descriptor() ([]byte, []int) {
-	return fileDescriptor0, []int{36, 0}
-}
-
-func (m *NodeGetCapabilitiesResponse_Result) GetCapabilities() []*NodeServiceCapability {
+func (m *NodeGetCapabilitiesResponse) GetCapabilities() []*NodeServiceCapability {
 	if m != nil {
 		return m.Capabilities
 	}
@@ -4464,743 +1721,14 @@ func (m *NodeServiceCapability_RPC) GetType() NodeServiceCapability_RPC_Type {
 	return NodeServiceCapability_RPC_UNKNOWN
 }
 
-// //////
-// //////
-type Error struct {
-	// One of the following fields MUST be specified.
-	//
-	// Types that are valid to be assigned to Value:
-	//	*Error_GeneralError_
-	//	*Error_CreateVolumeError_
-	//	*Error_DeleteVolumeError_
-	//	*Error_ControllerPublishVolumeError_
-	//	*Error_ControllerUnpublishVolumeError_
-	//	*Error_ValidateVolumeCapabilitiesError_
-	//	*Error_ControllerProbeError_
-	//	*Error_NodePublishVolumeError_
-	//	*Error_NodeUnpublishVolumeError_
-	//	*Error_NodeProbeError_
-	//	*Error_GetNodeIdError
-	Value isError_Value `protobuf_oneof:"value"`
-}
-
-func (m *Error) Reset()                    { *m = Error{} }
-func (m *Error) String() string            { return proto.CompactTextString(m) }
-func (*Error) ProtoMessage()               {}
-func (*Error) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{38} }
-
-type isError_Value interface {
-	isError_Value()
-}
-
-type Error_GeneralError_ struct {
-	GeneralError *Error_GeneralError `protobuf:"bytes,1,opt,name=general_error,json=generalError,oneof"`
-}
-type Error_CreateVolumeError_ struct {
-	CreateVolumeError *Error_CreateVolumeError `protobuf:"bytes,2,opt,name=create_volume_error,json=createVolumeError,oneof"`
-}
-type Error_DeleteVolumeError_ struct {
-	DeleteVolumeError *Error_DeleteVolumeError `protobuf:"bytes,3,opt,name=delete_volume_error,json=deleteVolumeError,oneof"`
-}
-type Error_ControllerPublishVolumeError_ struct {
-	ControllerPublishVolumeError *Error_ControllerPublishVolumeError `protobuf:"bytes,4,opt,name=controller_publish_volume_error,json=controllerPublishVolumeError,oneof"`
-}
-type Error_ControllerUnpublishVolumeError_ struct {
-	ControllerUnpublishVolumeError *Error_ControllerUnpublishVolumeError `protobuf:"bytes,5,opt,name=controller_unpublish_volume_error,json=controllerUnpublishVolumeError,oneof"`
-}
-type Error_ValidateVolumeCapabilitiesError_ struct {
-	ValidateVolumeCapabilitiesError *Error_ValidateVolumeCapabilitiesError `protobuf:"bytes,6,opt,name=validate_volume_capabilities_error,json=validateVolumeCapabilitiesError,oneof"`
-}
-type Error_ControllerProbeError_ struct {
-	ControllerProbeError *Error_ControllerProbeError `protobuf:"bytes,7,opt,name=controller_probe_error,json=controllerProbeError,oneof"`
-}
-type Error_NodePublishVolumeError_ struct {
-	NodePublishVolumeError *Error_NodePublishVolumeError `protobuf:"bytes,8,opt,name=node_publish_volume_error,json=nodePublishVolumeError,oneof"`
-}
-type Error_NodeUnpublishVolumeError_ struct {
-	NodeUnpublishVolumeError *Error_NodeUnpublishVolumeError `protobuf:"bytes,9,opt,name=node_unpublish_volume_error,json=nodeUnpublishVolumeError,oneof"`
-}
-type Error_NodeProbeError_ struct {
-	NodeProbeError *Error_NodeProbeError `protobuf:"bytes,10,opt,name=node_probe_error,json=nodeProbeError,oneof"`
-}
-type Error_GetNodeIdError struct {
-	GetNodeIdError *Error_GetNodeIDError `protobuf:"bytes,11,opt,name=get_node_id_error,json=getNodeIdError,oneof"`
-}
-
-func (*Error_GeneralError_) isError_Value()                    {}
-func (*Error_CreateVolumeError_) isError_Value()               {}
-func (*Error_DeleteVolumeError_) isError_Value()               {}
-func (*Error_ControllerPublishVolumeError_) isError_Value()    {}
-func (*Error_ControllerUnpublishVolumeError_) isError_Value()  {}
-func (*Error_ValidateVolumeCapabilitiesError_) isError_Value() {}
-func (*Error_ControllerProbeError_) isError_Value()            {}
-func (*Error_NodePublishVolumeError_) isError_Value()          {}
-func (*Error_NodeUnpublishVolumeError_) isError_Value()        {}
-func (*Error_NodeProbeError_) isError_Value()                  {}
-func (*Error_GetNodeIdError) isError_Value()                   {}
-
-func (m *Error) GetValue() isError_Value {
-	if m != nil {
-		return m.Value
-	}
-	return nil
-}
-
-func (m *Error) GetGeneralError() *Error_GeneralError {
-	if x, ok := m.GetValue().(*Error_GeneralError_); ok {
-		return x.GeneralError
-	}
-	return nil
-}
-
-func (m *Error) GetCreateVolumeError() *Error_CreateVolumeError {
-	if x, ok := m.GetValue().(*Error_CreateVolumeError_); ok {
-		return x.CreateVolumeError
-	}
-	return nil
-}
-
-func (m *Error) GetDeleteVolumeError() *Error_DeleteVolumeError {
-	if x, ok := m.GetValue().(*Error_DeleteVolumeError_); ok {
-		return x.DeleteVolumeError
-	}
-	return nil
-}
-
-func (m *Error) GetControllerPublishVolumeError() *Error_ControllerPublishVolumeError {
-	if x, ok := m.GetValue().(*Error_ControllerPublishVolumeError_); ok {
-		return x.ControllerPublishVolumeError
-	}
-	return nil
-}
-
-func (m *Error) GetControllerUnpublishVolumeError() *Error_ControllerUnpublishVolumeError {
-	if x, ok := m.GetValue().(*Error_ControllerUnpublishVolumeError_); ok {
-		return x.ControllerUnpublishVolumeError
-	}
-	return nil
-}
-
-func (m *Error) GetValidateVolumeCapabilitiesError() *Error_ValidateVolumeCapabilitiesError {
-	if x, ok := m.GetValue().(*Error_ValidateVolumeCapabilitiesError_); ok {
-		return x.ValidateVolumeCapabilitiesError
-	}
-	return nil
-}
-
-func (m *Error) GetControllerProbeError() *Error_ControllerProbeError {
-	if x, ok := m.GetValue().(*Error_ControllerProbeError_); ok {
-		return x.ControllerProbeError
-	}
-	return nil
-}
-
-func (m *Error) GetNodePublishVolumeError() *Error_NodePublishVolumeError {
-	if x, ok := m.GetValue().(*Error_NodePublishVolumeError_); ok {
-		return x.NodePublishVolumeError
-	}
-	return nil
-}
-
-func (m *Error) GetNodeUnpublishVolumeError() *Error_NodeUnpublishVolumeError {
-	if x, ok := m.GetValue().(*Error_NodeUnpublishVolumeError_); ok {
-		return x.NodeUnpublishVolumeError
-	}
-	return nil
-}
-
-func (m *Error) GetNodeProbeError() *Error_NodeProbeError {
-	if x, ok := m.GetValue().(*Error_NodeProbeError_); ok {
-		return x.NodeProbeError
-	}
-	return nil
-}
-
-func (m *Error) GetGetNodeIdError() *Error_GetNodeIDError {
-	if x, ok := m.GetValue().(*Error_GetNodeIdError); ok {
-		return x.GetNodeIdError
-	}
-	return nil
-}
-
-// XXX_OneofFuncs is for the internal use of the proto package.
-func (*Error) XXX_OneofFuncs() (func(msg proto.Message, b *proto.Buffer) error, func(msg proto.Message, tag, wire int, b *proto.Buffer) (bool, error), func(msg proto.Message) (n int), []interface{}) {
-	return _Error_OneofMarshaler, _Error_OneofUnmarshaler, _Error_OneofSizer, []interface{}{
-		(*Error_GeneralError_)(nil),
-		(*Error_CreateVolumeError_)(nil),
-		(*Error_DeleteVolumeError_)(nil),
-		(*Error_ControllerPublishVolumeError_)(nil),
-		(*Error_ControllerUnpublishVolumeError_)(nil),
-		(*Error_ValidateVolumeCapabilitiesError_)(nil),
-		(*Error_ControllerProbeError_)(nil),
-		(*Error_NodePublishVolumeError_)(nil),
-		(*Error_NodeUnpublishVolumeError_)(nil),
-		(*Error_NodeProbeError_)(nil),
-		(*Error_GetNodeIdError)(nil),
-	}
-}
-
-func _Error_OneofMarshaler(msg proto.Message, b *proto.Buffer) error {
-	m := msg.(*Error)
-	// value
-	switch x := m.Value.(type) {
-	case *Error_GeneralError_:
-		b.EncodeVarint(1<<3 | proto.WireBytes)
-		if err := b.EncodeMessage(x.GeneralError); err != nil {
-			return err
-		}
-	case *Error_CreateVolumeError_:
-		b.EncodeVarint(2<<3 | proto.WireBytes)
-		if err := b.EncodeMessage(x.CreateVolumeError); err != nil {
-			return err
-		}
-	case *Error_DeleteVolumeError_:
-		b.EncodeVarint(3<<3 | proto.WireBytes)
-		if err := b.EncodeMessage(x.DeleteVolumeError); err != nil {
-			return err
-		}
-	case *Error_ControllerPublishVolumeError_:
-		b.EncodeVarint(4<<3 | proto.WireBytes)
-		if err := b.EncodeMessage(x.ControllerPublishVolumeError); err != nil {
-			return err
-		}
-	case *Error_ControllerUnpublishVolumeError_:
-		b.EncodeVarint(5<<3 | proto.WireBytes)
-		if err := b.EncodeMessage(x.ControllerUnpublishVolumeError); err != nil {
-			return err
-		}
-	case *Error_ValidateVolumeCapabilitiesError_:
-		b.EncodeVarint(6<<3 | proto.WireBytes)
-		if err := b.EncodeMessage(x.ValidateVolumeCapabilitiesError); err != nil {
-			return err
-		}
-	case *Error_ControllerProbeError_:
-		b.EncodeVarint(7<<3 | proto.WireBytes)
-		if err := b.EncodeMessage(x.ControllerProbeError); err != nil {
-			return err
-		}
-	case *Error_NodePublishVolumeError_:
-		b.EncodeVarint(8<<3 | proto.WireBytes)
-		if err := b.EncodeMessage(x.NodePublishVolumeError); err != nil {
-			return err
-		}
-	case *Error_NodeUnpublishVolumeError_:
-		b.EncodeVarint(9<<3 | proto.WireBytes)
-		if err := b.EncodeMessage(x.NodeUnpublishVolumeError); err != nil {
-			return err
-		}
-	case *Error_NodeProbeError_:
-		b.EncodeVarint(10<<3 | proto.WireBytes)
-		if err := b.EncodeMessage(x.NodeProbeError); err != nil {
-			return err
-		}
-	case *Error_GetNodeIdError:
-		b.EncodeVarint(11<<3 | proto.WireBytes)
-		if err := b.EncodeMessage(x.GetNodeIdError); err != nil {
-			return err
-		}
-	case nil:
-	default:
-		return fmt.Errorf("Error.Value has unexpected type %T", x)
-	}
-	return nil
-}
-
-func _Error_OneofUnmarshaler(msg proto.Message, tag, wire int, b *proto.Buffer) (bool, error) {
-	m := msg.(*Error)
-	switch tag {
-	case 1: // value.general_error
-		if wire != proto.WireBytes {
-			return true, proto.ErrInternalBadWireType
-		}
-		msg := new(Error_GeneralError)
-		err := b.DecodeMessage(msg)
-		m.Value = &Error_GeneralError_{msg}
-		return true, err
-	case 2: // value.create_volume_error
-		if wire != proto.WireBytes {
-			return true, proto.ErrInternalBadWireType
-		}
-		msg := new(Error_CreateVolumeError)
-		err := b.DecodeMessage(msg)
-		m.Value = &Error_CreateVolumeError_{msg}
-		return true, err
-	case 3: // value.delete_volume_error
-		if wire != proto.WireBytes {
-			return true, proto.ErrInternalBadWireType
-		}
-		msg := new(Error_DeleteVolumeError)
-		err := b.DecodeMessage(msg)
-		m.Value = &Error_DeleteVolumeError_{msg}
-		return true, err
-	case 4: // value.controller_publish_volume_error
-		if wire != proto.WireBytes {
-			return true, proto.ErrInternalBadWireType
-		}
-		msg := new(Error_ControllerPublishVolumeError)
-		err := b.DecodeMessage(msg)
-		m.Value = &Error_ControllerPublishVolumeError_{msg}
-		return true, err
-	case 5: // value.controller_unpublish_volume_error
-		if wire != proto.WireBytes {
-			return true, proto.ErrInternalBadWireType
-		}
-		msg := new(Error_ControllerUnpublishVolumeError)
-		err := b.DecodeMessage(msg)
-		m.Value = &Error_ControllerUnpublishVolumeError_{msg}
-		return true, err
-	case 6: // value.validate_volume_capabilities_error
-		if wire != proto.WireBytes {
-			return true, proto.ErrInternalBadWireType
-		}
-		msg := new(Error_ValidateVolumeCapabilitiesError)
-		err := b.DecodeMessage(msg)
-		m.Value = &Error_ValidateVolumeCapabilitiesError_{msg}
-		return true, err
-	case 7: // value.controller_probe_error
-		if wire != proto.WireBytes {
-			return true, proto.ErrInternalBadWireType
-		}
-		msg := new(Error_ControllerProbeError)
-		err := b.DecodeMessage(msg)
-		m.Value = &Error_ControllerProbeError_{msg}
-		return true, err
-	case 8: // value.node_publish_volume_error
-		if wire != proto.WireBytes {
-			return true, proto.ErrInternalBadWireType
-		}
-		msg := new(Error_NodePublishVolumeError)
-		err := b.DecodeMessage(msg)
-		m.Value = &Error_NodePublishVolumeError_{msg}
-		return true, err
-	case 9: // value.node_unpublish_volume_error
-		if wire != proto.WireBytes {
-			return true, proto.ErrInternalBadWireType
-		}
-		msg := new(Error_NodeUnpublishVolumeError)
-		err := b.DecodeMessage(msg)
-		m.Value = &Error_NodeUnpublishVolumeError_{msg}
-		return true, err
-	case 10: // value.node_probe_error
-		if wire != proto.WireBytes {
-			return true, proto.ErrInternalBadWireType
-		}
-		msg := new(Error_NodeProbeError)
-		err := b.DecodeMessage(msg)
-		m.Value = &Error_NodeProbeError_{msg}
-		return true, err
-	case 11: // value.get_node_id_error
-		if wire != proto.WireBytes {
-			return true, proto.ErrInternalBadWireType
-		}
-		msg := new(Error_GetNodeIDError)
-		err := b.DecodeMessage(msg)
-		m.Value = &Error_GetNodeIdError{msg}
-		return true, err
-	default:
-		return false, nil
-	}
-}
-
-func _Error_OneofSizer(msg proto.Message) (n int) {
-	m := msg.(*Error)
-	// value
-	switch x := m.Value.(type) {
-	case *Error_GeneralError_:
-		s := proto.Size(x.GeneralError)
-		n += proto.SizeVarint(1<<3 | proto.WireBytes)
-		n += proto.SizeVarint(uint64(s))
-		n += s
-	case *Error_CreateVolumeError_:
-		s := proto.Size(x.CreateVolumeError)
-		n += proto.SizeVarint(2<<3 | proto.WireBytes)
-		n += proto.SizeVarint(uint64(s))
-		n += s
-	case *Error_DeleteVolumeError_:
-		s := proto.Size(x.DeleteVolumeError)
-		n += proto.SizeVarint(3<<3 | proto.WireBytes)
-		n += proto.SizeVarint(uint64(s))
-		n += s
-	case *Error_ControllerPublishVolumeError_:
-		s := proto.Size(x.ControllerPublishVolumeError)
-		n += proto.SizeVarint(4<<3 | proto.WireBytes)
-		n += proto.SizeVarint(uint64(s))
-		n += s
-	case *Error_ControllerUnpublishVolumeError_:
-		s := proto.Size(x.ControllerUnpublishVolumeError)
-		n += proto.SizeVarint(5<<3 | proto.WireBytes)
-		n += proto.SizeVarint(uint64(s))
-		n += s
-	case *Error_ValidateVolumeCapabilitiesError_:
-		s := proto.Size(x.ValidateVolumeCapabilitiesError)
-		n += proto.SizeVarint(6<<3 | proto.WireBytes)
-		n += proto.SizeVarint(uint64(s))
-		n += s
-	case *Error_ControllerProbeError_:
-		s := proto.Size(x.ControllerProbeError)
-		n += proto.SizeVarint(7<<3 | proto.WireBytes)
-		n += proto.SizeVarint(uint64(s))
-		n += s
-	case *Error_NodePublishVolumeError_:
-		s := proto.Size(x.NodePublishVolumeError)
-		n += proto.SizeVarint(8<<3 | proto.WireBytes)
-		n += proto.SizeVarint(uint64(s))
-		n += s
-	case *Error_NodeUnpublishVolumeError_:
-		s := proto.Size(x.NodeUnpublishVolumeError)
-		n += proto.SizeVarint(9<<3 | proto.WireBytes)
-		n += proto.SizeVarint(uint64(s))
-		n += s
-	case *Error_NodeProbeError_:
-		s := proto.Size(x.NodeProbeError)
-		n += proto.SizeVarint(10<<3 | proto.WireBytes)
-		n += proto.SizeVarint(uint64(s))
-		n += s
-	case *Error_GetNodeIdError:
-		s := proto.Size(x.GetNodeIdError)
-		n += proto.SizeVarint(11<<3 | proto.WireBytes)
-		n += proto.SizeVarint(uint64(s))
-		n += s
-	case nil:
-	default:
-		panic(fmt.Sprintf("proto: unexpected type %T in oneof", x))
-	}
-	return n
-}
-
-// General Error that MAY be returned by any RPC.
-type Error_GeneralError struct {
-	// Machine parsable error code.
-	ErrorCode Error_GeneralError_GeneralErrorCode `protobuf:"varint,1,opt,name=error_code,json=errorCode,enum=csi.Error_GeneralError_GeneralErrorCode" json:"error_code,omitempty"`
-	// When set to true, `caller_must_not_retry` indicates that the
-	// caller MUST not retry the same call again. This MAY be because
-	// the call is deemed invalid by the Plugin and no amount of retries
-	// will cause it to succeed. If this value is false, the caller MAY
-	// reissue the same call, but SHOULD implement exponential backoff
-	// on retires.
-	CallerMustNotRetry bool `protobuf:"varint,2,opt,name=caller_must_not_retry,json=callerMustNotRetry" json:"caller_must_not_retry,omitempty"`
-	// Human readable description of error, possibly with additional
-	// information. This string MAY be surfaced by CO to end users.
-	ErrorDescription string `protobuf:"bytes,3,opt,name=error_description,json=errorDescription" json:"error_description,omitempty"`
-}
-
-func (m *Error_GeneralError) Reset()                    { *m = Error_GeneralError{} }
-func (m *Error_GeneralError) String() string            { return proto.CompactTextString(m) }
-func (*Error_GeneralError) ProtoMessage()               {}
-func (*Error_GeneralError) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{38, 0} }
-
-func (m *Error_GeneralError) GetErrorCode() Error_GeneralError_GeneralErrorCode {
-	if m != nil {
-		return m.ErrorCode
-	}
-	return Error_GeneralError_UNKNOWN
-}
-
-func (m *Error_GeneralError) GetCallerMustNotRetry() bool {
-	if m != nil {
-		return m.CallerMustNotRetry
-	}
-	return false
-}
-
-func (m *Error_GeneralError) GetErrorDescription() string {
-	if m != nil {
-		return m.ErrorDescription
-	}
-	return ""
-}
-
-// `CreateVolume` specific error.
-type Error_CreateVolumeError struct {
-	// Machine parsable error code.
-	ErrorCode Error_CreateVolumeError_CreateVolumeErrorCode `protobuf:"varint,1,opt,name=error_code,json=errorCode,enum=csi.Error_CreateVolumeError_CreateVolumeErrorCode" json:"error_code,omitempty"`
-	// Human readable description of error, possibly with additional
-	// information. This string maybe surfaced by CO to end users.
-	ErrorDescription string `protobuf:"bytes,2,opt,name=error_description,json=errorDescription" json:"error_description,omitempty"`
-}
-
-func (m *Error_CreateVolumeError) Reset()                    { *m = Error_CreateVolumeError{} }
-func (m *Error_CreateVolumeError) String() string            { return proto.CompactTextString(m) }
-func (*Error_CreateVolumeError) ProtoMessage()               {}
-func (*Error_CreateVolumeError) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{38, 1} }
-
-func (m *Error_CreateVolumeError) GetErrorCode() Error_CreateVolumeError_CreateVolumeErrorCode {
-	if m != nil {
-		return m.ErrorCode
-	}
-	return Error_CreateVolumeError_UNKNOWN
-}
-
-func (m *Error_CreateVolumeError) GetErrorDescription() string {
-	if m != nil {
-		return m.ErrorDescription
-	}
-	return ""
-}
-
-// `DeleteVolume` specific error.
-type Error_DeleteVolumeError struct {
-	// Machine parsable error code.
-	ErrorCode Error_DeleteVolumeError_DeleteVolumeErrorCode `protobuf:"varint,1,opt,name=error_code,json=errorCode,enum=csi.Error_DeleteVolumeError_DeleteVolumeErrorCode" json:"error_code,omitempty"`
-	// Human readable description of error, possibly with additional
-	// information. This string maybe surfaced by CO to end users.
-	ErrorDescription string `protobuf:"bytes,2,opt,name=error_description,json=errorDescription" json:"error_description,omitempty"`
-}
-
-func (m *Error_DeleteVolumeError) Reset()                    { *m = Error_DeleteVolumeError{} }
-func (m *Error_DeleteVolumeError) String() string            { return proto.CompactTextString(m) }
-func (*Error_DeleteVolumeError) ProtoMessage()               {}
-func (*Error_DeleteVolumeError) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{38, 2} }
-
-func (m *Error_DeleteVolumeError) GetErrorCode() Error_DeleteVolumeError_DeleteVolumeErrorCode {
-	if m != nil {
-		return m.ErrorCode
-	}
-	return Error_DeleteVolumeError_UNKNOWN
-}
-
-func (m *Error_DeleteVolumeError) GetErrorDescription() string {
-	if m != nil {
-		return m.ErrorDescription
-	}
-	return ""
-}
-
-// `ControllerPublishVolume` specific error.
-type Error_ControllerPublishVolumeError struct {
-	// Machine parsable error code.
-	ErrorCode Error_ControllerPublishVolumeError_ControllerPublishVolumeErrorCode `protobuf:"varint,1,opt,name=error_code,json=errorCode,enum=csi.Error_ControllerPublishVolumeError_ControllerPublishVolumeErrorCode" json:"error_code,omitempty"`
-	// Human readable description of error, possibly with additional
-	// information. This string maybe surfaced by CO to end users.
-	ErrorDescription string `protobuf:"bytes,2,opt,name=error_description,json=errorDescription" json:"error_description,omitempty"`
-	// On `VOLUME_ALREADY_ATTACHED` and `MAX_ATTACHED_NODES` errors,
-	// this field contains the node(s) that the specified volume is
-	// already attached to.
-	NodeIds []string `protobuf:"bytes,3,rep,name=node_ids,json=nodeIds" json:"node_ids,omitempty"`
-}
-
-func (m *Error_ControllerPublishVolumeError) Reset()         { *m = Error_ControllerPublishVolumeError{} }
-func (m *Error_ControllerPublishVolumeError) String() string { return proto.CompactTextString(m) }
-func (*Error_ControllerPublishVolumeError) ProtoMessage()    {}
-func (*Error_ControllerPublishVolumeError) Descriptor() ([]byte, []int) {
-	return fileDescriptor0, []int{38, 3}
-}
-
-func (m *Error_ControllerPublishVolumeError) GetErrorCode() Error_ControllerPublishVolumeError_ControllerPublishVolumeErrorCode {
-	if m != nil {
-		return m.ErrorCode
-	}
-	return Error_ControllerPublishVolumeError_UNKNOWN
-}
-
-func (m *Error_ControllerPublishVolumeError) GetErrorDescription() string {
-	if m != nil {
-		return m.ErrorDescription
-	}
-	return ""
-}
-
-func (m *Error_ControllerPublishVolumeError) GetNodeIds() []string {
-	if m != nil {
-		return m.NodeIds
-	}
-	return nil
-}
-
-// `ControllerUnpublishVolume` specific error.
-type Error_ControllerUnpublishVolumeError struct {
-	ErrorCode        Error_ControllerUnpublishVolumeError_ControllerUnpublishVolumeErrorCode `protobuf:"varint,1,opt,name=error_code,json=errorCode,enum=csi.Error_ControllerUnpublishVolumeError_ControllerUnpublishVolumeErrorCode" json:"error_code,omitempty"`
-	ErrorDescription string                                                                  `protobuf:"bytes,2,opt,name=error_description,json=errorDescription" json:"error_description,omitempty"`
-}
-
-func (m *Error_ControllerUnpublishVolumeError) Reset()         { *m = Error_ControllerUnpublishVolumeError{} }
-func (m *Error_ControllerUnpublishVolumeError) String() string { return proto.CompactTextString(m) }
-func (*Error_ControllerUnpublishVolumeError) ProtoMessage()    {}
-func (*Error_ControllerUnpublishVolumeError) Descriptor() ([]byte, []int) {
-	return fileDescriptor0, []int{38, 4}
-}
-
-func (m *Error_ControllerUnpublishVolumeError) GetErrorCode() Error_ControllerUnpublishVolumeError_ControllerUnpublishVolumeErrorCode {
-	if m != nil {
-		return m.ErrorCode
-	}
-	return Error_ControllerUnpublishVolumeError_UNKNOWN
-}
-
-func (m *Error_ControllerUnpublishVolumeError) GetErrorDescription() string {
-	if m != nil {
-		return m.ErrorDescription
-	}
-	return ""
-}
-
-// `ValidateVolumeCapabilities` specific error.
-type Error_ValidateVolumeCapabilitiesError struct {
-	ErrorCode        Error_ValidateVolumeCapabilitiesError_ValidateVolumeCapabilitiesErrorCode `protobuf:"varint,1,opt,name=error_code,json=errorCode,enum=csi.Error_ValidateVolumeCapabilitiesError_ValidateVolumeCapabilitiesErrorCode" json:"error_code,omitempty"`
-	ErrorDescription string                                                                    `protobuf:"bytes,2,opt,name=error_description,json=errorDescription" json:"error_description,omitempty"`
-}
-
-func (m *Error_ValidateVolumeCapabilitiesError) Reset()         { *m = Error_ValidateVolumeCapabilitiesError{} }
-func (m *Error_ValidateVolumeCapabilitiesError) String() string { return proto.CompactTextString(m) }
-func (*Error_ValidateVolumeCapabilitiesError) ProtoMessage()    {}
-func (*Error_ValidateVolumeCapabilitiesError) Descriptor() ([]byte, []int) {
-	return fileDescriptor0, []int{38, 5}
-}
-
-func (m *Error_ValidateVolumeCapabilitiesError) GetErrorCode() Error_ValidateVolumeCapabilitiesError_ValidateVolumeCapabilitiesErrorCode {
-	if m != nil {
-		return m.ErrorCode
-	}
-	return Error_ValidateVolumeCapabilitiesError_UNKNOWN
-}
-
-func (m *Error_ValidateVolumeCapabilitiesError) GetErrorDescription() string {
-	if m != nil {
-		return m.ErrorDescription
-	}
-	return ""
-}
-
-// `ControllerProbe` specific error.
-type Error_ControllerProbeError struct {
-	ErrorCode        Error_ControllerProbeError_ControllerProbeErrorCode `protobuf:"varint,1,opt,name=error_code,json=errorCode,enum=csi.Error_ControllerProbeError_ControllerProbeErrorCode" json:"error_code,omitempty"`
-	ErrorDescription string                                              `protobuf:"bytes,2,opt,name=error_description,json=errorDescription" json:"error_description,omitempty"`
-}
-
-func (m *Error_ControllerProbeError) Reset()                    { *m = Error_ControllerProbeError{} }
-func (m *Error_ControllerProbeError) String() string            { return proto.CompactTextString(m) }
-func (*Error_ControllerProbeError) ProtoMessage()               {}
-func (*Error_ControllerProbeError) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{38, 6} }
-
-func (m *Error_ControllerProbeError) GetErrorCode() Error_ControllerProbeError_ControllerProbeErrorCode {
-	if m != nil {
-		return m.ErrorCode
-	}
-	return Error_ControllerProbeError_UNKNOWN
-}
-
-func (m *Error_ControllerProbeError) GetErrorDescription() string {
-	if m != nil {
-		return m.ErrorDescription
-	}
-	return ""
-}
-
-// `NodePublishVolume` specific error.
-type Error_NodePublishVolumeError struct {
-	ErrorCode        Error_NodePublishVolumeError_NodePublishVolumeErrorCode `protobuf:"varint,1,opt,name=error_code,json=errorCode,enum=csi.Error_NodePublishVolumeError_NodePublishVolumeErrorCode" json:"error_code,omitempty"`
-	ErrorDescription string                                                  `protobuf:"bytes,2,opt,name=error_description,json=errorDescription" json:"error_description,omitempty"`
-}
-
-func (m *Error_NodePublishVolumeError) Reset()         { *m = Error_NodePublishVolumeError{} }
-func (m *Error_NodePublishVolumeError) String() string { return proto.CompactTextString(m) }
-func (*Error_NodePublishVolumeError) ProtoMessage()    {}
-func (*Error_NodePublishVolumeError) Descriptor() ([]byte, []int) {
-	return fileDescriptor0, []int{38, 7}
-}
-
-func (m *Error_NodePublishVolumeError) GetErrorCode() Error_NodePublishVolumeError_NodePublishVolumeErrorCode {
-	if m != nil {
-		return m.ErrorCode
-	}
-	return Error_NodePublishVolumeError_UNKNOWN
-}
-
-func (m *Error_NodePublishVolumeError) GetErrorDescription() string {
-	if m != nil {
-		return m.ErrorDescription
-	}
-	return ""
-}
-
-// `NodeUnpublishVolume` specific error.
-type Error_NodeUnpublishVolumeError struct {
-	ErrorCode        Error_NodeUnpublishVolumeError_NodeUnpublishVolumeErrorCode `protobuf:"varint,1,opt,name=error_code,json=errorCode,enum=csi.Error_NodeUnpublishVolumeError_NodeUnpublishVolumeErrorCode" json:"error_code,omitempty"`
-	ErrorDescription string                                                      `protobuf:"bytes,2,opt,name=error_description,json=errorDescription" json:"error_description,omitempty"`
-}
-
-func (m *Error_NodeUnpublishVolumeError) Reset()         { *m = Error_NodeUnpublishVolumeError{} }
-func (m *Error_NodeUnpublishVolumeError) String() string { return proto.CompactTextString(m) }
-func (*Error_NodeUnpublishVolumeError) ProtoMessage()    {}
-func (*Error_NodeUnpublishVolumeError) Descriptor() ([]byte, []int) {
-	return fileDescriptor0, []int{38, 8}
-}
-
-func (m *Error_NodeUnpublishVolumeError) GetErrorCode() Error_NodeUnpublishVolumeError_NodeUnpublishVolumeErrorCode {
-	if m != nil {
-		return m.ErrorCode
-	}
-	return Error_NodeUnpublishVolumeError_UNKNOWN
-}
-
-func (m *Error_NodeUnpublishVolumeError) GetErrorDescription() string {
-	if m != nil {
-		return m.ErrorDescription
-	}
-	return ""
-}
-
-// `NodeProbe` specific error.
-type Error_NodeProbeError struct {
-	ErrorCode        Error_NodeProbeError_NodeProbeErrorCode `protobuf:"varint,1,opt,name=error_code,json=errorCode,enum=csi.Error_NodeProbeError_NodeProbeErrorCode" json:"error_code,omitempty"`
-	ErrorDescription string                                  `protobuf:"bytes,2,opt,name=error_description,json=errorDescription" json:"error_description,omitempty"`
-}
-
-func (m *Error_NodeProbeError) Reset()                    { *m = Error_NodeProbeError{} }
-func (m *Error_NodeProbeError) String() string            { return proto.CompactTextString(m) }
-func (*Error_NodeProbeError) ProtoMessage()               {}
-func (*Error_NodeProbeError) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{38, 9} }
-
-func (m *Error_NodeProbeError) GetErrorCode() Error_NodeProbeError_NodeProbeErrorCode {
-	if m != nil {
-		return m.ErrorCode
-	}
-	return Error_NodeProbeError_UNKNOWN
-}
-
-func (m *Error_NodeProbeError) GetErrorDescription() string {
-	if m != nil {
-		return m.ErrorDescription
-	}
-	return ""
-}
-
-// `GetNodeID` specific error.
-type Error_GetNodeIDError struct {
-	ErrorCode        Error_GetNodeIDError_GetNodeIDErrorCode `protobuf:"varint,1,opt,name=error_code,json=errorCode,enum=csi.Error_GetNodeIDError_GetNodeIDErrorCode" json:"error_code,omitempty"`
-	ErrorDescription string                                  `protobuf:"bytes,2,opt,name=error_description,json=errorDescription" json:"error_description,omitempty"`
-}
-
-func (m *Error_GetNodeIDError) Reset()                    { *m = Error_GetNodeIDError{} }
-func (m *Error_GetNodeIDError) String() string            { return proto.CompactTextString(m) }
-func (*Error_GetNodeIDError) ProtoMessage()               {}
-func (*Error_GetNodeIDError) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{38, 10} }
-
-func (m *Error_GetNodeIDError) GetErrorCode() Error_GetNodeIDError_GetNodeIDErrorCode {
-	if m != nil {
-		return m.ErrorCode
-	}
-	return Error_GetNodeIDError_UNKNOWN
-}
-
-func (m *Error_GetNodeIDError) GetErrorDescription() string {
-	if m != nil {
-		return m.ErrorDescription
-	}
-	return ""
-}
-
 func init() {
 	proto.RegisterType((*GetSupportedVersionsRequest)(nil), "csi.GetSupportedVersionsRequest")
 	proto.RegisterType((*GetSupportedVersionsResponse)(nil), "csi.GetSupportedVersionsResponse")
-	proto.RegisterType((*GetSupportedVersionsResponse_Result)(nil), "csi.GetSupportedVersionsResponse.Result")
 	proto.RegisterType((*Version)(nil), "csi.Version")
 	proto.RegisterType((*GetPluginInfoRequest)(nil), "csi.GetPluginInfoRequest")
 	proto.RegisterType((*GetPluginInfoResponse)(nil), "csi.GetPluginInfoResponse")
-	proto.RegisterType((*GetPluginInfoResponse_Result)(nil), "csi.GetPluginInfoResponse.Result")
 	proto.RegisterType((*CreateVolumeRequest)(nil), "csi.CreateVolumeRequest")
 	proto.RegisterType((*CreateVolumeResponse)(nil), "csi.CreateVolumeResponse")
-	proto.RegisterType((*CreateVolumeResponse_Result)(nil), "csi.CreateVolumeResponse.Result")
 	proto.RegisterType((*VolumeCapability)(nil), "csi.VolumeCapability")
 	proto.RegisterType((*VolumeCapability_BlockVolume)(nil), "csi.VolumeCapability.BlockVolume")
 	proto.RegisterType((*VolumeCapability_MountVolume)(nil), "csi.VolumeCapability.MountVolume")
@@ -5209,74 +1737,38 @@ func init() {
 	proto.RegisterType((*VolumeInfo)(nil), "csi.VolumeInfo")
 	proto.RegisterType((*DeleteVolumeRequest)(nil), "csi.DeleteVolumeRequest")
 	proto.RegisterType((*DeleteVolumeResponse)(nil), "csi.DeleteVolumeResponse")
-	proto.RegisterType((*DeleteVolumeResponse_Result)(nil), "csi.DeleteVolumeResponse.Result")
 	proto.RegisterType((*ControllerPublishVolumeRequest)(nil), "csi.ControllerPublishVolumeRequest")
 	proto.RegisterType((*ControllerPublishVolumeResponse)(nil), "csi.ControllerPublishVolumeResponse")
-	proto.RegisterType((*ControllerPublishVolumeResponse_Result)(nil), "csi.ControllerPublishVolumeResponse.Result")
 	proto.RegisterType((*ControllerUnpublishVolumeRequest)(nil), "csi.ControllerUnpublishVolumeRequest")
 	proto.RegisterType((*ControllerUnpublishVolumeResponse)(nil), "csi.ControllerUnpublishVolumeResponse")
-	proto.RegisterType((*ControllerUnpublishVolumeResponse_Result)(nil), "csi.ControllerUnpublishVolumeResponse.Result")
 	proto.RegisterType((*ValidateVolumeCapabilitiesRequest)(nil), "csi.ValidateVolumeCapabilitiesRequest")
 	proto.RegisterType((*ValidateVolumeCapabilitiesResponse)(nil), "csi.ValidateVolumeCapabilitiesResponse")
-	proto.RegisterType((*ValidateVolumeCapabilitiesResponse_Result)(nil), "csi.ValidateVolumeCapabilitiesResponse.Result")
 	proto.RegisterType((*ListVolumesRequest)(nil), "csi.ListVolumesRequest")
 	proto.RegisterType((*ListVolumesResponse)(nil), "csi.ListVolumesResponse")
-	proto.RegisterType((*ListVolumesResponse_Result)(nil), "csi.ListVolumesResponse.Result")
-	proto.RegisterType((*ListVolumesResponse_Result_Entry)(nil), "csi.ListVolumesResponse.Result.Entry")
+	proto.RegisterType((*ListVolumesResponse_Entry)(nil), "csi.ListVolumesResponse.Entry")
 	proto.RegisterType((*GetCapacityRequest)(nil), "csi.GetCapacityRequest")
 	proto.RegisterType((*GetCapacityResponse)(nil), "csi.GetCapacityResponse")
-	proto.RegisterType((*GetCapacityResponse_Result)(nil), "csi.GetCapacityResponse.Result")
 	proto.RegisterType((*ControllerProbeRequest)(nil), "csi.ControllerProbeRequest")
 	proto.RegisterType((*ControllerProbeResponse)(nil), "csi.ControllerProbeResponse")
-	proto.RegisterType((*ControllerProbeResponse_Result)(nil), "csi.ControllerProbeResponse.Result")
 	proto.RegisterType((*ControllerGetCapabilitiesRequest)(nil), "csi.ControllerGetCapabilitiesRequest")
 	proto.RegisterType((*ControllerGetCapabilitiesResponse)(nil), "csi.ControllerGetCapabilitiesResponse")
-	proto.RegisterType((*ControllerGetCapabilitiesResponse_Result)(nil), "csi.ControllerGetCapabilitiesResponse.Result")
 	proto.RegisterType((*ControllerServiceCapability)(nil), "csi.ControllerServiceCapability")
 	proto.RegisterType((*ControllerServiceCapability_RPC)(nil), "csi.ControllerServiceCapability.RPC")
 	proto.RegisterType((*NodePublishVolumeRequest)(nil), "csi.NodePublishVolumeRequest")
 	proto.RegisterType((*NodePublishVolumeResponse)(nil), "csi.NodePublishVolumeResponse")
-	proto.RegisterType((*NodePublishVolumeResponse_Result)(nil), "csi.NodePublishVolumeResponse.Result")
 	proto.RegisterType((*NodeUnpublishVolumeRequest)(nil), "csi.NodeUnpublishVolumeRequest")
 	proto.RegisterType((*NodeUnpublishVolumeResponse)(nil), "csi.NodeUnpublishVolumeResponse")
-	proto.RegisterType((*NodeUnpublishVolumeResponse_Result)(nil), "csi.NodeUnpublishVolumeResponse.Result")
 	proto.RegisterType((*GetNodeIDRequest)(nil), "csi.GetNodeIDRequest")
 	proto.RegisterType((*GetNodeIDResponse)(nil), "csi.GetNodeIDResponse")
-	proto.RegisterType((*GetNodeIDResponse_Result)(nil), "csi.GetNodeIDResponse.Result")
 	proto.RegisterType((*NodeProbeRequest)(nil), "csi.NodeProbeRequest")
 	proto.RegisterType((*NodeProbeResponse)(nil), "csi.NodeProbeResponse")
-	proto.RegisterType((*NodeProbeResponse_Result)(nil), "csi.NodeProbeResponse.Result")
 	proto.RegisterType((*NodeGetCapabilitiesRequest)(nil), "csi.NodeGetCapabilitiesRequest")
 	proto.RegisterType((*NodeGetCapabilitiesResponse)(nil), "csi.NodeGetCapabilitiesResponse")
-	proto.RegisterType((*NodeGetCapabilitiesResponse_Result)(nil), "csi.NodeGetCapabilitiesResponse.Result")
 	proto.RegisterType((*NodeServiceCapability)(nil), "csi.NodeServiceCapability")
 	proto.RegisterType((*NodeServiceCapability_RPC)(nil), "csi.NodeServiceCapability.RPC")
-	proto.RegisterType((*Error)(nil), "csi.Error")
-	proto.RegisterType((*Error_GeneralError)(nil), "csi.Error.GeneralError")
-	proto.RegisterType((*Error_CreateVolumeError)(nil), "csi.Error.CreateVolumeError")
-	proto.RegisterType((*Error_DeleteVolumeError)(nil), "csi.Error.DeleteVolumeError")
-	proto.RegisterType((*Error_ControllerPublishVolumeError)(nil), "csi.Error.ControllerPublishVolumeError")
-	proto.RegisterType((*Error_ControllerUnpublishVolumeError)(nil), "csi.Error.ControllerUnpublishVolumeError")
-	proto.RegisterType((*Error_ValidateVolumeCapabilitiesError)(nil), "csi.Error.ValidateVolumeCapabilitiesError")
-	proto.RegisterType((*Error_ControllerProbeError)(nil), "csi.Error.ControllerProbeError")
-	proto.RegisterType((*Error_NodePublishVolumeError)(nil), "csi.Error.NodePublishVolumeError")
-	proto.RegisterType((*Error_NodeUnpublishVolumeError)(nil), "csi.Error.NodeUnpublishVolumeError")
-	proto.RegisterType((*Error_NodeProbeError)(nil), "csi.Error.NodeProbeError")
-	proto.RegisterType((*Error_GetNodeIDError)(nil), "csi.Error.GetNodeIDError")
 	proto.RegisterEnum("csi.VolumeCapability_AccessMode_Mode", VolumeCapability_AccessMode_Mode_name, VolumeCapability_AccessMode_Mode_value)
 	proto.RegisterEnum("csi.ControllerServiceCapability_RPC_Type", ControllerServiceCapability_RPC_Type_name, ControllerServiceCapability_RPC_Type_value)
 	proto.RegisterEnum("csi.NodeServiceCapability_RPC_Type", NodeServiceCapability_RPC_Type_name, NodeServiceCapability_RPC_Type_value)
-	proto.RegisterEnum("csi.Error_GeneralError_GeneralErrorCode", Error_GeneralError_GeneralErrorCode_name, Error_GeneralError_GeneralErrorCode_value)
-	proto.RegisterEnum("csi.Error_CreateVolumeError_CreateVolumeErrorCode", Error_CreateVolumeError_CreateVolumeErrorCode_name, Error_CreateVolumeError_CreateVolumeErrorCode_value)
-	proto.RegisterEnum("csi.Error_DeleteVolumeError_DeleteVolumeErrorCode", Error_DeleteVolumeError_DeleteVolumeErrorCode_name, Error_DeleteVolumeError_DeleteVolumeErrorCode_value)
-	proto.RegisterEnum("csi.Error_ControllerPublishVolumeError_ControllerPublishVolumeErrorCode", Error_ControllerPublishVolumeError_ControllerPublishVolumeErrorCode_name, Error_ControllerPublishVolumeError_ControllerPublishVolumeErrorCode_value)
-	proto.RegisterEnum("csi.Error_ControllerUnpublishVolumeError_ControllerUnpublishVolumeErrorCode", Error_ControllerUnpublishVolumeError_ControllerUnpublishVolumeErrorCode_name, Error_ControllerUnpublishVolumeError_ControllerUnpublishVolumeErrorCode_value)
-	proto.RegisterEnum("csi.Error_ValidateVolumeCapabilitiesError_ValidateVolumeCapabilitiesErrorCode", Error_ValidateVolumeCapabilitiesError_ValidateVolumeCapabilitiesErrorCode_name, Error_ValidateVolumeCapabilitiesError_ValidateVolumeCapabilitiesErrorCode_value)
-	proto.RegisterEnum("csi.Error_ControllerProbeError_ControllerProbeErrorCode", Error_ControllerProbeError_ControllerProbeErrorCode_name, Error_ControllerProbeError_ControllerProbeErrorCode_value)
-	proto.RegisterEnum("csi.Error_NodePublishVolumeError_NodePublishVolumeErrorCode", Error_NodePublishVolumeError_NodePublishVolumeErrorCode_name, Error_NodePublishVolumeError_NodePublishVolumeErrorCode_value)
-	proto.RegisterEnum("csi.Error_NodeUnpublishVolumeError_NodeUnpublishVolumeErrorCode", Error_NodeUnpublishVolumeError_NodeUnpublishVolumeErrorCode_name, Error_NodeUnpublishVolumeError_NodeUnpublishVolumeErrorCode_value)
-	proto.RegisterEnum("csi.Error_NodeProbeError_NodeProbeErrorCode", Error_NodeProbeError_NodeProbeErrorCode_name, Error_NodeProbeError_NodeProbeErrorCode_value)
-	proto.RegisterEnum("csi.Error_GetNodeIDError_GetNodeIDErrorCode", Error_GetNodeIDError_GetNodeIDErrorCode_name, Error_GetNodeIDError_GetNodeIDErrorCode_value)
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -5911,214 +2403,130 @@ var _Node_serviceDesc = grpc.ServiceDesc{
 func init() { proto.RegisterFile("csi.proto", fileDescriptor0) }
 
 var fileDescriptor0 = []byte{
-	// 3335 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xcc, 0x5b, 0x4d, 0x6c, 0x23, 0x57,
-	0x1d, 0xf7, 0xf8, 0x23, 0x4e, 0xfe, 0xd9, 0xec, 0x4e, 0x5e, 0xbe, 0x9c, 0x49, 0x76, 0x93, 0x9d,
-	0xed, 0xb6, 0x5b, 0x4a, 0x03, 0xa4, 0x48, 0xdd, 0xdd, 0x7e, 0x3a, 0xf6, 0xc4, 0x31, 0xeb, 0x8c,
-	0xdd, 0xb1, 0xbd, 0xdb, 0x05, 0xb5, 0xc3, 0xc4, 0x9e, 0x64, 0xcd, 0x3a, 0xb6, 0x3b, 0x33, 0x8e,
-	0xea, 0x2b, 0x20, 0x24, 0x24, 0x04, 0x08, 0x0e, 0xbd, 0x20, 0x38, 0x14, 0xd1, 0x4a, 0x1c, 0xf9,
-	0x3a, 0x20, 0x2e, 0x70, 0x44, 0x1c, 0x90, 0x50, 0x91, 0x90, 0x90, 0xe0, 0x58, 0x4e, 0xdc, 0x8a,
-	0xc4, 0x05, 0xcd, 0x7b, 0x6f, 0xc6, 0x33, 0xe3, 0x37, 0xb6, 0x13, 0xbb, 0x2d, 0x37, 0xcf, 0xff,
-	0xbd, 0xf7, 0xfb, 0xbf, 0xff, 0xe7, 0xfb, 0xbf, 0x0f, 0xc3, 0x5c, 0xcd, 0x6c, 0xec, 0x74, 0x8c,
-	0xb6, 0xd5, 0x46, 0xb1, 0x9a, 0xd9, 0x10, 0xaf, 0xc2, 0x46, 0x4e, 0xb7, 0xca, 0xdd, 0x4e, 0xa7,
-	0x6d, 0x58, 0x7a, 0xfd, 0xbe, 0x6e, 0x98, 0x8d, 0x76, 0xcb, 0x54, 0xf4, 0xb7, 0xba, 0xba, 0x69,
-	0x89, 0x1f, 0x70, 0xb0, 0xc9, 0x6e, 0x37, 0x3b, 0xed, 0x96, 0xa9, 0xa3, 0x3d, 0x98, 0x31, 0x74,
-	0xb3, 0xdb, 0xb4, 0x52, 0xdc, 0x36, 0x77, 0x6b, 0x7e, 0xf7, 0xd6, 0x8e, 0xcd, 0x60, 0xd8, 0x90,
-	0x1d, 0x05, 0xf7, 0x3f, 0x88, 0x28, 0x74, 0x24, 0x12, 0x21, 0xa1, 0x1b, 0x46, 0xdb, 0x48, 0x45,
-	0x31, 0x04, 0x60, 0x08, 0xc9, 0xa6, 0x1c, 0x44, 0x14, 0xd2, 0x24, 0x48, 0x30, 0x43, 0xc6, 0xa1,
-	0x17, 0x00, 0x99, 0x0e, 0xb6, 0x7a, 0x46, 0xc1, 0x53, 0xdc, 0x76, 0xec, 0xd6, 0xfc, 0xee, 0x25,
-	0x3c, 0x94, 0x72, 0x54, 0x16, 0xcd, 0xe0, 0x1c, 0xf6, 0x92, 0x90, 0x30, 0xf4, 0x4e, 0xb3, 0x27,
-	0xde, 0x83, 0x24, 0x25, 0xa2, 0x65, 0x48, 0x9c, 0x6a, 0x5f, 0x6b, 0x1b, 0x58, 0x82, 0x05, 0x85,
-	0x7c, 0x60, 0x6a, 0xa3, 0x45, 0x27, 0x65, 0x53, 0xed, 0x0f, 0x9b, 0xda, 0xd1, 0xac, 0xda, 0xa3,
-	0x54, 0x8c, 0x50, 0xf1, 0x87, 0xf8, 0x32, 0x2c, 0xe7, 0x74, 0xab, 0xd4, 0xec, 0x9e, 0x34, 0x5a,
-	0xf9, 0xd6, 0x71, 0x9b, 0x6a, 0x0f, 0x3d, 0x09, 0x49, 0x3a, 0x41, 0xaa, 0x1d, 0xff, 0xfc, 0x9c,
-	0x46, 0xf1, 0xcf, 0x51, 0x58, 0x09, 0x00, 0x50, 0xf5, 0xbe, 0x10, 0x50, 0xef, 0x75, 0x47, 0xbd,
-	0x83, 0x7d, 0x2f, 0xa6, 0xd7, 0x3f, 0x71, 0xae, 0x62, 0x11, 0xc4, 0x5b, 0xda, 0xa9, 0x8e, 0x39,
-	0xcd, 0x29, 0xf8, 0x37, 0xba, 0x09, 0x97, 0xcf, 0xf4, 0x56, 0xbd, 0x6d, 0x38, 0x9a, 0xc6, 0x58,
-	0x73, 0xca, 0x02, 0xa1, 0x3a, 0x2a, 0xbc, 0x07, 0xb3, 0xa7, 0x5a, 0xab, 0x71, 0xac, 0x9b, 0x56,
-	0x2a, 0x86, 0x2d, 0xf1, 0xb9, 0x91, 0x13, 0xdd, 0x39, 0xa4, 0x23, 0xa4, 0x96, 0x65, 0xf4, 0x14,
-	0x17, 0x40, 0x78, 0x01, 0x16, 0x7c, 0x4d, 0x88, 0x87, 0xd8, 0x63, 0xbd, 0x47, 0xe7, 0x65, 0xff,
-	0xb4, 0xcd, 0x70, 0xa6, 0x35, 0xbb, 0x3a, 0x9d, 0x0d, 0xf9, 0xb8, 0x1b, 0xbd, 0xcd, 0xf5, 0x0d,
-	0xfc, 0xdf, 0x18, 0x2c, 0x65, 0x0c, 0x5d, 0xb3, 0xf4, 0xfb, 0xed, 0x66, 0xf7, 0x54, 0x3f, 0xa7,
-	0x4d, 0x5c, 0x6d, 0x44, 0x3d, 0xda, 0xb8, 0x03, 0x97, 0x6b, 0x5a, 0x47, 0xab, 0x35, 0xac, 0x9e,
-	0x6a, 0x68, 0xad, 0x13, 0x1d, 0xbb, 0xc1, 0xfc, 0x2e, 0xc2, 0x10, 0x19, 0xda, 0xa4, 0xd8, 0x2d,
-	0xca, 0x42, 0xcd, 0xfb, 0x89, 0xf6, 0x61, 0xe9, 0x0c, 0xcf, 0x43, 0xb5, 0xe9, 0x47, 0x8d, 0x66,
-	0xc3, 0x6a, 0xe8, 0x66, 0x2a, 0x8e, 0x95, 0xb5, 0x42, 0xa6, 0x80, 0xdb, 0x33, 0x4e, 0x73, 0x4f,
-	0x41, 0x67, 0x7e, 0x4a, 0x43, 0x37, 0xd1, 0x01, 0x40, 0x47, 0x33, 0xb4, 0x53, 0xdd, 0xd2, 0x0d,
-	0x33, 0x95, 0xc0, 0xc3, 0x49, 0xcc, 0x31, 0x84, 0xdd, 0x29, 0xb9, 0x5d, 0x89, 0x92, 0x3d, 0x63,
-	0xd1, 0xeb, 0xc0, 0x77, 0x4d, 0xdd, 0x50, 0x6b, 0x86, 0x5e, 0xd7, 0x5b, 0x56, 0x43, 0x6b, 0x9a,
-	0xa9, 0x19, 0x8c, 0xf7, 0x6c, 0x28, 0x5e, 0xd5, 0xd4, 0x8d, 0x4c, 0xbf, 0x3f, 0x01, 0xbd, 0xd2,
-	0xf5, 0x53, 0x85, 0x97, 0xe0, 0x4a, 0x80, 0xf1, 0x79, 0x4c, 0x28, 0xec, 0xc1, 0x32, 0x8b, 0xcf,
-	0x79, 0x30, 0xc4, 0xdf, 0x72, 0xb0, 0xec, 0x17, 0x80, 0x06, 0xd4, 0xdd, 0x40, 0x40, 0x6d, 0x33,
-	0x64, 0x9d, 0x24, 0x9e, 0xee, 0xba, 0xe1, 0xf4, 0x79, 0x98, 0xa7, 0x16, 0x6f, 0xb4, 0x8e, 0xdb,
-	0x94, 0xdd, 0x15, 0x8f, 0xa5, 0x71, 0x4c, 0xc0, 0x99, 0xfb, 0xbb, 0xef, 0xbb, 0x3f, 0x8e, 0x03,
-	0x1f, 0xf4, 0x06, 0x74, 0x07, 0x12, 0x47, 0xcd, 0x76, 0xed, 0xb1, 0x2f, 0x13, 0x04, 0x7b, 0xed,
-	0xec, 0xd9, 0x5d, 0x08, 0xd5, 0x9e, 0x14, 0x1e, 0x61, 0x0f, 0x3d, 0x6d, 0x77, 0x5b, 0x16, 0x9d,
-	0x78, 0xc8, 0xd0, 0x43, 0xbb, 0x4b, 0x7f, 0x28, 0x1e, 0x81, 0xd2, 0x30, 0xaf, 0xd5, 0x6a, 0xba,
-	0x69, 0xaa, 0xa7, 0xed, 0xba, 0xe3, 0xef, 0xdb, 0x6c, 0x80, 0x34, 0xee, 0x78, 0xd8, 0xae, 0xeb,
-	0x0a, 0x68, 0xee, 0x6f, 0x61, 0x01, 0xe6, 0x3d, 0xb3, 0x12, 0x72, 0x30, 0xef, 0xe1, 0x84, 0xd6,
-	0x20, 0x79, 0x6c, 0xaa, 0x56, 0xaf, 0xe3, 0x24, 0x9e, 0x99, 0x63, 0xb3, 0xd2, 0xeb, 0xe8, 0x68,
-	0x0b, 0xe6, 0xf1, 0x14, 0xd4, 0xe3, 0xa6, 0x76, 0x62, 0xa6, 0xa2, 0xdb, 0xb1, 0x5b, 0x73, 0x0a,
-	0x60, 0xd2, 0xbe, 0x4d, 0x11, 0x3e, 0xe4, 0x00, 0xfa, 0x2c, 0xd1, 0x1d, 0x88, 0xe3, 0x29, 0xda,
-	0x28, 0x97, 0x77, 0x6f, 0x8e, 0x9a, 0xe2, 0x0e, 0x9e, 0x27, 0x1e, 0x22, 0xfe, 0x84, 0x83, 0x38,
-	0xc6, 0x98, 0x87, 0x64, 0x55, 0xbe, 0x27, 0x17, 0x1f, 0xc8, 0x7c, 0x04, 0xad, 0x02, 0x2a, 0xe7,
-	0xe5, 0x5c, 0x41, 0x52, 0xe5, 0x62, 0x56, 0x52, 0x1f, 0x28, 0xf9, 0x8a, 0xa4, 0xf0, 0x1c, 0xda,
-	0x80, 0x35, 0x2f, 0x5d, 0x91, 0xd2, 0x59, 0x49, 0x51, 0x8b, 0x72, 0xe1, 0x21, 0x1f, 0x45, 0x02,
-	0xac, 0x1e, 0x56, 0x0b, 0x95, 0xfc, 0x60, 0x5b, 0x0c, 0x6d, 0x42, 0xca, 0xd3, 0x46, 0x31, 0x28,
-	0x6c, 0xdc, 0x86, 0xf5, 0xb4, 0x92, 0x9f, 0xb4, 0x31, 0xb1, 0xb7, 0xe0, 0x9a, 0xc1, 0xd6, 0x94,
-	0xf8, 0x00, 0x16, 0x7c, 0xd9, 0xc6, 0xce, 0xd3, 0x86, 0xfe, 0x56, 0xb7, 0x61, 0xe8, 0x75, 0xf5,
-	0xa8, 0x67, 0xe9, 0x26, 0x56, 0x43, 0x5c, 0x59, 0x70, 0xa8, 0x7b, 0x36, 0xd1, 0xd6, 0x69, 0xb3,
-	0x71, 0xda, 0xb0, 0x68, 0x9f, 0x28, 0xee, 0x03, 0x98, 0x84, 0x3b, 0x88, 0x7f, 0xe0, 0x00, 0xfa,
-	0xde, 0x69, 0xc3, 0xba, 0x09, 0xcf, 0x07, 0xeb, 0x50, 0x09, 0xec, 0x65, 0x88, 0x36, 0xea, 0x34,
-	0x08, 0xa3, 0x8d, 0x3a, 0x7a, 0x05, 0x40, 0xb3, 0x2c, 0xa3, 0x71, 0xd4, 0xb5, 0x87, 0x90, 0x05,
-	0x61, 0x2b, 0xe0, 0xf9, 0x3b, 0x69, 0xb7, 0x07, 0xcd, 0x4d, 0xfd, 0x21, 0x76, 0x06, 0x09, 0x34,
-	0x9f, 0x2b, 0xfa, 0xff, 0xc3, 0xc1, 0x52, 0x56, 0x6f, 0xea, 0x17, 0xcd, 0xfd, 0x1b, 0x30, 0xe7,
-	0x84, 0xae, 0x23, 0xd6, 0x2c, 0x8d, 0xd3, 0x3a, 0x33, 0x6f, 0xc6, 0x3c, 0x79, 0x93, 0xc1, 0x78,
-	0xcc, 0xbc, 0x39, 0x8d, 0xc4, 0xf7, 0x6d, 0x0e, 0x96, 0xfd, 0x33, 0x18, 0x9a, 0xf8, 0x58, 0x5d,
-	0x2f, 0x96, 0xf8, 0x66, 0x9d, 0xc4, 0xd7, 0x4f, 0x63, 0xbf, 0x8c, 0xc3, 0xb5, 0x4c, 0xbb, 0x65,
-	0x19, 0xed, 0x66, 0x53, 0x37, 0x4a, 0xdd, 0xa3, 0x66, 0xc3, 0x7c, 0xf4, 0x31, 0x58, 0x64, 0x0d,
-	0x92, 0xad, 0x76, 0x1d, 0x37, 0xc5, 0x48, 0x0a, 0xb1, 0x3f, 0xf3, 0x75, 0xb4, 0x07, 0x8b, 0xc1,
-	0x45, 0xb7, 0x97, 0x8a, 0x63, 0x3e, 0x21, 0x4b, 0x2e, 0x7f, 0x16, 0x4c, 0xbb, 0x02, 0xcc, 0x1a,
-	0xba, 0x56, 0x6f, 0xb7, 0x9a, 0xbd, 0x54, 0x62, 0x9b, 0xbb, 0x35, 0xab, 0xb8, 0xdf, 0xa8, 0x16,
-	0xba, 0x84, 0xde, 0x26, 0xcb, 0xca, 0x50, 0xe1, 0xc7, 0xf3, 0x0a, 0x74, 0xec, 0x0a, 0xe1, 0x89,
-	0xa9, 0x24, 0xe6, 0x72, 0x67, 0x1c, 0x2e, 0xe4, 0x2b, 0x18, 0x6d, 0x54, 0xd0, 0x3e, 0x79, 0x1a,
-	0xde, 0x27, 0x64, 0x60, 0x85, 0xc9, 0xee, 0x5c, 0x2e, 0xfc, 0xb7, 0x28, 0x6c, 0x85, 0xca, 0x44,
-	0xbd, 0x59, 0x0a, 0x78, 0xf3, 0x33, 0xc3, 0x35, 0x31, 0x89, 0x63, 0xff, 0xbe, 0x5f, 0x21, 0x1b,
-	0xb0, 0xd4, 0x21, 0xc0, 0xaa, 0x7f, 0x69, 0xb7, 0x8d, 0xb1, 0x77, 0x8e, 0x29, 0xec, 0xf8, 0x1a,
-	0xed, 0x74, 0x48, 0xac, 0xb2, 0xd8, 0x09, 0xd2, 0x85, 0x2c, 0xac, 0xb2, 0x3b, 0x5f, 0xac, 0x2c,
-	0xfe, 0x79, 0x14, 0xb6, 0xfb, 0x73, 0xac, 0xb6, 0x3a, 0x9f, 0x7c, 0x54, 0xea, 0x8c, 0xa8, 0x21,
-	0x75, 0xf0, 0xdd, 0x80, 0x0a, 0xd9, 0xd3, 0xfb, 0x04, 0xb3, 0xe9, 0xbb, 0x1c, 0x5c, 0x1f, 0x32,
-	0x1d, 0xea, 0x8c, 0xb9, 0x80, 0x33, 0x3e, 0x3b, 0x4a, 0x8c, 0x29, 0xe7, 0xd9, 0x7f, 0x44, 0xe1,
-	0xfa, 0x7d, 0xad, 0xd9, 0xa8, 0xbb, 0x35, 0xac, 0x77, 0xcb, 0x30, 0x55, 0xa3, 0x86, 0x6c, 0x63,
-	0x62, 0xe7, 0xdd, 0xc6, 0x34, 0x58, 0x49, 0x8d, 0x38, 0xc1, 0x8b, 0x04, 0x65, 0x94, 0x3c, 0x63,
-	0xe7, 0xb5, 0xa9, 0xe4, 0xa4, 0xbf, 0x73, 0x20, 0x0e, 0x9b, 0x12, 0xf5, 0x84, 0x83, 0x80, 0x27,
-	0xec, 0x8c, 0x94, 0x65, 0x12, 0x57, 0x78, 0xd5, 0x4d, 0x4c, 0x9b, 0x30, 0xe7, 0x9e, 0x75, 0x60,
-	0xd6, 0xb3, 0x4a, 0x9f, 0x80, 0x52, 0x90, 0x3c, 0xd5, 0x4d, 0x53, 0x3b, 0x71, 0x04, 0x73, 0x3e,
-	0xfb, 0x2e, 0xf4, 0x4d, 0x0e, 0x50, 0xa1, 0x61, 0xd2, 0xa2, 0xfc, 0xdc, 0x3e, 0x63, 0xd7, 0xea,
-	0xda, 0xdb, 0xaa, 0xde, 0xb2, 0x8c, 0x06, 0xad, 0x2b, 0x17, 0x14, 0x38, 0xd5, 0xde, 0x96, 0x08,
-	0xc5, 0x2e, 0x24, 0x4d, 0x4b, 0x33, 0xac, 0x46, 0xeb, 0x44, 0xb5, 0xda, 0x8f, 0xf5, 0x16, 0xcd,
-	0x09, 0x0b, 0x0e, 0xb5, 0x62, 0x13, 0xc5, 0x77, 0xa3, 0xb0, 0xe4, 0x9b, 0x06, 0xd5, 0xeb, 0x9d,
-	0x80, 0x5e, 0x49, 0x31, 0xc9, 0xe8, 0x79, 0x31, 0x45, 0xbe, 0xdb, 0x4f, 0xf1, 0xaf, 0x40, 0xd2,
-	0x91, 0x82, 0xa4, 0xf5, 0x9b, 0x23, 0x58, 0xed, 0x10, 0xbf, 0x73, 0x46, 0xa1, 0xab, 0x00, 0x2d,
-	0xfd, 0x6d, 0x8b, 0x4a, 0x49, 0xf4, 0x3d, 0x67, 0x53, 0xb0, 0x84, 0xc2, 0x1d, 0x48, 0x10, 0xef,
-	0x9b, 0x60, 0x7b, 0xf8, 0x9d, 0x28, 0xa0, 0x9c, 0x6e, 0xb9, 0x3b, 0x80, 0x73, 0x1a, 0x2b, 0x24,
-	0x86, 0xa3, 0xe7, 0x8d, 0xe1, 0x9c, 0xef, 0x28, 0x82, 0xa4, 0x80, 0xa7, 0x9c, 0x63, 0x9f, 0xc0,
-	0xe4, 0x86, 0x9d, 0x44, 0x4c, 0x78, 0x5e, 0x20, 0xfe, 0x9a, 0x83, 0x25, 0x1f, 0xc7, 0xa1, 0x4e,
-	0xc3, 0xe8, 0x79, 0x31, 0xa7, 0x79, 0xde, 0xf5, 0x99, 0x67, 0x01, 0x69, 0x67, 0x5a, 0xa3, 0xa9,
-	0x1d, 0x35, 0x89, 0x4e, 0x6d, 0x70, 0xba, 0x53, 0x5a, 0x74, 0x5b, 0x1c, 0xae, 0x7d, 0x3b, 0xbe,
-	0x0a, 0xab, 0x9e, 0x72, 0xc1, 0x68, 0x1f, 0x9d, 0x77, 0x01, 0x16, 0xbf, 0xc7, 0xc1, 0xda, 0x00,
-	0x04, 0x15, 0xff, 0xa5, 0x80, 0xf8, 0x37, 0x82, 0xf5, 0x89, 0xb7, 0xf7, 0xd4, 0xd6, 0xa2, 0x2f,
-	0x79, 0xcb, 0x0b, 0xaa, 0xeb, 0x0b, 0xae, 0x44, 0xe2, 0x87, 0xbe, 0xd5, 0x77, 0x00, 0x6c, 0xcc,
-	0xd5, 0x37, 0x64, 0xdc, 0xc5, 0x24, 0x96, 0x5d, 0xa3, 0x67, 0xe1, 0x12, 0x23, 0x7c, 0xb6, 0x03,
-	0xcc, 0xcb, 0xba, 0x71, 0xd6, 0xa8, 0x79, 0x23, 0xc9, 0x37, 0xaa, 0xaf, 0xb7, 0x77, 0xa2, 0xb0,
-	0x31, 0x64, 0x18, 0xba, 0x0d, 0x31, 0xa3, 0x53, 0xa3, 0x22, 0x3e, 0x31, 0x8a, 0xcb, 0x8e, 0x52,
-	0xca, 0x1c, 0x44, 0x14, 0x7b, 0x88, 0xf0, 0x2b, 0x0e, 0x62, 0x4a, 0x29, 0x83, 0x5e, 0x82, 0xb8,
-	0x7b, 0xca, 0x72, 0x79, 0xf7, 0xe9, 0x71, 0x20, 0x76, 0x2a, 0xbd, 0x8e, 0xae, 0xe0, 0x61, 0x62,
-	0x1b, 0xe2, 0xf8, 0x58, 0xc6, 0x77, 0x44, 0x92, 0x82, 0xe5, 0x8c, 0x22, 0xa5, 0x2b, 0x92, 0x9a,
-	0x95, 0x0a, 0x52, 0x45, 0x52, 0xef, 0x17, 0x0b, 0xd5, 0x43, 0x89, 0xe7, 0xd0, 0x26, 0xa4, 0x4a,
-	0xd5, 0xbd, 0x42, 0xbe, 0x7c, 0xa0, 0x56, 0x65, 0xe7, 0x17, 0x6d, 0x8d, 0x22, 0x1e, 0x2e, 0x15,
-	0xf2, 0xe5, 0x0a, 0x25, 0x94, 0xf9, 0x98, 0x4d, 0xc9, 0x49, 0x15, 0x35, 0x93, 0x2e, 0xa5, 0x33,
-	0xf9, 0xca, 0x43, 0x3e, 0xbe, 0x37, 0x43, 0xe6, 0x2b, 0x7e, 0x90, 0x80, 0x94, 0xdc, 0xae, 0xeb,
-	0x1f, 0xdf, 0xfe, 0xb1, 0xce, 0x2e, 0xeb, 0x49, 0x46, 0xfb, 0x22, 0x06, 0x0c, 0x9b, 0xc0, 0xf8,
-	0x85, 0xbc, 0xbd, 0x46, 0x5a, 0x9a, 0x71, 0xa2, 0x5b, 0x6a, 0x47, 0xb3, 0x1e, 0xe1, 0x6d, 0xe8,
-	0x9c, 0x02, 0x84, 0x54, 0xd2, 0xac, 0x47, 0xec, 0xdd, 0x6a, 0xe2, 0xe2, 0xbb, 0xd5, 0x99, 0xc0,
-	0x6e, 0xf5, 0x0d, 0x46, 0xdd, 0x4d, 0xf6, 0x91, 0xbb, 0xc3, 0x65, 0x1c, 0x6f, 0x9f, 0xfa, 0x55,
-	0x56, 0x49, 0x37, 0x8b, 0xf1, 0x9f, 0x1b, 0x8e, 0x3f, 0x6e, 0x25, 0x37, 0x95, 0xad, 0xd0, 0xff,
-	0xcf, 0x3e, 0xf7, 0x87, 0x1c, 0xac, 0x33, 0x74, 0x42, 0xd3, 0xda, 0x2b, 0x81, 0xb4, 0x76, 0x33,
-	0x4c, 0x87, 0x53, 0x4e, 0xe0, 0xef, 0x45, 0x41, 0xb0, 0xb9, 0x7c, 0x9c, 0x5b, 0xc3, 0x40, 0x28,
-	0xc4, 0x06, 0x42, 0x41, 0x0d, 0xdd, 0x22, 0xf6, 0xc3, 0xf1, 0x53, 0xdf, 0x1c, 0xbe, 0xc3, 0xc1,
-	0x06, 0x73, 0x22, 0xd4, 0x82, 0xe9, 0x80, 0x05, 0x9f, 0x0a, 0x9f, 0xfa, 0x94, 0x6d, 0x78, 0x17,
-	0xf8, 0x9c, 0x6e, 0xd9, 0x9c, 0xf2, 0xd9, 0xf3, 0x2e, 0xba, 0x3f, 0xe2, 0x60, 0xd1, 0x33, 0x98,
-	0xca, 0xf2, 0x7c, 0x40, 0x96, 0xab, 0x4e, 0x2d, 0xe5, 0xef, 0x77, 0x31, 0x09, 0xae, 0xbb, 0x8b,
-	0xaa, 0xe7, 0xcc, 0x80, 0xf3, 0x9e, 0x19, 0xf8, 0x44, 0xc3, 0x31, 0x70, 0x91, 0x6a, 0xe9, 0x1b,
-	0x1c, 0x2c, 0x7a, 0x06, 0x0f, 0x15, 0x6d, 0xa0, 0xdf, 0xd4, 0x8c, 0x93, 0x25, 0xf1, 0x35, 0x61,
-	0x6d, 0xf4, 0x57, 0xea, 0x7c, 0x61, 0x55, 0x51, 0xb8, 0xf3, 0x4d, 0xb5, 0x1e, 0x3a, 0x70, 0x4d,
-	0xf7, 0x32, 0xb3, 0x1e, 0x12, 0x5c, 0xb6, 0x63, 0x57, 0x42, 0xef, 0x73, 0xb0, 0xc2, 0x1c, 0x80,
-	0x76, 0xbd, 0x35, 0xd0, 0xb5, 0x70, 0x64, 0x6f, 0xf5, 0x53, 0x26, 0xc5, 0xcf, 0xf3, 0xbe, 0xe2,
-	0xe7, 0xc6, 0xf0, 0xb1, 0xde, 0xb2, 0x67, 0x89, 0x51, 0xf6, 0xb8, 0xa5, 0xc9, 0x47, 0x37, 0x21,
-	0x81, 0x15, 0x82, 0x5e, 0x86, 0x85, 0x13, 0xbd, 0xa5, 0x1b, 0x5a, 0x53, 0x25, 0x3a, 0x23, 0x93,
-	0x5c, 0xeb, 0xeb, 0x6c, 0x27, 0x47, 0xda, 0x1d, 0x05, 0x5e, 0x3a, 0xf1, 0x7c, 0x23, 0x19, 0x96,
-	0x6a, 0xf8, 0x0e, 0xd2, 0xa9, 0x40, 0xbc, 0x9a, 0xdf, 0xf4, 0xa0, 0x78, 0x6f, 0x2a, 0x1d, 0xa8,
-	0xc5, 0x5a, 0x90, 0x68, 0xe3, 0xd5, 0xf1, 0xd1, 0xbe, 0x1f, 0x2f, 0x36, 0x80, 0xe7, 0xbd, 0x00,
-	0x70, 0xf1, 0xea, 0x41, 0x22, 0xea, 0xc0, 0x56, 0xcd, 0xad, 0x15, 0xd5, 0x40, 0xb5, 0x44, 0xb0,
-	0xe3, 0x1e, 0x3f, 0xa3, 0x73, 0x65, 0x9f, 0x85, 0x3a, 0x6c, 0x36, 0x6b, 0x43, 0xda, 0xd1, 0x19,
-	0x5c, 0xf7, 0x70, 0xec, 0xb6, 0x98, 0x3c, 0x49, 0x75, 0xf4, 0x34, 0x93, 0x67, 0x20, 0xc9, 0x3a,
-	0x5c, 0xaf, 0xd5, 0x86, 0xf6, 0x40, 0x3d, 0x10, 0xcf, 0xe8, 0x79, 0x8d, 0xca, 0xd8, 0x26, 0x53,
-	0xc6, 0x33, 0x98, 0xf1, 0x67, 0x3c, 0x8c, 0xc3, 0x0f, 0x79, 0x1c, 0xce, 0x5b, 0x67, 0xc3, 0xbb,
-	0xa0, 0x07, 0xb0, 0xea, 0x55, 0xb2, 0x9d, 0x7d, 0x28, 0xbb, 0xa4, 0x67, 0x03, 0x3b, 0xa0, 0x5b,
-	0xbb, 0x9f, 0xc3, 0x63, 0xb9, 0xc6, 0xa0, 0xa3, 0x37, 0x61, 0x1d, 0xa7, 0x55, 0xa6, 0x0e, 0x67,
-	0x3d, 0x77, 0xc2, 0x04, 0x7b, 0xa0, 0xc8, 0x70, 0xd0, 0x57, 0x5b, 0xcc, 0x16, 0x54, 0x87, 0x0d,
-	0x8c, 0x1f, 0x62, 0xa5, 0x39, 0xcf, 0xfe, 0xb3, 0xcf, 0x21, 0xc4, 0x3e, 0xa9, 0x56, 0x48, 0x1b,
-	0x92, 0x80, 0x27, 0x52, 0x78, 0x14, 0x03, 0x18, 0x7a, 0x3d, 0x38, 0x79, 0xaf, 0x4a, 0x2e, 0xb7,
-	0x7c, 0x14, 0xb4, 0x0f, 0x8b, 0x76, 0xe5, 0x41, 0xd7, 0x19, 0x8a, 0x33, 0x3f, 0x80, 0xe3, 0xae,
-	0x6d, 0x2e, 0xce, 0x09, 0xa5, 0xd4, 0x31, 0x45, 0xf8, 0x69, 0x14, 0x2e, 0x79, 0x63, 0x1a, 0xe5,
-	0x00, 0x30, 0x98, 0x5a, 0xeb, 0x5f, 0x43, 0xdf, 0x0a, 0x49, 0x00, 0xbe, 0x8f, 0x4c, 0xbb, 0xae,
-	0x2b, 0x73, 0xba, 0xf3, 0x13, 0x7d, 0x01, 0x56, 0x6a, 0x1a, 0xf6, 0x81, 0xd3, 0xae, 0x69, 0xcf,
-	0xd4, 0x52, 0x0d, 0xdd, 0x32, 0x7a, 0x38, 0x1d, 0xcc, 0x2a, 0x88, 0x34, 0x1e, 0x76, 0x4d, 0x4b,
-	0x6e, 0x5b, 0x8a, 0xdd, 0x82, 0x9e, 0x81, 0x45, 0xc2, 0xbb, 0xae, 0x9b, 0x35, 0xa3, 0xd1, 0xb1,
-	0xec, 0x05, 0x84, 0xd4, 0x55, 0x3c, 0x6e, 0xc8, 0xf6, 0xe9, 0xe2, 0x63, 0xbb, 0x3c, 0xf0, 0xb3,
-	0xf7, 0x6f, 0xeb, 0x16, 0x60, 0xae, 0x2a, 0x67, 0xa5, 0xfd, 0xbc, 0x2c, 0x65, 0x79, 0x0e, 0x6d,
-	0xc1, 0x46, 0x55, 0x2e, 0x57, 0x4b, 0xa5, 0xa2, 0x52, 0x91, 0xb2, 0xaa, 0x22, 0xbd, 0x56, 0x95,
-	0xec, 0xcd, 0x9b, 0xa4, 0x94, 0xf3, 0x45, 0x99, 0x5e, 0x7a, 0xe7, 0xcb, 0xe5, 0xbc, 0x9c, 0xc3,
-	0x8d, 0x79, 0x45, 0xca, 0xaa, 0xfb, 0x79, 0xa9, 0x90, 0xe5, 0x63, 0xc2, 0xb7, 0x62, 0xb0, 0x38,
-	0x90, 0xb4, 0xd0, 0x6b, 0x0c, 0x5d, 0xed, 0x0e, 0x4b, 0x73, 0x83, 0x94, 0xa0, 0xd6, 0x98, 0x2a,
-	0x88, 0x86, 0xa8, 0xe0, 0xdf, 0x1c, 0xac, 0x30, 0x11, 0x07, 0xf7, 0xb7, 0xe9, 0x42, 0x41, 0x95,
-	0x8b, 0x15, 0x35, 0x7f, 0x58, 0x2a, 0x48, 0x87, 0x92, 0x5c, 0xc1, 0x3a, 0xd9, 0x86, 0xcd, 0x62,
-	0x49, 0x52, 0xd2, 0x95, 0x7c, 0x51, 0x56, 0x4b, 0x92, 0x9c, 0xb5, 0x85, 0xdf, 0x2f, 0x2a, 0xfd,
-	0x3d, 0xee, 0x1a, 0x2c, 0xe5, 0xe5, 0xfb, 0xe9, 0x42, 0x3e, 0x4b, 0x69, 0xaa, 0x9c, 0x3e, 0x94,
-	0xf8, 0x18, 0xba, 0x06, 0x82, 0x57, 0x9d, 0xce, 0x96, 0x57, 0x55, 0xd2, 0x72, 0x4e, 0xe2, 0xe3,
-	0x68, 0x1d, 0x56, 0xe8, 0x80, 0x74, 0x41, 0x91, 0xd2, 0xd9, 0x87, 0xaa, 0xf4, 0x7a, 0xbe, 0x5c,
-	0x29, 0xf3, 0x09, 0x74, 0x15, 0xd6, 0xbd, 0x43, 0x4b, 0x69, 0x25, 0x7d, 0x28, 0x55, 0x24, 0x45,
-	0xbd, 0x27, 0x3d, 0xe4, 0x67, 0xd0, 0x06, 0xac, 0x39, 0x2c, 0xfb, 0x4d, 0xf7, 0xd3, 0x85, 0xaa,
-	0xc4, 0x27, 0x85, 0xf7, 0xa3, 0xb0, 0x38, 0x90, 0xed, 0x47, 0x1a, 0x62, 0x60, 0xc4, 0x20, 0x65,
-	0x22, 0x43, 0xfc, 0x80, 0x83, 0x15, 0x26, 0xe2, 0xf4, 0x0c, 0xb1, 0x02, 0x8b, 0x01, 0x43, 0xe4,
-	0xb3, 0x7c, 0xcc, 0xa3, 0xe6, 0x6c, 0x51, 0x2a, 0x63, 0x64, 0xac, 0x67, 0x3e, 0x2e, 0xfc, 0x2c,
-	0x0e, 0x9b, 0xc3, 0x16, 0x2f, 0x74, 0xc2, 0xd0, 0xda, 0xc1, 0x98, 0x2b, 0xdf, 0xd0, 0xc6, 0x49,
-	0x74, 0x89, 0xd6, 0x61, 0x96, 0x66, 0x35, 0x72, 0x1c, 0x3b, 0xa7, 0x24, 0x49, 0xf9, 0x6c, 0x8a,
-	0x7f, 0xf1, 0x5d, 0xfb, 0xb1, 0xf9, 0x7e, 0x8a, 0x1a, 0x47, 0x9b, 0x90, 0x0a, 0xf8, 0x3c, 0x3d,
-	0x33, 0x92, 0xb2, 0x7c, 0xc2, 0x0e, 0x25, 0xfc, 0x28, 0x26, 0x30, 0x6c, 0x06, 0xad, 0x02, 0x3a,
-	0x4c, 0xbf, 0xae, 0xa6, 0x2b, 0x95, 0x74, 0xe6, 0x40, 0xca, 0xe2, 0xa7, 0x33, 0x65, 0x3e, 0x69,
-	0x07, 0x82, 0x37, 0x4e, 0x0e, 0x8b, 0x55, 0xb9, 0xa2, 0xee, 0x17, 0xd2, 0xb9, 0x32, 0x3f, 0x17,
-	0x6c, 0xa4, 0x7c, 0x2b, 0x0f, 0x4b, 0x12, 0x0f, 0x36, 0x2b, 0x6f, 0xe3, 0x7e, 0x99, 0x34, 0xcc,
-	0xa3, 0x25, 0xb8, 0xe2, 0xc8, 0x84, 0xe7, 0x92, 0xcf, 0xf2, 0xb3, 0xc2, 0x1f, 0x63, 0xde, 0x17,
-	0x0e, 0xcc, 0x55, 0xeb, 0x31, 0xc3, 0x55, 0x0a, 0x63, 0x17, 0x2c, 0x23, 0x9a, 0x27, 0x0a, 0xbd,
-	0xef, 0x46, 0x41, 0x1c, 0x0d, 0xff, 0x69, 0x7a, 0x45, 0x88, 0xdd, 0x13, 0x2c, 0x63, 0xcc, 0xa0,
-	0xa7, 0xe1, 0xa6, 0x93, 0x68, 0x8b, 0x95, 0xbe, 0x4f, 0x54, 0x8a, 0x6a, 0xb9, 0x24, 0x65, 0xf2,
-	0xfb, 0x79, 0xea, 0x20, 0x7c, 0x12, 0x2d, 0x03, 0x4f, 0xc7, 0xb9, 0x0b, 0x16, 0x3f, 0x2b, 0x7c,
-	0x14, 0x85, 0xad, 0x11, 0x65, 0x1c, 0x3a, 0x65, 0x98, 0x53, 0x1e, 0xbf, 0x0c, 0x1c, 0xd5, 0x3e,
-	0x91, 0x41, 0x7f, 0xc3, 0xc1, 0x8d, 0x31, 0xf0, 0xfd, 0x16, 0x0d, 0x55, 0x3f, 0x37, 0x2c, 0x8a,
-	0xa2, 0xc3, 0xa2, 0x28, 0x16, 0x16, 0x45, 0x71, 0xb6, 0x0f, 0x24, 0x84, 0xaf, 0x47, 0x61, 0x99,
-	0x55, 0xd1, 0xa2, 0x07, 0x0c, 0x75, 0xdf, 0x1e, 0x51, 0x06, 0x33, 0x89, 0x13, 0x29, 0xb6, 0x0e,
-	0xa9, 0x30, 0x4c, 0xbf, 0x32, 0x57, 0x60, 0x71, 0x2f, 0x9d, 0x55, 0x4b, 0x85, 0x6a, 0x2e, 0x2f,
-	0xab, 0x99, 0xa2, 0xbc, 0x9f, 0xcf, 0xf1, 0x1c, 0x7a, 0x02, 0xb6, 0x07, 0xea, 0xa3, 0x83, 0x62,
-	0xb9, 0xa2, 0x66, 0x25, 0x3b, 0x52, 0x24, 0x39, 0xf3, 0x90, 0x8f, 0xda, 0x95, 0xd2, 0x2a, 0xbb,
-	0xf4, 0x46, 0x5f, 0x61, 0xa8, 0xe1, 0xc5, 0x91, 0x15, 0x7b, 0x08, 0x79, 0x22, 0x55, 0xfc, 0x93,
-	0x23, 0xc7, 0x17, 0xe3, 0x2c, 0x21, 0xa3, 0x52, 0x02, 0x17, 0xee, 0x7c, 0xd1, 0x61, 0xce, 0x17,
-	0x1b, 0xe6, 0x7c, 0xf1, 0x30, 0xe7, 0x4b, 0xa0, 0x2b, 0x30, 0x4f, 0x60, 0x24, 0x45, 0x29, 0x2a,
-	0xfc, 0x0c, 0xdb, 0x1b, 0x93, 0xc2, 0xef, 0xa2, 0xe4, 0xc6, 0x81, 0x99, 0xcf, 0x55, 0x86, 0x29,
-	0x5e, 0x1d, 0x63, 0x6b, 0x13, 0xda, 0x30, 0x69, 0xf9, 0xb4, 0x39, 0x0c, 0x78, 0x8a, 0x06, 0x59,
-	0x84, 0x85, 0xaa, 0xec, 0xd5, 0x5f, 0x8c, 0xad, 0xbf, 0xb8, 0xf0, 0x2f, 0x0e, 0x2e, 0xfb, 0xb7,
-	0x61, 0xe8, 0x1e, 0x43, 0x6b, 0x9f, 0x0d, 0xdd, 0xb5, 0x05, 0x3e, 0x27, 0xd2, 0xd0, 0x9b, 0x80,
-	0x06, 0xd1, 0xa6, 0x18, 0xb5, 0xb6, 0xb0, 0xfe, 0xbd, 0xe2, 0x48, 0x61, 0xfd, 0xdd, 0x03, 0x9f,
-	0x93, 0x0a, 0x3b, 0x88, 0x36, 0x3d, 0x61, 0xf7, 0x92, 0xf4, 0x30, 0x7c, 0xf7, 0x17, 0x1c, 0xcc,
-	0xe6, 0xf1, 0xd1, 0xb9, 0xd5, 0x43, 0x6f, 0xe0, 0xbf, 0xbf, 0x0c, 0xfc, 0xe1, 0x07, 0x6d, 0x0f,
-	0xf9, 0x2f, 0x10, 0x3e, 0xed, 0x14, 0xae, 0x8f, 0xfc, 0xb7, 0x90, 0x18, 0x41, 0x07, 0xb0, 0xe0,
-	0xfb, 0x1f, 0x09, 0x5a, 0x67, 0xfd, 0xb7, 0x84, 0x00, 0x0a, 0xe1, 0x7f, 0x3b, 0x11, 0x23, 0xbb,
-	0xef, 0xcd, 0x00, 0xf4, 0x13, 0x39, 0x92, 0xe0, 0x92, 0x77, 0x0f, 0x88, 0x52, 0x61, 0xff, 0x7b,
-	0x10, 0xd6, 0x43, 0xff, 0x25, 0x20, 0x46, 0x6c, 0x18, 0xef, 0x0e, 0x86, 0xc2, 0x30, 0x9e, 0x01,
-	0x53, 0x18, 0xd6, 0x9b, 0x5b, 0x31, 0x82, 0x8e, 0x7d, 0x57, 0xf9, 0xde, 0x68, 0x46, 0x37, 0xc6,
-	0x78, 0xe7, 0x29, 0x3c, 0x31, 0xce, 0xfb, 0x43, 0x31, 0x82, 0x9a, 0xb0, 0x1e, 0x5a, 0xf5, 0xa1,
-	0x9b, 0x63, 0xbd, 0xc0, 0x13, 0x9e, 0x1c, 0xef, 0x85, 0x9b, 0x18, 0x41, 0x6d, 0x10, 0xc2, 0x4b,
-	0x12, 0xf4, 0xe4, 0x78, 0x6f, 0xbd, 0x84, 0xa7, 0xc6, 0x7c, 0x47, 0x25, 0x46, 0xd0, 0x1e, 0xcc,
-	0x7b, 0x1e, 0xeb, 0xa0, 0xb5, 0xc1, 0xe7, 0x3b, 0x04, 0x32, 0x15, 0xf6, 0xae, 0x87, 0x60, 0x78,
-	0x9e, 0x89, 0x50, 0x8c, 0xc1, 0x47, 0x2d, 0x14, 0x83, 0xf1, 0xa2, 0x44, 0x8c, 0x20, 0x19, 0xae,
-	0x04, 0x6a, 0x06, 0xb4, 0xc1, 0x7e, 0x81, 0x41, 0xb0, 0x36, 0x87, 0x3d, 0xcf, 0x08, 0x9a, 0x2d,
-	0x70, 0x86, 0x3f, 0x60, 0x36, 0xf6, 0xe5, 0xc2, 0x80, 0xd9, 0x42, 0xae, 0x02, 0xc4, 0xc8, 0xee,
-	0xf7, 0x63, 0x10, 0xb7, 0xd3, 0x08, 0xaa, 0xd0, 0x2b, 0x13, 0x9f, 0x97, 0x5c, 0x1d, 0x7a, 0x9f,
-	0x2b, 0x5c, 0x1b, 0x7e, 0x55, 0x29, 0x46, 0xd0, 0x97, 0x61, 0x89, 0xb1, 0x6a, 0xa1, 0xad, 0x11,
-	0x97, 0x7b, 0xc2, 0xf6, 0xa8, 0x2b, 0x34, 0x31, 0x82, 0x5e, 0x84, 0x39, 0x37, 0x07, 0xa2, 0x95,
-	0xe0, 0x3d, 0x15, 0xc1, 0x59, 0x65, 0x5f, 0x5f, 0x91, 0xd1, 0xee, 0x72, 0x41, 0x47, 0x07, 0xef,
-	0x9b, 0xe8, 0xe8, 0x81, 0x1b, 0xa2, 0xbe, 0x5c, 0x41, 0xf3, 0x6c, 0x85, 0x5f, 0xbe, 0x04, 0xe5,
-	0x0a, 0x35, 0xc9, 0xd1, 0x0c, 0xfe, 0xd7, 0xe6, 0x73, 0xff, 0x0b, 0x00, 0x00, 0xff, 0xff, 0x16,
-	0xa3, 0x1c, 0xe7, 0xc2, 0x39, 0x00, 0x00,
+	// 1993 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xcc, 0x59, 0x4b, 0x73, 0xe3, 0x58,
+	0x15, 0xb6, 0x6c, 0xe7, 0xe1, 0xe3, 0x38, 0xed, 0x5c, 0xe7, 0xa1, 0x28, 0xfd, 0x70, 0xab, 0xa7,
+	0x7b, 0x42, 0x15, 0xe3, 0xa2, 0x3c, 0x54, 0xd1, 0xe9, 0x9e, 0x19, 0x48, 0x6c, 0x4f, 0x62, 0x26,
+	0x71, 0xa7, 0x14, 0xa7, 0x9b, 0x01, 0xa6, 0x84, 0x62, 0xdf, 0xa4, 0x45, 0xcb, 0x92, 0x47, 0x92,
+	0x5d, 0xed, 0x3d, 0x4b, 0x16, 0xec, 0xd8, 0xc1, 0x72, 0xa0, 0x58, 0x02, 0xbf, 0x80, 0xbf, 0x00,
+	0xac, 0xd9, 0xf2, 0x0f, 0xa8, 0x62, 0x43, 0xdd, 0x87, 0x64, 0x49, 0x96, 0x1c, 0x3b, 0x93, 0x1e,
+	0x66, 0x27, 0x9d, 0xc7, 0x77, 0xcf, 0xe3, 0xde, 0x73, 0xce, 0x95, 0x20, 0xd7, 0x71, 0xf4, 0x4a,
+	0xdf, 0xb6, 0x5c, 0x0b, 0x65, 0x3a, 0x8e, 0x2e, 0xdf, 0x83, 0x9d, 0x43, 0xec, 0x9e, 0x0d, 0xfa,
+	0x7d, 0xcb, 0x76, 0x71, 0xf7, 0x25, 0xb6, 0x1d, 0xdd, 0x32, 0x1d, 0x05, 0x7f, 0x39, 0xc0, 0x8e,
+	0x2b, 0xff, 0x0c, 0xee, 0xc6, 0xb3, 0x9d, 0xbe, 0x65, 0x3a, 0x18, 0x3d, 0x07, 0xe4, 0x78, 0x4c,
+	0x75, 0xc8, 0xb9, 0xa2, 0x50, 0xce, 0xec, 0xe6, 0xab, 0x2b, 0x15, 0xb2, 0x16, 0x57, 0x51, 0xd6,
+	0x9c, 0x28, 0x88, 0xfc, 0x19, 0x2c, 0xf1, 0x67, 0xb4, 0x0e, 0x0b, 0x3d, 0xed, 0x97, 0x96, 0x2d,
+	0x0a, 0x65, 0x61, 0xb7, 0xa0, 0xb0, 0x17, 0x4a, 0xd5, 0x4d, 0xcb, 0x16, 0xd3, 0x9c, 0x4a, 0x5e,
+	0x08, 0xb5, 0xaf, 0xb9, 0x9d, 0xd7, 0x62, 0x86, 0x51, 0xe9, 0x8b, 0xfc, 0x09, 0xac, 0x1f, 0x62,
+	0xf7, 0xd4, 0x18, 0x5c, 0xe9, 0x66, 0xd3, 0xbc, 0xb4, 0xb8, 0x07, 0xe8, 0x09, 0x2c, 0x71, 0xbb,
+	0x28, 0x76, 0xd4, 0x2c, 0x8f, 0x29, 0xff, 0x43, 0x80, 0x8d, 0x08, 0x00, 0xf7, 0x11, 0x41, 0xd6,
+	0xd4, 0x7a, 0x98, 0xaa, 0xe7, 0x14, 0xfa, 0x8c, 0x1e, 0xc3, 0xea, 0x10, 0x9b, 0x5d, 0xcb, 0xf6,
+	0x9c, 0xa6, 0x26, 0xe6, 0x94, 0x02, 0xa3, 0x7a, 0x6e, 0xd5, 0x61, 0xb9, 0xa7, 0x99, 0xfa, 0x25,
+	0x76, 0x5c, 0x31, 0x43, 0x83, 0xb2, 0x4b, 0x57, 0x8f, 0x5d, 0xa8, 0x72, 0xc2, 0x45, 0x1b, 0xa6,
+	0x6b, 0x8f, 0x14, 0x5f, 0x53, 0x7a, 0x0e, 0x85, 0x10, 0x0b, 0x15, 0x21, 0xf3, 0x06, 0x8f, 0xb8,
+	0x41, 0xe4, 0x91, 0xc4, 0x64, 0xa8, 0x19, 0x03, 0xcc, 0xcd, 0x60, 0x2f, 0xcf, 0xd2, 0x4f, 0x05,
+	0xf9, 0xbf, 0x19, 0x28, 0xd5, 0x6c, 0xac, 0xb9, 0xf8, 0xa5, 0x65, 0x0c, 0x7a, 0x78, 0xce, 0xb8,
+	0xf8, 0xde, 0xa7, 0x03, 0xde, 0xef, 0xc1, 0x6a, 0x47, 0xeb, 0x6b, 0x1d, 0xdd, 0x1d, 0xa9, 0xb6,
+	0x66, 0x5e, 0x61, 0x9a, 0x8a, 0x7c, 0x15, 0x51, 0x88, 0x1a, 0x67, 0x29, 0x84, 0xa3, 0x14, 0x3a,
+	0xc1, 0x57, 0xf4, 0x29, 0x94, 0x86, 0xd4, 0x0e, 0x95, 0xd0, 0x2f, 0x74, 0x43, 0x77, 0x75, 0xec,
+	0x88, 0x59, 0x1a, 0x9c, 0x0d, 0x66, 0x02, 0xe5, 0xd7, 0x3c, 0xf6, 0x48, 0x41, 0xc3, 0x30, 0x45,
+	0xc7, 0x0e, 0x3a, 0x02, 0xe8, 0x6b, 0xb6, 0xd6, 0xc3, 0x2e, 0xb6, 0x1d, 0x71, 0x21, 0x10, 0xdb,
+	0x18, 0x67, 0x2b, 0xa7, 0xbe, 0x28, 0x8b, 0x6d, 0x40, 0x17, 0xfd, 0x04, 0x8a, 0x03, 0x07, 0xdb,
+	0x6a, 0xc7, 0xc6, 0x5d, 0x6c, 0xba, 0xba, 0x66, 0x38, 0xe2, 0x22, 0xc5, 0xfb, 0x20, 0x11, 0xef,
+	0xdc, 0xc1, 0x76, 0x6d, 0x2c, 0xcf, 0x40, 0xef, 0x0c, 0xc2, 0x54, 0xe9, 0x63, 0xb8, 0x13, 0x59,
+	0x78, 0x9e, 0xcc, 0x49, 0x07, 0xb0, 0x1e, 0xb7, 0xce, 0x5c, 0xd9, 0x3f, 0x82, 0xf5, 0xb0, 0xfd,
+	0x7c, 0x4f, 0x7f, 0x0f, 0xf2, 0x3c, 0x0d, 0xba, 0x79, 0x69, 0xf1, 0x1d, 0x70, 0x27, 0x10, 0x7e,
+	0xba, 0x31, 0x61, 0xe8, 0x3f, 0xcb, 0xbf, 0xcb, 0x42, 0x31, 0x9a, 0x19, 0xb4, 0x07, 0x0b, 0x17,
+	0x86, 0xd5, 0x79, 0xc3, 0x01, 0x1e, 0xc6, 0xe6, 0xaf, 0x72, 0x40, 0x44, 0x18, 0xf5, 0x28, 0xa5,
+	0x30, 0x0d, 0xa2, 0xda, 0xb3, 0x06, 0xa6, 0x4b, 0x6d, 0x4e, 0x54, 0x3d, 0x21, 0x22, 0x63, 0x55,
+	0xaa, 0x81, 0xf6, 0x21, 0xaf, 0x75, 0x3a, 0xd8, 0x71, 0xd4, 0x9e, 0xd5, 0xf5, 0xf6, 0x5e, 0x39,
+	0x1e, 0x60, 0x9f, 0x0a, 0x9e, 0x58, 0x5d, 0xac, 0x80, 0xe6, 0x3f, 0x4b, 0x05, 0xc8, 0x07, 0xac,
+	0x92, 0x0e, 0x21, 0x1f, 0x58, 0x09, 0x6d, 0xc1, 0xd2, 0xa5, 0xa3, 0xba, 0xa3, 0xbe, 0x77, 0xe8,
+	0x17, 0x2f, 0x9d, 0xf6, 0xa8, 0x8f, 0xd1, 0x03, 0xc8, 0x53, 0x13, 0xd4, 0x4b, 0x43, 0xbb, 0x72,
+	0xc4, 0x74, 0x39, 0xb3, 0x9b, 0x53, 0x80, 0x92, 0x3e, 0x25, 0x14, 0xe9, 0xdf, 0x02, 0xc0, 0x78,
+	0x49, 0xb4, 0x07, 0x59, 0x6a, 0x22, 0x41, 0x59, 0xad, 0x3e, 0xbe, 0xce, 0xc4, 0x0a, 0xb5, 0x93,
+	0xaa, 0xc8, 0xbf, 0x17, 0x20, 0x4b, 0x31, 0xf2, 0xb0, 0x74, 0xde, 0xfa, 0xac, 0xf5, 0xe2, 0x55,
+	0xab, 0x98, 0x42, 0x9b, 0x80, 0xce, 0x9a, 0xad, 0xc3, 0xe3, 0x86, 0xda, 0x7a, 0x51, 0x6f, 0xa8,
+	0xaf, 0x94, 0x66, 0xbb, 0xa1, 0x14, 0x05, 0xb4, 0x03, 0x5b, 0x41, 0xba, 0xd2, 0xd8, 0xaf, 0x37,
+	0x14, 0xf5, 0x45, 0xeb, 0xf8, 0xf3, 0x62, 0x1a, 0x49, 0xb0, 0x79, 0x72, 0x7e, 0xdc, 0x6e, 0x4e,
+	0xf2, 0x32, 0xe8, 0x2e, 0x88, 0x01, 0x1e, 0xc7, 0xe0, 0xb0, 0x59, 0x02, 0x1b, 0xe0, 0xb2, 0x47,
+	0xce, 0x5c, 0x38, 0x28, 0xf8, 0x69, 0x20, 0x91, 0x92, 0x5f, 0x41, 0x21, 0x74, 0xf2, 0x49, 0x8d,
+	0xb4, 0xf1, 0x97, 0x03, 0xdd, 0xc6, 0x5d, 0xf5, 0x62, 0xe4, 0x62, 0x87, 0x86, 0x21, 0xab, 0x14,
+	0x3c, 0xea, 0x01, 0x21, 0x92, 0x98, 0x1a, 0x7a, 0x4f, 0x77, 0xb9, 0x4c, 0x9a, 0xca, 0x00, 0x25,
+	0x51, 0x01, 0xf9, 0x6f, 0x02, 0xc0, 0x78, 0x53, 0x12, 0x58, 0xbf, 0xf8, 0x84, 0x60, 0x3d, 0x2a,
+	0x83, 0x5d, 0x85, 0xb4, 0xde, 0xe5, 0x07, 0x22, 0xad, 0x77, 0xd1, 0x0f, 0x01, 0x34, 0xd7, 0xb5,
+	0xf5, 0x8b, 0x01, 0x51, 0x61, 0xc5, 0xf8, 0x41, 0x64, 0xc3, 0x57, 0xf6, 0x7d, 0x09, 0x5e, 0x27,
+	0xc6, 0x2a, 0xe4, 0x34, 0x47, 0xd8, 0x73, 0x9d, 0xc4, 0xff, 0x08, 0x50, 0xaa, 0x63, 0x03, 0xdf,
+	0xb4, 0x0e, 0xef, 0x40, 0xce, 0x3b, 0xb1, 0x9e, 0x5b, 0xcb, 0xfc, 0x78, 0x76, 0x63, 0x6b, 0x58,
+	0x26, 0x50, 0xc3, 0x62, 0x16, 0x9e, 0xb1, 0x86, 0xdd, 0x46, 0x11, 0xda, 0x84, 0xf5, 0xb0, 0x01,
+	0xac, 0x08, 0xc9, 0x7f, 0xc9, 0xc2, 0xfd, 0x9a, 0x65, 0xba, 0xb6, 0x65, 0x18, 0xd8, 0x3e, 0x1d,
+	0x5c, 0x18, 0xba, 0xf3, 0xfa, 0x1d, 0x44, 0x67, 0x0b, 0x96, 0x4c, 0xab, 0x4b, 0x59, 0x19, 0x76,
+	0x9c, 0xc9, 0x6b, 0xb3, 0x8b, 0x0e, 0x60, 0x2d, 0xda, 0x8c, 0x46, 0x62, 0x96, 0xae, 0x93, 0xd0,
+	0x8a, 0x8a, 0xc3, 0x68, 0x09, 0x94, 0x60, 0xd9, 0xc6, 0x5a, 0xd7, 0x32, 0x8d, 0x91, 0xb8, 0x50,
+	0x16, 0x76, 0x97, 0x15, 0xff, 0x1d, 0x75, 0x12, 0x5b, 0xcb, 0x53, 0xd6, 0x5a, 0xa6, 0x3a, 0x3f,
+	0x5b, 0x86, 0xd0, 0xa5, 0xef, 0x44, 0x60, 0x7f, 0x2f, 0xd1, 0x55, 0xf6, 0x66, 0x59, 0x85, 0xbd,
+	0x45, 0x77, 0x3e, 0x77, 0x74, 0x4c, 0xbe, 0x8d, 0x9d, 0x20, 0xd5, 0x60, 0x23, 0x76, 0xb9, 0xb9,
+	0xb6, 0xd3, 0xdf, 0x05, 0x78, 0x90, 0xe8, 0x13, 0xef, 0x6f, 0x6f, 0xa0, 0xd4, 0x67, 0x0c, 0x35,
+	0xdc, 0xe7, 0x48, 0x58, 0x9e, 0x4f, 0x0f, 0x0b, 0x9f, 0xc6, 0x42, 0x54, 0x52, 0x1d, 0x58, 0x60,
+	0xd6, 0xfa, 0x51, 0xba, 0x54, 0x87, 0xcd, 0x78, 0xe1, 0xb9, 0xdc, 0xfa, 0x53, 0x1a, 0xca, 0x63,
+	0x9b, 0xce, 0xcd, 0xfe, 0x37, 0x7f, 0x1e, 0x70, 0xcc, 0x7e, 0x65, 0x93, 0xd9, 0xb3, 0x48, 0xc8,
+	0xe2, 0xcd, 0xfb, 0x06, 0x6b, 0xca, 0x23, 0x78, 0x38, 0xc5, 0x1a, 0x5e, 0x60, 0xfe, 0x95, 0x86,
+	0x87, 0x2f, 0x35, 0x43, 0xef, 0xfa, 0x03, 0x50, 0x70, 0x86, 0xbc, 0xd5, 0x98, 0x26, 0xcc, 0xb5,
+	0x99, 0x79, 0xe7, 0x5a, 0x3d, 0xee, 0x34, 0xb3, 0x1c, 0x7c, 0xc4, 0x50, 0xae, 0xf3, 0x67, 0xe6,
+	0x03, 0x7d, 0x2b, 0x87, 0xf1, 0xe7, 0x20, 0x4f, 0xb3, 0x88, 0x1f, 0xc7, 0xbb, 0x90, 0xf3, 0xaf,
+	0x7f, 0x14, 0x77, 0x59, 0x19, 0x13, 0x90, 0x08, 0x4b, 0x3d, 0xec, 0x38, 0xda, 0x95, 0x87, 0xef,
+	0xbd, 0xca, 0xbf, 0x12, 0x00, 0x1d, 0xeb, 0x0e, 0x9f, 0xcb, 0xe6, 0xce, 0x18, 0x19, 0xd7, 0xb4,
+	0xb7, 0x2a, 0x36, 0x5d, 0x5b, 0xe7, 0xa3, 0x45, 0x41, 0x81, 0x9e, 0xf6, 0xb6, 0xc1, 0x28, 0x64,
+	0x96, 0x70, 0x5c, 0xcd, 0x76, 0x75, 0xf3, 0x4a, 0x75, 0xad, 0x37, 0xd8, 0xe4, 0x07, 0xa2, 0xe0,
+	0x51, 0xdb, 0x84, 0x28, 0xff, 0x51, 0x80, 0x52, 0xc8, 0x0c, 0xee, 0xd6, 0x53, 0x58, 0xf2, 0xb0,
+	0x59, 0x65, 0xb9, 0x4f, 0xed, 0x88, 0x11, 0xad, 0xb0, 0x24, 0x78, 0xe2, 0xe8, 0x1e, 0x80, 0x89,
+	0xdf, 0xba, 0x7c, 0x51, 0xe6, 0x75, 0x8e, 0x50, 0xe8, 0x82, 0xd2, 0x1e, 0x2c, 0xb0, 0x54, 0xcc,
+	0x3f, 0xa7, 0xff, 0x3a, 0x0d, 0xe8, 0x10, 0xbb, 0xfe, 0x28, 0x36, 0x67, 0xc8, 0x12, 0xf6, 0x71,
+	0x7a, 0xde, 0x7d, 0x7c, 0x18, 0xba, 0x9f, 0xb1, 0x63, 0xf0, 0xbe, 0x77, 0xf7, 0x8d, 0x18, 0x37,
+	0xed, 0x7a, 0xf6, 0x35, 0x2f, 0x51, 0x72, 0x1d, 0x4a, 0xa1, 0x05, 0x79, 0xe6, 0x3e, 0x00, 0xa4,
+	0x0d, 0x35, 0xdd, 0xd0, 0x2e, 0x0c, 0xe6, 0x29, 0xe1, 0xf2, 0x41, 0x72, 0xcd, 0xe7, 0x78, 0x6a,
+	0xf2, 0x8f, 0x60, 0x33, 0xd0, 0x2e, 0x6c, 0xeb, 0x62, 0xde, 0x82, 0x2c, 0x6f, 0xc3, 0xd6, 0x04,
+	0x02, 0xaf, 0x52, 0x3f, 0x0e, 0xd6, 0x7d, 0x6e, 0xec, 0x0d, 0x6b, 0x94, 0xac, 0x07, 0xcb, 0xe2,
+	0x04, 0x16, 0x77, 0xbe, 0x0e, 0x2b, 0x31, 0xc9, 0x2d, 0x47, 0x4a, 0xfc, 0x19, 0xb6, 0x87, 0x7a,
+	0x27, 0x98, 0xe7, 0x90, 0x96, 0xfc, 0xdb, 0x34, 0xec, 0x4c, 0x91, 0x46, 0x4f, 0x21, 0x63, 0xf7,
+	0x3b, 0xdc, 0xdc, 0xf7, 0xae, 0x03, 0xaf, 0x28, 0xa7, 0xb5, 0xa3, 0x94, 0x42, 0x54, 0xa4, 0xbf,
+	0x0a, 0x90, 0x51, 0x4e, 0x6b, 0xe8, 0x63, 0xc8, 0xfa, 0x77, 0xb0, 0xd5, 0xea, 0x77, 0x66, 0x81,
+	0xa8, 0x90, 0x6b, 0x9a, 0x42, 0xd5, 0x64, 0x0b, 0xb2, 0xf4, 0xd2, 0x16, 0xba, 0x40, 0x89, 0xb0,
+	0x5e, 0x53, 0x1a, 0xfb, 0xed, 0x86, 0x5a, 0x6f, 0x1c, 0x37, 0xda, 0x0d, 0xf5, 0xe5, 0x8b, 0xe3,
+	0xf3, 0x93, 0x46, 0x51, 0x20, 0x37, 0xa1, 0xd3, 0xf3, 0x83, 0xe3, 0xe6, 0xd9, 0x91, 0x7a, 0xde,
+	0xf2, 0x9e, 0x38, 0x37, 0x8d, 0x8a, 0xb0, 0x72, 0xdc, 0x3c, 0x6b, 0x73, 0xc2, 0x59, 0x31, 0x43,
+	0x28, 0x87, 0x8d, 0xb6, 0x5a, 0xdb, 0x3f, 0xdd, 0xaf, 0x35, 0xdb, 0x9f, 0x17, 0xb3, 0x07, 0x8b,
+	0xcc, 0x5e, 0xf9, 0x9f, 0x0b, 0x20, 0xb6, 0xac, 0x2e, 0x7e, 0x77, 0x13, 0x6d, 0x37, 0x7e, 0xbc,
+	0x61, 0xc7, 0xec, 0xfb, 0x14, 0x30, 0xc9, 0x80, 0xd9, 0xe7, 0x1a, 0x52, 0x3e, 0x5d, 0xcd, 0xbe,
+	0xc2, 0xae, 0xda, 0xd7, 0xdc, 0xd7, 0x74, 0x30, 0xce, 0x29, 0xc0, 0x48, 0xa7, 0x9a, 0xfb, 0x3a,
+	0x7e, 0x7e, 0x5e, 0xb8, 0xf9, 0xfc, 0xbc, 0x18, 0x99, 0x9f, 0xbf, 0x88, 0x99, 0x47, 0xd8, 0x64,
+	0x5b, 0x9d, 0xee, 0xe3, 0x6c, 0x93, 0xf3, 0x2f, 0xe2, 0x7a, 0xed, 0x32, 0xc5, 0xff, 0x70, 0x3a,
+	0xfe, 0xac, 0x2d, 0xf6, 0x56, 0x26, 0xc3, 0x6f, 0xcf, 0xe4, 0xbd, 0x03, 0xdb, 0x31, 0x21, 0xe1,
+	0x65, 0xec, 0xab, 0x34, 0x48, 0x84, 0xfb, 0x2e, 0x27, 0xd7, 0xc8, 0x8e, 0xcc, 0x4c, 0xec, 0x48,
+	0x35, 0x71, 0x82, 0x1d, 0x9f, 0x8a, 0xff, 0xfb, 0xec, 0x7a, 0x0f, 0x76, 0x62, 0xed, 0xe0, 0x81,
+	0x7c, 0x06, 0xc5, 0x43, 0xec, 0x12, 0x89, 0x66, 0x7d, 0xde, 0xfa, 0xff, 0x5d, 0x58, 0x0b, 0xe8,
+	0xf2, 0x7a, 0x1f, 0x98, 0xf7, 0x85, 0xe0, 0xbc, 0x4f, 0x56, 0xa2, 0xf9, 0xbc, 0x49, 0x43, 0x2b,
+	0xc1, 0x5a, 0x40, 0x97, 0x9b, 0x5e, 0x67, 0x5b, 0xe0, 0x6b, 0x36, 0xb1, 0x2f, 0x58, 0x7c, 0x92,
+	0xda, 0xd7, 0x27, 0x91, 0xf6, 0xc5, 0x46, 0x2f, 0xc9, 0xcf, 0xef, 0x75, 0x8d, 0xeb, 0x0f, 0x02,
+	0x6c, 0xc4, 0xca, 0xa1, 0x6a, 0xb0, 0x65, 0xdd, 0x4f, 0x06, 0x0c, 0x36, 0xab, 0x33, 0xd6, 0xab,
+	0x7e, 0x10, 0xea, 0x55, 0x8f, 0xa6, 0xeb, 0x06, 0xbb, 0x54, 0x29, 0xa6, 0x4b, 0x79, 0x9d, 0xa4,
+	0xfa, 0x67, 0x01, 0x96, 0x9b, 0x74, 0xa3, 0xb9, 0xa4, 0x1a, 0xae, 0xc7, 0xfd, 0x8b, 0x41, 0x65,
+	0x6f, 0xac, 0x4a, 0xfa, 0x8b, 0x23, 0x3d, 0x9c, 0x22, 0xc1, 0x33, 0x97, 0x42, 0x47, 0x50, 0x08,
+	0xfd, 0x96, 0x40, 0xdb, 0x71, 0xbf, 0x2a, 0x18, 0xa0, 0x94, 0xfc, 0x17, 0x43, 0x4e, 0x55, 0xbf,
+	0x5a, 0x04, 0x18, 0xf7, 0x69, 0xd4, 0x80, 0x95, 0xe0, 0x37, 0x68, 0x24, 0x26, 0x7d, 0x56, 0x97,
+	0xb6, 0x63, 0x38, 0xbe, 0x7d, 0x0d, 0x58, 0x09, 0x7e, 0x45, 0xe2, 0x30, 0x31, 0x5f, 0xb6, 0x38,
+	0x4c, 0xec, 0x27, 0xa7, 0x14, 0xba, 0x0c, 0x0d, 0x62, 0xc1, 0x03, 0x88, 0x1e, 0xcd, 0xf0, 0xb9,
+	0x44, 0x7a, 0x6f, 0x96, 0x8f, 0x07, 0x72, 0x0a, 0x19, 0xb0, 0x9d, 0x78, 0x41, 0x45, 0x8f, 0x67,
+	0xba, 0x4e, 0x4b, 0x4f, 0xae, 0x13, 0xf3, 0x57, 0xb3, 0x40, 0x4a, 0xbe, 0x86, 0xa1, 0x27, 0xb3,
+	0xdd, 0x1c, 0xa5, 0xf7, 0xaf, 0x95, 0xf3, 0x17, 0x3c, 0x80, 0x7c, 0xe0, 0x9a, 0x83, 0xb6, 0x26,
+	0x2f, 0x3e, 0x0c, 0x52, 0x4c, 0xba, 0x11, 0x31, 0x8c, 0xc0, 0x6c, 0xce, 0x31, 0x26, 0xaf, 0x07,
+	0x1c, 0x23, 0x66, 0x8c, 0x97, 0x53, 0xa8, 0x05, 0x77, 0x22, 0x73, 0x35, 0xda, 0x89, 0x66, 0x28,
+	0x50, 0xde, 0xa4, 0xbb, 0xf1, 0xcc, 0xf8, 0xb4, 0x45, 0x2a, 0xd0, 0x44, 0xda, 0xe2, 0xeb, 0xdc,
+	0x44, 0xda, 0x12, 0x0a, 0x99, 0x9c, 0xaa, 0xfe, 0x26, 0x03, 0x59, 0x52, 0x25, 0x50, 0x9b, 0x57,
+	0xd3, 0xd0, 0x2e, 0xb9, 0x37, 0x75, 0x08, 0x91, 0xee, 0x27, 0xb1, 0x7d, 0x67, 0x7e, 0x0a, 0xa5,
+	0x98, 0x46, 0x83, 0x1e, 0x5c, 0xd3, 0x0a, 0xa5, 0x72, 0xb2, 0x80, 0x8f, 0xfd, 0x11, 0xe4, 0xfc,
+	0x4e, 0x83, 0x36, 0xbc, 0x0c, 0x85, 0xba, 0x96, 0xb4, 0x19, 0x25, 0x07, 0xb5, 0xfd, 0xee, 0xc1,
+	0xb5, 0xa3, 0x9d, 0x88, 0x6b, 0x4f, 0x36, 0x19, 0xdf, 0xaf, 0x68, 0x7a, 0xc6, 0x7e, 0x25, 0x24,
+	0xa6, 0x9c, 0x2c, 0xe0, 0x61, 0x5f, 0x2c, 0xd2, 0x9f, 0xe3, 0x1f, 0xfe, 0x2f, 0x00, 0x00, 0xff,
+	0xff, 0x17, 0x25, 0x65, 0xbe, 0x29, 0x1f, 0x00, 0x00,
 }
