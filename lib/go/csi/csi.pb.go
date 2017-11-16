@@ -245,7 +245,13 @@ func (m *GetPluginInfoRequest) GetVersion() *Version {
 }
 
 type GetPluginInfoResponse struct {
-	// This field is REQUIRED.
+	// Specify the name in Reverse domain name notation format,
+	// (https://en.wikipedia.org/wiki/Reverse_domain_name_notation)
+	// which includes the plugin's host company name and the plugin name,
+	// to minimize the possibility of collisions. The field MUST be 63
+	// characters or less, beginning and ending with an alphanumeric
+	// character ([a-z0-9A-Z]) with dashes (-), underscores (_),
+	// dots (.), and alphanumerics between. This field is REQUIRED.
 	Name string `protobuf:"bytes,1,opt,name=name" json:"name,omitempty"`
 	// This field is REQUIRED. Value of this field is opaque to the CO.
 	VendorVersion string `protobuf:"bytes,2,opt,name=vendor_version,json=vendorVersion" json:"vendor_version,omitempty"`
