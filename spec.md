@@ -672,10 +672,8 @@ message ControllerPublishVolumeRequest {
   // This field is REQUIRED.
   string volume_id = 2;
 
-  // The ID of the node. This field is OPTIONAL. The CO SHALL set (or
-  // clear) this field to match the node ID returned by `GetNodeID`.
-  // `GetNodeID` is allowed to omit node ID from a successful response;
-  // in such cases the CO SHALL NOT specify this field.
+  // The ID of the node. This field is REQUIRED. The CO SHALL set this
+  // field to match the node ID returned by `GetNodeID`.
   string node_id = 3;
 
   // The capability of the volume the CO expects the volume to have.
@@ -749,15 +747,11 @@ message ControllerUnpublishVolumeRequest {
   // The ID of the volume. This field is REQUIRED.
   string volume_id = 2;
 
-  // The ID of the node. This field is OPTIONAL. The CO SHALL set (or
-  // clear) this field to match the node ID returned by `GetNodeID`.
-  // `GetNodeID` is allowed to omit node ID from a successful response;
-  // in such cases the CO SHALL NOT specify this field.
-  //
-  // If `GetNodeID` does not omit node ID from a successful response,
-  // the CO MAY omit this field as well, indicating that it does not
-  // know which node the volume was previously used. The Plugin SHOULD
-  // return an Error if this is not supported.
+  // The ID of the node. This field is OPTIONAL. The CO SHOULD set this
+  // field to match the node ID returned by `GetNodeID` or leave it
+  // unset. If the value is set, the SP MUST unpublish the volume from
+  // the specified node. If the value is unset, the SP MUST unpublish
+  // the volume from all nodes it is published to.
   string node_id = 3;
 
   // End user credentials used to authenticate/authorize controller
@@ -1129,7 +1123,7 @@ Condition | gRPC Code | Description | Recovery Behavior
 
 #### `GetNodeID`
 
-A Node Plugin MUST implement this RPC call.
+A Node Plugin MUST implement this RPC call if the plugin has `PUBLISH_UNPUBLISH_VOLUME` controller capability.
 The Plugin SHALL assume that this RPC will be executed on the node where the volume will be used.
 The CO SHOULD call this RPC for the node at which it wants to place the workload.
 The result of this call will be used by CO in `ControllerPublishVolume`.
@@ -1141,10 +1135,9 @@ message GetNodeIDRequest {
 }
 
 message GetNodeIDResponse {
-  // The ID of the node which SHALL be used by CO in
-  // `ControllerPublishVolume`. This is an OPTIONAL field. If unset,
-  // the CO SHALL leave the `node_id` field unset in
-  // `ControllerPublishVolume`.
+  // The ID of the node as understood by the SP which SHALL be used by
+  // CO in subsequent `ControllerPublishVolume`.
+  // This is a REQUIRED field.
   string node_id = 1;
 }
 ```

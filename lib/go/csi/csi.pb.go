@@ -738,10 +738,8 @@ type ControllerPublishVolumeRequest struct {
 	// The ID of the volume to be used on a node.
 	// This field is REQUIRED.
 	VolumeId string `protobuf:"bytes,2,opt,name=volume_id,json=volumeId" json:"volume_id,omitempty"`
-	// The ID of the node. This field is OPTIONAL. The CO SHALL set (or
-	// clear) this field to match the node ID returned by `GetNodeID`.
-	// `GetNodeID` is allowed to omit node ID from a successful response;
-	// in such cases the CO SHALL NOT specify this field.
+	// The ID of the node. This field is REQUIRED. The CO SHALL set this
+	// field to match the node ID returned by `GetNodeID`.
 	NodeId string `protobuf:"bytes,3,opt,name=node_id,json=nodeId" json:"node_id,omitempty"`
 	// The capability of the volume the CO expects the volume to have.
 	// This is a REQUIRED field.
@@ -849,15 +847,11 @@ type ControllerUnpublishVolumeRequest struct {
 	Version *Version `protobuf:"bytes,1,opt,name=version" json:"version,omitempty"`
 	// The ID of the volume. This field is REQUIRED.
 	VolumeId string `protobuf:"bytes,2,opt,name=volume_id,json=volumeId" json:"volume_id,omitempty"`
-	// The ID of the node. This field is OPTIONAL. The CO SHALL set (or
-	// clear) this field to match the node ID returned by `GetNodeID`.
-	// `GetNodeID` is allowed to omit node ID from a successful response;
-	// in such cases the CO SHALL NOT specify this field.
-	//
-	// If `GetNodeID` does not omit node ID from a successful response,
-	// the CO MAY omit this field as well, indicating that it does not
-	// know which node the volume was previously used. The Plugin SHOULD
-	// return an Error if this is not supported.
+	// The ID of the node. This field is OPTIONAL. The CO SHOULD set this
+	// field to match the node ID returned by `GetNodeID` or leave it
+	// unset. If the value is set, the SP MUST unpublish the volume from
+	// the specified node. If the value is unset, the SP MUST unpublish
+	// the volume from all nodes it is published to.
 	NodeId string `protobuf:"bytes,3,opt,name=node_id,json=nodeId" json:"node_id,omitempty"`
 	// End user credentials used to authenticate/authorize controller
 	// unpublish request.
@@ -1531,10 +1525,9 @@ func (m *GetNodeIDRequest) GetVersion() *Version {
 }
 
 type GetNodeIDResponse struct {
-	// The ID of the node which SHALL be used by CO in
-	// `ControllerPublishVolume`. This is an OPTIONAL field. If unset,
-	// the CO SHALL leave the `node_id` field unset in
-	// `ControllerPublishVolume`.
+	// The ID of the node as understood by the SP which SHALL be used by
+	// CO in subsequent `ControllerPublishVolume`.
+	// This is a REQUIRED field.
 	NodeId string `protobuf:"bytes,1,opt,name=node_id,json=nodeId" json:"node_id,omitempty"`
 }
 
