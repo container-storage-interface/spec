@@ -352,7 +352,7 @@ The general flow of the success case is as follows (protos illustrated in YAML f
        minor: 1
        patch: 0
    response:
-      name: org.foo.whizbang/super-plugin
+      name: org.foo.whizbang.super-plugin
       vendor_version: blue-green
       manifest:
         baz: qaz
@@ -400,7 +400,13 @@ message GetPluginInfoRequest {
 }
 
 message GetPluginInfoResponse {
-  // This field is REQUIRED.
+  // The name MUST follow reverse domain name notation format
+  // (https://en.wikipedia.org/wiki/Reverse_domain_name_notation).
+  // It SHOULD include the plugin's host company name and the plugin
+  // name, to minimize the possibility of collisions. It MUST be 63
+  // characters or less, beginning and ending with an alphanumeric
+  // character ([a-z0-9A-Z]) with dashes (-), underscores (_),
+  // dots (.), and alphanumerics between. This field is REQUIRED.
   string name = 1;
 
   // This field is REQUIRED. Value of this field is opaque to the CO.
