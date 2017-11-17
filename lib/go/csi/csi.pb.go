@@ -73,9 +73,11 @@ type VolumeCapability_AccessMode_Mode int32
 
 const (
 	VolumeCapability_AccessMode_UNKNOWN VolumeCapability_AccessMode_Mode = 0
-	// Can be published as read/write at one node at a time.
+	// Can only be published once as read/write on a single node, at
+	// any given time.
 	VolumeCapability_AccessMode_SINGLE_NODE_WRITER VolumeCapability_AccessMode_Mode = 1
-	// Can be published as readonly at one node at a time.
+	// Can only be published once as readonly on a single node, at
+	// any given time.
 	VolumeCapability_AccessMode_SINGLE_NODE_READER_ONLY VolumeCapability_AccessMode_Mode = 2
 	// Can be published as readonly at multiple nodes simultaneously.
 	VolumeCapability_AccessMode_MULTI_NODE_READER_ONLY VolumeCapability_AccessMode_Mode = 3
