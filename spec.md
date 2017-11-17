@@ -523,10 +523,12 @@ message VolumeCapability {
     enum Mode {
       UNKNOWN = 0;
 
-      // Can be published as read/write at one node at a time.
+      // Can only be published once as read/write on a single node, at
+      // any given time.
       SINGLE_NODE_WRITER = 1;
 
-      // Can be published as readonly at one node at a time.
+      // Can only be published once as readonly on a single node, at
+      // any given time.
       SINGLE_NODE_READER_ONLY = 2;
 
       // Can be published as readonly at multiple nodes simultaneously.
@@ -1016,11 +1018,21 @@ It is NOT REQUIRED for a controller plugin to implement the `LIST_VOLUMES` capab
 
 This RPC is called by the CO when a workload that wants to use the specified volume is placed (scheduled) on a node.
 The Plugin SHALL assume that this RPC will be executed on the node where the volume will be used.
-This RPC MAY be called by the CO multiple times on the same node for the same volume with possibly different `target_path` and/or auth credentials.
+
 If the corresponding Controller Plugin has `PUBLISH_UNPUBLISH_VOLUME` controller capability, the CO MUST guarantee that this RPC is called after `ControllerPublishVolume` is called for the given volume on the given node and returns a success.
 
 This operation MUST be idempotent.
 If this RPC failed, or the CO does not know if it failed or not, it MAY choose to call `NodePublishVolume` again, or choose to call `NodeUnpublishVolume`.
+
+This RPC MAY be called by the CO multiple times on the same node for the same volume with possibly different `target_path` and/or auth credentials if the volume has MULTI_NODE capability (i.e., `access_mode` is either `MULTI_NODE_READER_ONLY`, `MULTI_NODE_SINGLE_WRITER` or `MULTI_NODE_MULTI_WRITER`).
+The following table shows what the Plugin SHOULD return when receiving a second `NodePublishVolume` on the same volume on the same node:
+
+|                | T1=T2, C1=C2    | T1=T2, C1!=C2 | T1!=T2, C1=C2 | T1!=T2, C1!=C2 |
+|----------------|-----------------|---------------|---------------|----------------|
+| MULTI_NODE     | OK (idempotent) | ABORTED       | OK            | OK             |
+| Non MULTI_NODE | OK (idempotent) | ABORTED       | ABORTED       | ABORTED        |
+
+(`Tn`: target path of the n-th `NodePublishVolume`, `Cn`: credential of the n-th `NodePublishVolume`)
 
 ```protobuf
 message NodePublishVolumeRequest {
@@ -1085,6 +1097,8 @@ Condition | gRPC Code | Description | Recovery Behavior
 | --- | --- | --- | --- |
 | Volume does not exists | 5 NOT_FOUND | Indicates that a volume corresponding to the specified `volume_id` does not exist. | Caller MUST verify that the `volume_id` is correct and that the volume is accessible and has not been deleted before retrying with exponential back off. |
 | Operation pending for volume | 9 FAILED_PRECONDITION | Indicates that there is a already an operation pending for the specified volume. In general the Cluster Orchestrator (CO) is responsible for ensuring that there is no more than one call "in-flight" per volume at a given time. However, in some circumstances, the CO MAY lose state (for example when the CO crashes and restarts), and MAY issue multiple calls simultaneously for the same volume. The Plugin, SHOULD handle this as gracefully as possible, and MAY return this error code to reject secondary calls. | Caller SHOULD ensure that there are no other calls pending for the specified volume, and then retry with exponential back off. |
+| Exceeds capabilities | 10 ABORTED | Indicates that the CO has exceeded the volume's capabilities because the volume does not have MULTI_NODE capability. | Caller MAY retry at a higher-level by calling `ValidateVolumeCapabilities` to validate the volume capabilities, or wait for the volume to be unpublished on the node. |
+
 
 #### `NodeUnpublishVolume`
 
