@@ -82,10 +82,10 @@ message GetPluginInfoRequest {
 }
 
 message GetPluginInfoResponse {
-  // Specify the name in Reverse domain name notation format,
-  // (https://en.wikipedia.org/wiki/Reverse_domain_name_notation)
-  // which includes the plugin's host company name and the plugin name,
-  // to minimize the possibility of collisions. The field MUST be 63
+  // The name MUST follow reverse domain name notation format
+  // (https://en.wikipedia.org/wiki/Reverse_domain_name_notation).
+  // It SHOULD include the plugin's host company name and the plugin
+  // name, to minimize the possibility of collisions. It MUST be 63
   // characters or less, beginning and ending with an alphanumeric
   // character ([a-z0-9A-Z]) with dashes (-), underscores (_),
   // dots (.), and alphanumerics between. This field is REQUIRED.
