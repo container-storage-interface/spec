@@ -1145,6 +1145,12 @@ message GetNodeIDResponse {
 ##### GetNodeID Errors
 
 If the plugin is unable to complete the GetNodeID call successfully, it MUST return a non-ok gRPC code in the gRPC status.
+If the conditions defined below are encountered, the plugin MUST return the specified gRPC error code.
+The CO MUST implement the specified error recovery behavior when it encounters the gRPC error code.
+
+Condition | gRPC Code | Description | Recovery Behavior
+| --- | --- | --- | --- |
+| Call not implemented | 12 UNIMPLEMENTED | GetNodeID call is not implemented by the plugin or disabled in the Plugin's current mode of operation. | Caller MUST NOT retry. Caller MAY call `ControllerGetCapabilities` or `NodeGetCapabilities` to discover Plugin capabilities. |
 
 #### `NodeProbe`
 
