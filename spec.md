@@ -319,11 +319,11 @@ Most gRPC libraries provide helper methods to set and read the status fields.
 
 The status `code` MUST contain a [canonical error code](https://github.com/grpc/grpc-go/blob/master/codes/codes.go). COs must handle all valid error codes. Each RPC defines a set of gRPC error codes that MUST be returned by the plugin when specified conditions are encountered. In addition to those, if the conditions defined below are encountered, the plugin MUST return the associated gRPC error code.
 
-Condition | gRPC Code | Description | Recovery Behavior
-| --- | --- | --- | --- |
+| Condition | gRPC Code | Description | Recovery Behavior |
+|-----------|-----------|-------------|-------------------|
 | Unsupported request version | 3 INVALID_ARGUMENT | Indicates that the version specified in the request is not supported by the Plugin. | Caller MUST NOT retry; caller SHOULD call `GetSupportedVersions` to discover which CSI versions the Plugin supports. |
 | Missing required field | 3 INVALID_ARGUMENT | Indicates that a required field is missing from the request. More human-readable information MAY be provided in the `error_description` field. | Caller MUST fix the request by adding the missing required field before retrying. |
-| Invalid or unsupported field in the request | 3 INVALID_ARGUMENT | Indicates that the one ore more fields in this field is either not allowed by the Plugin or has an invalid value. More human-readable information MAY be provided in the gRPC `status.message` field. | Caller MUST fix the the field before retrying. |
+| Invalid or unsupported field in the request | 3 INVALID_ARGUMENT | Indicates that the one ore more fields in this field is either not allowed by the Plugin or has an invalid value. More human-readable information MAY be provided in the gRPC `status.message` field. | Caller MUST fix the field before retrying. |
 
 The status `message` MUST contain a human readable description of error, if the status `code` is not `OK`.
 This string MAY be surfaced by CO to end users.
@@ -601,12 +601,12 @@ If the plugin is unable to complete the CreateVolume call successfully, it MUST 
 If the conditions defined below are encountered, the plugin MUST return the specified gRPC error code.
 The CO MUST implement the specified error recovery behavior when it encounters the gRPC error code.
 
-Condition | gRPC Code | Description | Recovery Behavior
-| --- | --- | --- | --- |
+| Condition | gRPC Code | Description | Recovery Behavior |
+|-----------|-----------|-------------|-------------------|
 | Volume already exists | 6 ALREADY_EXISTS | Indicates that a volume corresponding to the specified volume `name` already exists. Plugin MUST also return a valid `CreateVolumeResponse`. | Caller MUST assume the `CreateVolume` call succeeded. |
 | Operation pending for volume | 9 FAILED_PRECONDITION | Indicates that there is a already an operation pending for the specified volume. In general the Cluster Orchestrator (CO) is responsible for ensuring that there is no more than one call "in-flight" per volume at a given time. However, in some circumstances, the CO MAY lose state (for example when the CO crashes and restarts), and MAY issue multiple calls simultaneously for the same volume. The Plugin, SHOULD handle this as gracefully as possible, and MAY return this error code to reject secondary calls. | Caller SHOULD ensure that there are no other calls pending for the specified volume, and then retry with exponential back off. |
 | Unsupported `capacity_range` | 11 OUT_OF_RANGE | Indicates that the capacity range is not allowed by the Plugin. More human-readable information MAY be provided in the gRPC `status.message` field. | Caller MUST fix the capacity range before retrying. |
-| Call not implemented | 12 UNIMPLEMENTED | CreateVolume call is not implemented by the plugin or disabled in the Plugin's current mode of operation. | Caller MUST NOT retry. Caller MAY call `ControllerGetCapabilities` or `NodeGetCapabilities` to discover Plugin capabilities. |
+| Not supposed to be called | 10 ABORTED | Indicates that the CO is not supposed to call the RPC because the plugin does not set `CREATE_DELETE_VOLUME` controller capability. | Caller MAY retry at a higher-level by calling `ControllerGetCapabilities`. |
 
 
 #### `DeleteVolume`
@@ -650,12 +650,12 @@ If the plugin is unable to complete the DeleteVolume call successfully, it MUST 
 If the conditions defined below are encountered, the plugin MUST return the specified gRPC error code.
 The CO MUST implement the specified error recovery behavior when it encounters the gRPC error code.
 
-Condition | gRPC Code | Description | Recovery Behavior
-| --- | --- | --- | --- |
+| Condition | gRPC Code | Description | Recovery Behavior |
+|-----------|-----------|-------------|-------------------|
 | Volume does not exists | 5 NOT_FOUND | Indicates that a volume corresponding to the specified `volume_id` does not exist. | Caller MUST assume the `DeleteVolume` call succeeded. |
 | Volume in use | 9 FAILED_PRECONDITION | Indicates that the volume corresponding to the specified `volume_id` could not be deleted because it is in use by another resource. | Caller SHOULD ensure that there are no other resources using the volume, and then retry with exponential back off. |
 | Operation pending for volume | 9 FAILED_PRECONDITION | Indicates that there is a already an operation pending for the specified volume. In general the Cluster Orchestrator (CO) is responsible for ensuring that there is no more than one call "in-flight" per volume at a given time. However, in some circumstances, the CO MAY lose state (for example when the CO crashes and restarts), and MAY issue multiple calls simultaneously for the same volume. The Plugin, SHOULD handle this as gracefully as possible, and MAY return this error code to reject secondary calls. | Caller SHOULD ensure that there are no other calls pending for the specified volume, and then retry with exponential back off. |
-| Call not implemented | 12 UNIMPLEMENTED | DeleteVolume call is not implemented by the plugin or disabled in the Plugin's current mode of operation. | Caller MUST NOT retry. Caller MAY call `ControllerGetCapabilities` or `NodeGetCapabilities` to discover Plugin capabilities. |
+| Not supposed to be called | 10 ABORTED | Indicates that the CO is not supposed to call the RPC because the plugin does not set `CREATE_DELETE_VOLUME` controller capability. | Caller MAY retry at a higher-level by calling `ControllerGetCapabilities`. |
 
 
 #### `ControllerPublishVolume`
@@ -724,14 +724,15 @@ If the plugin is unable to complete the ControllerPublishVolume call successfull
 If the conditions defined below are encountered, the plugin MUST return the specified gRPC error code.
 The CO MUST implement the specified error recovery behavior when it encounters the gRPC error code.
 
-Condition | gRPC Code | Description | Recovery Behavior
-| --- | --- | --- | --- |
+| Condition | gRPC Code | Description | Recovery Behavior |
+|-----------|-----------|-------------|-------------------|
 | Volume does not exists | 5 NOT_FOUND | Indicates that a volume corresponding to the specified `volume_id` does not exist. | Caller MUST verify that the `volume_id` is correct and that the volume is accessible and has not been deleted before retrying with exponential back off. |
 | Node does not exists | 5 NOT_FOUND | Indicates that a node corresponding to the specified `node_id` does not exist. | Caller MUST verify that the `node_id` is correct and that the node is available and has not been terminated or deleted before retrying with exponential backoff. |
 | Volume published to another node | 6 ALREADY_EXISTS | Indicates that a volume corresponding to the specified `volume_id` is already attached to another node and does not support multi-node attach. If this error code is returned, the Plugin SHOULD specify the `node_id` of the node the volume is already attached to as part of the gRPC `status.message`. | Caller SHOULD ensure the specified volume is not attached to any other node before retrying with exponential back off. |
 | Max volumes attached | 8 RESOURCE_EXHAUSTED | Indicates that the maximum supported number of volumes that can be attached to the specified node are already attached. Therefore, this operation will fail until at least one of the existing attached volumes is detached from the node. | Caller MUST ensure that the number of volumes already attached to the node is less then the maximum supported number of volumes before retrying with exponential backoff. |
 | Operation pending for volume | 9 FAILED_PRECONDITION | Indicates that there is a already an operation pending for the specified volume. In general the Cluster Orchestrator (CO) is responsible for ensuring that there is no more than one call "in-flight" per volume at a given time. However, in some circumstances, the CO MAY lose state (for example when the CO crashes and restarts), and MAY issue multiple calls simultaneously for the same volume. The Plugin, SHOULD handle this as gracefully as possible, and MAY return this error code to reject secondary calls. | Caller SHOULD ensure that there are no other calls pending for the specified volume, and then retry with exponential back off. |
-| Call not implemented | 12 UNIMPLEMENTED | ControllerPublishVolume call is not implemented by the plugin or disabled in the Plugin's current mode of operation. | Caller MUST NOT retry. Caller MAY call `ControllerGetCapabilities` or `NodeGetCapabilities` to discover Plugin capabilities. |
+| Not supposed to be called | 10 ABORTED | Indicates that the CO is not supposed to call the RPC because the plugin does not set `PUBLISH_UNPUBLISH_VOLUME` controller capability. | Caller MAY retry at a higher-level by calling `ControllerGetCapabilities`. |
+
 
 #### `ControllerUnpublishVolume`
 
@@ -784,13 +785,13 @@ If the plugin is unable to complete the ControllerUnpublishVolume call successfu
 If the conditions defined below are encountered, the plugin MUST return the specified gRPC error code.
 The CO MUST implement the specified error recovery behavior when it encounters the gRPC error code.
 
-Condition | gRPC Code | Description | Recovery Behavior
-| --- | --- | --- | --- |
+| Condition | gRPC Code | Description | Recovery Behavior |
+|-----------|-----------|-------------|-------------------|
 | Volume not attached to specified node | 0 OK | Indicates that the volume corresponding to `volume_id` is not attached to the node corresponding to `node_id`. | Caller MUST assume the `ControllerUnpublishVolume` call succeeded. |
 | Volume does not exists | 5 NOT_FOUND | Indicates that a volume corresponding to the specified `volume_id` does not exist. | Caller MUST verify that the `volume_id` is correct and that the volume is accessible and has not been deleted before retrying with exponential back off. |
 | Node does not exists | 5 NOT_FOUND | Indicates that a node corresponding to the specified `node_id` does not exist. | Caller MUST verify that the `node_id` is correct and that the node is available and has not been terminated or deleted before retrying with exponential backoff. |
 | Operation pending for volume | 9 FAILED_PRECONDITION | Indicates that there is a already an operation pending for the specified volume. In general the Cluster Orchestrator (CO) is responsible for ensuring that there is no more than one call "in-flight" per volume at a given time. However, in some circumstances, the CO MAY lose state (for example when the CO crashes and restarts), and MAY issue multiple calls simultaneously for the same volume. The Plugin, SHOULD handle this as gracefully as possible, and MAY return this error code to reject secondary calls. | Caller SHOULD ensure that there are no other calls pending for the specified volume, and then retry with exponential back off. |
-| Call not implemented | 12 UNIMPLEMENTED | ControllerUnpublishVolume call is not implemented by the plugin or disabled in the Plugin's current mode of operation. | Caller MUST NOT retry. Caller MAY call `ControllerGetCapabilities` or `NodeGetCapabilities` to discover Plugin capabilities. |
+| Not supposed to be called | 10 ABORTED | Indicates that the CO is not supposed to call the RPC because the plugin does not set `PUBLISH_UNPUBLISH_VOLUME` controller capability. | Caller MAY retry at a higher-level by calling `ControllerGetCapabilities`. |
 
 
 #### `ValidateVolumeCapabilities`
@@ -836,9 +837,10 @@ If the plugin is unable to complete the ValidateVolumeCapabilities call successf
 If the conditions defined below are encountered, the plugin MUST return the specified gRPC error code.
 The CO MUST implement the specified error recovery behavior when it encounters the gRPC error code.
 
-Condition | gRPC Code | Description | Recovery Behavior
-| --- | --- | --- | --- |
+| Condition | gRPC Code | Description | Recovery Behavior |
+|-----------|-----------|-------------|-------------------|
 | Volume does not exists | 5 NOT_FOUND | Indicates that a volume corresponding to the specified `volume_id` does not exist. | Caller MUST verify that the `volume_id` is correct and that the volume is accessible and has not been deleted before retrying with exponential back off. |
+
 
 #### `ListVolumes`
 
@@ -889,9 +891,11 @@ If the plugin is unable to complete the ListVolumes call successfully, it MUST r
 If the conditions defined below are encountered, the plugin MUST return the specified gRPC error code.
 The CO MUST implement the specified error recovery behavior when it encounters the gRPC error code.
 
-Condition | gRPC Code | Description | Recovery Behavior
-| --- | --- | --- | --- |
-| Invalid `starting_token` | 10 ABORTED | Indicates that `starting_token` is not valid. | Caller SHOULD start the `ListVolumes` operation again with an empty `starting_token`. |
+| Condition | gRPC Code | Description | Recovery Behavior |
+|-----------|-----------|-------------|-------------------|
+| Invalid `starting_token` | 11 OUT_OF_RANGE | Indicates that `starting_token` is not valid. | Caller SHOULD start the `ListVolumes` operation again with an empty `starting_token`. |
+| Not supposed to be called | 10 ABORTED | Indicates that the CO is not supposed to call the RPC because the plugin does not set `LIST_VOLUMES` controller capability. | Caller MAY retry at a higher-level by calling `ControllerGetCapabilities`. |
+
 
 #### `GetCapacity`
 
@@ -930,6 +934,13 @@ message GetCapacityResponse {
 ##### GetCapacity Errors
 
 If the plugin is unable to complete the GetCapacity call successfully, it MUST return a non-ok gRPC code in the gRPC status.
+If the conditions defined below are encountered, the plugin MUST return the specified gRPC error code.
+The CO MUST implement the specified error recovery behavior when it encounters the gRPC error code.
+
+| Condition | gRPC Code | Description | Recovery Behavior |
+|-----------|-----------|-------------|-------------------|
+| Not supposed to be called | 10 ABORTED | Indicates that the CO is not supposed to call the RPC because the plugin does not set `GET_CAPACITY` controller capability. | Caller MAY retry at a higher-level by calling `ControllerGetCapabilities`. |
+
 
 #### `ControllerProbe`
 
@@ -953,10 +964,11 @@ If the plugin is unable to complete the ControllerProbe call successfully, it MU
 If the conditions defined below are encountered, the plugin MUST return the specified gRPC error code.
 The CO MUST implement the specified error recovery behavior when it encounters the gRPC error code.
 
-Condition | gRPC Code | Description | Recovery Behavior
-| --- | --- | --- | --- |
+| Condition | gRPC Code | Description | Recovery Behavior |
+|-----------|-----------|-------------|-------------------|
 | Bad plugin config | 9 FAILED_PRECONDITION | Indicates that the plugin is misconfigured. | Caller MUST assume the plugin is not healthy. |
 | Missing required dependency | 9 FAILED_PRECONDITION | Indicates that the plugin is missing one or more required dependency. | Caller MUST assume the plugin is not healthy. |
+
 
 #### `ControllerGetCapabilities`
 
@@ -1093,11 +1105,12 @@ If the plugin is unable to complete the NodePublishVolume call successfully, it 
 If the conditions defined below are encountered, the plugin MUST return the specified gRPC error code.
 The CO MUST implement the specified error recovery behavior when it encounters the gRPC error code.
 
-Condition | gRPC Code | Description | Recovery Behavior
-| --- | --- | --- | --- |
+| Condition | gRPC Code | Description | Recovery Behavior |
+|-----------|-----------|-------------|-------------------|
 | Volume does not exists | 5 NOT_FOUND | Indicates that a volume corresponding to the specified `volume_id` does not exist. | Caller MUST verify that the `volume_id` is correct and that the volume is accessible and has not been deleted before retrying with exponential back off. |
 | Operation pending for volume | 9 FAILED_PRECONDITION | Indicates that there is a already an operation pending for the specified volume. In general the Cluster Orchestrator (CO) is responsible for ensuring that there is no more than one call "in-flight" per volume at a given time. However, in some circumstances, the CO MAY lose state (for example when the CO crashes and restarts), and MAY issue multiple calls simultaneously for the same volume. The Plugin, SHOULD handle this as gracefully as possible, and MAY return this error code to reject secondary calls. | Caller SHOULD ensure that there are no other calls pending for the specified volume, and then retry with exponential back off. |
 | Exceeds capabilities | 10 ABORTED | Indicates that the CO has exceeded the volume's capabilities because the volume does not have MULTI_NODE capability. | Caller MAY retry at a higher-level by calling `ValidateVolumeCapabilities` to validate the volume capabilities, or wait for the volume to be unpublished on the node. |
+
 
 
 #### `NodeUnpublishVolume`
@@ -1150,10 +1163,11 @@ If the plugin is unable to complete the NodeUnpublishVolume call successfully, i
 If the conditions defined below are encountered, the plugin MUST return the specified gRPC error code.
 The CO MUST implement the specified error recovery behavior when it encounters the gRPC error code.
 
-Condition | gRPC Code | Description | Recovery Behavior
-| --- | --- | --- | --- |
+| Condition | gRPC Code | Description | Recovery Behavior |
+|-----------|-----------|-------------|-------------------|
 | Volume does not exists | 5 NOT_FOUND | Indicates that a volume corresponding to the specified `volume_id` does not exist. | Caller MUST verify that the `volume_id` is correct and that the volume is accessible and has not been deleted before retrying with exponential back off. |
 | Operation pending for volume | 9 FAILED_PRECONDITION | Indicates that there is a already an operation pending for the specified volume. In general the Cluster Orchestrator (CO) is responsible for ensuring that there is no more than one call "in-flight" per volume at a given time. However, in some circumstances, the CO MAY lose state (for example when the CO crashes and restarts), and MAY issue multiple calls simultaneously for the same volume. The Plugin, SHOULD handle this as gracefully as possible, and MAY return this error code to reject secondary calls. | Caller SHOULD ensure that there are no other calls pending for the specified volume, and then retry with exponential back off. |
+
 
 #### `GetNodeID`
 
@@ -1210,10 +1224,11 @@ If the plugin is unable to complete the NodeProbe call successfully, it MUST ret
 If the conditions defined below are encountered, the plugin MUST return the specified gRPC error code.
 The CO MUST implement the specified error recovery behavior when it encounters the gRPC error code.
 
-Condition | gRPC Code | Description | Recovery Behavior
-| --- | --- | --- | --- |
+| Condition | gRPC Code | Description | Recovery Behavior |
+|-----------|-----------|-------------|-------------------|
 | Bad plugin config | 9 FAILED_PRECONDITION | Indicates that the plugin is misconfigured. | Caller MUST assume the plugin is not healthy. |
 | Missing required dependency | 9 FAILED_PRECONDITION | Indicates that the plugin is missing one or more required dependency. | Caller MUST assume the plugin is not healthy. |
+
 
 #### `NodeGetCapabilities`
 
