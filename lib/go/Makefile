@@ -80,11 +80,13 @@ CSI_GO := csi/csi.pb.go
 CSI_A := csi.a
 CSI_PROTO := ../../csi.proto
 CSI_GO_TMP := csi/.build/csi.pb.go
+CSI_CANON_IMPORT := github.com/container-storage-interface/spec/lib/go/csi
 
 # This recipe generates the go language bindings to a temp area.
 $(CSI_GO_TMP): $(CSI_PROTO) | $(PROTOC) $(PROTOC_GEN_GO)
 	@mkdir -p "$(@D)"
 	$(PROTOC) -I "$(<D)" --go_out=plugins=grpc:"$(@D)" "$<"
+	sed -i -e 's|package csi|package csi // import "$(CSI_CANON_IMPORT)"|g' "$@"
 
 # The temp language bindings are compared to the ones that are
 # versioned. If they are different then it means the language

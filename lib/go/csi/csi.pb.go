@@ -47,7 +47,7 @@ It has these top-level messages:
 	NodeGetCapabilitiesResponse
 	NodeServiceCapability
 */
-package csi
+package csi // import "github.com/container-storage-interface/spec/lib/go/csi"
 
 import proto "github.com/golang/protobuf/proto"
 import fmt "fmt"
