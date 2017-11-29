@@ -226,6 +226,8 @@ Each SP MUST provide:
 ```protobuf
 syntax = "proto3";
 package csi;
+
+import "google/protobuf/wrappers.proto";
 ```
 
 There are three sets of RPCs:
@@ -495,6 +497,12 @@ message CreateVolumeResponse {
   // relevant to the CO along with information required by the Plugin
   // to uniquely identify the volume. This field is REQUIRED.
   VolumeInfo volume_info = 1;
+
+  // A value of `true` indicates that a volume corresponding to the
+  // specified volume `name` already exists. This is not an error state
+  // and no recovery actions are expected of a CO.
+  // This field is OPTIONAL.
+  .google.protobuf.BoolValue already_exists = 2;
 }
 
 // Specify a capability of a volume.
@@ -603,7 +611,7 @@ The CO MUST implement the specified error recovery behavior when it encounters t
 
 Condition | gRPC Code | Description | Recovery Behavior
 | --- | --- | --- | --- |
-| Volume already exists | 6 ALREADY_EXISTS | Indicates that a volume corresponding to the specified volume `name` already exists. Plugin MUST also return a valid `CreateVolumeResponse`. | Caller MUST assume the `CreateVolume` call succeeded. |
+| Volume created | 0 OK | Indicates that the volume corresponding to `name` with the requested capabilities, capacity, and parameters was created or else already exists. | Caller MUST assume the `CreateVolume` call succeeded. |
 | Operation pending for volume | 9 FAILED_PRECONDITION | Indicates that there is a already an operation pending for the specified volume. In general the Cluster Orchestrator (CO) is responsible for ensuring that there is no more than one call "in-flight" per volume at a given time. However, in some circumstances, the CO MAY lose state (for example when the CO crashes and restarts), and MAY issue multiple calls simultaneously for the same volume. The Plugin, SHOULD handle this as gracefully as possible, and MAY return this error code to reject secondary calls. | Caller SHOULD ensure that there are no other calls pending for the specified volume, and then retry with exponential back off. |
 | Unsupported `capacity_range` | 11 OUT_OF_RANGE | Indicates that the capacity range is not allowed by the Plugin. More human-readable information MAY be provided in the gRPC `status.message` field. | Caller MUST fix the capacity range before retrying. |
 | Call not implemented | 12 UNIMPLEMENTED | CreateVolume call is not implemented by the plugin or disabled in the Plugin's current mode of operation. | Caller MUST NOT retry. Caller MAY call `ControllerGetCapabilities` or `NodeGetCapabilities` to discover Plugin capabilities. |
@@ -715,6 +723,12 @@ message ControllerPublishVolumeResponse {
   // the subsequent `NodePublishVolume` call for the given volume.
   // This information is opaque to the CO. This field is OPTIONAL.
   map<string, string> publish_volume_info = 1;
+
+  // A value of `true` indicates that a volume corresponding to the
+  // specified publishing criteria already exists. This is not an error
+  // state and no recovery actions are expected of a CO.
+  // This field is OPTIONAL.
+  .google.protobuf.BoolValue already_published = 2;
 }
 ```
 
@@ -726,6 +740,7 @@ The CO MUST implement the specified error recovery behavior when it encounters t
 
 Condition | gRPC Code | Description | Recovery Behavior
 | --- | --- | --- | --- |
+| Volume published | 0 OK | Indicates that a volume corresponding to the specified publishing criteria is published, or was already published. | Caller MUST assume the `ControllerPublishVolume` call succeeded. |
 | Volume does not exists | 5 NOT_FOUND | Indicates that a volume corresponding to the specified `volume_id` does not exist. | Caller MUST verify that the `volume_id` is correct and that the volume is accessible and has not been deleted before retrying with exponential back off. |
 | Node does not exists | 5 NOT_FOUND | Indicates that a node corresponding to the specified `node_id` does not exist. | Caller MUST verify that the `node_id` is correct and that the node is available and has not been terminated or deleted before retrying with exponential backoff. |
 | Volume published to another node | 6 ALREADY_EXISTS | Indicates that a volume corresponding to the specified `volume_id` is already attached to another node and does not support multi-node attach. If this error code is returned, the Plugin SHOULD specify the `node_id` of the node the volume is already attached to as part of the gRPC `status.message`. | Caller SHOULD ensure the specified volume is not attached to any other node before retrying with exponential back off. |
@@ -1084,7 +1099,13 @@ message NodePublishVolumeRequest {
   map<string,string> volume_attributes = 8;
 }
 
-message NodePublishVolumeResponse {}
+message NodePublishVolumeResponse {
+  // A value of `true` indicates that a volume corresponding to the
+  // specified publishing criteria already exists. This is not an error
+  // state and no recovery actions are expected of a CO.
+  // This field is OPTIONAL.
+  .google.protobuf.BoolValue already_published = 1;
+}
 ```
 
 ##### NodePublishVolume Errors
@@ -1095,6 +1116,7 @@ The CO MUST implement the specified error recovery behavior when it encounters t
 
 Condition | gRPC Code | Description | Recovery Behavior
 | --- | --- | --- | --- |
+| Volume published | 0 OK | Indicates that a volume corresponding to the specified publishing criteria is published, or was already published. | Caller MUST assume the `NodePublishVolume` call succeeded. |
 | Volume does not exists | 5 NOT_FOUND | Indicates that a volume corresponding to the specified `volume_id` does not exist. | Caller MUST verify that the `volume_id` is correct and that the volume is accessible and has not been deleted before retrying with exponential back off. |
 | Operation pending for volume | 9 FAILED_PRECONDITION | Indicates that there is a already an operation pending for the specified volume. In general the Cluster Orchestrator (CO) is responsible for ensuring that there is no more than one call "in-flight" per volume at a given time. However, in some circumstances, the CO MAY lose state (for example when the CO crashes and restarts), and MAY issue multiple calls simultaneously for the same volume. The Plugin, SHOULD handle this as gracefully as possible, and MAY return this error code to reject secondary calls. | Caller SHOULD ensure that there are no other calls pending for the specified volume, and then retry with exponential back off. |
 | Exceeds capabilities | 10 ABORTED | Indicates that the CO has exceeded the volume's capabilities because the volume does not have MULTI_NODE capability. | Caller MAY retry at a higher-level by calling `ValidateVolumeCapabilities` to validate the volume capabilities, or wait for the volume to be unpublished on the node. |

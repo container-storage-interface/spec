@@ -1,6 +1,8 @@
 ////////
 syntax = "proto3";
 package csi;
+
+import "google/protobuf/wrappers.proto";
 ////////
 ////////
 service Identity {
@@ -159,6 +161,12 @@ message CreateVolumeResponse {
   // relevant to the CO along with information required by the Plugin
   // to uniquely identify the volume. This field is REQUIRED.
   VolumeInfo volume_info = 1;
+
+  // A value of `true` indicates that a volume corresponding to the
+  // specified volume `name` already exists. This is not an error state
+  // and no recovery actions are expected of a CO.
+  // This field is OPTIONAL.
+  .google.protobuf.BoolValue already_exists = 2;
 }
 
 // Specify a capability of a volume.
@@ -328,6 +336,12 @@ message ControllerPublishVolumeResponse {
   // the subsequent `NodePublishVolume` call for the given volume.
   // This information is opaque to the CO. This field is OPTIONAL.
   map<string, string> publish_volume_info = 1;
+
+  // A value of `true` indicates that a volume corresponding to the
+  // specified publishing criteria already exists. This is not an error
+  // state and no recovery actions are expected of a CO.
+  // This field is OPTIONAL.
+  .google.protobuf.BoolValue already_published = 2;
 }
 ////////
 ////////
@@ -545,7 +559,13 @@ message NodePublishVolumeRequest {
   map<string,string> volume_attributes = 8;
 }
 
-message NodePublishVolumeResponse {}
+message NodePublishVolumeResponse {
+  // A value of `true` indicates that a volume corresponding to the
+  // specified publishing criteria already exists. This is not an error
+  // state and no recovery actions are expected of a CO.
+  // This field is OPTIONAL.
+  .google.protobuf.BoolValue already_published = 1;
+}
 ////////
 ////////
 message NodeUnpublishVolumeRequest {
