@@ -46,7 +46,6 @@ $(PROTOC):
 	  unzip "$(PROTOC_TMP_DIR)/$(PROTOC_ZIP)" -d "$(PROTOC_TMP_DIR)" && \
 	  chmod 0755 "$(PROTOC_TMP_BIN)" && \
 	  cp -f "$(PROTOC_TMP_BIN)" "$@"
-	-rm -fr "$(PROTOC_TMP_DIR)"
 	stat "$@" > /dev/null 2>&1
 
 
@@ -82,9 +81,12 @@ CSI_PROTO := ../../csi.proto
 CSI_GO_TMP := csi/.build/csi.pb.go
 
 # This recipe generates the go language bindings to a temp area.
+$(CSI_GO_TMP): GO_OUT := plugins=grpc
+$(CSI_GO_TMP): GO_OUT := $(GO_OUT),Mgoogle/protobuf/wrappers.proto=github.com/golang/protobuf/ptypes/wrappers
+$(CSI_GO_TMP): INCLUDE = -I$(PROTOC_TMP_DIR)/include
 $(CSI_GO_TMP): $(CSI_PROTO) | $(PROTOC) $(PROTOC_GEN_GO)
 	@mkdir -p "$(@D)"
-	$(PROTOC) -I "$(<D)" --go_out=plugins=grpc:"$(@D)" "$<"
+	$(PROTOC) -I "$(<D)" $(INCLUDE) --go_out=$(GO_OUT):"$(@D)" "$<"
 
 # The temp language bindings are compared to the ones that are
 # versioned. If they are different then it means the language
