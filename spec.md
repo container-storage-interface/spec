@@ -432,7 +432,9 @@ If the plugin is unable to complete the GetPluginInfo call successfully, it MUST
 
 A Controller Plugin MUST implement this RPC call if it has `CREATE_DELETE_VOLUME` controller capability.
 This RPC will be called by the CO to provision a new volume on behalf of a user (to be consumed as either a block device or a mounted filesystem).
+
 This operation MUST be idempotent.
+If a volume corresponding to the specified volume `name` already exists and is compatible with the specified `capacity_range`, `volume_capabilities` and `parameters` in the `CreateVolumeRequest`, the Plugin MUST reply `0 OK` with the corresponding `CreateVolumeResponse`.
 
 ```protobuf
 message CreateVolumeRequest {
@@ -603,7 +605,7 @@ The CO MUST implement the specified error recovery behavior when it encounters t
 
 | Condition | gRPC Code | Description | Recovery Behavior |
 |-----------|-----------|-------------|-------------------|
-| Volume already exists | 6 ALREADY_EXISTS | Indicates that a volume corresponding to the specified volume `name` already exists. Plugin MUST also return a valid `CreateVolumeResponse`. | Caller MUST assume the `CreateVolume` call succeeded. |
+| Volume already exists but incompatible | 6 ALREADY_EXISTS | Indicates that a volume corresponding to the specified volume `name` already exists but is incompatible with the specified `capacity_range`, `volume_capabilities` and `parameters`. | Caller MUST fix the arguments or use a different `name` before retrying. |
 | Operation pending for volume | 9 FAILED_PRECONDITION | Indicates that there is a already an operation pending for the specified volume. In general the Cluster Orchestrator (CO) is responsible for ensuring that there is no more than one call "in-flight" per volume at a given time. However, in some circumstances, the CO MAY lose state (for example when the CO crashes and restarts), and MAY issue multiple calls simultaneously for the same volume. The Plugin, SHOULD handle this as gracefully as possible, and MAY return this error code to reject secondary calls. | Caller SHOULD ensure that there are no other calls pending for the specified volume, and then retry with exponential back off. |
 | Unsupported `capacity_range` | 11 OUT_OF_RANGE | Indicates that the capacity range is not allowed by the Plugin. More human-readable information MAY be provided in the gRPC `status.message` field. | Caller MUST fix the capacity range before retrying. |
 | Call not implemented | 12 UNIMPLEMENTED | CreateVolume call is not implemented by the plugin or disabled in the Plugin's current mode of operation. | Caller MUST NOT retry. Caller MAY call `ControllerGetCapabilities` or `NodeGetCapabilities` to discover Plugin capabilities. |
@@ -616,7 +618,7 @@ This RPC will be called by the CO to deprovision a volume.
 If successful, the storage space associated with the volume MUST be released and all the data in the volume SHALL NOT be accessible anymore.
 
 This operation MUST be idempotent.
-This operation SHOULD be best effort in the sense that if the Plugin is certain that the volume as well as the artifacts associated with the volume do not exist anymore, it SHOULD return a success.
+If a volume corresponding to the specified `volume_id` does not exist or the artifacts associated with the volume do not exist anymore, the Plugin MUST reply `0 OK`.
 
 ```protobuf
 message DeleteVolumeRequest {
@@ -652,7 +654,6 @@ The CO MUST implement the specified error recovery behavior when it encounters t
 
 | Condition | gRPC Code | Description | Recovery Behavior |
 |-----------|-----------|-------------|-------------------|
-| Volume does not exists | 5 NOT_FOUND | Indicates that a volume corresponding to the specified `volume_id` does not exist. | Caller MUST assume the `DeleteVolume` call succeeded. |
 | Volume in use | 9 FAILED_PRECONDITION | Indicates that the volume corresponding to the specified `volume_id` could not be deleted because it is in use by another resource. | Caller SHOULD ensure that there are no other resources using the volume, and then retry with exponential back off. |
 | Operation pending for volume | 9 FAILED_PRECONDITION | Indicates that there is a already an operation pending for the specified volume. In general the Cluster Orchestrator (CO) is responsible for ensuring that there is no more than one call "in-flight" per volume at a given time. However, in some circumstances, the CO MAY lose state (for example when the CO crashes and restarts), and MAY issue multiple calls simultaneously for the same volume. The Plugin, SHOULD handle this as gracefully as possible, and MAY return this error code to reject secondary calls. | Caller SHOULD ensure that there are no other calls pending for the specified volume, and then retry with exponential back off. |
 | Call not implemented | 12 UNIMPLEMENTED | DeleteVolume call is not implemented by the plugin or disabled in the Plugin's current mode of operation. | Caller MUST NOT retry. Caller MAY call `ControllerGetCapabilities` or `NodeGetCapabilities` to discover Plugin capabilities. |
@@ -744,6 +745,7 @@ The Plugin MUST NOT assume that this RPC will be executed on the node where the 
 This RPC is typically called by the CO when the workload using the volume is being moved to a different node, or all the workload using the volume on a node has finished.
 
 This operation MUST be idempotent.
+If the volume corresponding to the `volume_id` is not attached to the node corresponding to the `node_id`, the Plugin MUST reply `0 OK`.
 If this operation failed, or the CO does not know if the operation failed or not, it can choose to call `ControllerUnpublishVolume` again.
 
 ```protobuf
@@ -786,7 +788,6 @@ The CO MUST implement the specified error recovery behavior when it encounters t
 
 | Condition | gRPC Code | Description | Recovery Behavior |
 |-----------|-----------|-------------|-------------------|
-| Volume not attached to specified node | 0 OK | Indicates that the volume corresponding to `volume_id` is not attached to the node corresponding to `node_id`. | Caller MUST assume the `ControllerUnpublishVolume` call succeeded. |
 | Volume does not exists | 5 NOT_FOUND | Indicates that a volume corresponding to the specified `volume_id` does not exist. | Caller MUST verify that the `volume_id` is correct and that the volume is accessible and has not been deleted before retrying with exponential back off. |
 | Node does not exists | 5 NOT_FOUND | Indicates that a node corresponding to the specified `node_id` does not exist. | Caller MUST verify that the `node_id` is correct and that the node is available and has not been terminated or deleted before retrying with exponential backoff. |
 | Operation pending for volume | 9 FAILED_PRECONDITION | Indicates that there is a already an operation pending for the specified volume. In general the Cluster Orchestrator (CO) is responsible for ensuring that there is no more than one call "in-flight" per volume at a given time. However, in some circumstances, the CO MAY lose state (for example when the CO crashes and restarts), and MAY issue multiple calls simultaneously for the same volume. The Plugin, SHOULD handle this as gracefully as possible, and MAY return this error code to reject secondary calls. | Caller SHOULD ensure that there are no other calls pending for the specified volume, and then retry with exponential back off. |
