@@ -44,11 +44,11 @@ service Controller {
 }
 
 service Node {
-  rpc NodePublishDevice (NodePublishDeviceRequest)
-    returns (NodePublishDeviceResponse) {}
+  rpc NodeStageVolume (NodeStageVolumeRequest)
+    returns (NodeStageVolumeResponse) {}
 
-  rpc NodeUnpublishDevice (NodeUnpublishDeviceRequest)
-    returns (NodeUnpublishDeviceResponse) {}
+  rpc NodeUnstageVolume (NodeUnstageVolumeRequest)
+    returns (NodeUnstageVolumeResponse) {}
 
   rpc NodePublishVolume (NodePublishVolumeRequest)
     returns (NodePublishVolumeResponse) {}
@@ -189,18 +189,18 @@ message CreateVolumeRequest {
   // validating these parameters. COs will treat these as opaque.
   map<string, string> parameters = 5;
 
-  // End user credentials used to authenticate/authorize volume creation
-  // request.
+  // Credentials used by Controller plugin to authenticate/authorize
+  // volume creation request.
   // This field contains credential data, for example username and
   // password. Each key must consist of alphanumeric characters, '-',
   // '_' or '.'. Each value MUST contain a valid string. An SP MAY
   // choose to accept binary (non-string) data by using a binary-to-text
   // encoding scheme, like base64. An SP SHALL advertise the
   // requirements for credentials in documentation. COs SHALL permit
-  // users to pass through the required credentials. This information is
+  // passing through the required credentials. This information is
   // sensitive and MUST be treated as such (not logged, etc.) by the CO.
   // This field is OPTIONAL.
-  map<string, string> user_credentials = 6;
+  map<string, string> controller_create_credentials = 6;
 }
 
 message CreateVolumeResponse {
@@ -319,18 +319,18 @@ message DeleteVolumeRequest {
   // This field is REQUIRED.
   string volume_id = 2;
 
-  // End user credentials used to authenticate/authorize volume deletion
-  // request.
+  // Credentials used by Controller plugin to authenticate/authorize
+  // volume deletion request.
   // This field contains credential data, for example username and
   // password. Each key must consist of alphanumeric characters, '-',
   // '_' or '.'. Each value MUST contain a valid string. An SP MAY
   // choose to accept binary (non-string) data by using a binary-to-text
   // encoding scheme, like base64. An SP SHALL advertise the
   // requirements for credentials in documentation. COs SHALL permit
-  // users to pass through the required credentials. This information is
+  // passing through the required credentials. This information is
   // sensitive and MUST be treated as such (not logged, etc.) by the CO.
   // This field is OPTIONAL.
-  map<string, string> user_credentials = 3;
+  map<string, string> controller_delete_credentials = 3;
 }
 
 message DeleteVolumeResponse {}
@@ -356,18 +356,18 @@ message ControllerPublishVolumeRequest {
   // REQUIRED.
   bool readonly = 5;
 
-  // End user credentials used to authenticate/authorize controller
-  // publish request.
+  // Credentials used by Controller plugin to authenticate/authorize
+  // controller publish request.
   // This field contains credential data, for example username and
   // password. Each key must consist of alphanumeric characters, '-',
   // '_' or '.'. Each value MUST contain a valid string. An SP MAY
   // choose to accept binary (non-string) data by using a binary-to-text
   // encoding scheme, like base64. An SP SHALL advertise the
   // requirements for credentials in documentation. COs SHALL permit
-  // users to pass through the required credentials. This information is
+  // passing through the required credentials. This information is
   // sensitive and MUST be treated as such (not logged, etc.) by the CO.
   // This field is OPTIONAL.
-  map<string, string> user_credentials = 6;
+  map<string, string> controller_publish_credentials = 6;
 
   // Attributes of the volume to be used on a node. This field is
   // OPTIONAL and MUST match the attributes of the Volume identified
@@ -377,8 +377,8 @@ message ControllerPublishVolumeRequest {
 
 message ControllerPublishVolumeResponse {
   // The SP specific information that will be passed to the Plugin in
-    // the subsequent `NodePublishDevice` and `NodePublishVolume` calls
-    // for the given volume.
+  // the subsequent `NodeStageVolume` or `NodePublishVolume` calls
+  // for the given volume.
   // This information is opaque to the CO. This field is OPTIONAL.
   map<string, string> publish_info = 1;
 }
@@ -398,18 +398,18 @@ message ControllerUnpublishVolumeRequest {
   // the volume from all nodes it is published to.
   string node_id = 3;
 
-  // End user credentials used to authenticate/authorize controller
-  // unpublish request.
+  // Credentials used by Controller plugin to authenticate/authorize
+  // controller unpublish request.
   // This field contains credential data, for example username and
   // password. Each key must consist of alphanumeric characters, '-',
   // '_' or '.'. Each value MUST contain a valid string. An SP MAY
   // choose to accept binary (non-string) data by using a binary-to-text
   // encoding scheme, like base64. An SP SHALL advertise the
   // requirements for credentials in documentation. COs SHALL permit
-  // users to pass through the required credentials. This information is
+  // passing through the required credentials. This information is
   // sensitive and MUST be treated as such (not logged, etc.) by the CO.
   // This field is OPTIONAL.
-  map<string, string> user_credentials = 4;
+  map<string, string> controller_unpublish_credentials = 4;
 }
 
 message ControllerUnpublishVolumeResponse {}
@@ -551,7 +551,7 @@ message ControllerServiceCapability {
 }
 ////////
 ////////
-message NodePublishDeviceRequest {
+message NodeStageVolumeRequest {
   // The API version assumed by the CO. This is a REQUIRED field.
   Version version = 1;
 
@@ -563,24 +563,42 @@ message NodePublishDeviceRequest {
   // has `PUBLISH_UNPUBLISH_VOLUME` controller capability, and SHALL be
   // left unset if the corresponding Controller Plugin does not have
   // this capability. This is an OPTIONAL field.
-  map<string, string> publish_volume_info = 3;
+  map<string, string> publish_info = 3;
 
   // The path to which the volume will be published. It MUST be an
   // absolute path in the root filesystem of the process serving this
-  // request. The CO SHALL ensure uniqueness of global_target_path per
-  // volume.
+  // request. The CO SHALL ensure that there is only one 
+  // staging_target_path per volume.
   // This is a REQUIRED field.
-  string global_target_path = 4;
+  string staging_target_path = 4;
 
   // The capability of the volume the CO expects the volume to have.
   // This is a REQUIRED field.
   VolumeCapability volume_capability = 5;
+
+  // Credentials used by Node plugin to authenticate/authorize node
+  // stage request.
+  // This field contains credential data, for example username and
+  // password. Each key must consist of alphanumeric characters, '-',
+  // '_' or '.'. Each value MUST contain a valid string. An SP MAY
+  // choose to accept binary (non-string) data by using a binary-to-text
+  // encoding scheme, like base64. An SP SHALL advertise the
+  // requirements for credentials in documentation. COs SHALL permit
+  // passing through the required credentials. This information is
+  // sensitive and MUST be treated as such (not logged, etc.) by the CO.
+  // This field is OPTIONAL.
+  map<string, string> node_stage_credentials = 6;
+
+  // Attributes of the volume to publish. This field is OPTIONAL and
+  // MUST match the attributes of the VolumeInfo identified by
+  // `volume_id`.
+  map<string,string> volume_attributes = 7;
 }
 
-message NodePublishDeviceResponse {}
+message NodeStageVolumeResponse {}
 ////////
 ////////
-message NodeUnpublishDeviceRequest {
+message NodeUnstageVolumeRequest {
   // The API version assumed by the CO. This is a REQUIRED field.
   Version version = 1;
 
@@ -590,10 +608,23 @@ message NodeUnpublishDeviceRequest {
   // The path at which the volume was published. It MUST be an absolute
   // path in the root filesystem of the process serving this request.
   // This is a REQUIRED field.
-  string global_target_path = 3;
+  string staging_target_path = 3;
+
+  // Credentials used by Node plugin to authenticate/authorize node
+  // unstage request.
+  // This field contains credential data, for example username and
+  // password. Each key must consist of alphanumeric characters, '-',
+  // '_' or '.'. Each value MUST contain a valid string. An SP MAY
+  // choose to accept binary (non-string) data by using a binary-to-text
+  // encoding scheme, like base64. An SP SHALL advertise the
+  // requirements for credentials in documentation. COs SHALL permit
+  // passing through the required credentials. This information is
+  // sensitive and MUST be treated as such (not logged, etc.) by the CO.
+  // This field is OPTIONAL.
+  map<string, string> node_unstage_credentials = 4;
 }
 
-message NodeUnpublishDeviceResponse {}
+message NodeUnstageVolumeResponse {}
 ////////
 ////////
 message NodePublishVolumeRequest {
@@ -610,11 +641,13 @@ message NodePublishVolumeRequest {
   // this capability. This is an OPTIONAL field.
   map<string, string> publish_info = 3;
 
-  // The path to which the device was mounted by `NodePublishDevice`.
+  // The path to which the device was mounted by `NodeStageVolume`.
   // It MUST be an absolute path in the root filesystem of the process
   // serving this request.
+  // It MUST be set if the Node Plugin implements the 
+  // `STAGE_UNSTAGE_VOLUME` node capability.
   // This is an OPTIONAL field.
-  string global_target_path = 4;
+  string staging_target_path = 4;
 
   // The path to which the volume will be published. It MUST be an
   // absolute path in the root filesystem of the process serving this
@@ -632,7 +665,7 @@ message NodePublishVolumeRequest {
   // REQUIRED.
   bool readonly = 7;
 
-  // End user credentials used to authenticate/authorize node
+  // Credentials used by Node plugin to authenticate/authorize node
   // publish request.
   // This field contains credential data, for example username and
   // password. Each key must consist of alphanumeric characters, '-',
@@ -640,10 +673,11 @@ message NodePublishVolumeRequest {
   // choose to accept binary (non-string) data by using a binary-to-text
   // encoding scheme, like base64. An SP SHALL advertise the
   // requirements for credentials in documentation. COs SHALL permit
-  // users to pass through the required credentials. This information is
+  // passing through the required credentials. This information is
   // sensitive and MUST be treated as such (not logged, etc.) by the CO.
   // This field is OPTIONAL.
-  map<string, string> user_credentials = 8;
+  map<string, string> node_publish_credentials = 8;
+
 
   // Attributes of the volume to publish. This field is OPTIONAL and
   // MUST match the attributes of the Volume identified by
@@ -661,18 +695,12 @@ message NodeUnpublishVolumeRequest {
   // The ID of the volume. This field is REQUIRED.
   string volume_id = 2;
 
-  // The path to which the device was mounted by `NodePublishDevice`.
-  // It MUST be an absolute path in the root filesystem of the process
-  // serving this request.
-  // This is an OPTIONAL field.
-  string global_target_path = 3;
-
   // The path at which the volume was published. It MUST be an absolute
   // path in the root filesystem of the process serving this request.
   // This is a REQUIRED field.
-  string target_path = 4;
+  string target_path = 3;
 
-  // End user credentials used to authenticate/authorize node
+  // Credentials used by Node plugin to authenticate/authorize node
   // unpublish request.
   // This field contains credential data, for example username and
   // password. Each key must consist of alphanumeric characters, '-',
@@ -680,10 +708,10 @@ message NodeUnpublishVolumeRequest {
   // choose to accept binary (non-string) data by using a binary-to-text
   // encoding scheme, like base64. An SP SHALL advertise the
   // requirements for credentials in documentation. COs SHALL permit
-  // users to pass through the required credentials. This information is
+  // passing through the required credentials. This information is
   // sensitive and MUST be treated as such (not logged, etc.) by the CO.
   // This field is OPTIONAL.
-  map<string, string> user_credentials = 5;
+  map<string, string> node_unpublish_credentials = 4;
 }
 
 message NodeUnpublishVolumeResponse {}
@@ -726,7 +754,7 @@ message NodeServiceCapability {
   message RPC {
     enum Type {
       UNKNOWN = 0;
-      PUBLISH_UNPUBLISH_DEVICE = 1;
+      STAGE_UNSTAGE_VOLUME = 1;
     }
 
     Type type = 1;
