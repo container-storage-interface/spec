@@ -279,8 +279,8 @@ service Node {
   rpc NodeUnpublishVolume (NodeUnpublishVolumeRequest)
     returns (NodeUnpublishVolumeResponse) {}
 
-  rpc GetNodeID (GetNodeIDRequest)
-    returns (GetNodeIDResponse) {}
+  rpc NodeGetId (NodeGetIdRequest)
+    returns (NodeGetIdResponse) {}
 
   rpc NodeProbe (NodeProbeRequest)
     returns (NodeProbeResponse) {}
@@ -386,9 +386,12 @@ message GetSupportedVersionsResponse {
 // Specifies a version in Semantic Version 2.0 format.
 // (http://semver.org/spec/v2.0.0.html)
 message Version {
-  uint32 major = 1;  // This field is REQUIRED.
-  uint32 minor = 2;  // This field is REQUIRED.
-  uint32 patch = 3;  // This field is REQUIRED.
+  // The value of this field MUST NOT be negative.
+  int32 major = 1;  // This field is REQUIRED.
+  // The value of this field MUST NOT be negative.
+  int32 minor = 2;  // This field is REQUIRED.
+  // The value of this field MUST NOT be negative.
+  int32 patch = 3;  // This field is REQUIRED.
 }
 ```
 
@@ -496,7 +499,7 @@ message CreateVolumeResponse {
   // Contains all attributes of the newly created volume that are
   // relevant to the CO along with information required by the Plugin
   // to uniquely identify the volume. This field is REQUIRED.
-  VolumeInfo volume_info = 1;
+  Volume volume = 1;
 }
 
 // Specify a capability of a volume.
@@ -566,19 +569,22 @@ message VolumeCapability {
 message CapacityRange {
   // Volume must be at least this big. This field is OPTIONAL.
   // A value of 0 is equal to an unspecified field value.
-  uint64 required_bytes = 1;
+  // The value of this field MUST NOT be negative. 
+  int64 required_bytes = 1;
 
   // Volume must not be bigger than this. This field is OPTIONAL.
   // A value of 0 is equal to an unspecified field value.
-  uint64 limit_bytes = 2;
+  // The value of this field MUST NOT be negative. 
+  int64 limit_bytes = 2;
 }
 
 // The information about a provisioned volume.
-message VolumeInfo {
+message Volume {
   // The capacity of the volume in bytes. This field is OPTIONAL. If not
   // set (value of 0), it indicates that the capacity of the volume is
   // unknown (e.g., NFS share).
-  uint64 capacity_bytes = 1;
+  // The value of this field MUST NOT be negative. 
+  int64 capacity_bytes = 1;
 
   // Contains identity information for the created volume. This field is
   // REQUIRED. The identity information will be used by the CO in
@@ -683,7 +689,7 @@ message ControllerPublishVolumeRequest {
   string volume_id = 2;
 
   // The ID of the node. This field is REQUIRED. The CO SHALL set this
-  // field to match the node ID returned by `GetNodeID`.
+  // field to match the node ID returned by `NodeGetId`.
   string node_id = 3;
 
   // The capability of the volume the CO expects the volume to have.
@@ -708,7 +714,7 @@ message ControllerPublishVolumeRequest {
   map<string, string> controller_publish_credentials = 6;
 
   // Attributes of the volume to be used on a node. This field is
-  // OPTIONAL and MUST match the attributes of the VolumeInfo identified
+  // OPTIONAL and MUST match the attributes of the Volume identified
   // by `volume_id`.
   map<string,string> volume_attributes = 7;
 }
@@ -717,7 +723,7 @@ message ControllerPublishVolumeResponse {
   // The SP specific information that will be passed to the Plugin in
   // the subsequent `NodePublishVolume` call for the given volume.
   // This information is opaque to the CO. This field is OPTIONAL.
-  map<string, string> publish_volume_info = 1;
+  map<string, string> publish_info = 1;
 }
 ```
 
@@ -760,7 +766,7 @@ message ControllerUnpublishVolumeRequest {
   string volume_id = 2;
 
   // The ID of the node. This field is OPTIONAL. The CO SHOULD set this
-  // field to match the node ID returned by `GetNodeID` or leave it
+  // field to match the node ID returned by `NodeGetId` or leave it
   // unset. If the value is set, the SP MUST unpublish the volume from
   // the specified node. If the value is unset, the SP MUST unpublish
   // the volume from all nodes it is published to.
@@ -818,7 +824,7 @@ message ValidateVolumeCapabilitiesRequest {
   repeated VolumeCapability volume_capabilities = 3;
 
   // Attributes of the volume to check. This field is OPTIONAL and MUST
-  // match the attributes of the VolumeInfo identified by `volume_id`.
+  // match the attributes of the Volume identified by `volume_id`.
   map<string,string> volume_attributes = 4;
 }
 
@@ -862,7 +868,8 @@ message ListVolumesRequest {
   // in the subsequent `ListVolumes` call. This field is OPTIONAL. If
   // not specified (zero value), it means there is no restriction on the
   // number of entries that can be returned.
-  uint32 max_entries = 2;
+  // The value of this field MUST NOT be negative. 
+  int32 max_entries = 2;
 
   // A token to specify where to start paginating. Set this field to
   // `next_token` returned by a previous `ListVolumes` call to get the
@@ -873,7 +880,7 @@ message ListVolumesRequest {
 
 message ListVolumesResponse {
   message Entry {
-    VolumeInfo volume_info = 1;
+    Volume volume = 1;
   }
 
   repeated Entry entries = 1;
@@ -929,7 +936,8 @@ message GetCapacityResponse {
   // specified in the request, the Plugin SHALL take those into
   // consideration when calculating the available capacity of the
   // storage. This field is REQUIRED.
-  uint64 available_capacity = 1;
+  // The value of this field MUST NOT be negative. 
+  int64 available_capacity = 1;
 }
 ```
 
@@ -1056,7 +1064,7 @@ message NodePublishVolumeRequest {
   // has `PUBLISH_UNPUBLISH_VOLUME` controller capability, and SHALL be
   // left unset if the corresponding Controller Plugin does not have
   // this capability. This is an OPTIONAL field.
-  map<string, string> publish_volume_info = 3;
+  map<string, string> publish_info = 3;
 
   // The path to which the volume will be published. It MUST be an
   // absolute path in the root filesystem of the process serving this
@@ -1088,7 +1096,7 @@ message NodePublishVolumeRequest {
   map<string, string> node_publish_credentials = 7;
 
   // Attributes of the volume to publish. This field is OPTIONAL and
-  // MUST match the attributes of the VolumeInfo identified by
+  // MUST match the attributes of the Volume identified by
   // `volume_id`.
   map<string,string> volume_attributes = 8;
 }
@@ -1166,7 +1174,7 @@ The CO MUST implement the specified error recovery behavior when it encounters t
 | Operation pending for volume | 10 ABORTED | Indicates that there is a already an operation pending for the specified volume. In general the Cluster Orchestrator (CO) is responsible for ensuring that there is no more than one call "in-flight" per volume at a given time. However, in some circumstances, the CO MAY lose state (for example when the CO crashes and restarts), and MAY issue multiple calls simultaneously for the same volume. The Plugin, SHOULD handle this as gracefully as possible, and MAY return this error code to reject secondary calls. | Caller SHOULD ensure that there are no other calls pending for the specified volume, and then retry with exponential back off. |
 
 
-#### `GetNodeID`
+#### `NodeGetId`
 
 A Node Plugin MUST implement this RPC call if the plugin has `PUBLISH_UNPUBLISH_VOLUME` controller capability.
 The Plugin SHALL assume that this RPC will be executed on the node where the volume will be used.
@@ -1174,12 +1182,12 @@ The CO SHOULD call this RPC for the node at which it wants to place the workload
 The result of this call will be used by CO in `ControllerPublishVolume`.
 
 ```protobuf
-message GetNodeIDRequest {
+message NodeGetIdRequest {
   // The API version assumed by the CO. This is a REQUIRED field.
   Version version = 1;
 }
 
-message GetNodeIDResponse {
+message NodeGetIdResponse {
   // The ID of the node as understood by the SP which SHALL be used by
   // CO in subsequent `ControllerPublishVolume`.
   // This is a REQUIRED field.
@@ -1187,15 +1195,15 @@ message GetNodeIDResponse {
 }
 ```
 
-##### GetNodeID Errors
+##### NodeGetId Errors
 
-If the plugin is unable to complete the GetNodeID call successfully, it MUST return a non-ok gRPC code in the gRPC status.
+If the plugin is unable to complete the NodeGetId call successfully, it MUST return a non-ok gRPC code in the gRPC status.
 If the conditions defined below are encountered, the plugin MUST return the specified gRPC error code.
 The CO MUST implement the specified error recovery behavior when it encounters the gRPC error code.
 
 Condition | gRPC Code | Description | Recovery Behavior
 | --- | --- | --- | --- |
-| Call not implemented | 12 UNIMPLEMENTED | GetNodeID call is not implemented by the plugin or disabled in the Plugin's current mode of operation. | Caller MUST NOT retry. Caller MAY call `ControllerGetCapabilities` or `NodeGetCapabilities` to discover Plugin capabilities. |
+| Call not implemented | 12 UNIMPLEMENTED | NodeGetId call is not implemented by the plugin or disabled in the Plugin's current mode of operation. | Caller MUST NOT retry. Caller MAY call `ControllerGetCapabilities` or `NodeGetCapabilities` to discover Plugin capabilities. |
 
 #### `NodeProbe`
 
