@@ -1,0 +1,33 @@
+FROM golang:1.9.3
+
+RUN apt-get update && apt-get install -y unzip
+
+RUN mkdir -p /csi
+WORKDIR /csi
+
+ENV PROTOC_VER 3.5.1
+ENV PROTOC_ZIP protoc-$PROTOC_VER-linux-x86_64.zip
+ENV PROTOC_URL_PFX https://github.com/google/protobuf/releases/download
+ENV PROTOC_URL $PROTOC_URL_PFX/v$PROTOC_VER/$PROTOC_ZIP
+ENV PROTOC_BIN bin/protoc
+RUN curl -LO $PROTOC_URL && unzip $PROTOC_ZIP && chmod 0755 $PROTOC_BIN
+
+RUN go get -u github.com/golang/protobuf/protoc-gen-go
+
+COPY spec.md /csi
+
+RUN cat spec.md | \
+  sed -n -e '/```protobuf$/,/```$/ p' | \
+  sed -e 's@^```.*$@////////@g' > csi.proto
+
+RUN $PROTOC_BIN -I . --go_out=plugins=grpc:. csi.proto
+
+FROM alpine:3.7
+RUN mkdir /csi
+WORKDIR /csi
+COPY --from=0 /csi/csi.pb.go .
+COPY --from=0 /csi/csi.proto .
+COPY --from=0 /csi/spec.md .
+
+CMD [ "csi.pb.go" ]
+ENTRYPOINT [ "cat" ]
