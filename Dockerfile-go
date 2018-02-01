@@ -1,0 +1,69 @@
+FROM golang:1.9.3-alpine as build
+MAINTAINER Andrew Kutz <sakutz@gmail.com>
+
+# The versions of the software used in the build image. Please note
+# that the version of the protobuf Go packages and their transitive
+# dependencies are defined in the local files lib/go/Gopkg.toml and
+# lib/go/Gopkg.lock.
+ENV PROTOC_VER 3.5.1
+ENV DEP_VER 0.4.1
+
+ENV PKGPATH ${GOPATH}/src/csi
+RUN mkdir -p ${PKGPATH}
+WORKDIR ${PKGPATH}
+
+# Update the package cache and install the required tools.
+RUN apk update && apk add unzip curl git
+
+# Download protoc.
+ENV PROTOC_ZIP protoc-$PROTOC_VER-linux-x86_64.zip
+ENV PROTOC_BIN bin/protoc
+RUN curl -LO https://github.com/google/protobuf/releases/download/v${PROTOC_VER}/${PROTOC_ZIP} && \
+  unzip ${PROTOC_ZIP} && \
+  chmod 0755 ${PROTOC_BIN} && \
+  mv ${PROTOC_BIN} /usr/local/bin
+
+# Download dep.
+ENV DEP_BIN dep-linux-amd64
+RUN curl -LO https://github.com/golang/dep/releases/download/v${DEP_VER}/${DEP_BIN} && \
+  chmod 0755 ${DEP_BIN} && \
+  mv ${DEP_BIN} /usr/local/bin/dep
+
+# Copy the Go source file, dependency manifest, and lock file into the image.
+COPY lib/go/csi.go .
+COPY lib/go/Gopkg.toml .
+COPY lib/go/Gopkg.lock .
+
+# Download the Go dependencies.
+RUN dep ensure -v
+
+# Build the protogen-go binary.
+ENV PROTOC_GEN_GO_BIN protoc-gen-go
+RUN go build -o /usr/local/bin/${PROTOC_GEN_GO_BIN} ./vendor/github.com/golang/protobuf/protoc-gen-go
+
+# Start the second build stage.
+FROM alpine:3.7
+RUN mkdir -p /csi
+WORKDIR /csi
+
+# The versions of the software used in the primary image. 
+ENV GLIBC_VERSION 2.26-r0
+
+# Download and install glibc.
+# This step is credited to https://github.com/jeanblanchard/docker-alpine-glibc.
+RUN apk update && apk add curl
+RUN curl -Lo /etc/apk/keys/sgerrand.rsa.pub https://raw.githubusercontent.com/sgerrand/alpine-pkg-glibc/master/sgerrand.rsa.pub && \
+  curl -Lo glibc.apk "https://github.com/sgerrand/alpine-pkg-glibc/releases/download/${GLIBC_VERSION}/glibc-${GLIBC_VERSION}.apk" && \
+  curl -Lo glibc-bin.apk "https://github.com/sgerrand/alpine-pkg-glibc/releases/download/${GLIBC_VERSION}/glibc-bin-${GLIBC_VERSION}.apk" && \
+  apk add glibc-bin.apk glibc.apk && \
+  /usr/glibc-compat/sbin/ldconfig /lib /usr/glibc-compat/lib && \
+  echo 'hosts: files mdns4_minimal [NOTFOUND=return] dns mdns4' >> /etc/nsswitch.conf
+
+# Copy the protoc and protoc-gen-go binaries from the build image.
+COPY --from=build /usr/local/bin/protoc* /usr/local/bin/
+
+# Copy the entrypoint script from the local lib/go directory.
+COPY lib/go/spec.sh .
+RUN chmod 0755 spec.sh
+
+ENTRYPOINT [ "./spec.sh" ]

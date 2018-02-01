@@ -1,0 +1,29 @@
+# Refer to https://github.com/golang/dep/blob/master/docs/Gopkg.toml.md
+# for detailed Gopkg.toml documentation.
+#
+# Refer to https://github.com/toml-lang/toml for detailed TOML docs.
+
+# The following packages are required because they're either build
+# tools or are dependencies only if the "csi" package is already
+# generated. However, if the "csi" package is removed (a valid
+# condition), a "dep ensure" will not fetch the dependencies it
+# no longer sees in the project's dependency graph. Including the
+# dependencies in the "required" list ensures they're always
+# downloaded.
+required = [
+  "github.com/golang/protobuf/protoc-gen-go",
+  "golang.org/x/net/context",
+  "google.golang.org/grpc"
+]
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/golang/protobuf"
+
+[[constraint]]
+  branch = "master"
+  name = "golang.org/x/net"
+
+[[constraint]]
+  name = "google.golang.org/grpc"
+  version = "1.6.0"
