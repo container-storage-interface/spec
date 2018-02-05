@@ -12,6 +12,9 @@ service Identity {
 
   rpc GetPluginCapabilities(GetPluginCapabilitiesRequest)
     returns (GetPluginCapabilitiesResponse) {}
+
+  rpc Probe (ProbeRequest)
+    returns (ProbeResponse) {}
 }
 
 service Controller {
@@ -35,9 +38,6 @@ service Controller {
 
   rpc GetCapacity (GetCapacityRequest)
     returns (GetCapacityResponse) {}
-
-  rpc ControllerProbe (ControllerProbeRequest)
-    returns (ControllerProbeResponse) {}
 }
 
 service Node {
@@ -49,9 +49,6 @@ service Node {
 
   rpc GetNodeID (GetNodeIDRequest)
     returns (GetNodeIDResponse) {}
-
-  rpc NodeProbe (NodeProbeRequest)
-    returns (NodeProbeResponse) {}
 }
 ////////
 ////////
@@ -138,6 +135,14 @@ message PluginCapability {
     Service service = 2;
   }
 }
+////////
+////////
+message ProbeRequest {
+  // The API version assumed by the CO. This is a REQUIRED field.
+  Version version = 1;
+}
+
+message ProbeResponse {}
 ////////
 ////////
 message CreateVolumeRequest {
@@ -497,14 +502,6 @@ message GetCapacityResponse {
 }
 ////////
 ////////
-message ControllerProbeRequest {
-  // The API version assumed by the CO. This is a REQUIRED field.
-  Version version = 1;
-}
-
-message ControllerProbeResponse {}
-////////
-////////
 message NodePublishVolumeRequest {
   // The API version assumed by the CO. This is a REQUIRED field.
   Version version = 1;
@@ -597,12 +594,4 @@ message GetNodeIDResponse {
   // This is a REQUIRED field.
   string node_id = 1;
 }
-////////
-////////
-message NodeProbeRequest {
-  // The API version assumed by the CO. This is a REQUIRED field.
-  Version version = 1;
-}
-
-message NodeProbeResponse {}
 ////////
