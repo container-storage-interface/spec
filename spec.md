@@ -289,6 +289,9 @@ service Identity {
 
   rpc GetPluginCapabilities(GetPluginCapabilitiesRequest)
     returns (GetPluginCapabilitiesResponse) {}
+
+  rpc Probe (ProbeRequest)
+    returns (ProbeResponse) {}
 }
 
 service Controller {
@@ -313,9 +316,6 @@ service Controller {
   rpc GetCapacity (GetCapacityRequest)
     returns (GetCapacityResponse) {}
 
-  rpc ControllerProbe (ControllerProbeRequest)
-    returns (ControllerProbeResponse) {}
-
   rpc ControllerGetCapabilities (ControllerGetCapabilitiesRequest)
     returns (ControllerGetCapabilitiesResponse) {}  
 }
@@ -335,9 +335,6 @@ service Node {
 
   rpc NodeGetId (NodeGetIdRequest)
     returns (NodeGetIdResponse) {}
-
-  rpc NodeProbe (NodeProbeRequest)
-    returns (NodeProbeResponse) {}
 
   rpc NodeGetCapabilities (NodeGetCapabilitiesRequest)
     returns (NodeGetCapabilitiesResponse) {}
@@ -433,6 +430,18 @@ The general flow of the success case is as follows (protos illustrated in YAML f
      capabilities:
        - service:
            type: CONTROLLER_SERVICE
+```
+
+4. CO queries the readiness of the plugin.
+
+```
+   # CO --(Probe)--> Plugin
+   request:
+     version:
+       major: 0
+       minor: 2
+       patch: 0
+   response: {}
 ```
 
 #### `GetSupportedVersions`
@@ -547,6 +556,41 @@ message PluginCapability {
 ##### GetPluginCapabilities Errors
 
 If the plugin is unable to complete the GetPluginCapabilities call successfully, it MUST return a non-ok gRPC code in the gRPC status.
+
+#### `Probe`
+
+A Plugin MUST implement this RPC call.
+The primary utility of the Probe RPC is deployment verification: this can be a one time or periodic check to ensure that a plugin instance is healthy and has all dependencies available.
+This information can be used, for example, to monitor the health of the plugin and redeploy the plugin (or take other automated measures) when it becomes unhealthy.
+
+The Plugin SHOULD verify if it has the right configurations, devices, dependencies and drivers in order to run and return a success if the validation succeeds.
+The CO SHALL invoke this RPC prior to any other controller service or node service RPC in order to allow the CO to determine the readiness of the plugin.
+A CO MAY invoke this call multiple times with the understanding that a plugin's implementation MAY NOT be trivial and there MAY be overhead incurred by such repeated calls.
+The SP SHALL document known limitations regarding a particular Plugin's implementation of this RPC.
+For example, the SP MAY document the maximum frequency at which its Probe implementation should be called.
+
+```protobuf
+message ProbeRequest {
+  // The API version assumed by the CO. This is a REQUIRED field.
+  Version version = 1;
+}
+
+message ProbeResponse {
+  // Intentionally empty.
+}
+```
+
+##### Probe Errors
+
+If the plugin is unable to complete the Probe call successfully, it MUST return a non-ok gRPC code in the gRPC status.
+If the conditions defined below are encountered, the plugin MUST return the specified gRPC error code.
+The CO MUST implement the specified error recovery behavior when it encounters the gRPC error code.
+
+| Condition | gRPC Code | Description | Recovery Behavior |
+|-----------|-----------|-------------|-------------------|
+| Plugin not healthy | 9 FAILED_PRECONDITION | Indicates that the plugin is not in a healthy/ready state. | Caller SHOULD assume the plugin is not healthy and that future RPCs MAY fail because of this condition. |
+| Missing required dependency | 9 FAILED_PRECONDITION | Indicates that the plugin is missing one or more required dependency. | Caller MUST assume the plugin is not healthy. |
+
 
 ### Controller Service RPC
 
@@ -1065,34 +1109,6 @@ message GetCapacityResponse {
 
 If the plugin is unable to complete the GetCapacity call successfully, it MUST return a non-ok gRPC code in the gRPC status.
 
-#### `ControllerProbe`
-
-A Controller Plugin MUST implement this RPC call.
-The Plugin SHOULD verify if it has the right configurations, devices, dependencies and drivers in order to run the controller service, and return a success if the validation succeeds.
-The CO SHALL invoke this RPC prior to any other controller service RPC in order to allow the CO to determine the readiness of the controller service.
-A CO MAY invoke this call multiple times with the understanding that a plugin's implementation MAY NOT be trivial and there MAY be overhead incurred by such repeated calls.
-
-```protobuf
-message ControllerProbeRequest {
-  // The API version assumed by the CO. This is a REQUIRED field.
-  Version version = 1;
-}
-
-message ControllerProbeResponse {}
-```
-
-##### ControllerProbe Errors
-
-If the plugin is unable to complete the ControllerProbe call successfully, it MUST return a non-ok gRPC code in the gRPC status.
-If the conditions defined below are encountered, the plugin MUST return the specified gRPC error code.
-The CO MUST implement the specified error recovery behavior when it encounters the gRPC error code.
-
-| Condition | gRPC Code | Description | Recovery Behavior |
-|-----------|-----------|-------------|-------------------|
-| Bad plugin config | 9 FAILED_PRECONDITION | Indicates that the plugin is misconfigured. | Caller MUST assume the plugin is not healthy. |
-| Missing required dependency | 9 FAILED_PRECONDITION | Indicates that the plugin is missing one or more required dependency. | Caller MUST assume the plugin is not healthy. |
-
-
 #### `ControllerGetCapabilities`
 
 A Controller Plugin MUST implement this RPC call. This RPC allows the CO to check the supported capabilities of controller service provided by the Plugin.
@@ -1481,36 +1497,6 @@ The CO MUST implement the specified error recovery behavior when it encounters t
 Condition | gRPC Code | Description | Recovery Behavior
 | --- | --- | --- | --- |
 | Call not implemented | 12 UNIMPLEMENTED | NodeGetId call is not implemented by the plugin or disabled in the Plugin's current mode of operation. | Caller MUST NOT retry. Caller MAY call `ControllerGetCapabilities` or `NodeGetCapabilities` to discover Plugin capabilities. |
-
-#### `NodeProbe`
-
-A Node Plugin MUST implement this RPC call.
-The Plugin SHALL assume that this RPC will be executed on the node where the volume will be used.
-The CO SHOULD call this RPC for the node at which it wants to place the workload.
-This RPC allows the CO to probe the readiness of the Plugin on the node where the volumes will be used.
-The Plugin SHOULD verify if it has everything it needs (binaries, kernel module, drivers, etc.) to run on that node, and return a success if the validation succeeds.
-The CO MAY use this RPC to probe which machines can support specific Plugins and schedule workloads accordingly.
-
-```protobuf
-message NodeProbeRequest {
-  // The API version assumed by the CO. This is a REQUIRED field.
-  Version version = 1;
-}
-
-message NodeProbeResponse {}
-```
-
-##### NodeProbe Errors
-
-If the plugin is unable to complete the NodeProbe call successfully, it MUST return a non-ok gRPC code in the gRPC status.
-If the conditions defined below are encountered, the plugin MUST return the specified gRPC error code.
-The CO MUST implement the specified error recovery behavior when it encounters the gRPC error code.
-
-| Condition | gRPC Code | Description | Recovery Behavior |
-|-----------|-----------|-------------|-------------------|
-| Bad plugin config | 9 FAILED_PRECONDITION | Indicates that the plugin is misconfigured. | Caller MUST assume the plugin is not healthy. |
-| Missing required dependency | 9 FAILED_PRECONDITION | Indicates that the plugin is missing one or more required dependency. | Caller MUST assume the plugin is not healthy. |
-
 
 #### `NodeGetCapabilities`
 
