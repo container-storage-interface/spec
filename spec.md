@@ -99,8 +99,8 @@ Several of these possibilities are illustrated in the following figures.
 +-------------------------------------------+
 
 Figure 1: The Plugin runs on all nodes in the cluster: a centralized
-Controller Plugin is available on the CO master host and the Node
-Plugin is available on all of the CO Nodes.
+Controller-service Plugin is available on the CO master host and the
+Node-service Plugin is available on all of the CO Nodes.
 ```
 
 ```
@@ -208,7 +208,7 @@ calls.
 The above diagrams illustrate a general expectation with respect to how a CO MAY manage the lifecycle of a volume via the API presented in this specification.
 Plugins should expose all RPCs for an interface: Controller plugins should implement all RPCs for the `Controller` service.
 Unsupported RPCs should return an appropriate error code that indicates such (e.g. `CALL_NOT_IMPLEMENTED`).
-The full list of plugin capabilities is documented in the `ControllerGetCapabilities` and `NodeGetCapabilities` RPCs.
+The full list of plugin capabilities is documented in the `GetPluginCapabilities` RPC.
 
 ## Container Storage Interface
 
@@ -217,10 +217,10 @@ This section describes the interface between COs and Plugins.
 ### RPC Interface
 
 A CO interacts with an Plugin through RPCs.
-Each SP MUST provide:
+Each SP provides:
 
-* **Node Plugin**: A gRPC endpoint serving CSI RPCs that MUST be run on the Node whereupon an SP-provisioned volume will be published.
-* **Controller Plugin**: A gRPC endpoint serving CSI RPCs that MAY be run anywhere.
+* **Node services**: A gRPC endpoint serving CSI RPCs that MUST be run on the Node whereupon an SP-provisioned volume will be published. These services are REQUIRED of all Plugin distributions.
+* **Controller services**: A gRPC endpoint serving CSI RPCs that MAY be run anywhere. These services are OPTIONAL, see `GetPluginCapabilities`.
 * In some circumstances a single gRPC endpoint MAY serve all CSI RPCs (see Figure 3 in [Architecture](#architecture)).
 
 ```protobuf
@@ -230,9 +230,9 @@ package csi;
 
 There are three sets of RPCs:
 
-* **Identity Service**: Both the Node Plugin and the Controller Plugin MUST implement this sets of RPCs.
-* **Controller Service**: The Controller Plugin MUST implement this sets of RPCs.
-* **Node Service**: The Node Plugin MUST implement this sets of RPCs.
+* **Identity Service**: All Plugin endpoints MUST provide this set of RPCs.
+* **Controller Service**: Plugins MAY implement this set of RPCs. This service is NOT REQUIRED for all Plugin endpoints.
+* **Node Service**: All Plugin distributions MUST provide this set of RPCs. This service is NOT REQUIRED for all Plugin endpoints.
 
 ```protobuf
 service Identity {
@@ -241,6 +241,9 @@ service Identity {
 
   rpc GetPluginInfo(GetPluginInfoRequest)
     returns (GetPluginInfoResponse) {}
+
+  rpc GetPluginCapabilities(GetPluginCapabilitiesRequest)
+    returns (GetPluginCapabilitiesResponse) {}
 }
 
 service Controller {
@@ -267,9 +270,6 @@ service Controller {
 
   rpc ControllerProbe (ControllerProbeRequest)
     returns (ControllerProbeResponse) {}
-
-  rpc ControllerGetCapabilities (ControllerGetCapabilitiesRequest)
-    returns (ControllerGetCapabilitiesResponse) {}  
 }
 
 service Node {
@@ -284,9 +284,6 @@ service Node {
 
   rpc NodeProbe (NodeProbeRequest)
     returns (NodeProbeResponse) {}
-
-  rpc NodeGetCapabilities (NodeGetCapabilitiesRequest)
-    returns (NodeGetCapabilitiesResponse) {}
 }
 ```
 
@@ -363,6 +360,23 @@ The general flow of the success case is as follows (protos illustrated in YAML f
         baz: qaz
 ```
 
+3. CO queries available capabilities of the plugin.
+
+```
+   # CO --(GetPluginCapabilities)--> Plugin
+   request:
+     version:
+       major: 0
+       minor: 2
+       patch: 0
+   response:
+     capabilities:
+       - rpc:
+           type: CONTROLLER_LIST_VOLUMES
+       - service:
+           type: CONTROLLER_SERVICE
+```
+
 #### `GetSupportedVersions`
 
 A Plugin SHALL reply with a list of supported CSI versions.
@@ -426,11 +440,65 @@ message GetPluginInfoResponse {
 
 If the plugin is unable to complete the GetPluginInfo call successfully, it MUST return a non-ok gRPC code in the gRPC status.
 
+#### `GetPluginCapabilities`
+
+This REQUIRED RPC allows the CO to query the supported capabilities of the Plugin.
+All instances of the same version (see `vendor_version` of `GetPluginInfoResponse`) of the Plugin SHALL return the same set of capabilities, regardless of both: (a) where instances are deployed on the cluster as well as; (b) which RPCs an instance is serving.
+
+```protobuf
+message GetPluginCapabilitiesRequest {
+  // The API version assumed by the CO. This is a REQUIRED field.
+  Version version = 1;
+}
+
+message GetPluginCapabilitiesResponse {
+  // All the capabilities that the controller service supports. This
+  // field is OPTIONAL.
+  // If any of the `CONTROLLER_xxx` RPC capabilities are specified then
+  // it is REQUIRED for a plugin to also report a `CONTROLLER_SERVICE`
+  // service capability as well.
+  repeated PluginCapability capabilities = 2;
+}
+
+// Specifies a capability of the plugin.
+message PluginCapability {
+  message RPC {
+    enum Type {
+      UNKNOWN = 0;
+      CONTROLLER_CREATE_DELETE_VOLUME = 1;
+      CONTROLLER_PUBLISH_UNPUBLISH_VOLUME = 2;
+      CONTROLLER_LIST_VOLUMES = 3;
+      CONTROLLER_GET_CAPACITY = 4;
+    }
+
+    Type type = 1;
+  }
+
+  message Service {
+    enum Type {
+      UNKNOWN = 0;
+      CONTROLLER_SERVICE = 1;
+    }
+  }
+
+  oneof type {
+    // RPC that the plugin supports.
+    RPC rpc = 1;
+    // Service that the plugin supports.
+    Service service = 2;
+  }
+}
+```
+
+##### GetPluginCapabilities Errors
+
+If the plugin is unable to complete the GetPluginCapabilities call successfully, it MUST return a non-ok gRPC code in the gRPC status.
+
 ### Controller Service RPC
 
 #### `CreateVolume`
 
-A Controller Plugin MUST implement this RPC call if it has `CREATE_DELETE_VOLUME` controller capability.
+A Plugin MUST implement this RPC call if it has `CONTROLLER_CREATE_DELETE_VOLUME` plugin capability.
 This RPC will be called by the CO to provision a new volume on behalf of a user (to be consumed as either a block device or a mounted filesystem).
 
 This operation MUST be idempotent.
@@ -608,12 +676,12 @@ The CO MUST implement the specified error recovery behavior when it encounters t
 | Volume already exists but is incompatible | 6 ALREADY_EXISTS | Indicates that a volume corresponding to the specified volume `name` already exists but is incompatible with the specified `capacity_range`, `volume_capabilities` or `parameters`. | Caller MUST fix the arguments or use a different `name` before retrying. |
 | Operation pending for volume | 10 ABORTED | Indicates that there is a already an operation pending for the specified volume. In general the Cluster Orchestrator (CO) is responsible for ensuring that there is no more than one call "in-flight" per volume at a given time. However, in some circumstances, the CO MAY lose state (for example when the CO crashes and restarts), and MAY issue multiple calls simultaneously for the same volume. The Plugin, SHOULD handle this as gracefully as possible, and MAY return this error code to reject secondary calls. | Caller SHOULD ensure that there are no other calls pending for the specified volume, and then retry with exponential back off. |
 | Unsupported `capacity_range` | 11 OUT_OF_RANGE | Indicates that the capacity range is not allowed by the Plugin. More human-readable information MAY be provided in the gRPC `status.message` field. | Caller MUST fix the capacity range before retrying. |
-| Call not implemented | 12 UNIMPLEMENTED | CreateVolume call is not implemented by the plugin or disabled in the Plugin's current mode of operation. | Caller MUST NOT retry. Caller MAY call `ControllerGetCapabilities` or `NodeGetCapabilities` to discover Plugin capabilities. |
+| Call not implemented | 12 UNIMPLEMENTED | CreateVolume call is not implemented by the plugin or disabled in the Plugin's current mode of operation. | Caller MUST NOT retry. Caller MAY call `GetPluginCapabilities` to discover Plugin capabilities. |
 
 
 #### `DeleteVolume`
 
-A Controller Plugin MUST implement this RPC call if it has `CREATE_DELETE_VOLUME` capability.
+A Plugin MUST implement this RPC call if it has `CONTROLLER_CREATE_DELETE_VOLUME` capability.
 This RPC will be called by the CO to deprovision a volume.
 If successful, the storage space associated with the volume MUST be released and all the data in the volume SHALL NOT be accessible anymore.
 
@@ -656,12 +724,12 @@ The CO MUST implement the specified error recovery behavior when it encounters t
 |-----------|-----------|-------------|-------------------|
 | Volume in use | 9 FAILED_PRECONDITION | Indicates that the volume corresponding to the specified `volume_id` could not be deleted because it is in use by another resource. | Caller SHOULD ensure that there are no other resources using the volume, and then retry with exponential back off. |
 | Operation pending for volume | 10 ABORTED | Indicates that there is a already an operation pending for the specified volume. In general the Cluster Orchestrator (CO) is responsible for ensuring that there is no more than one call "in-flight" per volume at a given time. However, in some circumstances, the CO MAY lose state (for example when the CO crashes and restarts), and MAY issue multiple calls simultaneously for the same volume. The Plugin, SHOULD handle this as gracefully as possible, and MAY return this error code to reject secondary calls. | Caller SHOULD ensure that there are no other calls pending for the specified volume, and then retry with exponential back off. |
-| Call not implemented | 12 UNIMPLEMENTED | DeleteVolume call is not implemented by the plugin or disabled in the Plugin's current mode of operation. | Caller MUST NOT retry. Caller MAY call `ControllerGetCapabilities` or `NodeGetCapabilities` to discover Plugin capabilities. |
+| Call not implemented | 12 UNIMPLEMENTED | DeleteVolume call is not implemented by the plugin or disabled in the Plugin's current mode of operation. | Caller MUST NOT retry. Caller MAY call `GetPluginCapabilities` to discover Plugin capabilities. |
 
 
 #### `ControllerPublishVolume`
 
-A Controller Plugin MUST implement this RPC call if it has `PUBLISH_UNPUBLISH_VOLUME` controller capability.
+A Plugin MUST implement this RPC call if it has `CONTROLLER_PUBLISH_UNPUBLISH_VOLUME` plugin capability.
 This RPC will be called by the CO when it wants to place a workload that uses the volume onto a node.
 The Plugin SHOULD perform the work that is necessary for making the volume available on the given node.
 The Plugin MUST NOT assume that this RPC will be executed on the node where the volume will be used.
@@ -735,11 +803,11 @@ The CO MUST implement the specified error recovery behavior when it encounters t
 | Volume published to another node | 9 FAILED_PRECONDITION | Indicates that a volume corresponding to the specified `volume_id` has already been published at another node and does not have MULTI_NODE volume capability. If this error code is returned, the Plugin SHOULD specify the `node_id` of the node at which the volume is published as part of the gRPC `status.message`. | Caller SHOULD ensure the specified volume is not published at any other node before retrying with exponential back off. |
 | Max volumes attached | 8 RESOURCE_EXHAUSTED | Indicates that the maximum supported number of volumes that can be attached to the specified node are already attached. Therefore, this operation will fail until at least one of the existing attached volumes is detached from the node. | Caller MUST ensure that the number of volumes already attached to the node is less then the maximum supported number of volumes before retrying with exponential backoff. |
 | Operation pending for volume | 10 ABORTED | Indicates that there is a already an operation pending for the specified volume. In general the Cluster Orchestrator (CO) is responsible for ensuring that there is no more than one call "in-flight" per volume at a given time. However, in some circumstances, the CO MAY lose state (for example when the CO crashes and restarts), and MAY issue multiple calls simultaneously for the same volume. The Plugin, SHOULD handle this as gracefully as possible, and MAY return this error code to reject secondary calls. | Caller SHOULD ensure that there are no other calls pending for the specified volume, and then retry with exponential back off. |
-| Call not implemented | 12 UNIMPLEMENTED | ControllerPublishVolume call is not implemented by the plugin or disabled in the Plugin's current mode of operation. | Caller MUST NOT retry. Caller MAY call `ControllerGetCapabilities` or `NodeGetCapabilities` to discover Plugin capabilities. |
+| Call not implemented | 12 UNIMPLEMENTED | ControllerPublishVolume call is not implemented by the plugin or disabled in the Plugin's current mode of operation. | Caller MUST NOT retry. Caller MAY call `GetPluginCapabilities` to discover Plugin capabilities. |
 
 #### `ControllerUnpublishVolume`
 
-Controller Plugin MUST implement this RPC call if it has `PUBLISH_UNPUBLISH_VOLUME` controller capability.
+A Plugin MUST implement this RPC call if it has `CONTROLLER_PUBLISH_UNPUBLISH_VOLUME` plugin capability.
 This RPC is a reverse operation of `ControllerPublishVolume`.
 It MUST be called after `NodeUnpublishVolume` on the volume is called and succeeds.
 The Plugin SHOULD perform the work that is necessary for making the volume ready to be consumed by a different node.
@@ -794,12 +862,12 @@ The CO MUST implement the specified error recovery behavior when it encounters t
 | Volume does not exists | 5 NOT_FOUND | Indicates that a volume corresponding to the specified `volume_id` does not exist. | Caller MUST verify that the `volume_id` is correct and that the volume is accessible and has not been deleted before retrying with exponential back off. |
 | Node does not exists | 5 NOT_FOUND | Indicates that a node corresponding to the specified `node_id` does not exist. | Caller MUST verify that the `node_id` is correct and that the node is available and has not been terminated or deleted before retrying with exponential backoff. |
 | Operation pending for volume | 10 ABORTED | Indicates that there is a already an operation pending for the specified volume. In general the Cluster Orchestrator (CO) is responsible for ensuring that there is no more than one call "in-flight" per volume at a given time. However, in some circumstances, the CO MAY lose state (for example when the CO crashes and restarts), and MAY issue multiple calls simultaneously for the same volume. The Plugin, SHOULD handle this as gracefully as possible, and MAY return this error code to reject secondary calls. | Caller SHOULD ensure that there are no other calls pending for the specified volume, and then retry with exponential back off. |
-| Call not implemented | 12 UNIMPLEMENTED | ControllerUnpublishVolume call is not implemented by the plugin or disabled in the Plugin's current mode of operation. | Caller MUST NOT retry. Caller MAY call `ControllerGetCapabilities` or `NodeGetCapabilities` to discover Plugin capabilities. |
+| Call not implemented | 12 UNIMPLEMENTED | ControllerUnpublishVolume call is not implemented by the plugin or disabled in the Plugin's current mode of operation. | Caller MUST NOT retry. Caller MAY call `GetPluginCapabilities` to discover Plugin capabilities. |
 
 
 #### `ValidateVolumeCapabilities`
 
-A Controller Plugin MUST implement this RPC call.
+A controller service MUST implement this RPC call.
 This RPC will be called by the CO to check if a pre-provisioned volume has all the capabilities that the CO wants.
 This RPC call SHALL return `supported` only if all the volume capabilities specified in the request are supported.
 This operation MUST be idempotent.
@@ -847,7 +915,7 @@ The CO MUST implement the specified error recovery behavior when it encounters t
 
 #### `ListVolumes`
 
-A Controller Plugin MUST implement this RPC call if it has `LIST_VOLUMES` capability.
+A Controller service MUST implement this RPC call if it has `CONTROLLER_LIST_VOLUMES` capability.
 The Plugin SHALL return the information about all the volumes that it knows about.
 
 ```protobuf
@@ -901,7 +969,7 @@ The CO MUST implement the specified error recovery behavior when it encounters t
 
 #### `GetCapacity`
 
-A Controller Plugin MUST implement this RPC call if it has `GET_CAPACITY` controller capability.
+A Controller service MUST implement this RPC call if it has `CONTROLLER_GET_CAPACITY` plugin capability.
 The RPC allows the CO to query the capacity of the storage pool from which the controller provisions volumes.
 
 ```protobuf
@@ -939,7 +1007,7 @@ If the plugin is unable to complete the GetCapacity call successfully, it MUST r
 
 #### `ControllerProbe`
 
-A Controller Plugin MUST implement this RPC call.
+A Controller service MUST implement this RPC call.
 The Plugin SHOULD verify if it has the right configurations, devices, dependencies and drivers in order to run the controller service, and return a success if the validation succeeds.
 The CO SHALL invoke this RPC prior to any other controller service RPC in order to allow the CO to determine the readiness of the controller service.
 A CO MAY invoke this call multiple times with the understanding that a plugin's implementation MAY NOT be trivial and there MAY be overhead incurred by such repeated calls.
@@ -965,47 +1033,6 @@ The CO MUST implement the specified error recovery behavior when it encounters t
 | Missing required dependency | 9 FAILED_PRECONDITION | Indicates that the plugin is missing one or more required dependency. | Caller MUST assume the plugin is not healthy. |
 
 
-#### `ControllerGetCapabilities`
-
-A Controller Plugin MUST implement this RPC call. This RPC allows the CO to check the supported capabilities of controller service provided by the Plugin.
-
-```protobuf
-message ControllerGetCapabilitiesRequest {
-  // The API version assumed by the CO. This is a REQUIRED field.
-  Version version = 1;
-}
-
-message ControllerGetCapabilitiesResponse {
-  // All the capabilities that the controller service supports. This
-  // field is OPTIONAL.
-  repeated ControllerServiceCapability capabilities = 2;
-}
-
-// Specifies a capability of the controller service.
-message ControllerServiceCapability {
-  message RPC {
-    enum Type {
-      UNKNOWN = 0;
-      CREATE_DELETE_VOLUME = 1;
-      PUBLISH_UNPUBLISH_VOLUME = 2;
-      LIST_VOLUMES = 3;
-      GET_CAPACITY = 4;
-    }
-
-    Type type = 1;
-  }
-
-  oneof type {
-    // RPC that the controller supports.
-    RPC rpc = 1;
-  }
-}
-```
-
-##### ControllerGetCapabilities Errors
-
-If the plugin is unable to complete the ControllerGetCapabilities call successfully, it MUST return a non-ok gRPC code in the gRPC status.
-
 #### RPC Interactions
 
 ##### `CreateVolume`, `DeleteVolume`, `ListVolumes`
@@ -1017,7 +1044,7 @@ If a `CreateVolume` operation times out, leaving the CO without an ID with which
 2. Execute the `ListVolumes` RPC to possibly obtain a volume ID that may be used to execute a `DeleteVolume` RPC; upon success execute `DeleteVolume`.
 3. The CO takes no further action regarding the timed out RPC, a volume is possibly leaked and the operator/user is expected to clean up.
 
-It is NOT REQUIRED for a controller plugin to implement the `LIST_VOLUMES` capability if it supports the `CREATE_DELETE_VOLUME` capability: the onus is upon the CO to take into consideration the full range of plugin capabilities before deciding how to proceed in the above scenario.
+It is NOT REQUIRED for a controller service to implement the `CONTROLLER_LIST_VOLUMES` capability if it supports the `CONTROLLER_CREATE_DELETE_VOLUME` capability: the onus is upon the CO to take into consideration the full range of plugin capabilities before deciding how to proceed in the above scenario.
 
 ### Node Service RPC
 
@@ -1026,7 +1053,7 @@ It is NOT REQUIRED for a controller plugin to implement the `LIST_VOLUMES` capab
 This RPC is called by the CO when a workload that wants to use the specified volume is placed (scheduled) on a node.
 The Plugin SHALL assume that this RPC will be executed on the node where the volume will be used.
 
-If the corresponding Controller Plugin has `PUBLISH_UNPUBLISH_VOLUME` controller capability, the CO MUST guarantee that this RPC is called after `ControllerPublishVolume` is called for the given volume on the given node and returns a success.
+If the corresponding Plugin has `CONTROLLER_PUBLISH_UNPUBLISH_VOLUME` plugin capability, the CO MUST guarantee that this RPC is called after `ControllerPublishVolume` is called for the given volume on the given node and returns a success.
 
 This operation MUST be idempotent.
 If the volume corresponding to the `volume_id` has already been published at the specified `target_path`, and is compatible with the specified `volume_capability` and `readonly` flag, the Plugin MUST reply `0 OK`.
@@ -1052,10 +1079,10 @@ message NodePublishVolumeRequest {
   string volume_id = 2;
 
   // The CO SHALL set this field to the value returned by
-  // `ControllerPublishVolume` if the corresponding Controller Plugin
-  // has `PUBLISH_UNPUBLISH_VOLUME` controller capability, and SHALL be
-  // left unset if the corresponding Controller Plugin does not have
-  // this capability. This is an OPTIONAL field.
+  // `ControllerPublishVolume` if the corresponding Plugin has
+  // `CONTROLLER_PUBLISH_UNPUBLISH_VOLUME` plugin capability, and SHALL
+  // be left unset if the corresponding Plugin does not have this
+  // capability. This is an OPTIONAL field.
   map<string, string> publish_volume_info = 3;
 
   // The path to which the volume will be published. It MUST be an
@@ -1112,11 +1139,11 @@ The CO MUST implement the specified error recovery behavior when it encounters t
 
 #### `NodeUnpublishVolume`
 
-A Node Plugin MUST implement this RPC call.
+A Plugin MUST implement this RPC call.
 This RPC is a reverse operation of `NodePublishVolume`.
 This RPC MUST undo the work by the corresponding `NodePublishVolume`.
 This RPC SHALL be called by the CO at least once for each `target_path` that was successfully setup via `NodePublishVolume`.
-If the corresponding Controller Plugin has `PUBLISH_UNPUBLISH_VOLUME` controller capability, the CO SHOULD issue all `NodeUnpublishVolume` (as specified above) before calling `ControllerUnpublishVolume` for the given node and the given volume.
+If the corresponding Plugin has `CONTROLLER_PUBLISH_UNPUBLISH_VOLUME` plugin capability, the CO SHOULD issue all `NodeUnpublishVolume` (as specified above) before calling `ControllerUnpublishVolume` for the given node and the given volume.
 The Plugin SHALL assume that this RPC will be executed on the node where the volume is being used.
 
 This RPC is typically called by the CO when the workload using the volume is being moved to a different node, or all the workload using the volume on a node has finished.
@@ -1168,7 +1195,7 @@ The CO MUST implement the specified error recovery behavior when it encounters t
 
 #### `GetNodeID`
 
-A Node Plugin MUST implement this RPC call if the plugin has `PUBLISH_UNPUBLISH_VOLUME` controller capability.
+A Plugin MUST implement this RPC call if the plugin has `CONTROLLER_PUBLISH_UNPUBLISH_VOLUME` plugin capability.
 The Plugin SHALL assume that this RPC will be executed on the node where the volume will be used.
 The CO SHOULD call this RPC for the node at which it wants to place the workload.
 The result of this call will be used by CO in `ControllerPublishVolume`.
@@ -1195,11 +1222,11 @@ The CO MUST implement the specified error recovery behavior when it encounters t
 
 Condition | gRPC Code | Description | Recovery Behavior
 | --- | --- | --- | --- |
-| Call not implemented | 12 UNIMPLEMENTED | GetNodeID call is not implemented by the plugin or disabled in the Plugin's current mode of operation. | Caller MUST NOT retry. Caller MAY call `ControllerGetCapabilities` or `NodeGetCapabilities` to discover Plugin capabilities. |
+| Call not implemented | 12 UNIMPLEMENTED | GetNodeID call is not implemented by the plugin or disabled in the Plugin's current mode of operation. | Caller MUST NOT retry. Caller MAY call `GetPluginCapabilities` to discover Plugin capabilities. |
 
 #### `NodeProbe`
 
-A Node Plugin MUST implement this RPC call.
+A Plugin MUST implement this RPC call.
 The Plugin SHALL assume that this RPC will be executed on the node where the volume will be used.
 The CO SHOULD call this RPC for the node at which it wants to place the workload.
 This RPC allows the CO to probe the readiness of the Plugin on the node where the volumes will be used.
@@ -1227,44 +1254,6 @@ The CO MUST implement the specified error recovery behavior when it encounters t
 | Missing required dependency | 9 FAILED_PRECONDITION | Indicates that the plugin is missing one or more required dependency. | Caller MUST assume the plugin is not healthy. |
 
 
-#### `NodeGetCapabilities`
-
-A Node Plugin MUST implement this RPC call.
-This RPC allows the CO to check the supported capabilities of node service provided by the Plugin.
-
-```protobuf
-message NodeGetCapabilitiesRequest {
-  // The API version assumed by the CO. This is a REQUIRED field.
-  Version version = 1;
-}
-
-message NodeGetCapabilitiesResponse {
-  // All the capabilities that the node service supports. This field
-  // is OPTIONAL.
-  repeated NodeServiceCapability capabilities = 1;
-}
-
-// Specifies a capability of the node service.
-message NodeServiceCapability {
-  message RPC {
-    enum Type {
-      UNKNOWN = 0;
-    }
-
-    Type type = 1;
-  }
-
-  oneof type {
-    // RPC that the controller supports.
-    RPC rpc = 1;
-  }
-}
-```
-
-##### NodeGetCapabilities Errors
-
-If the plugin is unable to complete the NodeGetCapabilities call successfully, it MUST return a non-ok gRPC code in the gRPC status.
-
 ## Protocol
 
 ### Connectivity
@@ -1272,7 +1261,7 @@ If the plugin is unable to complete the NodeGetCapabilities call successfully, i
 * A CO SHALL communicate with a Plugin using gRPC to access the `Identity`, and (optionally) the `Controller` and `Node` services.
   * proto3 SHOULD be used with gRPC, as per the [official recommendations](http://www.grpc.io/docs/guides/#protocol-buffer-versions).
   * All Plugins SHALL implement the REQUIRED Identity service RPCs.
-    Support for OPTIONAL RPCs is reported by the `ControllerGetCapabilities` and `NodeGetCapabilities` RPC calls.
+    Support for OPTIONAL RPCs and/or services is reported by the `GetPluginCapabilities` RPC call.
 * The CO SHALL provide the listen-address for the Plugin by way of the `CSI_ENDPOINT` environment variable.
   Plugin components SHALL create, bind, and listen for RPCs on the specified listen address.
   * Only UNIX Domain Sockets may be used as endpoints.
@@ -1375,7 +1364,7 @@ Supervised plugins MAY be isolated and/or resource-bounded.
 ##### Namespaces
 
 * A Plugin SHOULD NOT assume that it is in the same [Linux namespaces](https://en.wikipedia.org/wiki/Linux_namespaces) as the Plugin Supervisor.
-  The CO MUST clearly document the [mount propagation](https://www.kernel.org/doc/Documentation/filesystems/sharedsubtree.txt) requirements for Node Plugins and the Plugin Supervisor SHALL satisfy the CO’s requirements.
+  The CO MUST clearly document the [mount propagation](https://www.kernel.org/doc/Documentation/filesystems/sharedsubtree.txt) requirements for Node services and the Plugin Supervisor SHALL satisfy the CO’s requirements.
 
 ##### Cgroup Isolation
 
