@@ -519,6 +519,14 @@ message PluginCapability {
       // attempt to invoke the REQUIRED ControllerService RPCs, as well
       // as specific RPCs as indicated by ControllerGetCapabilities.
       CONTROLLER_SERVICE = 1;
+
+      // ACCESSIBILITY_CONSTRAINTS indicates that the volumes for this
+      // plugin may not be equally accessible by all nodes in the
+      // cluster. The CO MUST use the topology information returned by
+      // CreateVolumeRequest along with the topology information
+      // returned by NodeGetInfo to ensure that a given volume is
+      // accessible from a given node when scheduling workloads.
+      ACCESSIBILITY_CONSTRAINTS = 2;
     }
     Type type = 1;
   }
@@ -600,7 +608,7 @@ A Controller Plugin MUST implement this RPC call if it has `CREATE_DELETE_VOLUME
 This RPC will be called by the CO to provision a new volume on behalf of a user (to be consumed as either a block device or a mounted filesystem).
 
 This operation MUST be idempotent.
-If a volume corresponding to the specified volume `name` already exists and is compatible with the specified `capacity_range`, `volume_capabilities` and `parameters` in the `CreateVolumeRequest`, the Plugin MUST reply `0 OK` with the corresponding `CreateVolumeResponse`.
+If a volume corresponding to the specified volume `name` already exists, is accessible from `accessibility_requirements`, and is compatible with the specified `capacity_range`, `volume_capabilities` and `parameters` in the `CreateVolumeRequest`, the Plugin MUST reply `0 OK` with the corresponding `CreateVolumeResponse`.
 
 ```protobuf
 message CreateVolumeRequest {
@@ -653,6 +661,19 @@ message CreateVolumeRequest {
   // If specified, the new volume will be pre-populated with data from
   // this source. This field is OPTIONAL.
   VolumeContentSource volume_content_source = 6;
+  
+  // Specifies where (regions, zones, racks, etc.) the provisioned
+  // volume MUST be accessible from.
+  // An SP SHALL advertise the requirements for topological
+  // accessibility information in documentation. COs SHALL only specify
+  // topological accessibility information supported by the SP.
+  // This field is OPTIONAL.
+  // This field SHALL NOT be specified unless the SP has the
+  // ACCESSIBILITY_CONSTRAINTS plugin capability.
+  // If this field is not specified and the SP has the
+  // ACCESSIBILITY_CONSTRAINTS plugin capability, the SP MAY choose
+  // where the provisioned volume is accessible from.
+  TopologyRequirement accessibility_requirements = 7;
 }
 
 // Specifies what source the volume will be created from. One of the
@@ -781,6 +802,194 @@ message Volume {
   // pre-populated with data from the specified source.
   // This field is OPTIONAL.
   VolumeContentSource content_source = 4;
+
+  // Specifies where (regions, zones, racks, etc.) the provisioned
+  // volume is accessible from.
+  // A plugin that returns this field MUST also set the
+  // ACCESSIBILITY_CONSTRAINTS plugin capability.
+  // An SP MAY specify multiple topologies to indicate the volume is
+  // accessible from multiple locations.
+  // COs MAY use this information along with the topology information
+  // returned by NodeGetInfo to ensure that a given volume is accessible
+  // from a given node when scheduling workloads.
+  // This field is OPTIONAL. If it is not specified, the CO MAY assume
+  // the volume is equally accessible from all nodes in the cluster and
+  // may schedule workloads referencing the volume on any available
+  // node.
+  //
+  // Example 1:
+  //   accessible_topology = {"region": "R1", "zone": "Z2"}
+  // Indicates a volume accessible only from the "region" "R1" and the
+  // "zone" "Z2".
+  //
+  // Example 2:
+  //   accessible_topology =
+  //     {"region": "R1", "zone": "Z2"},
+  //     {"region": "R1", "zone": "Z3"} 
+  // Indicates a volume accessible from both "zone" "Z2" and "zone" "Z3"
+  // in the "region" "R1".
+  repeated Topology accessible_topology = 5;
+}
+
+message TopologyRequirement {
+  // Specifies the list of topologies the provisioned volume MUST be
+  // accessible from.
+  // This field is OPTIONAL. If TopologyRequirement is specified either
+  // requisite or preferred or both MUST be specified.
+  // 
+  // If requisite is specified, the provisioned volume MUST be
+  // accessible from at least one of the requisite topologies.
+  // 
+  // Given
+  //   x = number of topologies provisioned volume is accessible from
+  //   n = number of requisite topologies
+  // The CO MUST ensure n >= 1. The SP MUST ensure x >= 1
+  // If x==n, than the SP MUST make the provisioned volume available to
+  // all topologies from the list of requisite topologies. If it is
+  // unable to do so, the SP MUST fail the CreateVolume call.
+  // For example, if a volume should be accessible from a single zone,
+  // and requisite =
+  //   {"region": "R1", "zone": "Z2"}
+  // then the provisioned volume MUST be accessible from the "region"
+  // "R1" and the "zone" "Z2".
+  // Similarly, if a volume should be accessible from two zones, and
+  // requisite =
+  //   {"region": "R1", "zone": "Z2"},
+  //   {"region": "R1", "zone": "Z3"}
+  // then the provisioned volume MUST be accessible from the "region"
+  // "R1" and both "zone" "Z2" and "zone" "Z3".
+  //
+  // If x<n, than the SP SHALL choose x unique topologies from the list
+  // of requisite topologies. If it is unable to do so, the SP MUST fail
+  // the CreateVolume call.
+  // For example, if a volume should be accessible from a single zone,
+  // and requisite =
+  //   {"region": "R1", "zone": "Z2"},
+  //   {"region": "R1", "zone": "Z3"}
+  // then the SP may choose to make the provisioned volume available in
+  // either the "zone" "Z2" or the "zone" "Z3" in the "region" "R1".
+  // Similarly, if a volume should be accessible from two zones, and
+  // requisite =
+  //   {"region": "R1", "zone": "Z2"},
+  //   {"region": "R1", "zone": "Z3"},
+  //   {"region": "R1", "zone": "Z4"}
+  // then the provisioned volume MUST be accessible from any combination
+  // of two unique topologies: e.g. "R1/Z2" and "R1/Z3", or "R1/Z2" and
+  //  "R1/Z4", or "R1/Z3" and "R1/Z4".
+  //
+  // If x>n, than the SP MUST make the provisioned volume available from
+  // all topologies from the list of requisite topologies and MAY choose
+  // the remaining x-n unique topologies from the list of all possible
+  // topologies. If it is unable to do so, the SP MUST fail the
+  // CreateVolume call.
+  // For example, if a volume should be accessible from two zones, and
+  // requisite =
+  //   {"region": "R1", "zone": "Z2"}
+  // then the provisioned volume MUST be accessible from the "region"
+  // "R1" and the "zone" "Z2" and the SP may select the second zone
+  // independently, e.g. "R1/Z4".
+  repeated Topology requisite = 1;
+
+  // Specifies the list of topologies the CO would prefer the volume to
+  // be provisioned in.
+  //
+  // This field is OPTIONAL. If TopologyRequirement is specified either
+  // requisite or preferred or both MUST be specified.
+  // 
+  // An SP MUST attempt to make the provisioned volume available using
+  // the preferred topologies in order from first to last.
+  //
+  // If requisite is specified, all topologies in preferred list MUST
+  // also be present in the list of requisite topologies.
+  //
+  // If the SP is unable to to make the provisioned volume available
+  // from any of the preferred topologies, the SP MAY choose a topology
+  // from the list of requisite topologies.
+  // If the list of requisite topologies is not specified, then the SP
+  // MAY choose from the list of all possible topologies.
+  // If the list of requisite topologies is specified and the SP is
+  // unable to to make the provisioned volume available from any of the
+  // requisite topologies it MUST fail the CreateVolume call.
+  // 
+  // Example 1:
+  // Given a volume should be accessible from a single zone, and
+  // requisite =
+  //   {"region": "R1", "zone": "Z2"},
+  //   {"region": "R1", "zone": "Z3"}
+  // preferred =
+  //   {"region": "R1", "zone": "Z3"}
+  // then the the SP SHOULD first attempt to make the provisioned volume
+  // available from "zone" "Z3" in the "region" "R1" and fall back to
+  // "zone" "Z2" in the "region" "R1" if that is not possible.
+  //
+  // Example 2:
+  // Given a volume should be accessible from a single zone, and
+  // requisite =
+  //   {"region": "R1", "zone": "Z2"},
+  //   {"region": "R1", "zone": "Z3"},
+  //   {"region": "R1", "zone": "Z4"},
+  //   {"region": "R1", "zone": "Z5"}
+  // preferred =
+  //   {"region": "R1", "zone": "Z4"},
+  //   {"region": "R1", "zone": "Z2"}
+  // then the the SP SHOULD first attempt to make the provisioned volume
+  // accessible from "zone" "Z4" in the "region" "R1" and fall back to
+  // "zone" "Z2" in the "region" "R1" if that is not possible. If that
+  // is not possible, the SP may choose between either the "zone"
+  // "Z3" or "Z5" in the "region" "R1".
+  //
+  // Example 3:
+  // Given a volume should be accessible from TWO zones (because an
+  // opaque parameter in CreateVolumeRequest, for example, specifies
+  // the volume is accessible from two zones, aka synchronously
+  // replicated), and
+  // requisite =
+  //   {"region": "R1", "zone": "Z2"},
+  //   {"region": "R1", "zone": "Z3"},
+  //   {"region": "R1", "zone": "Z4"},
+  //   {"region": "R1", "zone": "Z5"}
+  // preferred =
+  //   {"region": "R1", "zone": "Z5"},
+  //   {"region": "R1", "zone": "Z3"}
+  // then the the SP SHOULD first attempt to make the provisioned volume
+  // accessible from the combination of the two "zones" "Z5" and "Z3" in
+  // the "region" "R1". If that's not possible, it should fall back to
+  // a combination of "Z5" and other possibilities from the list of
+  // requisite. If that's not possible, it should fall back  to a
+  // combination of "Z3" and other possibilities from the list of
+  // requisite. If that's not possible, it should fall back  to a
+  // combination of other possibilities from the list of requisite.
+  repeated Topology preferred = 2;
+}
+
+// Topology is a map of topological domains to topological segments.
+// A topological domain is a sub-division of a cluster, like "region",
+// "zone", "rack", etc.
+// A topological segment is a specific instance of a topological domain,
+// like "zone3", "rack3", etc.
+// For example {"com.company/zone": "Z1", "com.company/rack": "R3"}
+// Valid keys have two segments: an optional prefix and name, separated
+// by a slash (/), for example: "com.company.example/zone".
+// The key name segment is required. The prefix is optional.
+// Both the key name and the prefix MUST each be 63 characters or less,
+// begin and end with an alphanumeric character ([a-z0-9A-Z]) and
+// contain only dashes (-), underscores (_), dots (.), or alphanumerics
+// in between, for example "zone".
+// The key prefix MUST follow reverse domain name notation format
+// (https://en.wikipedia.org/wiki/Reverse_domain_name_notation).
+// The key prefix SHOULD include the plugin's host company name and/or
+// the plugin name, to minimize the possibility of collisions with keys
+// from other plugins.
+// If a key prefix is specified, it MUST be identical across all
+// topology keys returned by the SP (across all RPCs).
+// Keys MUST be case-insensitive. Meaning the keys "Zone" and "zone"
+// MUST not both exist.
+// Each value (topological segment) MUST contain 1 or more strings.
+// Each string MUST be 63 characters or less and begin and end with an
+// alphanumeric character with '-', '_', '.', or alphanumerics in
+// between.
+message Topology {
+  map<string, string> segments = 1;
 }
 ```
 
@@ -793,6 +1002,7 @@ The CO MUST implement the specified error recovery behavior when it encounters t
 | Condition | gRPC Code | Description | Recovery Behavior |
 |-----------|-----------|-------------|-------------------|
 | Volume already exists but is incompatible | 6 ALREADY_EXISTS | Indicates that a volume corresponding to the specified volume `name` already exists but is incompatible with the specified `capacity_range`, `volume_capabilities` or `parameters`. | Caller MUST fix the arguments or use a different `name` before retrying. |
+| Unable to provision in `accessible_topology` | 8 RESOURCE_EXHAUSTED | Indicates that although the `accessible_topology` field is valid, a new volume can not be provisioned with the specified topology constraints. More human-readable information MAY be provided in the gRPC `status.message` field. | Caller MUST ensure that whatever is preventing volumes from being provisioned in the specified location (e.g. quota issues) is addressed before retrying with exponential backoff. |
 | Operation pending for volume | 10 ABORTED | Indicates that there is a already an operation pending for the specified volume. In general the Cluster Orchestrator (CO) is responsible for ensuring that there is no more than one call "in-flight" per volume at a given time. However, in some circumstances, the CO MAY lose state (for example when the CO crashes and restarts), and MAY issue multiple calls simultaneously for the same volume. The Plugin, SHOULD handle this as gracefully as possible, and MAY return this error code to reject secondary calls. | Caller SHOULD ensure that there are no other calls pending for the specified volume, and then retry with exponential back off. |
 | Unsupported `capacity_range` | 11 OUT_OF_RANGE | Indicates that the capacity range is not allowed by the Plugin, for example when trying to create a volume smaller than the source snapshot. More human-readable information MAY be provided in the gRPC `status.message` field. | Caller MUST fix the capacity range before retrying. |
 | Call not implemented | 12 UNIMPLEMENTED | CreateVolume call is not implemented by the plugin or disabled in the Plugin's current mode of operation. | Caller MUST NOT retry. Caller MAY call `ControllerGetCapabilities` or `NodeGetCapabilities` to discover Plugin capabilities. |
@@ -978,6 +1188,14 @@ message ValidateVolumeCapabilitiesRequest {
   // Attributes of the volume to check. This field is OPTIONAL and MUST
   // match the attributes of the Volume identified by `volume_id`.
   map<string, string> volume_attributes = 3;
+
+  // Specifies where (regions, zones, racks, etc.) the caller believes
+  // the volume is accessible from.
+  // A caller MAY specify multiple topologies to indicate they believe
+  // the volume to be accessible from multiple locations.
+  // This field is OPTIONAL. This field SHALL NOT be set unless the
+  // plugin advertises the ACCESSIBILITY_CONSTRAINTS capability.
+  repeated Topology accessible_topology = 4;
 }
 
 message ValidateVolumeCapabilitiesResponse {
@@ -1074,6 +1292,14 @@ message GetCapacityRequest {
   // specific `parameters`. These are the same `parameters` the CO will
   // use in `CreateVolumeRequest`. This field is OPTIONAL.
   map<string, string> parameters = 2;
+
+  // If specified, the Plugin SHALL report the capacity of the storage
+  // that can be used to provision volumes that in the specified
+  // `accessible_topology`. This is the same as the
+  // `accessible_topology` the CO returns in a `CreateVolumeResponse`.
+  // This field is OPTIONAL. This field SHALL NOT be set unless the
+  // plugin advertises the ACCESSIBILITY_CONSTRAINTS capability.
+  Topology accessible_topology = 3;
 }
 
 message GetCapacityResponse {
@@ -1782,6 +2008,25 @@ message NodeGetInfoResponse {
   // plugin MUST NOT set negative values here.
   // This field is OPTIONAL.
   int64 max_volumes_per_node = 2;
+
+  // Specifies where (regions, zones, racks, etc.) the node is
+  // accessible from.
+  // A plugin that returns this field MUST also set the
+  // ACCESSIBILITY_CONSTRAINTS plugin capability.
+  // COs MAY use this information along with the topology information
+  // returned in CreateVolumeResponse to ensure that a given volume is
+  // accessible from a given node when scheduling workloads.
+  // This field is OPTIONAL. If it is not specified, the CO MAY assume
+  // the node is not subject to any topological constraint, and MAY
+  // schedule workloads that reference any volume V, such that there are
+  // no topological constraints declared for V.
+  //
+  // Example 1:
+  //   accessible_topology =
+  //     {"region": "R1", "zone": "R2"}
+  // Indicates the node exists within the "region" "R1" and the "zone"
+  // "Z2".
+  Topology accessible_topology = 3;
 }
 ```
 
