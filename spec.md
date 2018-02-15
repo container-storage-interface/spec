@@ -653,12 +653,12 @@ message VolumeCapability {
 message CapacityRange {
   // Volume must be at least this big. This field is OPTIONAL.
   // A value of 0 is equal to an unspecified field value.
-  // The value of this field MUST NOT be negative. 
+  // The value of this field MUST NOT be negative.
   int64 required_bytes = 1;
 
   // Volume must not be bigger than this. This field is OPTIONAL.
   // A value of 0 is equal to an unspecified field value.
-  // The value of this field MUST NOT be negative. 
+  // The value of this field MUST NOT be negative.
   int64 limit_bytes = 2;
 }
 
@@ -667,7 +667,7 @@ message Volume {
   // The capacity of the volume in bytes. This field is OPTIONAL. If not
   // set (value of 0), it indicates that the capacity of the volume is
   // unknown (e.g., NFS share).
-  // The value of this field MUST NOT be negative. 
+  // The value of this field MUST NOT be negative.
   int64 capacity_bytes = 1;
 
   // Contains identity information for the created volume. This field is
@@ -952,7 +952,7 @@ message ListVolumesRequest {
   // in the subsequent `ListVolumes` call. This field is OPTIONAL. If
   // not specified (zero value), it means there is no restriction on the
   // number of entries that can be returned.
-  // The value of this field MUST NOT be negative. 
+  // The value of this field MUST NOT be negative.
   int32 max_entries = 2;
 
   // A token to specify where to start paginating. Set this field to
@@ -1020,7 +1020,7 @@ message GetCapacityResponse {
   // specified in the request, the Plugin SHALL take those into
   // consideration when calculating the available capacity of the
   // storage. This field is REQUIRED.
-  // The value of this field MUST NOT be negative. 
+  // The value of this field MUST NOT be negative.
   int64 available_capacity = 1;
 }
 ```
@@ -1365,20 +1365,13 @@ If the plugin is unable to complete the NodeGetCapabilities call successfully, i
   * proto3 SHOULD be used with gRPC, as per the [official recommendations](http://www.grpc.io/docs/guides/#protocol-buffer-versions).
   * All Plugins SHALL implement the REQUIRED Identity service RPCs.
     Support for OPTIONAL RPCs is reported by the `ControllerGetCapabilities` and `NodeGetCapabilities` RPC calls.
-* The CO SHALL provide the listen-address for the Plugin by way of the `CSI_ENDPOINT` environment variable.
-  Plugin components SHALL create, bind, and listen for RPCs on the specified listen address.
-  * Only UNIX Domain Sockets may be used as endpoints.
-    This will likely change in a future version of this specification to support non-UNIX platforms.
-* All supported RPC services MUST be available at the listen address of the Plugin.
+* All Plugins MUST support UNIX Domain Sockets as a gRPC endpoint.
 
 ### Security
 
 * The CO operator and Plugin Supervisor SHOULD take steps to ensure that any and all communication between the CO and Plugin Service are secured according to best practices.
-* Communication between a CO and a Plugin SHALL be transported over UNIX Domain Sockets.
+* Communication between a CO and a Plugin SHALL support UNIX Domain Sockets as a transport mechanism.
   * gRPC is compatible with UNIX Domain Sockets; it is the responsibility of the CO operator and Plugin Supervisor to properly secure access to the Domain Socket using OS filesystem ACLs and/or other OS-specific security context tooling.
-  * SP’s supplying stand-alone Plugin controller appliances, or other remote components that are incompatible with UNIX Domain Sockets must provide a software component that proxies communication between a UNIX Domain Socket and the remote component(s).
-    Proxy components transporting communication over IP networks SHALL be responsible for securing communications over such networks.
-* Both the CO and Plugin SHOULD avoid accidental leakage of sensitive information (such as redacting such information from log files).
 
 ### Debugging
 
@@ -1386,95 +1379,4 @@ If the plugin is unable to complete the NodeGetCapabilities call successfully, i
 
 ## Configuration and Operation
 
-### General Configuration
-
-* The `CSI_ENDPOINT` environment variable SHALL be supplied to the Plugin by the Plugin Supervisor.
-* An operator SHALL configure the CO to connect to the Plugin via the listen address identified by `CSI_ENDPOINT` variable.
-* With exception to sensitive data, Plugin configuration SHOULD be specified by environment variables, whenever possible, instead of by command line flags or bind-mounted/injected files.
-
-
-#### Plugin Bootstrap Example
-
-* Supervisor -> Plugin: `CSI_ENDPOINT=unix:///path/to/unix/domain/socket.sock`.
-* Operator -> CO: use plugin at endpoint `unix:///path/to/unix/domain/socket.sock`.
-* CO: monitor `/path/to/unix/domain/socket.sock`.
-* Plugin: read `CSI_ENDPOINT`, create UNIX socket at specified path, bind and listen.
-* CO: observe that socket now exists, establish connection.
-* CO: invoke `GetSupportedVersions`.
-
-#### Filesystem
-
-* Plugins SHALL NOT specify requirements that include or otherwise reference directories and/or files on the root filesystem of the CO.
-* Plugins SHALL NOT create additional files or directories adjacent to the UNIX socket specified by `CSI_ENDPOINT`; violations of this requirement constitute "abuse".
-  * The Plugin Supervisor is the ultimate authority of the directory in which the UNIX socket endpoint is created and MAY enforce policies to prevent and/or mitigate abuse of the directory by Plugins.
-
-### Supervised Lifecycle Management
-
-* For Plugins packaged in software form:
-  * Plugin Packages SHOULD use a well-documented container image format (e.g., Docker, OCI).
-  * The chosen package image format MAY expose configurable Plugin properties as environment variables, unless otherwise indicated in the section below.
-    Variables so exposed SHOULD be assigned default values in the image manifest.
-  * A Plugin Supervisor MAY programmatically evaluate or otherwise scan a Plugin Package’s image manifest in order to discover configurable environment variables.
-  * A Plugin SHALL NOT assume that an operator or Plugin Supervisor will scan an image manifest for environment variables.
-
-#### Environment Variables
-
-* Variables defined by this specification SHALL be identifiable by their `CSI_` name prefix.
-* Configuration properties not defined by the CSI specification SHALL NOT use the same `CSI_` name prefix; this prefix is reserved for common configuration properties defined by the CSI specification.
-* The Plugin Supervisor SHOULD supply all recommended CSI environment variables to a Plugin.
-* The Plugin Supervisor SHALL supply all required CSI environment variables to a Plugin.
-
-##### `CSI_ENDPOINT`
-
-Network endpoint at which a Plugin SHALL host CSI RPC services. The general format is:
-
-    {scheme}://{authority}{endpoint}
-
-The following address types SHALL be supported by Plugins:
-
-    unix:///path/to/unix/socket.sock
-
-Note: All UNIX endpoints SHALL end with `.sock`. See [gRPC Name Resolution](https://github.com/grpc/grpc/blob/master/doc/naming.md).  
-
-This variable is REQUIRED.
-
-#### Operational Recommendations
-
-The Plugin Supervisor expects that a Plugin SHALL act as a long-running service vs. an on-demand, CLI-driven process.
-
-Supervised plugins MAY be isolated and/or resource-bounded.
-
-##### Logging
-
-* Plugins SHOULD generate log messages to ONLY standard output and/or standard error.
-  * In this case the Plugin Supervisor SHALL assume responsibility for all log lifecycle management.
-* Plugin implementations that deviate from the above recommendation SHALL clearly and unambiguously document the following:
-  * Logging configuration flags and/or variables, including working sample configurations.
-  * Default log destination(s) (where do the logs go if no configuration is specified?)
-  * Log lifecycle management ownership and related guidance (size limits, rate limits, rolling, archiving, expunging, etc.) applicable to the logging mechanism embedded within the Plugin.
-* Plugins SHOULD NOT write potentially sensitive data to logs (e.g. `Credentials`).
-
-##### Available Services
-
-* Plugin Packages MAY support all or a subset of CSI services; service combinations MAY be configurable at runtime by the Plugin Supervisor.
-* Misconfigured plugin software SHOULD fail-fast with an OS-appropriate error code.
-
-##### Linux Capabilities
-
-* Plugin Supervisor SHALL guarantee that plugins will have `CAP_SYS_ADMIN` capability on Linux when running on Nodes.
-* Plugins SHOULD clearly document any additionally required capabilities and/or security context.
-
-##### Namespaces
-
-* A Plugin SHOULD NOT assume that it is in the same [Linux namespaces](https://en.wikipedia.org/wiki/Linux_namespaces) as the Plugin Supervisor.
-  The CO MUST clearly document the [mount propagation](https://www.kernel.org/doc/Documentation/filesystems/sharedsubtree.txt) requirements for Node Plugins and the Plugin Supervisor SHALL satisfy the CO’s requirements.
-
-##### Cgroup Isolation
-
-* A Plugin MAY be constrained by cgroups.
-* An operator or Plugin Supervisor MAY configure the devices cgroup subsystem to ensure that a Plugin may access requisite devices.
-* A Plugin Supervisor MAY define resource limits for a Plugin.
-
-##### Resource Requirements
-
-* SPs SHOULD unambiguously document all of a Plugin’s resource requirements.
+Configuration and operation details are implementation details and not subject to definition by this specification.

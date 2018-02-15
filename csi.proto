@@ -270,12 +270,12 @@ message VolumeCapability {
 message CapacityRange {
   // Volume must be at least this big. This field is OPTIONAL.
   // A value of 0 is equal to an unspecified field value.
-  // The value of this field MUST NOT be negative. 
+  // The value of this field MUST NOT be negative.
   int64 required_bytes = 1;
 
   // Volume must not be bigger than this. This field is OPTIONAL.
   // A value of 0 is equal to an unspecified field value.
-  // The value of this field MUST NOT be negative. 
+  // The value of this field MUST NOT be negative.
   int64 limit_bytes = 2;
 }
 
@@ -284,7 +284,7 @@ message Volume {
   // The capacity of the volume in bytes. This field is OPTIONAL. If not
   // set (value of 0), it indicates that the capacity of the volume is
   // unknown (e.g., NFS share).
-  // The value of this field MUST NOT be negative. 
+  // The value of this field MUST NOT be negative.
   int64 capacity_bytes = 1;
 
   // Contains identity information for the created volume. This field is
@@ -447,7 +447,7 @@ message ListVolumesRequest {
   // in the subsequent `ListVolumes` call. This field is OPTIONAL. If
   // not specified (zero value), it means there is no restriction on the
   // number of entries that can be returned.
-  // The value of this field MUST NOT be negative. 
+  // The value of this field MUST NOT be negative.
   int32 max_entries = 2;
 
   // A token to specify where to start paginating. Set this field to
@@ -498,7 +498,7 @@ message GetCapacityResponse {
   // specified in the request, the Plugin SHALL take those into
   // consideration when calculating the available capacity of the
   // storage. This field is REQUIRED.
-  // The value of this field MUST NOT be negative. 
+  // The value of this field MUST NOT be negative.
   int64 available_capacity = 1;
 }
 ////////
