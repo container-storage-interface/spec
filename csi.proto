@@ -9,6 +9,9 @@ service Identity {
 
   rpc GetPluginInfo(GetPluginInfoRequest)
     returns (GetPluginInfoResponse) {}
+
+  rpc GetPluginCapabilities(GetPluginCapabilitiesRequest)
+    returns (GetPluginCapabilitiesResponse) {}
 }
 
 service Controller {
@@ -99,6 +102,42 @@ message GetPluginInfoResponse {
 
   // This field is OPTIONAL. Values are opaque to the CO.
   map<string, string> manifest = 3;
+}
+////////
+////////
+message GetPluginCapabilitiesRequest {
+  // The API version assumed by the CO. This is a REQUIRED field.
+  Version version = 1;
+}
+
+message GetPluginCapabilitiesResponse {
+  // All the capabilities that the controller service supports. This
+  // field is OPTIONAL.
+  repeated PluginCapability capabilities = 2;
+}
+
+// Specifies a capability of the plugin.
+message PluginCapability {
+  message Service {
+    enum Type {
+      UNKNOWN = 0;
+
+      // CONTROLLER_SERVICE indicates that the Plugin provides RPCs for
+      // the ControllerService. Plugins SHOULD provide this capability.
+      // In rare cases certain plugins may wish to omit the
+      // ControllerService entirely from their implementation, but such
+      // SHOULD NOT be the common case.
+      // The presence of this capability determines whether the CO will
+      // attempt to invoke the REQUIRED ControllerService RPCs, as well
+      // as specific RPCs as indicated by ControllerGetCapabilities.
+      CONTROLLER_SERVICE = 1;
+    }
+  }
+
+  oneof type {
+    // Service that the plugin supports.
+    Service service = 1;
+  }
 }
 ////////
 ////////

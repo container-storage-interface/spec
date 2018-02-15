@@ -142,6 +142,23 @@ Plugins. A unified Plugin component supplies both the Controller
 Service and Node Service.
 ```
 
+```
+                            CO "Node" Host(s)
++-------------------------------------------+
+|                                           |
+|  +------------+           +------------+  |
+|  |     CO     |   gRPC    |    Node    |  |
+|  |            +----------->   Plugin   |  |
+|  +------------+           +------------+  |
+|                                           |
++-------------------------------------------+
+
+Figure 4: Headless Plugin deployment, only the CO Node hosts run
+Plugins. A Node-only Plugin component supplies only the Node Service.
+Its GetPluginCapabilities RPC does not report the CONTROLLER_SERVICE
+capability.
+```
+
 ### Volume Lifecycle
 
 ```
@@ -241,6 +258,9 @@ service Identity {
 
   rpc GetPluginInfo(GetPluginInfoRequest)
     returns (GetPluginInfoResponse) {}
+
+  rpc GetPluginCapabilities(GetPluginCapabilitiesRequest)
+    returns (GetPluginCapabilitiesResponse) {}
 }
 
 service Controller {
@@ -343,6 +363,9 @@ The general flow of the success case is as follows (protos illustrated in YAML f
    response:
       supported_versions:
         - major: 0
+          minor: 2
+          patch: 0
+        - major: 0
           minor: 1
           patch: 0
 ```
@@ -361,6 +384,21 @@ The general flow of the success case is as follows (protos illustrated in YAML f
       vendor_version: blue-green
       manifest:
         baz: qaz
+```
+
+3. CO queries available capabilities of the plugin.
+
+```
+   # CO --(GetPluginCapabilities)--> Plugin
+   request:
+     version:
+       major: 0
+       minor: 2
+       patch: 0
+   response:
+     capabilities:
+       - service:
+           type: CONTROLLER_SERVICE
 ```
 
 #### `GetSupportedVersions`
@@ -428,6 +466,52 @@ message GetPluginInfoResponse {
 ##### GetPluginInfo Errors
 
 If the plugin is unable to complete the GetPluginInfo call successfully, it MUST return a non-ok gRPC code in the gRPC status.
+
+#### `GetPluginCapabilities`
+
+This REQUIRED RPC allows the CO to query the supported capabilities of the Plugin "as a whole": it is the grand sum of all capabilities of all instances of the Plugin software, as it is intended to be deployed.
+All instances of the same version (see `vendor_version` of `GetPluginInfoResponse`) of the Plugin SHALL return the same set of capabilities, regardless of both: (a) where instances are deployed on the cluster as well as; (b) which RPCs an instance is serving.
+
+```protobuf
+message GetPluginCapabilitiesRequest {
+  // The API version assumed by the CO. This is a REQUIRED field.
+  Version version = 1;
+}
+
+message GetPluginCapabilitiesResponse {
+  // All the capabilities that the controller service supports. This
+  // field is OPTIONAL.
+  repeated PluginCapability capabilities = 2;
+}
+
+// Specifies a capability of the plugin.
+message PluginCapability {
+  message Service {
+    enum Type {
+      UNKNOWN = 0;
+
+      // CONTROLLER_SERVICE indicates that the Plugin provides RPCs for
+      // the ControllerService. Plugins SHOULD provide this capability.
+      // In rare cases certain plugins may wish to omit the
+      // ControllerService entirely from their implementation, but such
+      // SHOULD NOT be the common case.
+      // The presence of this capability determines whether the CO will
+      // attempt to invoke the REQUIRED ControllerService RPCs, as well
+      // as specific RPCs as indicated by ControllerGetCapabilities.
+      CONTROLLER_SERVICE = 1;
+    }
+  }
+
+  oneof type {
+    // Service that the plugin supports.
+    Service service = 1;
+  }
+}
+```
+
+##### GetPluginCapabilities Errors
+
+If the plugin is unable to complete the GetPluginCapabilities call successfully, it MUST return a non-ok gRPC code in the gRPC status.
 
 ### Controller Service RPC
 
