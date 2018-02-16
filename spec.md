@@ -384,7 +384,7 @@ The status `details` MUST be empty. In the future, this spec may require `detail
 ### Identity Service RPC
 
 Identity service RPCs allow a CO to negotiate an API protocol version that MAY be used for subsequent RPCs across all CSI services with respect to a particular CSI plugin.
-The general flow of the success case is as follows (protos illustrated in YAML for brevity):
+The general flow of the success case MAY be as follows (protos illustrated in YAML for brevity):
 
 1. CO queries supported versions via Identity RPC. The CO is expected to gracefully handle, in the manner of its own choosing, the case wherein the returned `supported_versions` from the plugin are not supported by the CO.
 
@@ -564,9 +564,9 @@ The primary utility of the Probe RPC is deployment verification: this can be a o
 This information can be used, for example, to monitor the health of the plugin and redeploy the plugin (or take other automated measures) when it becomes unhealthy.
 
 The Plugin SHOULD verify if it has the right configurations, devices, dependencies and drivers in order to run and return a success if the validation succeeds.
-The CO SHALL invoke this RPC prior to any other controller service or node service RPC in order to allow the CO to determine the readiness of the plugin.
+The CO MAY invoke this RPC at any time after version negotiation has been completed (see `GetSupportedVersions`).
 A CO MAY invoke this call multiple times with the understanding that a plugin's implementation MAY NOT be trivial and there MAY be overhead incurred by such repeated calls.
-The SP SHALL document known limitations regarding a particular Plugin's implementation of this RPC.
+The SP SHALL document guidance and known limitations regarding a particular Plugin's implementation of this RPC.
 For example, the SP MAY document the maximum frequency at which its Probe implementation should be called.
 
 ```protobuf
@@ -1637,6 +1637,7 @@ Supervised plugins MAY be isolated and/or resource-bounded.
 ##### Available Services
 
 * Plugin Packages MAY support all or a subset of CSI services; service combinations MAY be configurable at runtime by the Plugin Supervisor.
+  * A plugin must know the "mode" in which it's operating: mode of operation is NOT discoverable via interaction with the CO via the CSI specification.
 * Misconfigured plugin software SHOULD fail-fast with an OS-appropriate error code.
 
 ##### Linux Capabilities
