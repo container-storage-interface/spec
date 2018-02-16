@@ -270,7 +270,9 @@ Each SP MUST provide:
 
 ```protobuf
 syntax = "proto3";
-package csi;
+package csi.v1;
+
+option go_package = "csi";
 ```
 
 There are three sets of RPCs:
