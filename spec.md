@@ -500,6 +500,7 @@ message PluginCapability {
       // as specific RPCs as indicated by ControllerGetCapabilities.
       CONTROLLER_SERVICE = 1;
     }
+    Type type = 1;
   }
 
   oneof type {
