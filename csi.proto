@@ -44,6 +44,12 @@ service Controller {
 }
 
 service Node {
+  rpc NodeStageVolume (NodeStageVolumeRequest)
+    returns (NodeStageVolumeResponse) {}
+
+  rpc NodeUnstageVolume (NodeUnstageVolumeRequest)
+    returns (NodeUnstageVolumeResponse) {}
+
   rpc NodePublishVolume (NodePublishVolumeRequest)
     returns (NodePublishVolumeResponse) {}
 
@@ -371,7 +377,8 @@ message ControllerPublishVolumeRequest {
 
 message ControllerPublishVolumeResponse {
   // The SP specific information that will be passed to the Plugin in
-  // the subsequent `NodePublishVolume` call for the given volume.
+  // the subsequent `NodeStageVolume` or `NodePublishVolume` calls
+  // for the given volume.
   // This information is opaque to the CO. This field is OPTIONAL.
   map<string, string> publish_info = 1;
 }
@@ -544,7 +551,7 @@ message ControllerServiceCapability {
 }
 ////////
 ////////
-message NodePublishVolumeRequest {
+message NodeStageVolumeRequest {
   // The API version assumed by the CO. This is a REQUIRED field.
   Version version = 1;
 
@@ -560,19 +567,103 @@ message NodePublishVolumeRequest {
 
   // The path to which the volume will be published. It MUST be an
   // absolute path in the root filesystem of the process serving this
-  // request. The CO SHALL ensure uniqueness of target_path per volume.
-  // The CO SHALL ensure that the path exists, and that the process
-  // serving the request has `read` and `write` permissions to the path.
+  // request. The CO SHALL ensure that there is only one 
+  // staging_target_path per volume.
   // This is a REQUIRED field.
-  string target_path = 4;
+  string staging_target_path = 4;
 
   // The capability of the volume the CO expects the volume to have.
   // This is a REQUIRED field.
   VolumeCapability volume_capability = 5;
 
+  // Credentials used by Node plugin to authenticate/authorize node
+  // stage request.
+  // This field contains credential data, for example username and
+  // password. Each key must consist of alphanumeric characters, '-',
+  // '_' or '.'. Each value MUST contain a valid string. An SP MAY
+  // choose to accept binary (non-string) data by using a binary-to-text
+  // encoding scheme, like base64. An SP SHALL advertise the
+  // requirements for credentials in documentation. COs SHALL permit
+  // passing through the required credentials. This information is
+  // sensitive and MUST be treated as such (not logged, etc.) by the CO.
+  // This field is OPTIONAL.
+  map<string, string> node_stage_credentials = 6;
+
+  // Attributes of the volume to publish. This field is OPTIONAL and
+  // MUST match the attributes of the VolumeInfo identified by
+  // `volume_id`.
+  map<string,string> volume_attributes = 7;
+}
+
+message NodeStageVolumeResponse {}
+////////
+////////
+message NodeUnstageVolumeRequest {
+  // The API version assumed by the CO. This is a REQUIRED field.
+  Version version = 1;
+
+  // The ID of the volume. This field is REQUIRED.
+  string volume_id = 2;
+
+  // The path at which the volume was published. It MUST be an absolute
+  // path in the root filesystem of the process serving this request.
+  // This is a REQUIRED field.
+  string staging_target_path = 3;
+
+  // Credentials used by Node plugin to authenticate/authorize node
+  // unstage request.
+  // This field contains credential data, for example username and
+  // password. Each key must consist of alphanumeric characters, '-',
+  // '_' or '.'. Each value MUST contain a valid string. An SP MAY
+  // choose to accept binary (non-string) data by using a binary-to-text
+  // encoding scheme, like base64. An SP SHALL advertise the
+  // requirements for credentials in documentation. COs SHALL permit
+  // passing through the required credentials. This information is
+  // sensitive and MUST be treated as such (not logged, etc.) by the CO.
+  // This field is OPTIONAL.
+  map<string, string> node_unstage_credentials = 4;
+}
+
+message NodeUnstageVolumeResponse {}
+////////
+////////
+message NodePublishVolumeRequest {
+  // The API version assumed by the CO. This is a REQUIRED field.
+  Version version = 1;
+
+  // The ID of the volume to publish. This field is REQUIRED.
+  string volume_id = 2;
+
+  // The CO SHALL set this field to the value returned by
+  // `ControllerPublishVolume` if the corresponding Controller Plugin
+  // has `PUBLISH_UNPUBLISH_VOLUME` controller capability, and SHALL be
+  // left unset if the corresponding Controller Plugin does not have
+  // this capability. This is an OPTIONAL field.
+  map<string, string> publish_info = 3;
+
+  // The path to which the device was mounted by `NodeStageVolume`.
+  // It MUST be an absolute path in the root filesystem of the process
+  // serving this request.
+  // It MUST be set if the Node Plugin implements the 
+  // `STAGE_UNSTAGE_VOLUME` node capability.
+  // This is an OPTIONAL field.
+  string staging_target_path = 4;
+
+  // The path to which the volume will be published. It MUST be an
+  // absolute path in the root filesystem of the process serving this
+  // request. The CO SHALL ensure uniqueness of target_path per volume.
+  // The CO SHALL ensure that the path exists, and that the process
+  // serving the request has `read` and `write` permissions to the path.
+  // This is a REQUIRED field.
+  string target_path = 5;
+
+  // The capability of the volume the CO expects the volume to have.
+  // This is a REQUIRED field.
+  VolumeCapability volume_capability = 6;
+
   // Whether to publish the volume in readonly mode. This field is
   // REQUIRED.
-  bool readonly = 6;
+  bool readonly = 7;
 
   // Credentials used by Node plugin to authenticate/authorize node
   // publish request.
@@ -585,12 +676,13 @@ message NodePublishVolumeRequest {
   // passing through the required credentials. This information is
   // sensitive and MUST be treated as such (not logged, etc.) by the CO.
   // This field is OPTIONAL.
-  map<string, string> node_publish_credentials = 7;
+  map<string, string> node_publish_credentials = 8;
+
 
   // Attributes of the volume to publish. This field is OPTIONAL and
   // MUST match the attributes of the Volume identified by
   // `volume_id`.
-  map<string,string> volume_attributes = 8;
+  map<string,string> volume_attributes = 9;
 }
 
 message NodePublishVolumeResponse {}
@@ -662,6 +754,7 @@ message NodeServiceCapability {
   message RPC {
     enum Type {
       UNKNOWN = 0;
+      STAGE_UNSTAGE_VOLUME = 1;
     }
 
     Type type = 1;

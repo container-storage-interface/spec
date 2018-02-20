@@ -183,6 +183,34 @@ creation to destruction.
 ```
 
 ```
+   CreateVolume +------------+ DeleteVolume
+ +------------->|  CREATED   +--------------+
+ |              +---+----+---+              |
+ |       Controller |    | Controller       v
++++         Publish |    | Unpublish       +++
+|X|          Volume |    | Volume          | |
++-+             +---v----+---+             +-+
+                | NODE_READY |
+                +---+----^---+
+               Node |    | Node
+              Stage |    | Unstage
+             Volume |    | Volume
+                +---v----+---+
+                |  VOL_READY |
+                +------------+
+               Node |    | Node
+            Publish |    | Unpublish
+             Volume |    | Volume
+                +---v----+---+
+                | PUBLISHED  |
+                +------------+
+
+Figure 5: The lifecycle of a dynamically provisioned volume, from
+creation to destruction, when the Node Plugin advertises the
+STAGE_UNSTAGE_VOLUME capability.
+```
+
+```
     Controller                  Controller
        Publish                  Unpublish
         Volume  +------------+  Volume
@@ -199,7 +227,7 @@ creation to destruction.
    Volume
    Capabilities
 
-Figure 5: The lifecycle of a pre-provisioned volume that requires
+Figure 6: The lifecycle of a pre-provisioned volume that requires
 controller to publish to a node (`ControllerPublishVolume`) prior to
 publishing on the node (`NodePublishVolume`).
 ```
@@ -216,7 +244,7 @@ Publish |    | Unpublish
     | PUBLISHED  |
     +------------+
 
-Figure 6: Plugins may forego other lifecycle steps by contraindicating
+Figure 7: Plugins may forego other lifecycle steps by contraindicating
 them via the capabilities API. Interactions with the volumes of such
 plugins is reduced to `NodePublishVolume` and `NodeUnpublishVolume`
 calls.
@@ -293,6 +321,12 @@ service Controller {
 }
 
 service Node {
+  rpc NodeStageVolume (NodeStageVolumeRequest)
+    returns (NodeStageVolumeResponse) {}
+
+  rpc NodeUnstageVolume (NodeUnstageVolumeRequest)
+    returns (NodeUnstageVolumeResponse) {}
+
   rpc NodePublishVolume (NodePublishVolumeRequest)
     returns (NodePublishVolumeResponse) {}
 
@@ -806,7 +840,8 @@ message ControllerPublishVolumeRequest {
 
 message ControllerPublishVolumeResponse {
   // The SP specific information that will be passed to the Plugin in
-  // the subsequent `NodePublishVolume` call for the given volume.
+  // the subsequent `NodeStageVolume` or `NodePublishVolume` calls
+  // for the given volume.
   // This information is opaque to the CO. This field is OPTIONAL.
   map<string, string> publish_info = 1;
 }
@@ -832,7 +867,7 @@ The CO MUST implement the specified error recovery behavior when it encounters t
 
 Controller Plugin MUST implement this RPC call if it has `PUBLISH_UNPUBLISH_VOLUME` controller capability.
 This RPC is a reverse operation of `ControllerPublishVolume`.
-It MUST be called after `NodeUnpublishVolume` on the volume is called and succeeds.
+It MUST be called after all `NodeUnstageVolume` and `NodeUnpublishVolume` on the volume are called and succeed.
 The Plugin SHOULD perform the work that is necessary for making the volume ready to be consumed by a different node.
 The Plugin MUST NOT assume that this RPC will be executed on the node where the volume was previously used.
 
@@ -1114,6 +1149,153 @@ It is NOT REQUIRED for a controller plugin to implement the `LIST_VOLUMES` capab
 
 ### Node Service RPC
 
+#### `NodeStageVolume`
+
+A Node Plugin MUST implement this RPC call if it has `STAGE_UNSTAGE_VOLUME` node capability.
+
+This RPC is called by the CO prior to the volume being consumed by any workloads on the node by `NodePublishVolume`.
+The Plugin SHALL assume that this RPC will be executed on the node where the volume will be used.
+This RPC SHOULD be called by the CO when a workload that wants to use the specified volume is placed (scheduled) on the specified node for the first time or for the first time since a `NodeUnstageVolume` call for the specified volume was called and returned success on that node.
+
+If the corresponding Controller Plugin has `PUBLISH_UNPUBLISH_VOLUME` controller capability and the Node Plugin has `STAGE_UNSTAGE_VOLUME` capability, then the CO MUST guarantee that this RPC is called after `ControllerPublishVolume` is called for the given volume on the given node and returns a success.
+The CO MUST guarantee that this RPC is called and returns a success before any `NodePublishVolume` is called for the given volume on the given node.
+
+This operation MUST be idempotent.
+If the volume corresponding to the `volume_id` is already staged to the `staging_target_path`, and is identical to the specified `volume_capability` the Plugin MUST reply `0 OK`.
+
+If this RPC failed, or the CO does not know if it failed or not, it MAY choose to call `NodeStageVolume` again, or choose to call `NodeUnstageVolume`.
+
+```protobuf
+message NodeStageVolumeRequest {
+  // The API version assumed by the CO. This is a REQUIRED field.
+  Version version = 1;
+
+  // The ID of the volume to publish. This field is REQUIRED.
+  string volume_id = 2;
+
+  // The CO SHALL set this field to the value returned by
+  // `ControllerPublishVolume` if the corresponding Controller Plugin
+  // has `PUBLISH_UNPUBLISH_VOLUME` controller capability, and SHALL be
+  // left unset if the corresponding Controller Plugin does not have
+  // this capability. This is an OPTIONAL field.
+  map<string, string> publish_info = 3;
+
+  // The path to which the volume will be published. It MUST be an
+  // absolute path in the root filesystem of the process serving this
+  // request. The CO SHALL ensure that there is only one 
+  // staging_target_path per volume.
+  // This is a REQUIRED field.
+  string staging_target_path = 4;
+
+  // The capability of the volume the CO expects the volume to have.
+  // This is a REQUIRED field.
+  VolumeCapability volume_capability = 5;
+
+  // Credentials used by Node plugin to authenticate/authorize node
+  // stage request.
+  // This field contains credential data, for example username and
+  // password. Each key must consist of alphanumeric characters, '-',
+  // '_' or '.'. Each value MUST contain a valid string. An SP MAY
+  // choose to accept binary (non-string) data by using a binary-to-text
+  // encoding scheme, like base64. An SP SHALL advertise the
+  // requirements for credentials in documentation. COs SHALL permit
+  // passing through the required credentials. This information is
+  // sensitive and MUST be treated as such (not logged, etc.) by the CO.
+  // This field is OPTIONAL.
+  map<string, string> node_stage_credentials = 6;
+
+  // Attributes of the volume to publish. This field is OPTIONAL and
+  // MUST match the attributes of the VolumeInfo identified by
+  // `volume_id`.
+  map<string,string> volume_attributes = 7;
+}
+
+message NodeStageVolumeResponse {}
+```
+
+#### NodeStageVolume Errors
+
+If the plugin is unable to complete the NodeStageVolume call successfully, it MUST return a non-ok gRPC code in the gRPC status.
+If the conditions defined below are encountered, the plugin MUST return the specified gRPC error code.
+The CO MUST implement the specified error recovery behavior when it encounters the gRPC error code.
+
+| Condition | gRPC Code | Description | Recovery Behavior |
+|-----------|-----------|-------------|-------------------|
+| Volume does not exist | 5 NOT_FOUND | Indicates that a volume corresponding to the specified `volume_id` does not exist. | Caller MUST verify that the `volume_id` is correct and that the volume is accessible and has not been deleted before retrying with exponential back off. |
+| Volume published but is incompatible | 6 ALREADY_EXISTS | Indicates that a volume corresponding to the specified `volume_id` has already been published at the specified `staging_target_path` but is incompatible with the specified `volume_capability` flag. | Caller MUST fix the arguments before retying. |
+| Operation pending for volume | 10 ABORTED | Indicates that there is a already an operation pending for the specified volume. In general the Cluster Orchestrator (CO) is responsible for ensuring that there is no more than one call "in-flight" per volume at a given time. However, in some circumstances, the CO MAY lose state (for example when the CO crashes and restarts), and MAY issue multiple calls simultaneously for the same volume. The Plugin, SHOULD handle this as gracefully as possible, and MAY return this error code to reject secondary calls. | Caller SHOULD ensure that there are no other calls pending for the specified volume, and then retry with exponential back off. |
+| Exceeds capabilities | 10 FAILED_PRECONDITION | Indicates that the CO has exceeded the volume's capabilities because the volume does not have MULTI_NODE capability. | Caller MAY choose to call `ValidateVolumeCapabilities` to validate the volume capabilities, or wait for the volume to be unpublished on the node. |
+
+#### `NodeUnstageVolume`
+
+A Node Plugin MUST implement this RPC call if it has `STAGE_UNSTAGE_VOLUME` node capability.
+
+This RPC is a reverse operation of `NodeStageVolume`.
+This RPC MUST undo the work by the corresponding `NodeStageVolume`.
+This RPC SHALL be called by the CO once for each `staging_target_path` that was successfully setup via `NodeStageVolume`.
+
+If the corresponding Controller Plugin has `PUBLISH_UNPUBLISH_VOLUME` controller capability and the Node Plugin has `STAGE_UNSTAGE_VOLUME` capability, the CO MUST guarantee that this RPC is called and returns success before calling `ControllerUnpublishVolume` for the given node and the given volume.
+The CO MUST guarantee that this RPC is called after all `NodeUnpublishVolume` have been called and returned success for the given volume on the given node.
+
+The Plugin SHALL assume that this RPC will be executed on the node where the volume is being used.
+
+This RPC MAY be called by the CO when the workload using the volume is being moved to a different node, or all the workloads using the volume on a node have finished.
+
+This operation MUST be idempotent.
+If the volume corresponding to the `volume_id` is not staged to the `staging_target_path`,  the Plugin MUST reply `0 OK`.
+
+If this RPC failed, or the CO does not know if it failed or not, it MAY choose to call `NodeUnstageVolume` again.
+
+```protobuf
+message NodeUnstageVolumeRequest {
+  // The API version assumed by the CO. This is a REQUIRED field.
+  Version version = 1;
+
+  // The ID of the volume. This field is REQUIRED.
+  string volume_id = 2;
+
+  // The path at which the volume was published. It MUST be an absolute
+  // path in the root filesystem of the process serving this request.
+  // This is a REQUIRED field.
+  string staging_target_path = 3;
+
+  // Credentials used by Node plugin to authenticate/authorize node
+  // unstage request.
+  // This field contains credential data, for example username and
+  // password. Each key must consist of alphanumeric characters, '-',
+  // '_' or '.'. Each value MUST contain a valid string. An SP MAY
+  // choose to accept binary (non-string) data by using a binary-to-text
+  // encoding scheme, like base64. An SP SHALL advertise the
+  // requirements for credentials in documentation. COs SHALL permit
+  // passing through the required credentials. This information is
+  // sensitive and MUST be treated as such (not logged, etc.) by the CO.
+  // This field is OPTIONAL.
+  map<string, string> node_unstage_credentials = 4;
+}
+
+message NodeUnstageVolumeResponse {}
+```
+
+#### NodeUnstageVolume Errors
+
+If the plugin is unable to complete the NodeUnstageVolume call successfully, it MUST return a non-ok gRPC code in the gRPC status.
+If the conditions defined below are encountered, the plugin MUST return the specified gRPC error code.
+The CO MUST implement the specified error recovery behavior when it encounters the gRPC error code.
+
+| Condition | gRPC Code | Description | Recovery Behavior |
+|-----------|-----------|-------------|-------------------|
+| Volume does not exists | 5 NOT_FOUND | Indicates that a volume corresponding to the specified `volume_id` does not exist. | Caller MUST verify that the `volume_id` is correct and that the volume is accessible and has not been deleted before retrying with exponential back off. |
+| Operation pending for volume | 10 ABORTED | Indicates that there is a already an operation pending for the specified volume. In general the Cluster Orchestrator (CO) is responsible for ensuring that there is no more than one call "in-flight" per volume at a given time. However, in some circumstances, the CO MAY lose state (for example when the CO crashes and restarts), and MAY issue multiple calls simultaneously for the same volume. The Plugin, SHOULD handle this as gracefully as possible, and MAY return this error code to reject secondary calls. | Caller SHOULD ensure that there are no other calls pending for the specified volume, and then retry with exponential back off. |
+
+#### RPC Interactions and Reference Counting
+`NodeStageVolume`, `NodeUnstageVolume`, `NodePublishVolume`, `NodeUnpublishVolume`
+
+The following interaction semantics ARE REQUIRED if the plugin advertises the `STAGE_UNSTAGE_VOLUME` capability. 
+`NodeStageVolume` MUST be called and return success once per volume per node before any `NodePublishVolume` MAY be called for the volume.
+All `NodeUnpublishVolume` MUST be called and return success for a volume before `NodeUnstageVolume` MAY be called for the volume.
+
+Note that this requires that all COs MUST support reference counting of volumes so that if `STAGE_UNSTAGE_VOLUME` is advertised by the SP, the CO MUST fufill the above interaction semantics.
+
 #### `NodePublishVolume`
 
 This RPC is called by the CO when a workload that wants to use the specified volume is placed (scheduled) on a node.
@@ -1151,21 +1333,29 @@ message NodePublishVolumeRequest {
   // this capability. This is an OPTIONAL field.
   map<string, string> publish_info = 3;
 
+  // The path to which the device was mounted by `NodeStageVolume`.
+  // It MUST be an absolute path in the root filesystem of the process
+  // serving this request.
+  // It MUST be set if the Node Plugin implements the 
+  // `STAGE_UNSTAGE_VOLUME` node capability.
+  // This is an OPTIONAL field.
+  string staging_target_path = 4;
+
   // The path to which the volume will be published. It MUST be an
   // absolute path in the root filesystem of the process serving this
   // request. The CO SHALL ensure uniqueness of target_path per volume.
   // The CO SHALL ensure that the path exists, and that the process
   // serving the request has `read` and `write` permissions to the path.
   // This is a REQUIRED field.
-  string target_path = 4;
+  string target_path = 5;
 
   // The capability of the volume the CO expects the volume to have.
   // This is a REQUIRED field.
-  VolumeCapability volume_capability = 5;
+  VolumeCapability volume_capability = 6;
 
   // Whether to publish the volume in readonly mode. This field is
   // REQUIRED.
-  bool readonly = 6;
+  bool readonly = 7;
 
   // Credentials used by Node plugin to authenticate/authorize node
   // publish request.
@@ -1178,12 +1368,13 @@ message NodePublishVolumeRequest {
   // passing through the required credentials. This information is
   // sensitive and MUST be treated as such (not logged, etc.) by the CO.
   // This field is OPTIONAL.
-  map<string, string> node_publish_credentials = 7;
+  map<string, string> node_publish_credentials = 8;
+
 
   // Attributes of the volume to publish. This field is OPTIONAL and
   // MUST match the attributes of the Volume identified by
   // `volume_id`.
-  map<string,string> volume_attributes = 8;
+  map<string,string> volume_attributes = 9;
 }
 
 message NodePublishVolumeResponse {}
@@ -1201,6 +1392,7 @@ The CO MUST implement the specified error recovery behavior when it encounters t
 | Volume published but is incompatible | 6 ALREADY_EXISTS | Indicates that a volume corresponding to the specified `volume_id` has already been published at the specified `target_path` but is incompatible with the specified `volume_capability` or `readonly` flag. | Caller MUST fix the arguments before retying. |
 | Operation pending for volume | 10 ABORTED | Indicates that there is a already an operation pending for the specified volume. In general the Cluster Orchestrator (CO) is responsible for ensuring that there is no more than one call "in-flight" per volume at a given time. However, in some circumstances, the CO MAY lose state (for example when the CO crashes and restarts), and MAY issue multiple calls simultaneously for the same volume. The Plugin, SHOULD handle this as gracefully as possible, and MAY return this error code to reject secondary calls. | Caller SHOULD ensure that there are no other calls pending for the specified volume, and then retry with exponential back off. |
 | Exceeds capabilities | 10 FAILED_PRECONDITION | Indicates that the CO has exceeded the volume's capabilities because the volume does not have MULTI_NODE capability. | Caller MAY choose to call `ValidateVolumeCapabilities` to validate the volume capabilities, or wait for the volume to be unpublished on the node. |
+| Stanging target path not set | 10 FAILED_PRECONDITION | Indicates that `STAGE_UNSTAGE_VOLUME` capability is set but no `staging_target_path` was set. | Caller MUST make sure call to `NodeStageVolume` is made and returns success before retrying with valid `staging_target_path`. |  
 
 
 #### `NodeUnpublishVolume`
@@ -1342,6 +1534,7 @@ message NodeServiceCapability {
   message RPC {
     enum Type {
       UNKNOWN = 0;
+      STAGE_UNSTAGE_VOLUME = 1;
     }
 
     Type type = 1;
