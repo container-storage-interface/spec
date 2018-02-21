@@ -560,10 +560,14 @@ If the plugin is unable to complete the GetPluginCapabilities call successfully,
 #### `Probe`
 
 A Plugin MUST implement this RPC call.
-The primary utility of the Probe RPC is deployment verification: this can be a one time or periodic check to ensure that a plugin instance is healthy and has all dependencies available.
-This information can be used, for example, to monitor the health of the plugin and redeploy the plugin (or take other automated measures) when it becomes unhealthy.
+The primary utility of the Probe RPC is to verify that the plugin is in a healthy state.
+If an unhealthy state is reported, via a non-success response, a CO MAY take action with the intent to bring the plugin to a healthy state.
+Such actions MAY include, but SHALL NOT be limited to, the following:
 
-The Plugin SHOULD verify if it has the right configurations, devices, dependencies and drivers in order to run and return a success if the validation succeeds.
+* Restarting the plugin container, or
+* Notifying the plugin supervisor.
+
+The Plugin MAY verify that it has the right configurations, devices, dependencies and drivers in order to run and return a success if the validation succeeds.
 The CO MAY invoke this RPC at any time after version negotiation has been completed (see `GetSupportedVersions`).
 A CO MAY invoke this call multiple times with the understanding that a plugin's implementation MAY NOT be trivial and there MAY be overhead incurred by such repeated calls.
 The SP SHALL document guidance and known limitations regarding a particular Plugin's implementation of this RPC.
@@ -1637,7 +1641,8 @@ Supervised plugins MAY be isolated and/or resource-bounded.
 ##### Available Services
 
 * Plugin Packages MAY support all or a subset of CSI services; service combinations MAY be configurable at runtime by the Plugin Supervisor.
-  * A plugin must know the "mode" in which it's operating: mode of operation is NOT discoverable via interaction with the CO via the CSI specification.
+  * A plugin must know the "mode" in which it is operating (e.g. node, controller, or both).
+  * This specification does not dictate the mechanism by which mode of operation must be discovered, and instead places that burden upon the SP.
 * Misconfigured plugin software SHOULD fail-fast with an OS-appropriate error code.
 
 ##### Linux Capabilities
