@@ -12,6 +12,9 @@ service Identity {
 
   rpc GetPluginCapabilities(GetPluginCapabilitiesRequest)
     returns (GetPluginCapabilitiesResponse) {}
+
+  rpc Probe (ProbeRequest)
+    returns (ProbeResponse) {}
 }
 
 service Controller {
@@ -36,9 +39,6 @@ service Controller {
   rpc GetCapacity (GetCapacityRequest)
     returns (GetCapacityResponse) {}
 
-  rpc ControllerProbe (ControllerProbeRequest)
-    returns (ControllerProbeResponse) {}
-
   rpc ControllerGetCapabilities (ControllerGetCapabilitiesRequest)
     returns (ControllerGetCapabilitiesResponse) {}  
 }
@@ -58,9 +58,6 @@ service Node {
 
   rpc NodeGetId (NodeGetIdRequest)
     returns (NodeGetIdResponse) {}
-
-  rpc NodeProbe (NodeProbeRequest)
-    returns (NodeProbeResponse) {}
 
   rpc NodeGetCapabilities (NodeGetCapabilitiesRequest)
     returns (NodeGetCapabilitiesResponse) {}
@@ -145,6 +142,16 @@ message PluginCapability {
     // Service that the plugin supports.
     Service service = 1;
   }
+}
+////////
+////////
+message ProbeRequest {
+  // The API version assumed by the CO. This is a REQUIRED field.
+  Version version = 1;
+}
+
+message ProbeResponse {
+  // Intentionally empty.
 }
 ////////
 ////////
@@ -511,14 +518,6 @@ message GetCapacityResponse {
 }
 ////////
 ////////
-message ControllerProbeRequest {
-  // The API version assumed by the CO. This is a REQUIRED field.
-  Version version = 1;
-}
-
-message ControllerProbeResponse {}
-////////
-////////
 message ControllerGetCapabilitiesRequest {
   // The API version assumed by the CO. This is a REQUIRED field.
   Version version = 1;
@@ -728,14 +727,6 @@ message NodeGetIdResponse {
   // This is a REQUIRED field.
   string node_id = 1;
 }
-////////
-////////
-message NodeProbeRequest {
-  // The API version assumed by the CO. This is a REQUIRED field.
-  Version version = 1;
-}
-
-message NodeProbeResponse {}
 ////////
 ////////
 message NodeGetCapabilitiesRequest {
