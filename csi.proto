@@ -1,10 +1,7 @@
-////////
 syntax = "proto3";
 package csi.v1;
 
 option go_package = "csi";
-////////
-////////
 service Identity {
   rpc GetPluginInfo(GetPluginInfoRequest)
     returns (GetPluginInfoResponse) {}
@@ -61,8 +58,6 @@ service Node {
   rpc NodeGetCapabilities (NodeGetCapabilitiesRequest)
     returns (NodeGetCapabilitiesResponse) {}
 }
-////////
-////////
 message GetPluginInfoRequest {
 }
 
@@ -82,8 +77,6 @@ message GetPluginInfoResponse {
   // This field is OPTIONAL. Values are opaque to the CO.
   map<string, string> manifest = 3;
 }
-////////
-////////
 message GetPluginCapabilitiesRequest {
 }
 
@@ -117,16 +110,12 @@ message PluginCapability {
     Service service = 1;
   }
 }
-////////
-////////
 message ProbeRequest {
 }
 
 message ProbeResponse {
   // Intentionally empty.
 }
-////////
-////////
 message CreateVolumeRequest {
   // The suggested name for the storage space. This field is REQUIRED.
   // It serves two purposes:
@@ -285,8 +274,6 @@ message Volume {
   // be passed to volume validation and publishing calls.
   map<string,string> attributes = 3;
 }
-////////
-////////
 message DeleteVolumeRequest {
   // The ID of the volume to be deprovisioned.
   // This field is REQUIRED.
@@ -308,8 +295,6 @@ message DeleteVolumeRequest {
 
 message DeleteVolumeResponse {
 }
-////////
-////////
 message ControllerPublishVolumeRequest {
   // The ID of the volume to be used on a node.
   // This field is REQUIRED.
@@ -353,8 +338,6 @@ message ControllerPublishVolumeResponse {
   // This information is opaque to the CO. This field is OPTIONAL.
   map<string, string> publish_info = 1;
 }
-////////
-////////
 message ControllerUnpublishVolumeRequest {
   // The ID of the volume. This field is REQUIRED.
   string volume_id = 1;
@@ -382,8 +365,6 @@ message ControllerUnpublishVolumeRequest {
 
 message ControllerUnpublishVolumeResponse {
 }
-////////
-////////
 message ValidateVolumeCapabilitiesRequest {
   // The ID of the volume to check. This field is REQUIRED.
   string volume_id = 1;
@@ -408,8 +389,6 @@ message ValidateVolumeCapabilitiesResponse {
   // An empty string is equal to an unspecified field value.
   string message = 2;
 }
-////////
-////////
 message ListVolumesRequest {
   // If specified (non-zero value), the Plugin MUST NOT return more
   // entries than this number in the response. If the actual number of
@@ -443,8 +422,6 @@ message ListVolumesResponse {
   // An empty string is equal to an unspecified field value.
   string next_token = 2;
 }
-////////
-////////
 message GetCapacityRequest {
   // If specified, the Plugin SHALL report the capacity of the storage
   // that can be used to provision volumes that satisfy ALL of the
@@ -469,8 +446,6 @@ message GetCapacityResponse {
   // The value of this field MUST NOT be negative. 
   int64 available_capacity = 1;
 }
-////////
-////////
 message ControllerGetCapabilitiesRequest {
 }
 
@@ -499,8 +474,6 @@ message ControllerServiceCapability {
     RPC rpc = 1;
   }
 }
-////////
-////////
 message NodeStageVolumeRequest {
   // The ID of the volume to publish. This field is REQUIRED.
   string volume_id = 1;
@@ -544,8 +517,6 @@ message NodeStageVolumeRequest {
 
 message NodeStageVolumeResponse {
 }
-////////
-////////
 message NodeUnstageVolumeRequest {
   // The ID of the volume. This field is REQUIRED.
   string volume_id = 1;
@@ -571,8 +542,6 @@ message NodeUnstageVolumeRequest {
 
 message NodeUnstageVolumeResponse {
 }
-////////
-////////
 message NodePublishVolumeRequest {
   // The ID of the volume to publish. This field is REQUIRED.
   string volume_id = 1;
@@ -630,8 +599,6 @@ message NodePublishVolumeRequest {
 
 message NodePublishVolumeResponse {
 }
-////////
-////////
 message NodeUnpublishVolumeRequest {
   // The ID of the volume. This field is REQUIRED.
   string volume_id = 1;
@@ -657,8 +624,6 @@ message NodeUnpublishVolumeRequest {
 
 message NodeUnpublishVolumeResponse {
 }
-////////
-////////
 message NodeGetIdRequest {
 }
 
@@ -668,8 +633,6 @@ message NodeGetIdResponse {
   // This is a REQUIRED field.
   string node_id = 1;
 }
-////////
-////////
 message NodeGetCapabilitiesRequest {
 }
 
@@ -695,4 +658,3 @@ message NodeServiceCapability {
     RPC rpc = 1;
   }
 }
-////////

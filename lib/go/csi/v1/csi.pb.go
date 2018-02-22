@@ -201,8 +201,6 @@ func (NodeServiceCapability_RPC_Type) EnumDescriptor() ([]byte, []int) {
 	return fileDescriptor0, []int{39, 0, 0}
 }
 
-// //////
-// //////
 type GetPluginInfoRequest struct {
 }
 
@@ -252,8 +250,6 @@ func (m *GetPluginInfoResponse) GetManifest() map[string]string {
 	return nil
 }
 
-// //////
-// //////
 type GetPluginCapabilitiesRequest struct {
 }
 
@@ -387,8 +383,6 @@ func (m *PluginCapability_Service) GetType() PluginCapability_Service_Type {
 	return PluginCapability_Service_UNKNOWN
 }
 
-// //////
-// //////
 type ProbeRequest struct {
 }
 
@@ -405,8 +399,6 @@ func (m *ProbeResponse) String() string            { return proto.CompactTextStr
 func (*ProbeResponse) ProtoMessage()               {}
 func (*ProbeResponse) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{6} }
 
-// //////
-// //////
 type CreateVolumeRequest struct {
 	// The suggested name for the storage space. This field is REQUIRED.
 	// It serves two purposes:
@@ -788,8 +780,6 @@ func (m *Volume) GetAttributes() map[string]string {
 	return nil
 }
 
-// //////
-// //////
 type DeleteVolumeRequest struct {
 	// The ID of the volume to be deprovisioned.
 	// This field is REQUIRED.
@@ -835,8 +825,6 @@ func (m *DeleteVolumeResponse) String() string            { return proto.Compact
 func (*DeleteVolumeResponse) ProtoMessage()               {}
 func (*DeleteVolumeResponse) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{13} }
 
-// //////
-// //////
 type ControllerPublishVolumeRequest struct {
 	// The ID of the volume to be used on a node.
 	// This field is REQUIRED.
@@ -937,8 +925,6 @@ func (m *ControllerPublishVolumeResponse) GetPublishInfo() map[string]string {
 	return nil
 }
 
-// //////
-// //////
 type ControllerUnpublishVolumeRequest struct {
 	// The ID of the volume. This field is REQUIRED.
 	VolumeId string `protobuf:"bytes,1,opt,name=volume_id,json=volumeId" json:"volume_id,omitempty"`
@@ -1000,8 +986,6 @@ func (*ControllerUnpublishVolumeResponse) Descriptor() ([]byte, []int) {
 	return fileDescriptor0, []int{17}
 }
 
-// //////
-// //////
 type ValidateVolumeCapabilitiesRequest struct {
 	// The ID of the volume to check. This field is REQUIRED.
 	VolumeId string `protobuf:"bytes,1,opt,name=volume_id,json=volumeId" json:"volume_id,omitempty"`
@@ -1073,8 +1057,6 @@ func (m *ValidateVolumeCapabilitiesResponse) GetMessage() string {
 	return ""
 }
 
-// //////
-// //////
 type ListVolumesRequest struct {
 	// If specified (non-zero value), the Plugin MUST NOT return more
 	// entries than this number in the response. If the actual number of
@@ -1157,8 +1139,6 @@ func (m *ListVolumesResponse_Entry) GetVolume() *Volume {
 	return nil
 }
 
-// //////
-// //////
 type GetCapacityRequest struct {
 	// If specified, the Plugin SHALL report the capacity of the storage
 	// that can be used to provision volumes that satisfy ALL of the
@@ -1214,8 +1194,6 @@ func (m *GetCapacityResponse) GetAvailableCapacity() int64 {
 	return 0
 }
 
-// //////
-// //////
 type ControllerGetCapabilitiesRequest struct {
 }
 
@@ -1355,8 +1333,6 @@ func (m *ControllerServiceCapability_RPC) GetType() ControllerServiceCapability_
 	return ControllerServiceCapability_RPC_UNKNOWN
 }
 
-// //////
-// //////
 type NodeStageVolumeRequest struct {
 	// The ID of the volume to publish. This field is REQUIRED.
 	VolumeId string `protobuf:"bytes,1,opt,name=volume_id,json=volumeId" json:"volume_id,omitempty"`
@@ -1448,8 +1424,6 @@ func (m *NodeStageVolumeResponse) String() string            { return proto.Comp
 func (*NodeStageVolumeResponse) ProtoMessage()               {}
 func (*NodeStageVolumeResponse) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{28} }
 
-// //////
-// //////
 type NodeUnstageVolumeRequest struct {
 	// The ID of the volume. This field is REQUIRED.
 	VolumeId string `protobuf:"bytes,1,opt,name=volume_id,json=volumeId" json:"volume_id,omitempty"`
@@ -1505,8 +1479,6 @@ func (m *NodeUnstageVolumeResponse) String() string            { return proto.Co
 func (*NodeUnstageVolumeResponse) ProtoMessage()               {}
 func (*NodeUnstageVolumeResponse) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{30} }
 
-// //////
-// //////
 type NodePublishVolumeRequest struct {
 	// The ID of the volume to publish. This field is REQUIRED.
 	VolumeId string `protobuf:"bytes,1,opt,name=volume_id,json=volumeId" json:"volume_id,omitempty"`
@@ -1623,8 +1595,6 @@ func (m *NodePublishVolumeResponse) String() string            { return proto.Co
 func (*NodePublishVolumeResponse) ProtoMessage()               {}
 func (*NodePublishVolumeResponse) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{32} }
 
-// //////
-// //////
 type NodeUnpublishVolumeRequest struct {
 	// The ID of the volume. This field is REQUIRED.
 	VolumeId string `protobuf:"bytes,1,opt,name=volume_id,json=volumeId" json:"volume_id,omitempty"`
@@ -1680,8 +1650,6 @@ func (m *NodeUnpublishVolumeResponse) String() string            { return proto.
 func (*NodeUnpublishVolumeResponse) ProtoMessage()               {}
 func (*NodeUnpublishVolumeResponse) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{34} }
 
-// //////
-// //////
 type NodeGetIdRequest struct {
 }
 
@@ -1709,8 +1677,6 @@ func (m *NodeGetIdResponse) GetNodeId() string {
 	return ""
 }
 
-// //////
-// //////
 type NodeGetCapabilitiesRequest struct {
 }
 
