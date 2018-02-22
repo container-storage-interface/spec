@@ -648,18 +648,21 @@ message CreateVolumeRequest {
   // validating these parameters. COs will treat these as opaque.
   map<string, string> parameters = 5;
 
-  // Credentials used by Controller plugin to authenticate/authorize
-  // volume creation request.
-  // This field contains credential data, for example username and
-  // password. Each key must consist of alphanumeric characters, '-',
-  // '_' or '.'. Each value MUST contain a valid string. An SP MAY
-  // choose to accept binary (non-string) data by using a binary-to-text
-  // encoding scheme, like base64. An SP SHALL advertise the
-  // requirements for credentials in documentation. COs SHALL permit
-  // passing through the required credentials. This information is
-  // sensitive and MUST be treated as such (not logged, etc.) by the CO.
+  // Secrets required by plugin to complete volume creation request.
+  // A secret is a string to string map where the key identifies the
+  // name of the secret (e.g. "username" or "password"), and the value
+  // contains the secret data (e.g. "bob" or "abc123").
+  // Each key must consist of alphanumeric characters, '-', '_' or '.'.
+  // Each value MUST contain a valid string. An SP MAY choose to accept
+  // binary (non-string) data by using a binary-to-text encoding scheme,
+  // like base64.
+  // An SP SHALL advertise the requirements for required secret keys and
+  // values in documentation.
+  // COs SHALL permit passing through the required secrets.
+  // This information is sensitive and MUST be treated as such (not
+  // logged, etc.) by the CO.
   // This field is OPTIONAL.
-  map<string, string> controller_create_credentials = 6;
+  map<string, string> create_delete_volume_secrets = 6;
 }
 
 message CreateVolumeResponse {
@@ -802,18 +805,21 @@ message DeleteVolumeRequest {
   // This field is REQUIRED.
   string volume_id = 2;
 
-  // Credentials used by Controller plugin to authenticate/authorize
-  // volume deletion request.
-  // This field contains credential data, for example username and
-  // password. Each key must consist of alphanumeric characters, '-',
-  // '_' or '.'. Each value MUST contain a valid string. An SP MAY
-  // choose to accept binary (non-string) data by using a binary-to-text
-  // encoding scheme, like base64. An SP SHALL advertise the
-  // requirements for credentials in documentation. COs SHALL permit
-  // passing through the required credentials. This information is
-  // sensitive and MUST be treated as such (not logged, etc.) by the CO.
+  // Secrets required by plugin to complete volume deletion request.
+  // A secret is a string to string map where the key identifies the
+  // name of the secret (e.g. "username" or "password"), and the value
+  // contains the secret data (e.g. "bob" or "abc123").
+  // Each key must consist of alphanumeric characters, '-', '_' or '.'.
+  // Each value MUST contain a valid string. An SP MAY choose to accept
+  // binary (non-string) data by using a binary-to-text encoding scheme,
+  // like base64.
+  // An SP SHALL advertise the requirements for required secret keys and
+  // values in documentation.
+  // COs SHALL permit passing through the required secrets.
+  // This information is sensitive and MUST be treated as such (not
+  // logged, etc.) by the CO.
   // This field is OPTIONAL.
-  map<string, string> controller_delete_credentials = 3;
+  map<string, string> create_delete_volume_secrets = 3;
 }
 
 message DeleteVolumeResponse {}
@@ -867,18 +873,22 @@ message ControllerPublishVolumeRequest {
   // REQUIRED.
   bool readonly = 5;
 
-  // Credentials used by Controller plugin to authenticate/authorize
-  // controller publish request.
-  // This field contains credential data, for example username and
-  // password. Each key must consist of alphanumeric characters, '-',
-  // '_' or '.'. Each value MUST contain a valid string. An SP MAY
-  // choose to accept binary (non-string) data by using a binary-to-text
-  // encoding scheme, like base64. An SP SHALL advertise the
-  // requirements for credentials in documentation. COs SHALL permit
-  // passing through the required credentials. This information is
-  // sensitive and MUST be treated as such (not logged, etc.) by the CO.
+  // Secrets required by plugin to access the specified volume.
+  // This maybe, for example, a volume decryption key.
+  // A secret is a string to string map where the key identifies the
+  // name of the secret (e.g. "encryptionKey" or "volumePassword"), and
+  // the value contains the secret data (e.g. "bob232" or "abc123").
+  // Each key must consist of alphanumeric characters, '-', '_' or '.'.
+  // Each value MUST contain a valid string. An SP MAY choose to accept
+  // binary (non-string) data by using a binary-to-text encoding scheme,
+  // like base64.
+  // An SP SHALL advertise the requirements for required secret keys and
+  // values in documentation.
+  // COs SHALL permit passing through the required secrets.
+  // This information is sensitive and MUST be treated as such (not
+  // logged, etc.) by the CO.
   // This field is OPTIONAL.
-  map<string, string> controller_publish_credentials = 6;
+  map<string, string> volume_secrets = 6;
 
   // Attributes of the volume to be used on a node. This field is
   // OPTIONAL and MUST match the attributes of the Volume identified
@@ -940,18 +950,22 @@ message ControllerUnpublishVolumeRequest {
   // the volume from all nodes it is published to.
   string node_id = 3;
 
-  // Credentials used by Controller plugin to authenticate/authorize
-  // controller unpublish request.
-  // This field contains credential data, for example username and
-  // password. Each key must consist of alphanumeric characters, '-',
-  // '_' or '.'. Each value MUST contain a valid string. An SP MAY
-  // choose to accept binary (non-string) data by using a binary-to-text
-  // encoding scheme, like base64. An SP SHALL advertise the
-  // requirements for credentials in documentation. COs SHALL permit
-  // passing through the required credentials. This information is
-  // sensitive and MUST be treated as such (not logged, etc.) by the CO.
+  // Secrets required by plugin to access the specified volume.
+  // This maybe, for example, a volume decryption key.
+  // A secret is a string to string map where the key identifies the
+  // name of the secret (e.g. "encryptionKey" or "volumePassword"), and
+  // the value contains the secret data (e.g. "bob232" or "abc123").
+  // Each key must consist of alphanumeric characters, '-', '_' or '.'.
+  // Each value MUST contain a valid string. An SP MAY choose to accept
+  // binary (non-string) data by using a binary-to-text encoding scheme,
+  // like base64.
+  // An SP SHALL advertise the requirements for required secret keys and
+  // values in documentation.
+  // COs SHALL permit passing through the required secrets.
+  // This information is sensitive and MUST be treated as such (not
+  // logged, etc.) by the CO.
   // This field is OPTIONAL.
-  map<string, string> controller_unpublish_credentials = 4;
+  map<string, string> volume_secrets = 4;
 }
 
 message ControllerUnpublishVolumeResponse {}
@@ -1211,18 +1225,22 @@ message NodeStageVolumeRequest {
   // This is a REQUIRED field.
   VolumeCapability volume_capability = 5;
 
-  // Credentials used by Node plugin to authenticate/authorize node
-  // stage request.
-  // This field contains credential data, for example username and
-  // password. Each key must consist of alphanumeric characters, '-',
-  // '_' or '.'. Each value MUST contain a valid string. An SP MAY
-  // choose to accept binary (non-string) data by using a binary-to-text
-  // encoding scheme, like base64. An SP SHALL advertise the
-  // requirements for credentials in documentation. COs SHALL permit
-  // passing through the required credentials. This information is
-  // sensitive and MUST be treated as such (not logged, etc.) by the CO.
+  // Secrets required by plugin to access the specified volume.
+  // This maybe, for example, a volume decryption key.
+  // A secret is a string to string map where the key identifies the
+  // name of the secret (e.g. "encryptionKey" or "volumePassword"), and
+  // the value contains the secret data (e.g. "bob232" or "abc123").
+  // Each key must consist of alphanumeric characters, '-', '_' or '.'.
+  // Each value MUST contain a valid string. An SP MAY choose to accept
+  // binary (non-string) data by using a binary-to-text encoding scheme,
+  // like base64.
+  // An SP SHALL advertise the requirements for required secret keys and
+  // values in documentation.
+  // COs SHALL permit passing through the required secrets.
+  // This information is sensitive and MUST be treated as such (not
+  // logged, etc.) by the CO.
   // This field is OPTIONAL.
-  map<string, string> node_stage_credentials = 6;
+  map<string, string> volume_secrets = 6;
 
   // Attributes of the volume to publish. This field is OPTIONAL and
   // MUST match the attributes of the VolumeInfo identified by
@@ -1279,18 +1297,22 @@ message NodeUnstageVolumeRequest {
   // This is a REQUIRED field.
   string staging_target_path = 3;
 
-  // Credentials used by Node plugin to authenticate/authorize node
-  // unstage request.
-  // This field contains credential data, for example username and
-  // password. Each key must consist of alphanumeric characters, '-',
-  // '_' or '.'. Each value MUST contain a valid string. An SP MAY
-  // choose to accept binary (non-string) data by using a binary-to-text
-  // encoding scheme, like base64. An SP SHALL advertise the
-  // requirements for credentials in documentation. COs SHALL permit
-  // passing through the required credentials. This information is
-  // sensitive and MUST be treated as such (not logged, etc.) by the CO.
+  // Secrets required by plugin to access the specified volume.
+  // This maybe, for example, a volume decryption key.
+  // A secret is a string to string map where the key identifies the
+  // name of the secret (e.g. "encryptionKey" or "volumePassword"), and
+  // the value contains the secret data (e.g. "bob232" or "abc123").
+  // Each key must consist of alphanumeric characters, '-', '_' or '.'.
+  // Each value MUST contain a valid string. An SP MAY choose to accept
+  // binary (non-string) data by using a binary-to-text encoding scheme,
+  // like base64.
+  // An SP SHALL advertise the requirements for required secret keys and
+  // values in documentation.
+  // COs SHALL permit passing through the required secrets.
+  // This information is sensitive and MUST be treated as such (not
+  // logged, etc.) by the CO.
   // This field is OPTIONAL.
-  map<string, string> node_unstage_credentials = 4;
+  map<string, string> volume_secrets = 4;
 }
 
 message NodeUnstageVolumeResponse {}
@@ -1336,7 +1358,7 @@ The following table shows what the Plugin SHOULD return when receiving a second 
 | MULTI_NODE     | OK (idempotent) | ALREADY_EXISTS | OK                  | OK                 |
 | Non MULTI_NODE | OK (idempotent) | ALREADY_EXISTS | FAILED_PRECONDITION | FAILED_PRECONDITION|
 
-(`Tn`: target path of the n-th `NodePublishVolume`, `Pn`: other arguments of the n-th `NodePublishVolume` except `node_credentials`)
+(`Tn`: target path of the n-th `NodePublishVolume`, `Pn`: other arguments of the n-th `NodePublishVolume` except `volume_secrets` and `workload_secrets`)
 
 ```protobuf
 message NodePublishVolumeRequest {
@@ -1377,24 +1399,45 @@ message NodePublishVolumeRequest {
   // REQUIRED.
   bool readonly = 7;
 
-  // Credentials used by Node plugin to authenticate/authorize node
-  // publish request.
-  // This field contains credential data, for example username and
-  // password. Each key must consist of alphanumeric characters, '-',
-  // '_' or '.'. Each value MUST contain a valid string. An SP MAY
-  // choose to accept binary (non-string) data by using a binary-to-text
-  // encoding scheme, like base64. An SP SHALL advertise the
-  // requirements for credentials in documentation. COs SHALL permit
-  // passing through the required credentials. This information is
-  // sensitive and MUST be treated as such (not logged, etc.) by the CO.
+  // Secrets required by plugin to access the specified volume.
+  // This maybe, for example, a volume decryption key.
+  // A secret is a string to string map where the key identifies the
+  // name of the secret (e.g. "encryptionKey" or "volumePassword"), and
+  // the value contains the secret data (e.g. "bob232" or "abc123").
+  // Each key must consist of alphanumeric characters, '-', '_' or '.'.
+  // Each value MUST contain a valid string. An SP MAY choose to accept
+  // binary (non-string) data by using a binary-to-text encoding scheme,
+  // like base64.
+  // An SP SHALL advertise the requirements for required secret keys and
+  // values in documentation.
+  // COs SHALL permit passing through the required secrets.
+  // This information is sensitive and MUST be treated as such (not
+  // logged, etc.) by the CO.
   // This field is OPTIONAL.
-  map<string, string> node_publish_credentials = 8;
+  map<string, string> volume_secrets = 8;
 
+  // Secrets required by plugin to complete a node publish request.
+  // This maybe, for example, user credentials for a volume that that
+  // permits multiple user access and requires per consumer auth.
+  // A secret is a string to string map where the key identifies the
+  // name of the secret (e.g. "username" or "password"), and the value
+  // contains the secret data (e.g. "bob" or "abc123").
+  // Each key must consist of alphanumeric characters, '-', '_' or '.'.
+  // Each value MUST contain a valid string. An SP MAY choose to accept
+  // binary (non-string) data by using a binary-to-text encoding scheme,
+  // like base64.
+  // An SP SHALL advertise the requirements for required secret keys and
+  // values in documentation.
+  // COs SHALL permit passing through the required secrets.
+  // This information is sensitive and MUST be treated as such (not
+  // logged, etc.) by the CO.
+  // This field is OPTIONAL.
+  map<string, string> workload_secrets = 9;
 
   // Attributes of the volume to publish. This field is OPTIONAL and
   // MUST match the attributes of the Volume identified by
   // `volume_id`.
-  map<string,string> volume_attributes = 9;
+  map<string,string> volume_attributes = 10;
 }
 
 message NodePublishVolumeResponse {}
@@ -1442,18 +1485,40 @@ message NodeUnpublishVolumeRequest {
   // This is a REQUIRED field.
   string target_path = 3;
 
-  // Credentials used by Node plugin to authenticate/authorize node
-  // unpublish request.
-  // This field contains credential data, for example username and
-  // password. Each key must consist of alphanumeric characters, '-',
-  // '_' or '.'. Each value MUST contain a valid string. An SP MAY
-  // choose to accept binary (non-string) data by using a binary-to-text
-  // encoding scheme, like base64. An SP SHALL advertise the
-  // requirements for credentials in documentation. COs SHALL permit
-  // passing through the required credentials. This information is
-  // sensitive and MUST be treated as such (not logged, etc.) by the CO.
+  // Secrets required by plugin to access the specified volume.
+  // This maybe, for example, a volume decryption key.
+  // A secret is a string to string map where the key identifies the
+  // name of the secret (e.g. "encryptionKey" or "volumePassword"), and
+  // the value contains the secret data (e.g. "bob232" or "abc123").
+  // Each key must consist of alphanumeric characters, '-', '_' or '.'.
+  // Each value MUST contain a valid string. An SP MAY choose to accept
+  // binary (non-string) data by using a binary-to-text encoding scheme,
+  // like base64.
+  // An SP SHALL advertise the requirements for required secret keys and
+  // values in documentation.
+  // COs SHALL permit passing through the required secrets.
+  // This information is sensitive and MUST be treated as such (not
+  // logged, etc.) by the CO.
   // This field is OPTIONAL.
-  map<string, string> node_unpublish_credentials = 4;
+  map<string, string> volume_secrets = 4;
+
+  // Secrets required by plugin to complete a node publish request.
+  // This maybe, for example, user credentials for a volume that that
+  // permits multiple user access and requires per consumer auth.
+  // A secret is a string to string map where the key identifies the
+  // name of the secret (e.g. "username" or "password"), and the value
+  // contains the secret data (e.g. "bob" or "abc123").
+  // Each key must consist of alphanumeric characters, '-', '_' or '.'.
+  // Each value MUST contain a valid string. An SP MAY choose to accept
+  // binary (non-string) data by using a binary-to-text encoding scheme,
+  // like base64.
+  // An SP SHALL advertise the requirements for required secret keys and
+  // values in documentation.
+  // COs SHALL permit passing through the required secrets.
+  // This information is sensitive and MUST be treated as such (not
+  // logged, etc.) by the CO.
+  // This field is OPTIONAL.
+  map<string, string> workload_secrets = 5;
 }
 
 message NodeUnpublishVolumeResponse {}
@@ -1636,7 +1701,7 @@ Supervised plugins MAY be isolated and/or resource-bounded.
   * Logging configuration flags and/or variables, including working sample configurations.
   * Default log destination(s) (where do the logs go if no configuration is specified?)
   * Log lifecycle management ownership and related guidance (size limits, rate limits, rolling, archiving, expunging, etc.) applicable to the logging mechanism embedded within the Plugin.
-* Plugins SHOULD NOT write potentially sensitive data to logs (e.g. `Credentials`).
+* Plugins SHOULD NOT write potentially sensitive data to logs (e.g. `Secrets`).
 
 ##### Available Services
 
