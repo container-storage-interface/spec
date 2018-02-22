@@ -9,7 +9,7 @@ CSI_PROTO := csi.proto
 # built on Travis-CI.
 $(CSI_PROTO).tmp: $(CSI_SPEC)
 	cat $? | \
-	  sed -n -e '/```protobuf$$/,/```$$/ p' | \
+	  sed -n -e '/```protobuf$$/,/^```$$/ p' | \
 	  sed -e 's@^```.*$$@////////@g' > $@
 
 # This is the target for building the CSI protobuf file.
