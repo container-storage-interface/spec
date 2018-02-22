@@ -283,9 +283,6 @@ There are three sets of RPCs:
 
 ```protobuf
 service Identity {
-  rpc GetSupportedVersions (GetSupportedVersionsRequest)
-    returns (GetSupportedVersionsResponse) {}
-
   rpc GetPluginInfo(GetPluginInfoRequest)
     returns (GetPluginInfoResponse) {}
 
@@ -374,7 +371,6 @@ The status `code` MUST contain a [canonical error code](https://github.com/grpc/
 
 | Condition | gRPC Code | Description | Recovery Behavior |
 |-----------|-----------|-------------|-------------------|
-| Unsupported request version | 3 INVALID_ARGUMENT | Indicates that the version specified in the request is not supported by the Plugin. | Caller MUST NOT retry; caller SHOULD call `GetSupportedVersions` to discover which CSI versions the Plugin supports. |
 | Missing required field | 3 INVALID_ARGUMENT | Indicates that a required field is missing from the request. More human-readable information MAY be provided in the `error_description` field. | Caller MUST fix the request by adding the missing required field before retrying. |
 | Invalid or unsupported field in the request | 3 INVALID_ARGUMENT | Indicates that the one ore more fields in this field is either not allowed by the Plugin or has an invalid value. More human-readable information MAY be provided in the gRPC `status.message` field. | Caller MUST fix the field before retrying. |
 
@@ -385,33 +381,14 @@ The status `details` MUST be empty. In the future, this spec may require `detail
 
 ### Identity Service RPC
 
-Identity service RPCs allow a CO to negotiate an API protocol version that MAY be used for subsequent RPCs across all CSI services with respect to a particular CSI plugin.
+Identity service RPCs allow a CO to query a plugin for capabilities, health, and other metadata.
 The general flow of the success case MAY be as follows (protos illustrated in YAML for brevity):
 
-1. CO queries supported versions via Identity RPC. The CO is expected to gracefully handle, in the manner of its own choosing, the case wherein the returned `supported_versions` from the plugin are not supported by the CO.
-
-```
-   # CO --(GetSupportedVersions)--> Plugin
-   request: {}
-   response:
-      supported_versions:
-        - major: 0
-          minor: 2
-          patch: 0
-        - major: 0
-          minor: 1
-          patch: 0
-```
-
-2. CO queries metadata via Identity RPC, using a supported API protocol version (as per the reply from the prior step): the requested `version` MUST match an entry from the aforementioned `supported_versions` array.
+1. CO queries metadata via Identity RPC.
 
 ```
    # CO --(GetPluginInfo)--> Plugin
    request:
-     version:
-       major: 0
-       minor: 1
-       patch: 0
    response:
       name: org.foo.whizbang.super-plugin
       vendor_version: blue-green
@@ -419,75 +396,29 @@ The general flow of the success case MAY be as follows (protos illustrated in YA
         baz: qaz
 ```
 
-3. CO queries available capabilities of the plugin.
+2. CO queries available capabilities of the plugin.
 
 ```
    # CO --(GetPluginCapabilities)--> Plugin
    request:
-     version:
-       major: 0
-       minor: 2
-       patch: 0
    response:
      capabilities:
        - service:
            type: CONTROLLER_SERVICE
 ```
 
-4. CO queries the readiness of the plugin.
+3. CO queries the readiness of the plugin.
 
 ```
    # CO --(Probe)--> Plugin
    request:
-     version:
-       major: 0
-       minor: 2
-       patch: 0
    response: {}
 ```
-
-#### `GetSupportedVersions`
-
-A Plugin SHALL reply with a list of supported CSI versions.
-The initial version of the CSI specification is 0.1.0 (in *major.minor.patch* format).
-A CO MAY execute plugin RPCs in the manner prescribed by any such supported CSI version.
-The versions returned by this call are orthogonal to any vendor-specific version metadata (see `vendor_version` in `GetPluginInfoResponse`).
-
-NOTE: Changes to this RPC should be approached very conservatively since the request/response protobufs here are critical for proper client-server version negotiation.
-Future changes to this RPC MUST **guarantee** backwards compatibility.
-
-```protobuf
-message GetSupportedVersionsRequest {
-}
-
-message GetSupportedVersionsResponse {
-  // All the CSI versions that the Plugin supports. This field is
-  // REQUIRED.
-  repeated Version supported_versions = 1;
-}
-
-// Specifies a version in Semantic Version 2.0 format.
-// (http://semver.org/spec/v2.0.0.html)
-message Version {
-  // The value of this field MUST NOT be negative.
-  int32 major = 1;  // This field is REQUIRED.
-  // The value of this field MUST NOT be negative.
-  int32 minor = 2;  // This field is REQUIRED.
-  // The value of this field MUST NOT be negative.
-  int32 patch = 3;  // This field is REQUIRED.
-}
-```
-
-##### GetSupportedVersions Errors
-
-If the plugin is unable to complete the GetSupportedVersions call successfully, it MUST return a non-ok gRPC code in the gRPC status.
 
 #### `GetPluginInfo`
 
 ```protobuf
 message GetPluginInfoRequest {
-  // The API version assumed by the CO. This is a REQUIRED field.
-  Version version = 1;
 }
 
 message GetPluginInfoResponse {
@@ -519,8 +450,6 @@ All instances of the same version (see `vendor_version` of `GetPluginInfoRespons
 
 ```protobuf
 message GetPluginCapabilitiesRequest {
-  // The API version assumed by the CO. This is a REQUIRED field.
-  Version version = 1;
 }
 
 message GetPluginCapabilitiesResponse {
@@ -570,15 +499,13 @@ Such actions MAY include, but SHALL NOT be limited to, the following:
 * Notifying the plugin supervisor.
 
 The Plugin MAY verify that it has the right configurations, devices, dependencies and drivers in order to run and return a success if the validation succeeds.
-The CO MAY invoke this RPC at any time after version negotiation has been completed (see `GetSupportedVersions`).
+The CO MAY invoke this RPC at any time.
 A CO MAY invoke this call multiple times with the understanding that a plugin's implementation MAY NOT be trivial and there MAY be overhead incurred by such repeated calls.
 The SP SHALL document guidance and known limitations regarding a particular Plugin's implementation of this RPC.
 For example, the SP MAY document the maximum frequency at which its Probe implementation should be called.
 
 ```protobuf
 message ProbeRequest {
-  // The API version assumed by the CO. This is a REQUIRED field.
-  Version version = 1;
 }
 
 message ProbeResponse {
@@ -610,9 +537,6 @@ If a volume corresponding to the specified volume `name` already exists and is c
 
 ```protobuf
 message CreateVolumeRequest {
-  // The API version assumed by the CO. This field is REQUIRED.
-  Version version = 1;
-
   // The suggested name for the storage space. This field is REQUIRED.
   // It serves two purposes:
   // 1) Idempotency - This name is generated by the CO to achieve
@@ -628,12 +552,12 @@ message CreateVolumeRequest {
   //    an identifier by which to refer to the newly provisioned
   //    storage. If a storage system supports this, it can optionally
   //    use this name as the identifier for the new volume.
-  string name = 2;
+  string name = 1;
 
   // This field is OPTIONAL. This allows the CO to specify the capacity
   // requirement of the volume to be provisioned. If not specified, the
   // Plugin MAY choose an implementation-defined capacity range.
-  CapacityRange capacity_range = 3;
+  CapacityRange capacity_range = 2;
 
   // The capabilities that the provisioned volume MUST have: the Plugin
   // MUST provision a volume that could satisfy ALL of the
@@ -643,12 +567,12 @@ message CreateVolumeRequest {
   // early validation: if ANY of the specified volume capabilities are
   // not supported by the Plugin, the call SHALL fail. This field is
   // REQUIRED.
-  repeated VolumeCapability volume_capabilities = 4;
+  repeated VolumeCapability volume_capabilities = 3;
 
   // Plugin specific parameters passed in as opaque key-value pairs.
   // This field is OPTIONAL. The Plugin is responsible for parsing and
   // validating these parameters. COs will treat these as opaque.
-  map<string, string> parameters = 5;
+  map<string, string> parameters = 4;
 
   // Credentials used by Controller plugin to authenticate/authorize
   // volume creation request.
@@ -661,7 +585,7 @@ message CreateVolumeRequest {
   // passing through the required credentials. This information is
   // sensitive and MUST be treated as such (not logged, etc.) by the CO.
   // This field is OPTIONAL.
-  map<string, string> controller_create_credentials = 6;
+  map<string, string> controller_create_credentials = 5;
 }
 
 message CreateVolumeResponse {
@@ -797,12 +721,9 @@ If a volume corresponding to the specified `volume_id` does not exist or the art
 
 ```protobuf
 message DeleteVolumeRequest {
-  // The API version assumed by the CO. This field is REQUIRED.
-  Version version = 1;
-
   // The ID of the volume to be deprovisioned.
   // This field is REQUIRED.
-  string volume_id = 2;
+  string volume_id = 1;
 
   // Credentials used by Controller plugin to authenticate/authorize
   // volume deletion request.
@@ -815,10 +736,11 @@ message DeleteVolumeRequest {
   // passing through the required credentials. This information is
   // sensitive and MUST be treated as such (not logged, etc.) by the CO.
   // This field is OPTIONAL.
-  map<string, string> controller_delete_credentials = 3;
+  map<string, string> controller_delete_credentials = 2;
 }
 
-message DeleteVolumeResponse {}
+message DeleteVolumeResponse {
+}
 ```
 
 ##### DeleteVolume Errors
@@ -850,24 +772,21 @@ The CO MAY call this RPC for publishing a volume to multiple nodes if the volume
 
 ```protobuf
 message ControllerPublishVolumeRequest {
-  // The API version assumed by the CO. This field is REQUIRED.
-  Version version = 1;
-
   // The ID of the volume to be used on a node.
   // This field is REQUIRED.
-  string volume_id = 2;
+  string volume_id = 1;
 
   // The ID of the node. This field is REQUIRED. The CO SHALL set this
   // field to match the node ID returned by `NodeGetId`.
-  string node_id = 3;
+  string node_id = 2;
 
   // The capability of the volume the CO expects the volume to have.
   // This is a REQUIRED field.
-  VolumeCapability volume_capability = 4;
+  VolumeCapability volume_capability = 3;
 
   // Whether to publish the volume in readonly mode. This field is
   // REQUIRED.
-  bool readonly = 5;
+  bool readonly = 4;
 
   // Credentials used by Controller plugin to authenticate/authorize
   // controller publish request.
@@ -880,12 +799,12 @@ message ControllerPublishVolumeRequest {
   // passing through the required credentials. This information is
   // sensitive and MUST be treated as such (not logged, etc.) by the CO.
   // This field is OPTIONAL.
-  map<string, string> controller_publish_credentials = 6;
+  map<string, string> controller_publish_credentials = 5;
 
   // Attributes of the volume to be used on a node. This field is
   // OPTIONAL and MUST match the attributes of the Volume identified
   // by `volume_id`.
-  map<string,string> volume_attributes = 7;
+  map<string,string> volume_attributes = 6;
 }
 
 message ControllerPublishVolumeResponse {
@@ -929,18 +848,15 @@ If this operation failed, or the CO does not know if the operation failed or not
 
 ```protobuf
 message ControllerUnpublishVolumeRequest {
-  // The API version assumed by the CO. This field is REQUIRED.
-  Version version = 1;
-
   // The ID of the volume. This field is REQUIRED.
-  string volume_id = 2;
+  string volume_id = 1;
 
   // The ID of the node. This field is OPTIONAL. The CO SHOULD set this
   // field to match the node ID returned by `NodeGetId` or leave it
   // unset. If the value is set, the SP MUST unpublish the volume from
   // the specified node. If the value is unset, the SP MUST unpublish
   // the volume from all nodes it is published to.
-  string node_id = 3;
+  string node_id = 2;
 
   // Credentials used by Controller plugin to authenticate/authorize
   // controller unpublish request.
@@ -953,10 +869,11 @@ message ControllerUnpublishVolumeRequest {
   // passing through the required credentials. This information is
   // sensitive and MUST be treated as such (not logged, etc.) by the CO.
   // This field is OPTIONAL.
-  map<string, string> controller_unpublish_credentials = 4;
+  map<string, string> controller_unpublish_credentials = 3;
 }
 
-message ControllerUnpublishVolumeResponse {}
+message ControllerUnpublishVolumeResponse {
+}
 ```
 
 ##### ControllerUnpublishVolume Errors
@@ -982,20 +899,17 @@ This operation MUST be idempotent.
 
 ```protobuf
 message ValidateVolumeCapabilitiesRequest {
-  // The API version assumed by the CO. This is a REQUIRED field.
-  Version version = 1;
-
   // The ID of the volume to check. This field is REQUIRED.
-  string volume_id = 2;
+  string volume_id = 1;
 
   // The capabilities that the CO wants to check for the volume. This
   // call SHALL return "supported" only if all the volume capabilities
   // specified below are supported. This field is REQUIRED.
-  repeated VolumeCapability volume_capabilities = 3;
+  repeated VolumeCapability volume_capabilities = 2;
 
   // Attributes of the volume to check. This field is OPTIONAL and MUST
   // match the attributes of the Volume identified by `volume_id`.
-  map<string,string> volume_attributes = 4;
+  map<string,string> volume_attributes = 3;
 }
 
 message ValidateVolumeCapabilitiesResponse {
@@ -1028,9 +942,6 @@ The Plugin SHALL return the information about all the volumes that it knows abou
 
 ```protobuf
 message ListVolumesRequest {
-  // The API version assumed by the CO. This field is REQUIRED.
-  Version version = 1;
-
   // If specified (non-zero value), the Plugin MUST NOT return more
   // entries than this number in the response. If the actual number of
   // entries is more than this number, the Plugin MUST set `next_token`
@@ -1039,13 +950,13 @@ message ListVolumesRequest {
   // not specified (zero value), it means there is no restriction on the
   // number of entries that can be returned.
   // The value of this field MUST NOT be negative. 
-  int32 max_entries = 2;
+  int32 max_entries = 1;
 
   // A token to specify where to start paginating. Set this field to
   // `next_token` returned by a previous `ListVolumes` call to get the
   // next page of entries. This field is OPTIONAL.
   // An empty string is equal to an unspecified field value.
-  string starting_token = 3;
+  string starting_token = 2;
 }
 
 message ListVolumesResponse {
@@ -1083,21 +994,18 @@ The RPC allows the CO to query the capacity of the storage pool from which the c
 
 ```protobuf
 message GetCapacityRequest {
-  // The API version assumed by the CO. This is a REQUIRED field.
-  Version version = 1;
-
   // If specified, the Plugin SHALL report the capacity of the storage
   // that can be used to provision volumes that satisfy ALL of the
   // specified `volume_capabilities`. These are the same
   // `volume_capabilities` the CO will use in `CreateVolumeRequest`.
   // This field is OPTIONAL.
-  repeated VolumeCapability volume_capabilities = 2;
+  repeated VolumeCapability volume_capabilities = 1;
 
   // If specified, the Plugin SHALL report the capacity of the storage
   // that can be used to provision volumes with the given Plugin
   // specific `parameters`. These are the same `parameters` the CO will
   // use in `CreateVolumeRequest`. This field is OPTIONAL.
-  map<string, string> parameters = 3;
+  map<string, string> parameters = 2;
 }
 
 message GetCapacityResponse {
@@ -1121,8 +1029,6 @@ A Controller Plugin MUST implement this RPC call. This RPC allows the CO to chec
 
 ```protobuf
 message ControllerGetCapabilitiesRequest {
-  // The API version assumed by the CO. This is a REQUIRED field.
-  Version version = 1;
 }
 
 message ControllerGetCapabilitiesResponse {
@@ -1189,29 +1095,26 @@ If this RPC failed, or the CO does not know if it failed or not, it MAY choose t
 
 ```protobuf
 message NodeStageVolumeRequest {
-  // The API version assumed by the CO. This is a REQUIRED field.
-  Version version = 1;
-
   // The ID of the volume to publish. This field is REQUIRED.
-  string volume_id = 2;
+  string volume_id = 1;
 
   // The CO SHALL set this field to the value returned by
   // `ControllerPublishVolume` if the corresponding Controller Plugin
   // has `PUBLISH_UNPUBLISH_VOLUME` controller capability, and SHALL be
   // left unset if the corresponding Controller Plugin does not have
   // this capability. This is an OPTIONAL field.
-  map<string, string> publish_info = 3;
+  map<string, string> publish_info = 2;
 
   // The path to which the volume will be published. It MUST be an
   // absolute path in the root filesystem of the process serving this
   // request. The CO SHALL ensure that there is only one 
   // staging_target_path per volume.
   // This is a REQUIRED field.
-  string staging_target_path = 4;
+  string staging_target_path = 3;
 
   // The capability of the volume the CO expects the volume to have.
   // This is a REQUIRED field.
-  VolumeCapability volume_capability = 5;
+  VolumeCapability volume_capability = 4;
 
   // Credentials used by Node plugin to authenticate/authorize node
   // stage request.
@@ -1224,15 +1127,16 @@ message NodeStageVolumeRequest {
   // passing through the required credentials. This information is
   // sensitive and MUST be treated as such (not logged, etc.) by the CO.
   // This field is OPTIONAL.
-  map<string, string> node_stage_credentials = 6;
+  map<string, string> node_stage_credentials = 5;
 
   // Attributes of the volume to publish. This field is OPTIONAL and
   // MUST match the attributes of the VolumeInfo identified by
   // `volume_id`.
-  map<string,string> volume_attributes = 7;
+  map<string,string> volume_attributes = 6;
 }
 
-message NodeStageVolumeResponse {}
+message NodeStageVolumeResponse {
+}
 ```
 
 #### NodeStageVolume Errors
@@ -1270,16 +1174,13 @@ If this RPC failed, or the CO does not know if it failed or not, it MAY choose t
 
 ```protobuf
 message NodeUnstageVolumeRequest {
-  // The API version assumed by the CO. This is a REQUIRED field.
-  Version version = 1;
-
   // The ID of the volume. This field is REQUIRED.
-  string volume_id = 2;
+  string volume_id = 1;
 
   // The path at which the volume was published. It MUST be an absolute
   // path in the root filesystem of the process serving this request.
   // This is a REQUIRED field.
-  string staging_target_path = 3;
+  string staging_target_path = 2;
 
   // Credentials used by Node plugin to authenticate/authorize node
   // unstage request.
@@ -1292,10 +1193,11 @@ message NodeUnstageVolumeRequest {
   // passing through the required credentials. This information is
   // sensitive and MUST be treated as such (not logged, etc.) by the CO.
   // This field is OPTIONAL.
-  map<string, string> node_unstage_credentials = 4;
+  map<string, string> node_unstage_credentials = 3;
 }
 
-message NodeUnstageVolumeResponse {}
+message NodeUnstageVolumeResponse {
+}
 ```
 
 #### NodeUnstageVolume Errors
@@ -1342,18 +1244,15 @@ The following table shows what the Plugin SHOULD return when receiving a second 
 
 ```protobuf
 message NodePublishVolumeRequest {
-  // The API version assumed by the CO. This is a REQUIRED field.
-  Version version = 1;
-
   // The ID of the volume to publish. This field is REQUIRED.
-  string volume_id = 2;
+  string volume_id = 1;
 
   // The CO SHALL set this field to the value returned by
   // `ControllerPublishVolume` if the corresponding Controller Plugin
   // has `PUBLISH_UNPUBLISH_VOLUME` controller capability, and SHALL be
   // left unset if the corresponding Controller Plugin does not have
   // this capability. This is an OPTIONAL field.
-  map<string, string> publish_info = 3;
+  map<string, string> publish_info = 2;
 
   // The path to which the device was mounted by `NodeStageVolume`.
   // It MUST be an absolute path in the root filesystem of the process
@@ -1361,7 +1260,7 @@ message NodePublishVolumeRequest {
   // It MUST be set if the Node Plugin implements the 
   // `STAGE_UNSTAGE_VOLUME` node capability.
   // This is an OPTIONAL field.
-  string staging_target_path = 4;
+  string staging_target_path = 3;
 
   // The path to which the volume will be published. It MUST be an
   // absolute path in the root filesystem of the process serving this
@@ -1369,15 +1268,15 @@ message NodePublishVolumeRequest {
   // The CO SHALL ensure that the path exists, and that the process
   // serving the request has `read` and `write` permissions to the path.
   // This is a REQUIRED field.
-  string target_path = 5;
+  string target_path = 4;
 
   // The capability of the volume the CO expects the volume to have.
   // This is a REQUIRED field.
-  VolumeCapability volume_capability = 6;
+  VolumeCapability volume_capability = 5;
 
   // Whether to publish the volume in readonly mode. This field is
   // REQUIRED.
-  bool readonly = 7;
+  bool readonly = 6;
 
   // Credentials used by Node plugin to authenticate/authorize node
   // publish request.
@@ -1390,16 +1289,17 @@ message NodePublishVolumeRequest {
   // passing through the required credentials. This information is
   // sensitive and MUST be treated as such (not logged, etc.) by the CO.
   // This field is OPTIONAL.
-  map<string, string> node_publish_credentials = 8;
+  map<string, string> node_publish_credentials = 7;
 
 
   // Attributes of the volume to publish. This field is OPTIONAL and
   // MUST match the attributes of the Volume identified by
   // `volume_id`.
-  map<string,string> volume_attributes = 9;
+  map<string,string> volume_attributes = 8;
 }
 
-message NodePublishVolumeResponse {}
+message NodePublishVolumeResponse {
+}
 ```
 
 ##### NodePublishVolume Errors
@@ -1433,16 +1333,13 @@ If this RPC failed, or the CO does not know if it failed or not, it can choose t
 
 ```protobuf
 message NodeUnpublishVolumeRequest {
-  // The API version assumed by the CO. This is a REQUIRED field.
-  Version version = 1;
-
   // The ID of the volume. This field is REQUIRED.
-  string volume_id = 2;
+  string volume_id = 1;
 
   // The path at which the volume was published. It MUST be an absolute
   // path in the root filesystem of the process serving this request.
   // This is a REQUIRED field.
-  string target_path = 3;
+  string target_path = 2;
 
   // Credentials used by Node plugin to authenticate/authorize node
   // unpublish request.
@@ -1455,10 +1352,11 @@ message NodeUnpublishVolumeRequest {
   // passing through the required credentials. This information is
   // sensitive and MUST be treated as such (not logged, etc.) by the CO.
   // This field is OPTIONAL.
-  map<string, string> node_unpublish_credentials = 4;
+  map<string, string> node_unpublish_credentials = 3;
 }
 
-message NodeUnpublishVolumeResponse {}
+message NodeUnpublishVolumeResponse {
+}
 ```
 
 ##### NodeUnpublishVolume Errors
@@ -1482,8 +1380,6 @@ The result of this call will be used by CO in `ControllerPublishVolume`.
 
 ```protobuf
 message NodeGetIdRequest {
-  // The API version assumed by the CO. This is a REQUIRED field.
-  Version version = 1;
 }
 
 message NodeGetIdResponse {
@@ -1511,8 +1407,6 @@ This RPC allows the CO to check the supported capabilities of node service provi
 
 ```protobuf
 message NodeGetCapabilitiesRequest {
-  // The API version assumed by the CO. This is a REQUIRED field.
-  Version version = 1;
 }
 
 message NodeGetCapabilitiesResponse {
@@ -1586,7 +1480,7 @@ If the plugin is unable to complete the NodeGetCapabilities call successfully, i
 * CO: monitor `/path/to/unix/domain/socket.sock`.
 * Plugin: read `CSI_ENDPOINT`, create UNIX socket at specified path, bind and listen.
 * CO: observe that socket now exists, establish connection.
-* CO: invoke `GetSupportedVersions`.
+* CO: invoke `GetPluginCapabilities`.
 
 #### Filesystem
 
