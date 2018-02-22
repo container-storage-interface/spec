@@ -1,16 +1,21 @@
 all: build
 
 CSI_SPEC := spec.md
+
 CSI_PROTO := csi.proto
+VERSIONED_PROTO := versioned.proto
+
+PROTOS := $(CSI_PROTO) $(VERSIONED_PROTO)
+
+.SUFFIXES:
+.SUFFIXES: .proto .tmp
 
 # This is the target for building the temporary CSI protobuf file.
 #
 # The temporary file is not versioned, and thus will always be
 # built on Travis-CI.
-$(CSI_PROTO).tmp: $(CSI_SPEC)
-	cat $? | \
-	  sed -n -e '/```protobuf$$/,/```$$/ p' | \
-	  sed -e 's@^```.*$$@////////@g' > $@
+$(PROTOS:.proto=.tmp): $(CSI_SPEC)
+	cat $? | sed -n -e '/```protobuf$$/,/^```$$/ { /^\/\/csi:file=$*.proto$$/,/^```$$/ { /^\(\/\/\|```$$\)/!p } }' > $@
 
 # This is the target for building the CSI protobuf file.
 #
@@ -21,7 +26,7 @@ $(CSI_PROTO).tmp: $(CSI_SPEC)
 # will fail.
 #
 # Locally the temp file is simply copied over the real file.
-$(CSI_PROTO): $(CSI_PROTO).tmp
+.tmp.proto:
 ifeq (true,$(TRAVIS))
 	diff "$@" "$?"
 else
@@ -41,10 +46,10 @@ endif
 clean:
 
 clobber: clean
-	rm -f $(CSI_PROTO) $(CSI_PROTO).tmp
+	rm -f $(PROTOS) $(PROTOS:.proto=.tmp)
 
 # check generated files for violation of standards
-check: $(CSI_PROTO)
+check: $(PROTOS)
 	awk '{ if (length > 72) print NR, $$0 }' $? | diff - /dev/null
 
 .PHONY: clean clobber check

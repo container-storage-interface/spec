@@ -76,26 +76,29 @@ export PATH := $(shell pwd):$(PATH)
 ########################################################################
 ##                              BUILD                                 ##
 ########################################################################
+CSI_PROTOS := ../../csi.proto ../../versioned.proto
 CSI_PROTO := ../../csi.proto
 CSI_PKG := $(shell cat $(CSI_PROTO) | sed -n -e 's/^package.\([^;]*\);$$/\1/p'|tr '.' '/')
-CSI_GO := $(CSI_PKG)/csi.pb.go
+CSI_GO := $(CSI_PKG)/csi.pb.go $(CSI_PKG)/versioned.pb.go
 CSI_A := csi.a
-CSI_GO_TMP := $(CSI_PKG)/.build/csi.pb.go
+CSI_GO_TMP := $(CSI_PKG)/.build/csi.pb.go $(CSI_PKG)/.build/versioned.pb.go
+
+../../versioned.proto:
 
 # This recipe generates the go language bindings to a temp area.
-$(CSI_GO_TMP): $(CSI_PROTO) | $(PROTOC) $(PROTOC_GEN_GO)
+$(CSI_GO_TMP): $(CSI_PROTOS) | $(PROTOC) $(PROTOC_GEN_GO)
 	@mkdir -p "$(@D)"
-	$(PROTOC) -I "$(<D)" --go_out=plugins=grpc:"$(@D)" "$<"
+	$(PROTOC) -I "$(<D)" --go_out=plugins=grpc:"$(@D)" $^
 
 # The temp language bindings are compared to the ones that are
 # versioned. If they are different then it means the language
 # bindings were not updated prior to being committed.
 $(CSI_GO): $(CSI_GO_TMP)
 ifeq (true,$(TRAVIS))
-	diff "$@" "$?"
+	diff "$@" "$(<D)/$(@F)"
 else
 	@mkdir -p "$(@D)"
-	diff "$@" "$?" > /dev/null 2>&1 || cp -f "$?" "$@"
+	diff "$@" "$(<D)/$(@F)" > /dev/null 2>&1 || cp -f "$(<D)/$(@F)" "$@"
 endif
 
 # This recipe builds the Go archive from the sources in three steps:
