@@ -240,24 +240,33 @@ Each SP MUST provide:
 * **Controller Plugin**: A gRPC endpoint serving CSI RPCs that MAY be run anywhere.
 * In some circumstances a single gRPC endpoint MAY serve all CSI RPCs (see Figure 3 in [Architecture](#architecture)).
 
-```protobuf
-syntax = "proto3";
-package csi.v1;
+There are four sets of RPCs:
 
-option go_package = "csi";
-```
-
-There are three sets of RPCs:
-
-* **Identity Service**: Both the Node Plugin and the Controller Plugin MUST implement this sets of RPCs.
+* **Versioned Service**: Both the Node Plugin and the Controller Plugin MUST implement this set of RPCs.
+* **Identity Service**: Both the Node Plugin and the Controller Plugin MUST implement this set of RPCs.
 * **Controller Service**: The Controller Plugin MUST implement this sets of RPCs.
 * **Node Service**: The Node Plugin MUST implement this sets of RPCs.
 
 ```protobuf
-service Identity {
+//csi:file=versioned.proto
+syntax = "proto3";
+package csi;
+
+service Versioned {
   rpc GetSupportedVersions (GetSupportedVersionsRequest)
     returns (GetSupportedVersionsResponse) {}
+}
+```
 
+```protobuf
+//csi:file=csi.proto
+syntax = "proto3";
+import "versioned.proto";
+package csi.v1;
+
+option go_package = "csi";
+
+service Identity {
   rpc GetPluginInfo(GetPluginInfoRequest)
     returns (GetPluginInfoResponse) {}
 
@@ -352,9 +361,9 @@ This string MAY be surfaced by CO to end users.
 
 The status `details` MUST be empty. In the future, this spec may require `details` to return a machine-parsable protobuf message if the status `code` is not `OK` to enable CO's to implement smarter error handling and fault resolution.
 
-### Identity Service RPC
+### Versioned Service RPC
 
-Identity service RPCs allow a CO to negotiate an API protocol version that MAY be used for subsequent RPCs across all CSI services with respect to a particular CSI plugin.
+Versioned service RPCs allow a CO to negotiate an API protocol version that MAY be used for subsequent RPCs across all CSI services with respect to a particular CSI plugin.
 The general flow of the success case is as follows (protos illustrated in YAML for brevity):
 
 1. CO queries supported versions via Identity RPC. The CO is expected to gracefully handle, in the manner of its own choosing, the case wherein the returned `supported_versions` from the plugin are not supported by the CO.
@@ -372,37 +381,6 @@ The general flow of the success case is as follows (protos illustrated in YAML f
           patch: 0
 ```
 
-2. CO queries metadata via Identity RPC, using a supported API protocol version (as per the reply from the prior step): the requested `version` MUST match an entry from the aforementioned `supported_versions` array.
-
-```
-   # CO --(GetPluginInfo)--> Plugin
-   request:
-     version:
-       major: 0
-       minor: 1
-       patch: 0
-   response:
-      name: org.foo.whizbang.super-plugin
-      vendor_version: blue-green
-      manifest:
-        baz: qaz
-```
-
-3. CO queries available capabilities of the plugin.
-
-```
-   # CO --(GetPluginCapabilities)--> Plugin
-   request:
-     version:
-       major: 0
-       minor: 2
-       patch: 0
-   response:
-     capabilities:
-       - service:
-           type: CONTROLLER_SERVICE
-```
-
 #### `GetSupportedVersions`
 
 A Plugin SHALL reply with a list of supported CSI versions.
@@ -414,6 +392,7 @@ NOTE: Changes to this RPC should be approached very conservatively since the req
 Future changes to this RPC MUST **guarantee** backwards compatibility.
 
 ```protobuf
+//csi:file=versioned.proto
 message GetSupportedVersionsRequest {
 }
 
@@ -439,9 +418,45 @@ message Version {
 
 If the plugin is unable to complete the GetSupportedVersions call successfully, it MUST return a non-ok gRPC code in the gRPC status.
 
+### Identity Service RPC
+
+The general flow of the success case is as follows (protos illustrated in YAML for brevity):
+
+1. CO queries metadata via Identity RPC, using a supported API protocol version (as per the reply from the prior step): the requested `version` MUST match an entry from the aforementioned `supported_versions` array.
+
+```
+   # CO --(GetPluginInfo)--> Plugin
+   request:
+     version:
+       major: 0
+       minor: 1
+       patch: 0
+   response:
+      name: org.foo.whizbang.super-plugin
+      vendor_version: blue-green
+      manifest:
+        baz: qaz
+```
+
+2. CO queries available capabilities of the plugin.
+
+```
+   # CO --(GetPluginCapabilities)--> Plugin
+   request:
+     version:
+       major: 0
+       minor: 2
+       patch: 0
+   response:
+     capabilities:
+       - service:
+           type: CONTROLLER_SERVICE
+```
+
 #### `GetPluginInfo`
 
 ```protobuf
+//csi:file=csi.proto
 message GetPluginInfoRequest {
   // The API version assumed by the CO. This is a REQUIRED field.
   Version version = 1;
@@ -475,6 +490,7 @@ This REQUIRED RPC allows the CO to query the supported capabilities of the Plugi
 All instances of the same version (see `vendor_version` of `GetPluginInfoResponse`) of the Plugin SHALL return the same set of capabilities, regardless of both: (a) where instances are deployed on the cluster as well as; (b) which RPCs an instance is serving.
 
 ```protobuf
+//csi:file=csi.proto
 message GetPluginCapabilitiesRequest {
   // The API version assumed by the CO. This is a REQUIRED field.
   Version version = 1;
@@ -526,6 +542,7 @@ This operation MUST be idempotent.
 If a volume corresponding to the specified volume `name` already exists and is compatible with the specified `capacity_range`, `volume_capabilities` and `parameters` in the `CreateVolumeRequest`, the Plugin MUST reply `0 OK` with the corresponding `CreateVolumeResponse`.
 
 ```protobuf
+//csi:file=csi.proto
 message CreateVolumeRequest {
   // The API version assumed by the CO. This field is REQUIRED.
   Version version = 1;
@@ -713,6 +730,7 @@ This operation MUST be idempotent.
 If a volume corresponding to the specified `volume_id` does not exist or the artifacts associated with the volume do not exist anymore, the Plugin MUST reply `0 OK`.
 
 ```protobuf
+//csi:file=csi.proto
 message DeleteVolumeRequest {
   // The API version assumed by the CO. This field is REQUIRED.
   Version version = 1;
@@ -766,6 +784,7 @@ If the operation failed or the CO does not know if the operation has failed or n
 The CO MAY call this RPC for publishing a volume to multiple nodes if the volume has `MULTI_NODE` capability (i.e., `MULTI_NODE_READER_ONLY`, `MULTI_NODE_SINGLE_WRITER` or `MULTI_NODE_MULTI_WRITER`).
 
 ```protobuf
+//csi:file=csi.proto
 message ControllerPublishVolumeRequest {
   // The API version assumed by the CO. This field is REQUIRED.
   Version version = 1;
@@ -844,6 +863,7 @@ If the volume corresponding to the `volume_id` is not attached to the node corre
 If this operation failed, or the CO does not know if the operation failed or not, it can choose to call `ControllerUnpublishVolume` again.
 
 ```protobuf
+//csi:file=csi.proto
 message ControllerUnpublishVolumeRequest {
   // The API version assumed by the CO. This field is REQUIRED.
   Version version = 1;
@@ -897,6 +917,7 @@ This RPC call SHALL return `supported` only if all the volume capabilities speci
 This operation MUST be idempotent.
 
 ```protobuf
+//csi:file=csi.proto
 message ValidateVolumeCapabilitiesRequest {
   // The API version assumed by the CO. This is a REQUIRED field.
   Version version = 1;
@@ -943,6 +964,7 @@ A Controller Plugin MUST implement this RPC call if it has `LIST_VOLUMES` capabi
 The Plugin SHALL return the information about all the volumes that it knows about.
 
 ```protobuf
+//csi:file=csi.proto
 message ListVolumesRequest {
   // The API version assumed by the CO. This field is REQUIRED.
   Version version = 1;
@@ -998,6 +1020,7 @@ A Controller Plugin MUST implement this RPC call if it has `GET_CAPACITY` contro
 The RPC allows the CO to query the capacity of the storage pool from which the controller provisions volumes.
 
 ```protobuf
+//csi:file=csi.proto
 message GetCapacityRequest {
   // The API version assumed by the CO. This is a REQUIRED field.
   Version version = 1;
@@ -1039,6 +1062,7 @@ The CO SHALL invoke this RPC prior to any other controller service RPC in order 
 A CO MAY invoke this call multiple times with the understanding that a plugin's implementation MAY NOT be trivial and there MAY be overhead incurred by such repeated calls.
 
 ```protobuf
+//csi:file=csi.proto
 message ControllerProbeRequest {
   // The API version assumed by the CO. This is a REQUIRED field.
   Version version = 1;
@@ -1064,6 +1088,7 @@ The CO MUST implement the specified error recovery behavior when it encounters t
 A Controller Plugin MUST implement this RPC call. This RPC allows the CO to check the supported capabilities of controller service provided by the Plugin.
 
 ```protobuf
+//csi:file=csi.proto
 message ControllerGetCapabilitiesRequest {
   // The API version assumed by the CO. This is a REQUIRED field.
   Version version = 1;
@@ -1138,6 +1163,7 @@ The following table shows what the Plugin SHOULD return when receiving a second 
 (`Tn`: target path of the n-th `NodePublishVolume`, `Pn`: other arguments of the n-th `NodePublishVolume` except `node_credentials`)
 
 ```protobuf
+//csi:file=csi.proto
 message NodePublishVolumeRequest {
   // The API version assumed by the CO. This is a REQUIRED field.
   Version version = 1;
@@ -1219,6 +1245,7 @@ This operation MUST be idempotent.
 If this RPC failed, or the CO does not know if it failed or not, it can choose to call `NodeUnpublishVolume` again.
 
 ```protobuf
+//csi:file=csi.proto
 message NodeUnpublishVolumeRequest {
   // The API version assumed by the CO. This is a REQUIRED field.
   Version version = 1;
@@ -1268,6 +1295,7 @@ The CO SHOULD call this RPC for the node at which it wants to place the workload
 The result of this call will be used by CO in `ControllerPublishVolume`.
 
 ```protobuf
+//csi:file=csi.proto
 message NodeGetIdRequest {
   // The API version assumed by the CO. This is a REQUIRED field.
   Version version = 1;
@@ -1301,6 +1329,7 @@ The Plugin SHOULD verify if it has everything it needs (binaries, kernel module,
 The CO MAY use this RPC to probe which machines can support specific Plugins and schedule workloads accordingly.
 
 ```protobuf
+//csi:file=csi.proto
 message NodeProbeRequest {
   // The API version assumed by the CO. This is a REQUIRED field.
   Version version = 1;
@@ -1327,6 +1356,7 @@ A Node Plugin MUST implement this RPC call.
 This RPC allows the CO to check the supported capabilities of node service provided by the Plugin.
 
 ```protobuf
+//csi:file=csi.proto
 message NodeGetCapabilitiesRequest {
   // The API version assumed by the CO. This is a REQUIRED field.
   Version version = 1;
@@ -1363,9 +1393,9 @@ If the plugin is unable to complete the NodeGetCapabilities call successfully, i
 
 ### Connectivity
 
-* A CO SHALL communicate with a Plugin using gRPC to access the `Identity`, and (optionally) the `Controller` and `Node` services.
+* A CO SHALL communicate with a Plugin using gRPC to access the mandatory `Identity` and `Versioned` services, as well as (optionally) the `Controller` and `Node` services.
   * proto3 SHOULD be used with gRPC, as per the [official recommendations](http://www.grpc.io/docs/guides/#protocol-buffer-versions).
-  * All Plugins SHALL implement the REQUIRED Identity service RPCs.
+  * All Plugins SHALL implement the REQUIRED Identity and Versioned service RPCs.
     Support for OPTIONAL RPCs is reported by the `ControllerGetCapabilities` and `NodeGetCapabilities` RPC calls.
 * The CO SHALL provide the listen-address for the Plugin by way of the `CSI_ENDPOINT` environment variable.
   Plugin components SHALL create, bind, and listen for RPCs on the specified listen address.

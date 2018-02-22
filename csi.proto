@@ -1,14 +1,10 @@
-////////
 syntax = "proto3";
+import "versioned.proto";
 package csi.v1;
 
 option go_package = "csi";
-////////
-////////
-service Identity {
-  rpc GetSupportedVersions (GetSupportedVersionsRequest)
-    returns (GetSupportedVersionsResponse) {}
 
+service Identity {
   rpc GetPluginInfo(GetPluginInfoRequest)
     returns (GetPluginInfoResponse) {}
 
@@ -61,29 +57,6 @@ service Node {
   rpc NodeGetCapabilities (NodeGetCapabilitiesRequest)
     returns (NodeGetCapabilitiesResponse) {}
 }
-////////
-////////
-message GetSupportedVersionsRequest {
-}
-
-message GetSupportedVersionsResponse {
-  // All the CSI versions that the Plugin supports. This field is
-  // REQUIRED.
-  repeated Version supported_versions = 1;
-}
-
-// Specifies a version in Semantic Version 2.0 format.
-// (http://semver.org/spec/v2.0.0.html)
-message Version {
-  // The value of this field MUST NOT be negative.
-  int32 major = 1;  // This field is REQUIRED.
-  // The value of this field MUST NOT be negative.
-  int32 minor = 2;  // This field is REQUIRED.
-  // The value of this field MUST NOT be negative.
-  int32 patch = 3;  // This field is REQUIRED.
-}
-////////
-////////
 message GetPluginInfoRequest {
   // The API version assumed by the CO. This is a REQUIRED field.
   Version version = 1;
@@ -105,8 +78,6 @@ message GetPluginInfoResponse {
   // This field is OPTIONAL. Values are opaque to the CO.
   map<string, string> manifest = 3;
 }
-////////
-////////
 message GetPluginCapabilitiesRequest {
   // The API version assumed by the CO. This is a REQUIRED field.
   Version version = 1;
@@ -118,7 +89,6 @@ message GetPluginCapabilitiesResponse {
   repeated PluginCapability capabilities = 2;
 }
 
-// Specifies a capability of the plugin.
 message PluginCapability {
   message Service {
     enum Type {
@@ -141,8 +111,6 @@ message PluginCapability {
     Service service = 1;
   }
 }
-////////
-////////
 message CreateVolumeRequest {
   // The API version assumed by the CO. This field is REQUIRED.
   Version version = 1;
@@ -205,7 +173,6 @@ message CreateVolumeResponse {
   Volume volume = 1;
 }
 
-// Specify a capability of a volume.
 message VolumeCapability {
   // Indicate that the volume will be accessed via the block device API.
   message BlockVolume {
@@ -266,9 +233,6 @@ message VolumeCapability {
   AccessMode access_mode = 3;
 }
 
-// The capacity of the storage space in bytes. To specify an exact size,
-// `required_bytes` and `limit_bytes` can be set to the same value. At
-// least one of the these fields MUST be specified.
 message CapacityRange {
   // Volume must be at least this big. This field is OPTIONAL.
   // A value of 0 is equal to an unspecified field value.
@@ -281,7 +245,6 @@ message CapacityRange {
   int64 limit_bytes = 2;
 }
 
-// The information about a provisioned volume.
 message Volume {
   // The capacity of the volume in bytes. This field is OPTIONAL. If not
   // set (value of 0), it indicates that the capacity of the volume is
@@ -304,8 +267,6 @@ message Volume {
   // be passed to volume validation and publishing calls.
   map<string,string> attributes = 3;
 }
-////////
-////////
 message DeleteVolumeRequest {
   // The API version assumed by the CO. This field is REQUIRED.
   Version version = 1;
@@ -329,8 +290,6 @@ message DeleteVolumeRequest {
 }
 
 message DeleteVolumeResponse {}
-////////
-////////
 message ControllerPublishVolumeRequest {
   // The API version assumed by the CO. This field is REQUIRED.
   Version version = 1;
@@ -376,8 +335,6 @@ message ControllerPublishVolumeResponse {
   // This information is opaque to the CO. This field is OPTIONAL.
   map<string, string> publish_info = 1;
 }
-////////
-////////
 message ControllerUnpublishVolumeRequest {
   // The API version assumed by the CO. This field is REQUIRED.
   Version version = 1;
@@ -407,8 +364,6 @@ message ControllerUnpublishVolumeRequest {
 }
 
 message ControllerUnpublishVolumeResponse {}
-////////
-////////
 message ValidateVolumeCapabilitiesRequest {
   // The API version assumed by the CO. This is a REQUIRED field.
   Version version = 1;
@@ -436,8 +391,6 @@ message ValidateVolumeCapabilitiesResponse {
   // An empty string is equal to an unspecified field value.
   string message = 2;
 }
-////////
-////////
 message ListVolumesRequest {
   // The API version assumed by the CO. This field is REQUIRED.
   Version version = 1;
@@ -474,8 +427,6 @@ message ListVolumesResponse {
   // An empty string is equal to an unspecified field value.
   string next_token = 2;
 }
-////////
-////////
 message GetCapacityRequest {
   // The API version assumed by the CO. This is a REQUIRED field.
   Version version = 1;
@@ -503,16 +454,12 @@ message GetCapacityResponse {
   // The value of this field MUST NOT be negative. 
   int64 available_capacity = 1;
 }
-////////
-////////
 message ControllerProbeRequest {
   // The API version assumed by the CO. This is a REQUIRED field.
   Version version = 1;
 }
 
 message ControllerProbeResponse {}
-////////
-////////
 message ControllerGetCapabilitiesRequest {
   // The API version assumed by the CO. This is a REQUIRED field.
   Version version = 1;
@@ -524,7 +471,6 @@ message ControllerGetCapabilitiesResponse {
   repeated ControllerServiceCapability capabilities = 2;
 }
 
-// Specifies a capability of the controller service.
 message ControllerServiceCapability {
   message RPC {
     enum Type {
@@ -543,8 +489,6 @@ message ControllerServiceCapability {
     RPC rpc = 1;
   }
 }
-////////
-////////
 message NodePublishVolumeRequest {
   // The API version assumed by the CO. This is a REQUIRED field.
   Version version = 1;
@@ -595,8 +539,6 @@ message NodePublishVolumeRequest {
 }
 
 message NodePublishVolumeResponse {}
-////////
-////////
 message NodeUnpublishVolumeRequest {
   // The API version assumed by the CO. This is a REQUIRED field.
   Version version = 1;
@@ -624,8 +566,6 @@ message NodeUnpublishVolumeRequest {
 }
 
 message NodeUnpublishVolumeResponse {}
-////////
-////////
 message NodeGetIdRequest {
   // The API version assumed by the CO. This is a REQUIRED field.
   Version version = 1;
@@ -637,16 +577,12 @@ message NodeGetIdResponse {
   // This is a REQUIRED field.
   string node_id = 1;
 }
-////////
-////////
 message NodeProbeRequest {
   // The API version assumed by the CO. This is a REQUIRED field.
   Version version = 1;
 }
 
 message NodeProbeResponse {}
-////////
-////////
 message NodeGetCapabilitiesRequest {
   // The API version assumed by the CO. This is a REQUIRED field.
   Version version = 1;
@@ -658,7 +594,6 @@ message NodeGetCapabilitiesResponse {
   repeated NodeServiceCapability capabilities = 1;
 }
 
-// Specifies a capability of the node service.
 message NodeServiceCapability {
   message RPC {
     enum Type {
@@ -673,4 +608,3 @@ message NodeServiceCapability {
     RPC rpc = 1;
   }
 }
-////////

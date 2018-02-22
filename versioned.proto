@@ -1,0 +1,24 @@
+syntax = "proto3";
+package csi;
+
+service Versioned {
+  rpc GetSupportedVersions (GetSupportedVersionsRequest)
+    returns (GetSupportedVersionsResponse) {}
+}
+message GetSupportedVersionsRequest {
+}
+
+message GetSupportedVersionsResponse {
+  // All the CSI versions that the Plugin supports. This field is
+  // REQUIRED.
+  repeated Version supported_versions = 1;
+}
+
+message Version {
+  // The value of this field MUST NOT be negative.
+  int32 major = 1;  // This field is REQUIRED.
+  // The value of this field MUST NOT be negative.
+  int32 minor = 2;  // This field is REQUIRED.
+  // The value of this field MUST NOT be negative.
+  int32 patch = 3;  // This field is REQUIRED.
+}
