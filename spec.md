@@ -178,7 +178,7 @@ capability.
                 | PUBLISHED  |
                 +------------+
 
-Figure 4: The lifecycle of a dynamically provisioned volume, from
+Figure 5: The lifecycle of a dynamically provisioned volume, from
 creation to destruction.
 ```
 
@@ -205,7 +205,7 @@ creation to destruction.
                 | PUBLISHED  |
                 +------------+
 
-Figure 5: The lifecycle of a dynamically provisioned volume, from
+Figure 6: The lifecycle of a dynamically provisioned volume, from
 creation to destruction, when the Node Plugin advertises the
 STAGE_UNSTAGE_VOLUME capability.
 ```
@@ -227,7 +227,7 @@ STAGE_UNSTAGE_VOLUME capability.
    Volume
    Capabilities
 
-Figure 6: The lifecycle of a pre-provisioned volume that requires
+Figure 7: The lifecycle of a pre-provisioned volume that requires
 controller to publish to a node (`ControllerPublishVolume`) prior to
 publishing on the node (`NodePublishVolume`).
 ```
@@ -244,7 +244,7 @@ Publish |    | Unpublish
     | PUBLISHED  |
     +------------+
 
-Figure 7: Plugins may forego other lifecycle steps by contraindicating
+Figure 8: Plugins may forego other lifecycle steps by contraindicating
 them via the capabilities API. Interactions with the volumes of such
 plugins is reduced to `NodePublishVolume` and `NodeUnpublishVolume`
 calls.
