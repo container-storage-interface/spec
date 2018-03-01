@@ -46,6 +46,8 @@ The Container Storage Interface (CSI) will
   * Mounting/unmounting a volume from a node.
   * Consumption of both block and mountable volumes.
   * Local storage providers (e.g., device mapper, lvm).
+  * Creating and deleting a snapshot (source of the snapshot is a volume).
+  * Provisioning a new volume from a snapshot (reverting snapshot, where data in the original volume is erased and replaced with data in the snapshot, is out of scope).
 * Define plugin protocol RECOMMENDATIONS.
   * Describe a process by which a Supervisor configures a Plugin.
   * Container deployment considerations (`CAP_SYS_ADMIN`, mount namespace, etc.).
@@ -317,6 +319,15 @@ service Controller {
 
   rpc ControllerGetCapabilities (ControllerGetCapabilitiesRequest)
     returns (ControllerGetCapabilitiesResponse) {}  
+
+  rpc CreateSnapshot (CreateSnapshotRequest)
+    returns (CreateSnapshotResponse) {}
+
+  rpc DeleteSnapshot (DeleteSnapshotRequest)
+    returns (DeleteSnapshotResponse) {}
+
+  rpc ListSnapshots (ListSnapshotsRequest)
+    returns (ListSnapshotsResponse) {}
 }
 
 service Node {
@@ -378,6 +389,17 @@ The status `message` MUST contain a human readable description of error, if the 
 This string MAY be surfaced by CO to end users.
 
 The status `details` MUST be empty. In the future, this spec may require `details` to return a machine-parsable protobuf message if the status `code` is not `OK` to enable CO's to implement smarter error handling and fault resolution.
+
+### Secrets Requirements
+
+Secrets may be required by plugin to complete a RPC request.
+A secret is a string to string map where the key identifies the name of the secret (e.g. "username" or "password"), and the value contains the secret data (e.g. "bob" or "abc123").
+Each key MUST consist of alphanumeric characters, '-', '_' or '.'.
+Each value MUST contain a valid string. An SP MAY choose to accept binary (non-string) data by using a binary-to-text encoding scheme, like base64.
+An SP SHALL advertise the requirements for required secret keys and values in documentation.
+CO SHALL permit passing through the required secrets.
+A CO MAY pass the same secrets to all RPCs, therefore the keys for all unique secrets that an SP expects must be unique across all CSI operations.
+This information is sensitive and MUST be treated as such (not logged, etc.) by the CO.
 
 ### Identity Service RPC
 
@@ -575,23 +597,28 @@ message CreateVolumeRequest {
   map<string, string> parameters = 4;
 
   // Secrets required by plugin to complete volume creation request.
-  // A secret is a string to string map where the key identifies the
-  // name of the secret (e.g. "username" or "password"), and the value
-  // contains the secret data (e.g. "bob" or "abc123").
-  // Each key MUST consist of alphanumeric characters, '-', '_' or '.'.
-  // Each value MUST contain a valid string. An SP MAY choose to accept
-  // binary (non-string) data by using a binary-to-text encoding scheme,
-  // like base64.
-  // An SP SHALL advertise the requirements for required secret keys and
-  // values in documentation.
-  // CO SHALL permit passing through the required secrets.
-  // A CO MAY pass the same secrets to all RPCs, therefore the keys for
-  // all unique secrets that an SP expects must be unique across all CSI
-  // operations.
-  // This information is sensitive and MUST be treated as such (not
-  // logged, etc.) by the CO.
   // This field is OPTIONAL.
   map<string, string> controller_create_secrets = 5;
+
+  // Contains all attributes of the source that is used to create
+  // the volume from. This field is OPTIONAL.
+  VolumeContentSource content_source = 6;
+}
+
+// Specifies what source the volume will be created from. One of the
+// source_type fields MUST be specified. Only Snapshot is
+// a supported VolumeContentSource at the moment.
+message VolumeContentSource {
+  message Snapshot {
+    // Contains identity information for the created snapshot. This
+    // field is REQUIRED. The identity information will be used by
+    // the CO in subsequent calls to refer to the provisioned snapshot.
+    string id = 1;
+  }
+
+  oneof type {
+    Snapshot snapshot = 1;
+  }
 }
 
 message CreateVolumeResponse {
@@ -699,6 +726,10 @@ message Volume {
   // the same attributes. This field is OPTIONAL and when present MUST
   // be passed to volume validation and publishing calls.
   map<string, string> attributes = 3;
+
+  // All information about the source where the volume is created
+  // from. This field is OPTIONAL.
+  VolumeContentSource content_source = 4;
 }
 ```
 
@@ -732,21 +763,6 @@ message DeleteVolumeRequest {
   string volume_id = 1;
 
   // Secrets required by plugin to complete volume deletion request.
-  // A secret is a string to string map where the key identifies the
-  // name of the secret (e.g. "username" or "password"), and the value
-  // contains the secret data (e.g. "bob" or "abc123").
-  // Each key MUST consist of alphanumeric characters, '-', '_' or '.'.
-  // Each value MUST contain a valid string. An SP MAY choose to accept
-  // binary (non-string) data by using a binary-to-text encoding scheme,
-  // like base64.
-  // An SP SHALL advertise the requirements for required secret keys and
-  // values in documentation.
-  // CO SHALL permit passing through the required secrets.
-  // A CO MAY pass the same secrets to all RPCs, therefore the keys for
-  // all unique secrets that an SP expects must be unique across all CSI
-  // operations.
-  // This information is sensitive and MUST be treated as such (not
-  // logged, etc.) by the CO.
   // This field is OPTIONAL.
   map<string, string> controller_delete_secrets = 2;
 }
@@ -801,23 +817,7 @@ message ControllerPublishVolumeRequest {
   bool readonly = 4;
 
   // Secrets required by plugin to complete controller publish volume
-  // request.
-  // A secret is a string to string map where the key identifies the
-  // name of the secret (e.g. "username" or "password"), and the value
-  // contains the secret data (e.g. "bob" or "abc123").
-  // Each key MUST consist of alphanumeric characters, '-', '_' or '.'.
-  // Each value MUST contain a valid string. An SP MAY choose to accept
-  // binary (non-string) data by using a binary-to-text encoding scheme,
-  // like base64.
-  // An SP SHALL advertise the requirements for required secret keys and
-  // values in documentation.
-  // CO SHALL permit passing through the required secrets.
-  // A CO MAY pass the same secrets to all RPCs, therefore the keys for
-  // all unique secrets that an SP expects must be unique across all CSI
-  // operations.
-  // This information is sensitive and MUST be treated as such (not
-  // logged, etc.) by the CO.
-  // This field is OPTIONAL.
+  // request. This field is OPTIONAL.
   map<string, string> controller_publish_secrets = 5;
 
   // Attributes of the volume to be used on a node. This field is
@@ -879,23 +879,7 @@ message ControllerUnpublishVolumeRequest {
 
   // Secrets required by plugin to complete controller unpublish volume
   // request. This SHOULD be the same secrets passed to the
-  // ControllerPublishVolume.
-  // call for the specified volume.
-  // A secret is a string to string map where the key identifies the
-  // name of the secret (e.g. "username" or "password"), and the value
-  // contains the secret data (e.g. "bob" or "abc123").
-  // Each key MUST consist of alphanumeric characters, '-', '_' or '.'.
-  // Each value MUST contain a valid string. An SP MAY choose to accept
-  // binary (non-string) data by using a binary-to-text encoding scheme,
-  // like base64.
-  // An SP SHALL advertise the requirements for required secret keys and
-  // values in documentation.
-  // CO SHALL permit passing through the required secrets.
-  // A CO MAY pass the same secrets to all RPCs, therefore the keys for
-  // all unique secrets that an SP expects must be unique across all CSI
-  // operations.
-  // This information is sensitive and MUST be treated as such (not
-  // logged, etc.) by the CO.
+  // ControllerPublishVolume call for the specified volume.
   // This field is OPTIONAL.
   map<string, string> controller_unpublish_secrets = 3;
 }
@@ -1074,6 +1058,16 @@ message ControllerServiceCapability {
       PUBLISH_UNPUBLISH_VOLUME = 2;
       LIST_VOLUMES = 3;
       GET_CAPACITY = 4;
+      CREATE_DELETE_SNAPSHOT = 5;
+      // For storage systems that need to upload the snapshot after
+      // it is cut, LIST_SNAPSHOTS is a required RPC because CO needs
+      // to call it to find out whether the upload is complete.
+      LIST_SNAPSHOTS = 6;
+      // Currently the only way to consume a snapshot is to create
+      // a volume from it. Therefore plugins supporting
+      // CREATE_DELETE_SNAPSHOT should also support
+      // CREATE_VOLUME_FROM_SNAPSHOT.
+      CREATE_VOLUME_FROM_SNAPSHOT = 7;
     }
 
     Type type = 1;
@@ -1090,6 +1084,252 @@ message ControllerServiceCapability {
 
 If the plugin is unable to complete the ControllerGetCapabilities call successfully, it MUST return a non-ok gRPC code in the gRPC status.
 
+#### `CreateSnapshot`
+
+A Controller Plugin MUST implement this RPC call if it has `CREATE_DELETE_SNAPSHOT` controller capability.
+This RPC will be called by the CO to create a new snapshot from a source volume on behalf of a user.
+
+This operation MUST be idempotent.
+If a snapshot corresponding to the specified snapshot `name` already exists and is compatible with the specified `source_volume_id` and `parameters` in the `CreateSnapshotRequest`, the Plugin MUST reply `0 OK` with the corresponding `CreateSnapshotResponse`.
+
+Snapshot can be used as the source to provision a new volume.
+CreateVolumeRequest is modified to take an OPTIONAL parameter of a source snapshot.
+Reverting snapshot, where data in the original volume is erased and replaced with data in the snapshot, is an advanced functionality not every storage system can support and therefore is currently out of scope.
+
+```protobuf
+message CreateSnapshotRequest {
+  // The ID of the source volume to be snapshotted.
+  // This field is REQUIRED.
+  string source_volume_id = 1;
+
+  // The suggested name for the snapshot. This field is REQUIRED for
+  // idempotency.
+  string name = 2;
+
+  // Secrets required by plugin to complete snapshot creation request.
+  // This field is OPTIONAL.
+  map<string, string> create_snapshot_secrets = 3;
+
+  // Plugin specific parameters passed in as opaque key-value pairs.
+  // This field is OPTIONAL. The Plugin is responsible for parsing and
+  // validating these parameters. COs will treat these as opaque.
+  // Use cases for opaque parameters:
+  // - Specify a policy to automatically clean up the snapshot.
+  // - Specify an expiration date for the snapshot.
+  // - Specify whether the snapshot is readonly or read/write.
+  // - Specify if the snapshot should be replicated to some place.
+  // - Specify primary or secondary for replication systems that
+  //   support snapshotting only on primary.
+  map<string, string> parameters = 4;
+}
+
+message CreateSnapshotResponse {
+  // Contains all attributes of the newly created snapshot that are
+  // relevant to the CO along with information required by the Plugin
+  // to uniquely identify the snapshot. This field is REQUIRED.
+  Snapshot snapshot = 1;
+}
+
+// The information about a provisioned snapshot.
+message Snapshot {
+  // SnapshotSize is the disk size of the snapshot. The purpose of this
+  // field is to give CO guidance on how much space is needed to create
+  // a volume from this snapshot. The size of the volume must not be
+  // less than the size of the source snapshot. This field is OPTIONAL.
+  // If SnapshotSize is not set, it indicates that this size is unknown.
+  SnapshotSize size = 1;
+
+  // Contains identity information for the created snapshot. This field
+  // is REQUIRED. The identity information will be used by the CO in
+  // subsequent calls to refer to the provisioned snapshot.
+  string id = 2;
+
+  // Identity information for the source volume. Note that create
+  // snapshot from snapshot is not supported here so the source has to
+  // be a volume. This field is REQUIRED.
+  string source_volume_id = 3;
+
+  // Timestamp when the point-in-time snapshot is taken on the storage
+  // system. The format of this field should be a UnixNano time encoded
+  // as an int64. This field is REQUIRED.
+  int64 created_at = 4;
+
+  // The status of a snapshot.
+  SnapshotStatus status = 5;
+}
+
+message SnapshotSize {
+  // The disk size of the snapshot. The purpose of this field is to
+  // give CO guidance on how much space is needed to create a volume
+  // from this snapshot. The size of the volume must not be less than
+  // the size of the source snapshot. This field is OPTIONAL. The value
+  // of this field MUST NOT be negative.
+  int64 size_bytes = 1;
+}
+
+// The status of a snapshot. A snapshot could have the following
+// statuses:
+// UPLOADING - A snapshot is cut and is now being uploaded.
+// READY - A snapshot is ready for use.
+// Some cloud providers will upload the snapshot to a location in
+// the cloud (i.e., an object store) after the snapshot is cut.
+// Uploading is a long process that could take hours. At this phase,
+// since the snapshot is already cut, a `thaw` operation can be
+// performed so application can start running again (assuming a
+// `freeze` operation was done before taking the snapshot). The
+// status of the snapshot will become `READY` after the upload is
+// complete.
+// For cloud providers and storage systems that don't have the
+// uploading process, the status should be `READY` after the snapshot
+// is cut. `thaw` can be done when the status is `READY` in this case.
+// A `CREATING` status is not included here because CreateSnapshot
+// is synchronous and will block until the snapshot is cut.
+// The SnapshotStatus parameter provides guidance to the CO on what
+// action can be taken in the process of snapshotting. Based on
+// this information, CO can issue repeated (idemponent) calls to
+// CreateSnapshot, monitor the response, and make decisions.
+// Note that CreateSnapshot is a synchronous call and it must block
+// until the snapshot is cut. If the cloud provider or storage system
+// does not need to upload the snapshot after it is cut, the status
+// returned by CreateSnapshot should be `READY`.
+// If the cloud provider or storage system needs to upload the snapshot
+// after the snapshot is cut, the status returned by CreateSnapshot
+// should be `UPLOADING`. CO can continue to call CreateSnapshot while
+// waiting for the upload to complete until the status becomes `READY`.
+// Note that CreateSnapshot no longer blocks after the snapshot is cut.
+// Alternatively, another RPC ListSnapshots can be called with
+// snapshot_id as filtering repeatedly to wait for the upload to
+// complete. ListSnapshots should return immediately with the current
+// snapshot info. When upload is complete, the status of the snapshot
+// from ListSnapshots should become `READY`.
+message SnapshotStatus {
+  enum Type {
+     UNKNOWN = 0;
+     // A snapshot is cut and is now being uploaded.
+     UPLOADING = 1;
+     // A snapshot is ready for use.
+     READY = 2;
+     // A snapshot is in error status.
+     ERROR = 3;
+  }
+  Type type = 1;
+}
+```
+
+##### CreateSnapshot Errors
+
+If the plugin is unable to complete the CreateSnapshot call successfully, it MUST return a non-ok gRPC code in the gRPC status.
+If the conditions defined below are encountered, the plugin MUST return the specified gRPC error code.
+The CO MUST implement the specified error recovery behavior when it encounters the gRPC error code.
+
+| Condition | gRPC Code | Description | Recovery Behavior |
+|-----------|-----------|-------------|-------------------|
+| Snapshot already exists but is incompatible | 6 ALREADY_EXISTS | Indicates that a snapshot corresponding to the specified snapshot `name` already exists but is incompatible with the specified `volume_id`. | Caller MUST fix the arguments or use a different `name` before retrying. |
+| Operation pending for snapshot | 10 ABORTED | Indicates that there is a already an operation pending for the specified snapshot. In general the Cluster Orchestrator (CO) is responsible for ensuring that there is no more than one call "in-flight" per snapshot at a given time. However, in some circumstances, the CO MAY lose state (for example when the CO crashes and restarts), and MAY issue multiple calls simultaneously for the same snapshot. The Plugin, SHOULD handle this as gracefully as possible, and MAY return this error code to reject secondary calls. | Caller SHOULD ensure that there are no other calls pending for the specified snapshot, and then retry with exponential back off. |
+| Call not implemented | 12 UNIMPLEMENTED | CreateSnapshot call is not implemented by the plugin or disabled in the Plugin's current mode of operation. | Caller MUST NOT retry. Caller MAY call `ControllerGetCapabilities` to discover Plugin capabilities. |
+| Not enough space to create snapshot | 13 RESOURCE_EXHAUSTED | There is not enough space on the storage system to handle the create snapshot request. | Caller should fail this request. Future calls to CreateSnapshot may succeed if space is freed up. |
+
+
+#### `DeleteSnapshot`
+
+A Controller Plugin MUST implement this RPC call if it has CREATE_DELETE_SNAPSHOT capability.
+This RPC will be called by the CO to delete a snapshot.
+If successful, the storage space associated with the snapshot MUST be released and all the data in the snapshot SHALL NOT be accessible anymore.
+
+This operation MUST be idempotent.
+If a snapshot corresponding to the specified snapshot_id does not exist or the artifacts associated with the snapshot do not exist anymore, the Plugin MUST reply `0 OK`.
+
+```protobuf
+message DeleteSnapshotRequest {
+  // The ID of the snapshot to be deleted.
+  // This field is REQUIRED.
+  string snapshot_id = 1;
+
+  // Secrets required by plugin to complete snapshot deletion request.
+  // This field is OPTIONAL.
+  map<string, string> delete_snapshot_secrets = 2;
+}
+
+message DeleteSnapshotResponse {}
+```
+
+##### DeleteSnapshot Errors
+
+If the plugin is unable to complete the DeleteSnapshot call successfully, it MUST return a non-ok gRPC code in the gRPC status.
+If the conditions defined below are encountered, the plugin MUST return the specified gRPC error code.
+The CO MUST implement the specified error recovery behavior when it encounters the gRPC error code.
+
+| Condition | gRPC Code | Description | Recovery Behavior |
+|-----------|-----------|-------------|-------------------|
+| Snapshot in use | 9 FAILED_PRECONDITION | Indicates that the snapshot corresponding to the specified `snapshot_id` could not be deleted because it is in use by another resource. | Caller SHOULD ensure that there are no other resources using the snapshot, and then retry with exponential back off. |
+| Operation pending for snapshot | 10 ABORTED | Indicates that there is already an operation pending for the specified snapshot. In general the Cluster Orchestrator (CO) is responsible for ensuring that there is no more than one call "in-flight" per snapshot at a given time. However, in some circumstances, the CO MAY lose state (for example when the CO crashes and restarts), and MAY issue multiple calls simultaneously for the same snapshot. The Plugin, SHOULD handle this as gracefully as possible, and MAY return this error code to reject secondary calls. | Caller SHOULD ensure that there are no other calls pending for the specified snapshot, and then retry with exponential back off. |
+| Call not implemented | 12 UNIMPLEMENTED | DeleteSnapshot call is not implemented by the plugin or disabled in the Plugin's current mode of operation. | Caller MUST NOT retry. Caller MAY call `ControllerGetCapabilities` to discover Plugin capabilities. |
+
+
+#### `ListSnapshots`
+
+A Controller Plugin MUST implement this RPC call if it has LIST_SNAPSHOTS capability.
+The Plugin SHALL return the information about all the snapshots on the storage system regardless of how they were created.
+
+```protobuf
+// List all snapshots on the storage system regardless of how they were
+// created.
+message ListSnapshotsRequest {
+  // If specified (non-zero value), the Plugin MUST NOT return more
+  // entries than this number in the response. If the actual number of
+  // entries is more than this number, the Plugin MUST set `next_token`
+  // in the response which can be used to get the next page of entries
+  // in the subsequent `ListSnapshots` call. This field is OPTIONAL. If
+  // not specified (zero value), it means there is no restriction on the
+  // number of entries that can be returned.
+  // The value of this field MUST NOT be negative.
+  int32 max_entries = 1;
+
+  // A token to specify where to start paginating. Set this field to
+  // `next_token` returned by a previous `ListSnapshots` call to get the
+  // next page of entries. This field is OPTIONAL.
+  // An empty string is equal to an unspecified field value.
+  string starting_token = 2;
+
+  // Identity information for the source volume. This field is OPTIONAL.
+  // It can be used to list snapshots by volume.
+  string source_volume_id = 3;
+
+  // Identity information for a specific snapshot. This field is
+  // OPTIONAL. It can be used to list only a specific snapshot.
+  // ListSnapshots will return with current snapshot information
+  // and will not block if the snapshot is being uploaded.
+  string snapshot_id = 4;
+}
+
+message ListSnapshotsResponse {
+  message Entry {
+    Snapshot snapshot = 1;
+  }
+
+  repeated Entry entries = 1;
+
+  // This token allows you to get the next page of entries for
+  // `ListSnapshots` request. If the number of entries is larger than
+  // `max_entries`, use the `next_token` as a value for the
+  // `starting_token` field in the next `ListSnapshots` request. This
+  // field is OPTIONAL.
+  // An empty string is equal to an unspecified field value.
+  string next_token = 2;
+}
+```
+
+##### ListSnapshots Errors
+
+If the plugin is unable to complete the ListSnapshots call successfully, it MUST return a non-ok gRPC code in the gRPC status.
+If the conditions defined below are encountered, the plugin MUST return the specified gRPC error code.
+The CO MUST implement the specified error recovery behavior when it encounters the gRPC error code.
+
+| Condition | gRPC Code | Description | Recovery Behavior |
+|-----------|-----------|-------------|-------------------|
+| Invalid `starting_token` | 10 ABORTED | Indicates that `starting_token` is not valid. | Caller SHOULD start the `ListSnapshots` operation again with an empty `starting_token`. |
+
+
 #### RPC Interactions
 
 ##### `CreateVolume`, `DeleteVolume`, `ListVolumes`
@@ -1102,6 +1342,16 @@ If a `CreateVolume` operation times out, leaving the CO without an ID with which
 3. The CO takes no further action regarding the timed out RPC, a volume is possibly leaked and the operator/user is expected to clean up.
 
 It is NOT REQUIRED for a controller plugin to implement the `LIST_VOLUMES` capability if it supports the `CREATE_DELETE_VOLUME` capability: the onus is upon the CO to take into consideration the full range of plugin capabilities before deciding how to proceed in the above scenario.
+
+##### `CreateSnapshot`, `DeleteSnapshot`, `ListSnapshots`
+
+The plugin-generated `snapshot_id` is a REQUIRED field for the `DeleteSnapshot` RPC, as opposed to the CO-generated snapshot `name` that is REQUIRED for the `CreateSnapshot` RPC: these fields MAY NOT contain the same value.
+If a `CreateSnapshot` operation times out, leaving the CO without an ID with which to reference a snapshot, and the CO also decides that it no longer needs/wants the snapshot in question then the CO MAY choose one of the following paths:
+
+1. Execute the `ListSnapshots` RPC to possibly obtain a snapshot ID that may be used to execute a `DeleteSnapshot` RPC; upon success execute `DeleteSnapshot`.
+2. The CO takes no further action regarding the timed out RPC, a snapshot is possibly leaked and the operator/user is expected to clean up.
+
+It is NOT REQUIRED for a controller plugin to implement the `LIST_SNAPSHOTS` capability if it supports the CREATE_DELETE_SNAPSHOT capability: the CO needs to take into consideration the full range of plugin capabilities before deciding how to proceed in the above scenario.
 
 ### Node Service RPC
 
@@ -1145,21 +1395,6 @@ message NodeStageVolumeRequest {
   VolumeCapability volume_capability = 4;
 
   // Secrets required by plugin to complete node stage volume request.
-  // A secret is a string to string map where the key identifies the
-  // name of the secret (e.g. "username" or "password"), and the value
-  // contains the secret data (e.g. "bob" or "abc123").
-  // Each key MUST consist of alphanumeric characters, '-', '_' or '.'.
-  // Each value MUST contain a valid string. An SP MAY choose to accept
-  // binary (non-string) data by using a binary-to-text encoding scheme,
-  // like base64.
-  // An SP SHALL advertise the requirements for required secret keys and
-  // values in documentation.
-  // CO SHALL permit passing through the required secrets.
-  // A CO MAY pass the same secrets to all RPCs, therefore the keys for
-  // all unique secrets that an SP expects must be unique across all CSI
-  // operations.
-  // This information is sensitive and MUST be treated as such (not
-  // logged, etc.) by the CO.
   // This field is OPTIONAL.
   map<string, string> node_stage_secrets = 5;
 
@@ -1300,21 +1535,6 @@ message NodePublishVolumeRequest {
   bool readonly = 6;
 
   // Secrets required by plugin to complete node publish volume request.
-  // A secret is a string to string map where the key identifies the
-  // name of the secret (e.g. "username" or "password"), and the value
-  // contains the secret data (e.g. "bob" or "abc123").
-  // Each key MUST consist of alphanumeric characters, '-', '_' or '.'.
-  // Each value MUST contain a valid string. An SP MAY choose to accept
-  // binary (non-string) data by using a binary-to-text encoding scheme,
-  // like base64.
-  // An SP SHALL advertise the requirements for required secret keys and
-  // values in documentation.
-  // CO SHALL permit passing through the required secrets.
-  // A CO MAY pass the same secrets to all RPCs, therefore the keys for
-  // all unique secrets that an SP expects must be unique across all CSI
-  // operations.
-  // This information is sensitive and MUST be treated as such (not
-  // logged, etc.) by the CO.
   // This field is OPTIONAL.
   map<string, string> node_publish_secrets = 7;
 
