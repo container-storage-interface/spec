@@ -490,7 +490,7 @@ If the plugin is unable to complete the GetPluginCapabilities call successfully,
 
 #### `Probe`
 
-A Plugin MUST implement this RPC call.
+A Plugin MUST implement this RPC.
 The primary utility of the Probe RPC is to verify that the plugin is in a healthy state.
 If an unhealthy state is reported, via a non-success response, a CO MAY take action with the intent to bring the plugin to a healthy state.
 Such actions MAY include, but SHALL NOT be limited to, the following:
@@ -529,7 +529,7 @@ The CO MUST implement the specified error recovery behavior when it encounters t
 
 #### `CreateVolume`
 
-A Controller Plugin MUST implement this RPC call if it has `CREATE_DELETE_VOLUME` controller capability.
+A Controller Plugin MUST implement this RPC if it has `CREATE_DELETE_VOLUME` controller capability.
 This RPC will be called by the CO to provision a new volume on behalf of a user (to be consumed as either a block device or a mounted filesystem).
 
 This operation MUST be idempotent.
@@ -718,7 +718,7 @@ The CO MUST implement the specified error recovery behavior when it encounters t
 
 #### `DeleteVolume`
 
-A Controller Plugin MUST implement this RPC call if it has `CREATE_DELETE_VOLUME` capability.
+A Controller Plugin MUST implement this RPC if it has `CREATE_DELETE_VOLUME` capability.
 This RPC will be called by the CO to deprovision a volume.
 If successful, the storage space associated with the volume MUST be released and all the data in the volume SHALL NOT be accessible anymore.
 
@@ -770,7 +770,7 @@ The CO MUST implement the specified error recovery behavior when it encounters t
 
 #### `ControllerPublishVolume`
 
-A Controller Plugin MUST implement this RPC call if it has `PUBLISH_UNPUBLISH_VOLUME` controller capability.
+A Controller Plugin MUST implement this RPC if it has `PUBLISH_UNPUBLISH_VOLUME` controller capability.
 This RPC will be called by the CO when it wants to place a workload that uses the volume onto a node.
 The Plugin SHOULD perform the work that is necessary for making the volume available on the given node.
 The Plugin MUST NOT assume that this RPC will be executed on the node where the volume will be used.
@@ -853,7 +853,7 @@ The CO MUST implement the specified error recovery behavior when it encounters t
 
 #### `ControllerUnpublishVolume`
 
-Controller Plugin MUST implement this RPC call if it has `PUBLISH_UNPUBLISH_VOLUME` controller capability.
+Controller Plugin MUST implement this RPC if it has `PUBLISH_UNPUBLISH_VOLUME` controller capability.
 This RPC is a reverse operation of `ControllerPublishVolume`.
 It MUST be called after all `NodeUnstageVolume` and `NodeUnpublishVolume` on the volume are called and succeed.
 The Plugin SHOULD perform the work that is necessary for making the volume ready to be consumed by a different node.
@@ -920,9 +920,9 @@ The CO MUST implement the specified error recovery behavior when it encounters t
 
 #### `ValidateVolumeCapabilities`
 
-A Controller Plugin MUST implement this RPC call.
+A Controller Plugin MUST implement this RPC.
 This RPC will be called by the CO to check if a pre-provisioned volume has all the capabilities that the CO wants.
-This RPC call SHALL return `supported` only if all the volume capabilities specified in the request are supported.
+This RPC SHALL return `supported` only if all the volume capabilities specified in the request are supported.
 This operation MUST be idempotent.
 
 ```protobuf
@@ -965,7 +965,7 @@ The CO MUST implement the specified error recovery behavior when it encounters t
 
 #### `ListVolumes`
 
-A Controller Plugin MUST implement this RPC call if it has `LIST_VOLUMES` capability.
+A Controller Plugin MUST implement this RPC if it has `LIST_VOLUMES` capability.
 The Plugin SHALL return the information about all the volumes that it knows about.
 
 ```protobuf
@@ -1017,7 +1017,7 @@ The CO MUST implement the specified error recovery behavior when it encounters t
 
 #### `GetCapacity`
 
-A Controller Plugin MUST implement this RPC call if it has `GET_CAPACITY` controller capability.
+A Controller Plugin MUST implement this RPC if it has `GET_CAPACITY` controller capability.
 The RPC allows the CO to query the capacity of the storage pool from which the controller provisions volumes.
 
 ```protobuf
@@ -1053,7 +1053,7 @@ If the plugin is unable to complete the GetCapacity call successfully, it MUST r
 
 #### `ControllerGetCapabilities`
 
-A Controller Plugin MUST implement this RPC call. This RPC allows the CO to check the supported capabilities of controller service provided by the Plugin.
+A Controller Plugin MUST implement this RPC. This RPC allows the CO to check the supported capabilities of controller service provided by the Plugin.
 
 ```protobuf
 message ControllerGetCapabilitiesRequest {
@@ -1107,7 +1107,7 @@ It is NOT REQUIRED for a controller plugin to implement the `LIST_VOLUMES` capab
 
 #### `NodeStageVolume`
 
-A Node Plugin MUST implement this RPC call if it has `STAGE_UNSTAGE_VOLUME` node capability.
+A Node Plugin MUST implement this RPC if it has `STAGE_UNSTAGE_VOLUME` node capability.
 
 This RPC is called by the CO prior to the volume being consumed by any workloads on the node by `NodePublishVolume`.
 The Plugin SHALL assume that this RPC will be executed on the node where the volume will be used.
@@ -1188,7 +1188,7 @@ The CO MUST implement the specified error recovery behavior when it encounters t
 
 #### `NodeUnstageVolume`
 
-A Node Plugin MUST implement this RPC call if it has `STAGE_UNSTAGE_VOLUME` node capability.
+A Node Plugin MUST implement this RPC if it has `STAGE_UNSTAGE_VOLUME` node capability.
 
 This RPC is a reverse operation of `NodeStageVolume`.
 This RPC MUST undo the work by the corresponding `NodeStageVolume`.
@@ -1345,7 +1345,7 @@ The CO MUST implement the specified error recovery behavior when it encounters t
 
 #### `NodeUnpublishVolume`
 
-A Node Plugin MUST implement this RPC call.
+A Node Plugin MUST implement this RPC.
 This RPC is a reverse operation of `NodePublishVolume`.
 This RPC MUST undo the work by the corresponding `NodePublishVolume`.
 This RPC SHALL be called by the CO at least once for each `target_path` that was successfully setup via `NodePublishVolume`.
@@ -1386,7 +1386,7 @@ The CO MUST implement the specified error recovery behavior when it encounters t
 
 #### `NodeGetId`
 
-A Node Plugin MUST implement this RPC call if the plugin has `PUBLISH_UNPUBLISH_VOLUME` controller capability.
+A Node Plugin MUST implement this RPC if the plugin has `PUBLISH_UNPUBLISH_VOLUME` controller capability.
 The Plugin SHALL assume that this RPC will be executed on the node where the volume will be used.
 The CO SHOULD call this RPC for the node at which it wants to place the workload.
 The result of this call will be used by CO in `ControllerPublishVolume`.
@@ -1415,7 +1415,7 @@ Condition | gRPC Code | Description | Recovery Behavior
 
 #### `NodeGetCapabilities`
 
-A Node Plugin MUST implement this RPC call.
+A Node Plugin MUST implement this RPC.
 This RPC allows the CO to check the supported capabilities of node service provided by the Plugin.
 
 ```protobuf
@@ -1457,7 +1457,7 @@ If the plugin is unable to complete the NodeGetCapabilities call successfully, i
 * A CO SHALL communicate with a Plugin using gRPC to access the `Identity`, and (optionally) the `Controller` and `Node` services.
   * proto3 SHOULD be used with gRPC, as per the [official recommendations](http://www.grpc.io/docs/guides/#protocol-buffer-versions).
   * All Plugins SHALL implement the REQUIRED Identity service RPCs.
-    Support for OPTIONAL RPCs is reported by the `ControllerGetCapabilities` and `NodeGetCapabilities` RPC calls.
+    Support for OPTIONAL RPCs is reported by the `ControllerGetCapabilities` and `NodeGetCapabilities` RPCs.
 * The CO SHALL provide the listen-address for the Plugin by way of the `CSI_ENDPOINT` environment variable.
   Plugin components SHALL create, bind, and listen for RPCs on the specified listen address.
   * Only UNIX Domain Sockets may be used as endpoints.
