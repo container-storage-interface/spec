@@ -288,9 +288,7 @@ func (m *PluginCapability) String() string            { return proto.CompactText
 func (*PluginCapability) ProtoMessage()               {}
 func (*PluginCapability) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{4} }
 
-type isPluginCapability_Type interface {
-	isPluginCapability_Type()
-}
+type isPluginCapability_Type interface{ isPluginCapability_Type() }
 
 type PluginCapability_Service_ struct {
 	Service *PluginCapability_Service `protobuf:"bytes,1,opt,name=service,oneof"`
@@ -530,9 +528,7 @@ func (m *VolumeCapability) String() string            { return proto.CompactText
 func (*VolumeCapability) ProtoMessage()               {}
 func (*VolumeCapability) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{9} }
 
-type isVolumeCapability_AccessType interface {
-	isVolumeCapability_AccessType()
-}
+type isVolumeCapability_AccessType interface{ isVolumeCapability_AccessType() }
 
 type VolumeCapability_Block struct {
 	Block *VolumeCapability_BlockVolume `protobuf:"bytes,1,opt,name=block,oneof"`
@@ -1264,9 +1260,7 @@ func (m *ControllerServiceCapability) String() string            { return proto.
 func (*ControllerServiceCapability) ProtoMessage()               {}
 func (*ControllerServiceCapability) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{26} }
 
-type isControllerServiceCapability_Type interface {
-	isControllerServiceCapability_Type()
-}
+type isControllerServiceCapability_Type interface{ isControllerServiceCapability_Type() }
 
 type ControllerServiceCapability_Rpc struct {
 	Rpc *ControllerServiceCapability_RPC `protobuf:"bytes,1,opt,name=rpc,oneof"`
@@ -1398,7 +1392,7 @@ type NodeStageVolumeRequest struct {
 	// This field is OPTIONAL.
 	NodeStageSecrets map[string]string `protobuf:"bytes,5,rep,name=node_stage_secrets,json=nodeStageSecrets" json:"node_stage_secrets,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
 	// Attributes of the volume to publish. This field is OPTIONAL and
-	// MUST match the attributes of the VolumeInfo identified by
+	// MUST match the attributes of the `Volume` identified by
 	// `volume_id`.
 	VolumeAttributes map[string]string `protobuf:"bytes,6,rep,name=volume_attributes,json=volumeAttributes" json:"volume_attributes,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
 }
@@ -1717,9 +1711,7 @@ func (m *NodeServiceCapability) String() string            { return proto.Compac
 func (*NodeServiceCapability) ProtoMessage()               {}
 func (*NodeServiceCapability) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{39} }
 
-type isNodeServiceCapability_Type interface {
-	isNodeServiceCapability_Type()
-}
+type isNodeServiceCapability_Type interface{ isNodeServiceCapability_Type() }
 
 type NodeServiceCapability_Rpc struct {
 	Rpc *NodeServiceCapability_RPC `protobuf:"bytes,1,opt,name=rpc,oneof"`
