@@ -1164,7 +1164,7 @@ message NodeStageVolumeRequest {
   map<string, string> node_stage_secrets = 5;
 
   // Attributes of the volume to publish. This field is OPTIONAL and
-  // MUST match the attributes of the VolumeInfo identified by
+  // MUST match the attributes of the `Volume` identified by
   // `volume_id`.
   map<string,string> volume_attributes = 6;
 }
