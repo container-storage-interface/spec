@@ -706,14 +706,14 @@ func (m *VolumeCapability_AccessMode) GetMode() VolumeCapability_AccessMode_Mode
 }
 
 // The capacity of the storage space in bytes. To specify an exact size,
-// `required_bytes` and `limit_bytes` can be set to the same value. At
+// `required_bytes` and `limit_bytes` MUST be set to the same value. At
 // least one of the these fields MUST be specified.
 type CapacityRange struct {
-	// Volume must be at least this big. This field is OPTIONAL.
+	// Volume MUST be at least this big. This field is OPTIONAL.
 	// A value of 0 is equal to an unspecified field value.
 	// The value of this field MUST NOT be negative.
 	RequiredBytes int64 `protobuf:"varint,1,opt,name=required_bytes,json=requiredBytes" json:"required_bytes,omitempty"`
-	// Volume must not be bigger than this. This field is OPTIONAL.
+	// Volume MUST not be bigger than this. This field is OPTIONAL.
 	// A value of 0 is equal to an unspecified field value.
 	// The value of this field MUST NOT be negative.
 	LimitBytes int64 `protobuf:"varint,2,opt,name=limit_bytes,json=limitBytes" json:"limit_bytes,omitempty"`
