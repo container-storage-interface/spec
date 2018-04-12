@@ -698,7 +698,7 @@ message Volume {
   // a volume. A volume uniquely identified by `id` SHALL always report
   // the same attributes. This field is OPTIONAL and when present MUST
   // be passed to volume validation and publishing calls.
-  map<string,string> attributes = 3;
+  map<string, string> attributes = 3;
 }
 ```
 
@@ -823,7 +823,7 @@ message ControllerPublishVolumeRequest {
   // Attributes of the volume to be used on a node. This field is
   // OPTIONAL and MUST match the attributes of the Volume identified
   // by `volume_id`.
-  map<string,string> volume_attributes = 6;
+  map<string, string> volume_attributes = 6;
 }
 
 message ControllerPublishVolumeResponse {
@@ -937,7 +937,7 @@ message ValidateVolumeCapabilitiesRequest {
 
   // Attributes of the volume to check. This field is OPTIONAL and MUST
   // match the attributes of the Volume identified by `volume_id`.
-  map<string,string> volume_attributes = 3;
+  map<string, string> volume_attributes = 3;
 }
 
 message ValidateVolumeCapabilitiesResponse {
@@ -1166,7 +1166,7 @@ message NodeStageVolumeRequest {
   // Attributes of the volume to publish. This field is OPTIONAL and
   // MUST match the attributes of the `Volume` identified by
   // `volume_id`.
-  map<string,string> volume_attributes = 6;
+  map<string, string> volume_attributes = 6;
 }
 
 message NodeStageVolumeResponse {
@@ -1321,7 +1321,7 @@ message NodePublishVolumeRequest {
   // Attributes of the volume to publish. This field is OPTIONAL and
   // MUST match the attributes of the Volume identified by
   // `volume_id`.
-  map<string,string> volume_attributes = 8;
+  map<string, string> volume_attributes = 8;
 }
 
 message NodePublishVolumeResponse {
