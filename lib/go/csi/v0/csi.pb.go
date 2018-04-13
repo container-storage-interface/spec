@@ -706,7 +706,7 @@ func (m *VolumeCapability_AccessMode) GetMode() VolumeCapability_AccessMode_Mode
 }
 
 // The capacity of the storage space in bytes. To specify an exact size,
-// `required_bytes` and `limit_bytes` MUST be set to the same value. At
+// `required_bytes` and `limit_bytes` SHALL be set to the same value. At
 // least one of the these fields MUST be specified.
 type CapacityRange struct {
 	// Volume MUST be at least this big. This field is OPTIONAL.
