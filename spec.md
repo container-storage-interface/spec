@@ -345,11 +345,22 @@ service Node {
   rpc NodeUnpublishVolume (NodeUnpublishVolumeRequest)
     returns (NodeUnpublishVolumeResponse) {}
 
+  // NodeGetId is being deprecated in favor of NodeGetInfo and will be
+  // removed in CSI 1.0. Existing drivers, however, may depend on this
+  // RPC call and hence this RPC call MUST be implemented by the CSI
+  // plugin prior to v1.0.
   rpc NodeGetId (NodeGetIdRequest)
-    returns (NodeGetIdResponse) {}
+    returns (NodeGetIdResponse) {
+    option deprecated = true;
+  }
 
   rpc NodeGetCapabilities (NodeGetCapabilitiesRequest)
     returns (NodeGetCapabilitiesResponse) {}
+
+  // Prior to CSI 1.0 - CSI plugins MUST implement both NodeGetId and
+  // NodeGetInfo RPC calls.
+  rpc NodeGetInfo (NodeGetInfoRequest)
+    returns (NodeGetInfoResponse) {}
 }
 ```
 
@@ -836,7 +847,7 @@ message ControllerPublishVolumeRequest {
   string volume_id = 1;
 
   // The ID of the node. This field is REQUIRED. The CO SHALL set this
-  // field to match the node ID returned by `NodeGetId`.
+  // field to match the node ID returned by `NodeGetInfo`.
   string node_id = 2;
 
   // The capability of the volume the CO expects the volume to have.
@@ -903,7 +914,7 @@ message ControllerUnpublishVolumeRequest {
   string volume_id = 1;
 
   // The ID of the node. This field is OPTIONAL. The CO SHOULD set this
-  // field to match the node ID returned by `NodeGetId` or leave it
+  // field to match the node ID returned by `NodeGetInfo` or leave it
   // unset. If the value is set, the SP MUST unpublish the volume from
   // the specified node. If the value is unset, the SP MUST unpublish
   // the volume from all nodes it is published to.
@@ -1667,6 +1678,9 @@ The CO MUST implement the specified error recovery behavior when it encounters t
 
 #### `NodeGetId`
 
+`NodeGetId` RPC call is deprecated.
+Users of this RPC call SHOULD use `NodeGetInfo`.
+
 A Node Plugin MUST implement this RPC call if the plugin has `PUBLISH_UNPUBLISH_VOLUME` controller capability.
 The Plugin SHALL assume that this RPC will be executed on the node where the volume will be used.
 The CO SHOULD call this RPC for the node at which it wants to place the workload.
@@ -1732,6 +1746,44 @@ message NodeServiceCapability {
 ##### NodeGetCapabilities Errors
 
 If the plugin is unable to complete the NodeGetCapabilities call successfully, it MUST return a non-ok gRPC code in the gRPC status.
+
+
+#### `NodeGetInfo`
+
+A Node Plugin MUST implement this RPC call if the plugin has `PUBLISH_UNPUBLISH_VOLUME` controller capability.
+The Plugin SHALL assume that this RPC will be executed on the node where the volume will be used.
+The CO SHOULD call this RPC for the node at which it wants to place the workload.
+The result of this call will be used by CO in `ControllerPublishVolume`.
+
+```protobuf
+message NodeGetInfoRequest {
+}
+
+message NodeGetInfoResponse {
+  // The ID of the node as understood by the SP which SHALL be used by
+  // CO in subsequent calls to `ControllerPublishVolume`.
+  // This is a REQUIRED field.
+  string node_id = 1;
+
+  // Maximum number of volumes that controller can publish to the node.
+  // If value is not set or zero CO SHALL decide how many volumes of 
+  // this type can be published by the controller to the node. The
+  // plugin MUST NOT set negative values here.
+  // This field is OPTIONAL.
+  int64 max_volumes_per_node = 2;
+}
+```
+
+##### NodeGetInfo Errors
+
+If the plugin is unable to complete the NodeGetInfo call successfully, it MUST return a non-ok gRPC code in the gRPC status.
+If the conditions defined below are encountered, the plugin MUST return the specified gRPC error code.
+The CO MUST implement the specified error recovery behavior when it encounters the gRPC error code.
+
+Condition | gRPC Code | Description | Recovery Behavior
+| --- | --- | --- | --- |
+| Call not implemented | 12 UNIMPLEMENTED | NodeGetInfo call is not implemented by the plugin or disabled in the Plugin's current mode of operation. | Caller MUST NOT retry. Caller MAY call `ControllerGetCapabilities` or `NodeGetCapabilities` to discover Plugin capabilities. |
+
 
 ## Protocol
 
