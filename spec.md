@@ -598,7 +598,8 @@ message CreateVolumeRequest {
   map<string, string> parameters = 4;
 
   // Secrets required by plugin to complete volume creation request.
-  // This field is OPTIONAL.
+  // This field is OPTIONAL. Refer to the `Secrets Requirements`
+  // section on how to use this field.
   map<string, string> controller_create_secrets = 5;
 
   // If specified, the new volume will be pre-populated with data from
@@ -766,7 +767,8 @@ message DeleteVolumeRequest {
   string volume_id = 1;
 
   // Secrets required by plugin to complete volume deletion request.
-  // This field is OPTIONAL.
+  // This field is OPTIONAL. Refer to the `Secrets Requirements`
+  // section on how to use this field.
   map<string, string> controller_delete_secrets = 2;
 }
 
@@ -820,7 +822,8 @@ message ControllerPublishVolumeRequest {
   bool readonly = 4;
 
   // Secrets required by plugin to complete controller publish volume
-  // request. This field is OPTIONAL.
+  // request. This field is OPTIONAL. Refer to the
+  // `Secrets Requirements` section on how to use this field.
   map<string, string> controller_publish_secrets = 5;
 
   // Attributes of the volume to be used on a node. This field is
@@ -883,7 +886,8 @@ message ControllerUnpublishVolumeRequest {
   // Secrets required by plugin to complete controller unpublish volume
   // request. This SHOULD be the same secrets passed to the
   // ControllerPublishVolume call for the specified volume.
-  // This field is OPTIONAL.
+  // This field is OPTIONAL. Refer to the `Secrets Requirements`
+  // section on how to use this field.
   map<string, string> controller_unpublish_secrets = 3;
 }
 
@@ -1094,7 +1098,10 @@ A Controller Plugin MUST implement this RPC call if it has `CREATE_DELETE_SNAPSH
 This RPC will be called by the CO to create a new snapshot from a source volume on behalf of a user.
 
 This operation MUST be idempotent.
-If a snapshot corresponding to the specified snapshot `name` already exists and is compatible with the specified `source_volume_id` and `parameters` in the `CreateSnapshotRequest`, the Plugin MUST reply `0 OK` with the corresponding `CreateSnapshotResponse`.
+If a snapshot corresponding to the specified snapshot `name` is already successfully cut and uploaded (if upload is part of the process) and is compatible with the specified `source_volume_id` and `parameters` in the `CreateSnapshotRequest`, the Plugin MUST reply `0 OK` with the corresponding `CreateSnapshotResponse`.
+
+For plugins that implement snapshot uploads, `CreateSnapshot` SHOULD return `10 ABORTED`, a gRPC code that indicates the operation is pending for snapshot, during the snapshot uploading processs.
+If an error occurs during the uploading process, `CreateSnapshot` SHOULD return a corresponding gRPC error code that reflects the error condition.
 
 A snapshot MAY be used as the source to provision a new volume.
 A CreateVolumeRequest message may specify an OPTIONAL source snapshot parameter.
@@ -1111,7 +1118,8 @@ message CreateSnapshotRequest {
   string name = 2;
 
   // Secrets required by plugin to complete snapshot creation request.
-  // This field is OPTIONAL.
+  // This field is OPTIONAL. Refer to the `Secrets Requirements`
+  // section on how to use this field.
   map<string, string> create_snapshot_secrets = 3;
 
   // Plugin specific parameters passed in as opaque key-value pairs.
@@ -1183,6 +1191,10 @@ message SnapshotStatus {
      ERROR = 3;
   }
   Type type = 1;
+
+  // Additional information to describe why a snapshot ended up in the
+  // `ERROR` status.
+  string details = 2;
 }
 ```
 
@@ -1216,7 +1228,8 @@ message DeleteSnapshotRequest {
   string snapshot_id = 1;
 
   // Secrets required by plugin to complete snapshot deletion request.
-  // This field is OPTIONAL.
+  // This field is OPTIONAL. Refer to the `Secrets Requirements`
+  // section on how to use this field.
   map<string, string> delete_snapshot_secrets = 2;
 }
 
@@ -1321,7 +1334,9 @@ If a `CreateSnapshot` operation times out, leaving the CO without an ID with whi
 1. Execute the `ListSnapshots` RPC to possibly obtain a snapshot ID that may be used to execute a `DeleteSnapshot` RPC; upon success execute `DeleteSnapshot`.
 2. The CO takes no further action regarding the timed out RPC, a snapshot is possibly leaked and the operator/user is expected to clean up.
 
-It is NOT REQUIRED for a controller plugin to implement the `LIST_SNAPSHOTS` capability if it supports the CREATE_DELETE_SNAPSHOT capability: the CO needs to take into consideration the full range of plugin capabilities before deciding how to proceed in the above scenario.
+While it is NOT REQUIRED for a controller plugin to implement the `LIST_SNAPSHOTS` capability if it supports the CREATE_DELETE_SNAPSHOT capability, it is REQUIRED for a controller plugin to implement the `LIST_SNAPSHOTS` capability if it needs to upload a snapshot after it is being cut.
+This is because uploading a snapshot could fail after the initial `CreateSnapshot` RPC returns.
+The `ListSnapshots` RPC allows the CO to clean up orphaned snapshots whose background upload process has failed.
 
 ##### Snapshot Statuses
 
@@ -1340,6 +1355,9 @@ For cloud providers and storage systems that don't have the uploading process, t
 `thaw` can be done when the status is `READY` in this case.
 
 A `CREATING` status is not included here because CreateSnapshot is synchronous and will block until the snapshot is cut.
+
+`ERROR` is a terminal snapshot status.
+A CO SHOULD explicitly delete snapshots in this status.
 
 The SnapshotStatus parameter provides guidance to the CO on what action can be taken in the process of snapshotting.
 Based on this information, CO can issue repeated (idemponent) calls to CreateSnapshot, monitor the response, and make decisions.
@@ -1395,7 +1413,8 @@ message NodeStageVolumeRequest {
   VolumeCapability volume_capability = 4;
 
   // Secrets required by plugin to complete node stage volume request.
-  // This field is OPTIONAL.
+  // This field is OPTIONAL. Refer to the `Secrets Requirements`
+  // section on how to use this field.
   map<string, string> node_stage_secrets = 5;
 
   // Attributes of the volume to publish. This field is OPTIONAL and
@@ -1535,7 +1554,8 @@ message NodePublishVolumeRequest {
   bool readonly = 6;
 
   // Secrets required by plugin to complete node publish volume request.
-  // This field is OPTIONAL.
+  // This field is OPTIONAL. Refer to the `Secrets Requirements`
+  // section on how to use this field.
   map<string, string> node_publish_secrets = 7;
 
   // Attributes of the volume to publish. This field is OPTIONAL and

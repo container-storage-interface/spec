@@ -165,7 +165,8 @@ message CreateVolumeRequest {
   map<string, string> parameters = 4;
 
   // Secrets required by plugin to complete volume creation request.
-  // This field is OPTIONAL.
+  // This field is OPTIONAL. Refer to the `Secrets Requirements`
+  // section on how to use this field.
   map<string, string> controller_create_secrets = 5;
 
   // If specified, the new volume will be pre-populated with data from
@@ -307,7 +308,8 @@ message DeleteVolumeRequest {
   string volume_id = 1;
 
   // Secrets required by plugin to complete volume deletion request.
-  // This field is OPTIONAL.
+  // This field is OPTIONAL. Refer to the `Secrets Requirements`
+  // section on how to use this field.
   map<string, string> controller_delete_secrets = 2;
 }
 
@@ -331,7 +333,8 @@ message ControllerPublishVolumeRequest {
   bool readonly = 4;
 
   // Secrets required by plugin to complete controller publish volume
-  // request. This field is OPTIONAL.
+  // request. This field is OPTIONAL. Refer to the
+  // `Secrets Requirements` section on how to use this field.
   map<string, string> controller_publish_secrets = 5;
 
   // Attributes of the volume to be used on a node. This field is
@@ -361,7 +364,8 @@ message ControllerUnpublishVolumeRequest {
   // Secrets required by plugin to complete controller unpublish volume
   // request. This SHOULD be the same secrets passed to the
   // ControllerPublishVolume call for the specified volume.
-  // This field is OPTIONAL.
+  // This field is OPTIONAL. Refer to the `Secrets Requirements`
+  // section on how to use this field.
   map<string, string> controller_unpublish_secrets = 3;
 }
 
@@ -497,7 +501,8 @@ message CreateSnapshotRequest {
   string name = 2;
 
   // Secrets required by plugin to complete snapshot creation request.
-  // This field is OPTIONAL.
+  // This field is OPTIONAL. Refer to the `Secrets Requirements`
+  // section on how to use this field.
   map<string, string> create_snapshot_secrets = 3;
 
   // Plugin specific parameters passed in as opaque key-value pairs.
@@ -569,6 +574,10 @@ message SnapshotStatus {
      ERROR = 3;
   }
   Type type = 1;
+
+  // Additional information to describe why a snapshot ended up in the
+  // `ERROR` status.
+  string details = 2;
 }
 message DeleteSnapshotRequest {
   // The ID of the snapshot to be deleted.
@@ -576,7 +585,8 @@ message DeleteSnapshotRequest {
   string snapshot_id = 1;
 
   // Secrets required by plugin to complete snapshot deletion request.
-  // This field is OPTIONAL.
+  // This field is OPTIONAL. Refer to the `Secrets Requirements`
+  // section on how to use this field.
   map<string, string> delete_snapshot_secrets = 2;
 }
 
@@ -649,7 +659,8 @@ message NodeStageVolumeRequest {
   VolumeCapability volume_capability = 4;
 
   // Secrets required by plugin to complete node stage volume request.
-  // This field is OPTIONAL.
+  // This field is OPTIONAL. Refer to the `Secrets Requirements`
+  // section on how to use this field.
   map<string, string> node_stage_secrets = 5;
 
   // Attributes of the volume to publish. This field is OPTIONAL and
@@ -708,7 +719,8 @@ message NodePublishVolumeRequest {
   bool readonly = 6;
 
   // Secrets required by plugin to complete node publish volume request.
-  // This field is OPTIONAL.
+  // This field is OPTIONAL. Refer to the `Secrets Requirements`
+  // section on how to use this field.
   map<string, string> node_publish_secrets = 7;
 
   // Attributes of the volume to publish. This field is OPTIONAL and
