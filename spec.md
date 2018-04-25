@@ -1067,7 +1067,7 @@ message ControllerServiceCapability {
       GET_CAPACITY = 4;
       // Currently the only way to consume a snapshot is to create
       // a volume from it. Therefore plugins supporting
-      // CREATE_DELETE_SNAPSHOT SHOULD support creating volume from
+      // CREATE_DELETE_SNAPSHOT MUST support creating volume from
       // snapshot.
       CREATE_DELETE_SNAPSHOT = 5;
       // LIST_SNAPSHOTS is NOT REQUIRED. For plugins that need to upload
@@ -1098,6 +1098,8 @@ This RPC will be called by the CO to create a new snapshot from a source volume 
 
 This operation MUST be idempotent.
 If a snapshot corresponding to the specified snapshot `name` is already successfully cut and uploaded (if upload is part of the process) and is compatible with the specified `source_volume_id` and `parameters` in the `CreateSnapshotRequest`, the Plugin MUST reply `0 OK` with the corresponding `CreateSnapshotResponse`.
+
+If an error occurs before a snapshot is cut, `CreateSnapshot` SHOULD return a corresponding gRPC error code that reflects the error condition.
 
 For plugins that implement snapshot uploads, `CreateSnapshot` SHOULD return `10 ABORTED`, a gRPC code that indicates the operation is pending for snapshot, during the snapshot uploading processs.
 If an error occurs during the uploading process, `CreateSnapshot` SHOULD return a corresponding gRPC error code that reflects the error condition.
@@ -1186,14 +1188,20 @@ message SnapshotStatus {
      // `thaw` can be done so the application can be running again if
      // `freeze` was done before taking the snapshot.
      UPLOADING = 2;
-     // A snapshot is in error status.
-     ERROR = 3;
+     // An error occurred during the snapshot uploading process.
+     // This error status is specific for uploading because
+     // `CreateSnaphot` is a blocking call before the snapshot is
+     // cut and therefore it SHOULD NOT come back with an error
+     // status when an error occurs. Instead a gRPC error code SHALL
+     // be returned by `CreateSnapshot` when an error occurs before
+     // a snapshot is cut.
+     ERROR_UPLOADING = 3;
   }
   // This field is REQUIRED.
   Type type = 1;
 
   // Additional information to describe why a snapshot ended up in the
-  // `ERROR` status. This field is OPTIONAL.
+  // `ERROR_UPLOADING` status. This field is OPTIONAL.
   string details = 2;
 }
 ```
@@ -1253,6 +1261,7 @@ The CO MUST implement the specified error recovery behavior when it encounters t
 
 A Controller Plugin MUST implement this RPC call if it has `LIST_SNAPSHOTS` capability.
 The Plugin SHALL return the information about all snapshots on the storage system within the given parameters regardless of how they were created.
+`ListSnapshots` SHALL NOT list a snapshot that is being created but has not been cut successfully yet.
 
 ```protobuf
 // List all snapshots on the storage system regardless of how they were
