@@ -1315,9 +1315,7 @@ It is NOT REQUIRED for a controller plugin to implement the `LIST_VOLUMES` capab
 
 ##### `CreateSnapshot`, `DeleteSnapshot`, `ListSnapshots`
 
-The plugin-generated `snapshot_id` is a REQUIRED field for the `DeleteSnapshot` RPC, as opposed to the CO-generated snapshot `name` that is REQUIRED for the `CreateSnapshot` RPC: these fields MAY NOT contain the same value.
-Therefore the CO-generated snapshot `name` specified in `CreateSnapshot` SHALL NOT be used as a filter to query a snapshot by calling `ListSnapshots`.
-Instead the plugin-generated `snapshot_id` SHALL be used as a filter to query a snapshot by calling `ListSnapshots`.
+The plugin-generated `snapshot_id` is a REQUIRED field for the `DeleteSnapshot` RPC, as opposed to the CO-generated snapshot `name` that is REQUIRED for the `CreateSnapshot` RPC.
 If a `CreateSnapshot` operation times out, leaving the CO without an ID with which to reference a snapshot, and the CO also decides that it no longer needs/wants the snapshot in question then the CO MAY choose one of the following paths:
 
 1. Execute the `ListSnapshots` RPC to possibly obtain a snapshot ID that may be used to execute a `DeleteSnapshot` RPC; upon success execute `DeleteSnapshot`.
