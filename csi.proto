@@ -475,11 +475,8 @@ message ControllerServiceCapability {
       // CREATE_DELETE_SNAPSHOT SHOULD support creating volume from
       // snapshot.
       CREATE_DELETE_SNAPSHOT = 5;
-      // If LIST_SNAPSHOTS is supported by the plugin, CO MAY call
-      // this RPC to find out whether the snapshot upload is complete.
-      // If LIST_SNAPSHOTS is not supported by the plugin, CO MAY
-      // assume that the snapshot is created (cut and uploaded) once it
-      // receives a successful CreateSnapshotResponse.
+      // LIST_SNAPSHOTS is REQUIRED for plugins that need to upload
+      // a snapshot after it is being cut.
       LIST_SNAPSHOTS = 6;
     }
 
