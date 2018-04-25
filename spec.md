@@ -1190,10 +1190,11 @@ message SnapshotStatus {
      // A snapshot is in error status.
      ERROR = 3;
   }
+  // This field is REQUIRED.
   Type type = 1;
 
   // Additional information to describe why a snapshot ended up in the
-  // `ERROR` status.
+  // `ERROR` status. This field is OPTIONAL.
   string details = 2;
 }
 ```
