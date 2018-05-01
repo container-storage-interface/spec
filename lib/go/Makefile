@@ -115,6 +115,6 @@ clean:
 	rm -f "$(CSI_A)"
 
 clobber: clean
-	rm -fr "$(PROTOC)" "$(PROTOC_GEN_GO)" "$(dir $(CSI_GO))"
+	rm -fr "$(PROTOC)" "$(PROTOC_GEN_GO)" "$(CSI_PKG)"
 
 .PHONY: clean clobber

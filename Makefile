@@ -38,8 +38,10 @@ build:
 endif
 
 clean:
+	$(MAKE) -C lib/go $@
 
 clobber: clean
+	$(MAKE) -C lib/go $@
 	rm -f $(CSI_PROTO) $(CSI_PROTO).tmp
 
 # check generated files for violation of standards
