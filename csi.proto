@@ -69,6 +69,7 @@ service Node {
     returns (NodeGetCapabilitiesResponse) {}
 }
 message GetPluginInfoRequest {
+  // Intentionally empty.
 }
 
 message GetPluginInfoResponse {
@@ -88,6 +89,7 @@ message GetPluginInfoResponse {
   map<string, string> manifest = 3;
 }
 message GetPluginCapabilitiesRequest {
+  // Intentionally empty.
 }
 
 message GetPluginCapabilitiesResponse {
@@ -121,6 +123,7 @@ message PluginCapability {
   }
 }
 message ProbeRequest {
+  // Intentionally empty.
 }
 
 message ProbeResponse {
@@ -314,6 +317,7 @@ message DeleteVolumeRequest {
 }
 
 message DeleteVolumeResponse {
+  // Intentionally empty.
 }
 message ControllerPublishVolumeRequest {
   // The ID of the volume to be used on a node.
@@ -370,6 +374,7 @@ message ControllerUnpublishVolumeRequest {
 }
 
 message ControllerUnpublishVolumeResponse {
+  // Intentionally empty.
 }
 message ValidateVolumeCapabilitiesRequest {
   // The ID of the volume to check. This field is REQUIRED.
@@ -453,6 +458,7 @@ message GetCapacityResponse {
   int64 available_capacity = 1;
 }
 message ControllerGetCapabilitiesRequest {
+  // Intentionally empty.
 }
 
 message ControllerGetCapabilitiesResponse {
@@ -676,6 +682,7 @@ message NodeStageVolumeRequest {
 }
 
 message NodeStageVolumeResponse {
+  // Intentionally empty.
 }
 message NodeUnstageVolumeRequest {
   // The ID of the volume. This field is REQUIRED.
@@ -688,6 +695,7 @@ message NodeUnstageVolumeRequest {
 }
 
 message NodeUnstageVolumeResponse {
+  // Intentionally empty.
 }
 message NodePublishVolumeRequest {
   // The ID of the volume to publish. This field is REQUIRED.
@@ -736,6 +744,7 @@ message NodePublishVolumeRequest {
 }
 
 message NodePublishVolumeResponse {
+  // Intentionally empty.
 }
 message NodeUnpublishVolumeRequest {
   // The ID of the volume. This field is REQUIRED.
@@ -748,8 +757,10 @@ message NodeUnpublishVolumeRequest {
 }
 
 message NodeUnpublishVolumeResponse {
+  // Intentionally empty.
 }
 message NodeGetIdRequest {
+  // Intentionally empty.
 }
 
 message NodeGetIdResponse {
@@ -759,6 +770,7 @@ message NodeGetIdResponse {
   string node_id = 1;
 }
 message NodeGetCapabilitiesRequest {
+  // Intentionally empty.
 }
 
 message NodeGetCapabilitiesResponse {

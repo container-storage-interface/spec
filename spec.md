@@ -442,6 +442,7 @@ The general flow of the success case MAY be as follows (protos illustrated in YA
 
 ```protobuf
 message GetPluginInfoRequest {
+  // Intentionally empty.
 }
 
 message GetPluginInfoResponse {
@@ -473,6 +474,7 @@ All instances of the same version (see `vendor_version` of `GetPluginInfoRespons
 
 ```protobuf
 message GetPluginCapabilitiesRequest {
+  // Intentionally empty.
 }
 
 message GetPluginCapabilitiesResponse {
@@ -529,6 +531,7 @@ For example, the SP MAY document the maximum frequency at which its Probe implem
 
 ```protobuf
 message ProbeRequest {
+  // Intentionally empty.
 }
 
 message ProbeResponse {
@@ -773,6 +776,7 @@ message DeleteVolumeRequest {
 }
 
 message DeleteVolumeResponse {
+  // Intentionally empty.
 }
 ```
 
@@ -892,6 +896,7 @@ message ControllerUnpublishVolumeRequest {
 }
 
 message ControllerUnpublishVolumeResponse {
+  // Intentionally empty.
 }
 ```
 
@@ -1048,6 +1053,7 @@ A Controller Plugin MUST implement this RPC call. This RPC allows the CO to chec
 
 ```protobuf
 message ControllerGetCapabilitiesRequest {
+  // Intentionally empty.
 }
 
 message ControllerGetCapabilitiesResponse {
@@ -1433,6 +1439,7 @@ message NodeStageVolumeRequest {
 }
 
 message NodeStageVolumeResponse {
+  // Intentionally empty.
 }
 ```
 
@@ -1481,6 +1488,7 @@ message NodeUnstageVolumeRequest {
 }
 
 message NodeUnstageVolumeResponse {
+  // Intentionally empty.
 }
 ```
 
@@ -1574,6 +1582,7 @@ message NodePublishVolumeRequest {
 }
 
 message NodePublishVolumeResponse {
+  // Intentionally empty.
 }
 ```
 
@@ -1618,6 +1627,7 @@ message NodeUnpublishVolumeRequest {
 }
 
 message NodeUnpublishVolumeResponse {
+  // Intentionally empty.
 }
 ```
 
@@ -1642,6 +1652,7 @@ The result of this call will be used by CO in `ControllerPublishVolume`.
 
 ```protobuf
 message NodeGetIdRequest {
+  // Intentionally empty.
 }
 
 message NodeGetIdResponse {
@@ -1669,6 +1680,7 @@ This RPC allows the CO to check the supported capabilities of node service provi
 
 ```protobuf
 message NodeGetCapabilitiesRequest {
+  // Intentionally empty.
 }
 
 message NodeGetCapabilitiesResponse {
