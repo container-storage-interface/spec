@@ -516,7 +516,7 @@ If the plugin is unable to complete the GetPluginCapabilities call successfully,
 #### `Probe`
 
 A Plugin MUST implement this RPC call.
-The primary utility of the Probe RPC is to verify that the plugin is in a healthy state.
+The primary utility of the Probe RPC is to verify that the plugin is in a healthy and ready state.
 If an unhealthy state is reported, via a non-success response, a CO MAY take action with the intent to bring the plugin to a healthy state.
 Such actions MAY include, but SHALL NOT be limited to, the following:
 
@@ -535,7 +535,30 @@ message ProbeRequest {
 }
 
 message ProbeResponse {
-  // Intentionally empty.
+  // Readiness allows a plugin to report its initialization status back
+  // to the CO. Initialization for some plugins MAY be time consuming
+  // and it is important for a CO to distinguish between the following
+  // cases:
+  //
+  // 1) The plugin is in an unhealthy state and MAY need restarting. In
+  //    this case a gRPC error code SHALL be returned.
+  // 2) The plugin is still initializing, but is otherwise perfectly
+  //    healthy. In this case a successful response SHALL be returned
+  //    with a readiness value of `false`. Calls to the plugin's
+  //    Controller and/or Node services MAY fail due to an incomplete
+  //    initialization state.
+  // 3) The plugin has finished initializing and is ready to service
+  //    calls to its Controller and/or Node services. A successful
+  //    response is returned with a readiness value of `true`.
+  message Readiness {
+    bool value = 1;
+  }
+
+  // This field is OPTIONAL. If not present, the caller SHALL assume
+  // that the plugin is in a ready state and is accepting calls to its
+  // Controller and/or Node services (according to the plugin's reported
+  // capabilities).
+  Readiness readiness = 1;
 }
 ```
 
