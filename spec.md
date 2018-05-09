@@ -274,6 +274,8 @@ Each SP MUST provide:
 syntax = "proto3";
 package csi.v0;
 
+import "google/protobuf/wrappers.proto";
+
 option go_package = "csi";
 ```
 
@@ -550,15 +552,12 @@ message ProbeResponse {
   // 3) The plugin has finished initializing and is ready to service
   //    calls to its Controller and/or Node services. A successful
   //    response is returned with a readiness value of `true`.
-  message Readiness {
-    bool value = 1;
-  }
-
+  //
   // This field is OPTIONAL. If not present, the caller SHALL assume
   // that the plugin is in a ready state and is accepting calls to its
   // Controller and/or Node services (according to the plugin's reported
   // capabilities).
-  Readiness readiness = 1;
+  .google.protobuf.BoolValue readiness = 1;
 }
 ```
 
