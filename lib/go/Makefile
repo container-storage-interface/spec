@@ -94,6 +94,7 @@ CSI_GO_TMP := $(CSI_BUILD)/$(CSI_PKG_ROOT)/csi.pb.go
 $(CSI_GO_TMP): HERE := $(shell pwd)
 $(CSI_GO_TMP): PTYPES_PKG := github.com/golang/protobuf/ptypes
 $(CSI_GO_TMP): GO_OUT := plugins=grpc
+$(CSI_GO_TMP): GO_OUT := $(GO_OUT),Mgoogle/protobuf/descriptor.proto=github.com/golang/protobuf/protoc-gen-go/descriptor
 $(CSI_GO_TMP): GO_OUT := $(GO_OUT),Mgoogle/protobuf/wrappers.proto=$(PTYPES_PKG)/wrappers
 $(CSI_GO_TMP): GO_OUT := $(GO_OUT):"$(HERE)/$(CSI_BUILD)"
 $(CSI_GO_TMP): INCLUDE := -I$(GOPATH)/src -I$(HERE)/$(PROTOC_TMP_DIR)/include
