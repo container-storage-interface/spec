@@ -274,9 +274,16 @@ Each SP MUST provide:
 syntax = "proto3";
 package csi.v0;
 
+import "google/protobuf/descriptor.proto";
 import "google/protobuf/wrappers.proto";
 
 option go_package = "csi";
+
+extend google.protobuf.FieldOptions {
+  // Indicates that a field MAY contain information that is sensitive
+  // and MUST be treated as such (e.g. not logged).
+  bool csi_secret = 50000;
+}
 ```
 
 There are three sets of RPCs:
@@ -656,7 +663,8 @@ message CreateVolumeRequest {
   // Secrets required by plugin to complete volume creation request.
   // This field is OPTIONAL. Refer to the `Secrets Requirements`
   // section on how to use this field.
-  map<string, string> controller_create_secrets = 5;
+  map<string, string> controller_create_secrets = 5
+    [(csi_secret) = true];
 
   // If specified, the new volume will be pre-populated with data from
   // this source. This field is OPTIONAL.
@@ -1026,7 +1034,8 @@ message DeleteVolumeRequest {
   // Secrets required by plugin to complete volume deletion request.
   // This field is OPTIONAL. Refer to the `Secrets Requirements`
   // section on how to use this field.
-  map<string, string> controller_delete_secrets = 2;
+  map<string, string> controller_delete_secrets = 2
+    [(csi_secret) = true];
 }
 
 message DeleteVolumeResponse {
@@ -1080,7 +1089,8 @@ message ControllerPublishVolumeRequest {
   // Secrets required by plugin to complete controller publish volume
   // request. This field is OPTIONAL. Refer to the
   // `Secrets Requirements` section on how to use this field.
-  map<string, string> controller_publish_secrets = 5;
+  map<string, string> controller_publish_secrets = 5
+    [(csi_secret) = true];
 
   // Attributes of the volume to be used on a node. This field is
   // OPTIONAL and MUST match the attributes of the Volume identified
@@ -1142,7 +1152,8 @@ message ControllerUnpublishVolumeRequest {
   // ControllerPublishVolume call for the specified volume.
   // This field is OPTIONAL. Refer to the `Secrets Requirements`
   // section on how to use this field.
-  map<string, string> controller_unpublish_secrets = 3;
+  map<string, string> controller_unpublish_secrets = 3
+    [(csi_secret) = true];
 }
 
 message ControllerUnpublishVolumeResponse {
@@ -1421,7 +1432,7 @@ message CreateSnapshotRequest {
   // Secrets required by plugin to complete snapshot creation request.
   // This field is OPTIONAL. Refer to the `Secrets Requirements`
   // section on how to use this field.
-  map<string, string> create_snapshot_secrets = 3;
+  map<string, string> create_snapshot_secrets = 3 [(csi_secret) = true];
 
   // Plugin specific parameters passed in as opaque key-value pairs.
   // This field is OPTIONAL. The Plugin is responsible for parsing and
@@ -1536,7 +1547,7 @@ message DeleteSnapshotRequest {
   // Secrets required by plugin to complete snapshot deletion request.
   // This field is OPTIONAL. Refer to the `Secrets Requirements`
   // section on how to use this field.
-  map<string, string> delete_snapshot_secrets = 2;
+  map<string, string> delete_snapshot_secrets = 2 [(csi_secret) = true];
 }
 
 message DeleteSnapshotResponse {}
@@ -1723,7 +1734,7 @@ message NodeStageVolumeRequest {
   // Secrets required by plugin to complete node stage volume request.
   // This field is OPTIONAL. Refer to the `Secrets Requirements`
   // section on how to use this field.
-  map<string, string> node_stage_secrets = 5;
+  map<string, string> node_stage_secrets = 5 [(csi_secret) = true];
 
   // Attributes of the volume to publish. This field is OPTIONAL and
   // MUST match the attributes of the `Volume` identified by
@@ -1864,7 +1875,7 @@ message NodePublishVolumeRequest {
   // Secrets required by plugin to complete node publish volume request.
   // This field is OPTIONAL. Refer to the `Secrets Requirements`
   // section on how to use this field.
-  map<string, string> node_publish_secrets = 7;
+  map<string, string> node_publish_secrets = 7 [(csi_secret) = true];
 
   // Attributes of the volume to publish. This field is OPTIONAL and
   // MUST match the attributes of the Volume identified by
