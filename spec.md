@@ -557,7 +557,7 @@ message ProbeResponse {
   // that the plugin is in a ready state and is accepting calls to its
   // Controller and/or Node services (according to the plugin's reported
   // capabilities).
-  .google.protobuf.BoolValue readiness = 1;
+  .google.protobuf.BoolValue ready = 1;
 }
 ```
 
