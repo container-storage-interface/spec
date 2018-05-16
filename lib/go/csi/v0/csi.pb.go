@@ -51,7 +51,7 @@ func (x PluginCapability_Service_Type) String() string {
 	return proto.EnumName(PluginCapability_Service_Type_name, int32(x))
 }
 func (PluginCapability_Service_Type) EnumDescriptor() ([]byte, []int) {
-	return fileDescriptor_csi_b09f5c5da9b60591, []int{4, 0, 0}
+	return fileDescriptor_csi_1b72f25a8660f57b, []int{4, 0, 0}
 }
 
 type VolumeCapability_AccessMode_Mode int32
@@ -95,7 +95,7 @@ func (x VolumeCapability_AccessMode_Mode) String() string {
 	return proto.EnumName(VolumeCapability_AccessMode_Mode_name, int32(x))
 }
 func (VolumeCapability_AccessMode_Mode) EnumDescriptor() ([]byte, []int) {
-	return fileDescriptor_csi_b09f5c5da9b60591, []int{9, 2, 0}
+	return fileDescriptor_csi_1b72f25a8660f57b, []int{10, 2, 0}
 }
 
 type ControllerServiceCapability_RPC_Type int32
@@ -106,6 +106,16 @@ const (
 	ControllerServiceCapability_RPC_PUBLISH_UNPUBLISH_VOLUME ControllerServiceCapability_RPC_Type = 2
 	ControllerServiceCapability_RPC_LIST_VOLUMES             ControllerServiceCapability_RPC_Type = 3
 	ControllerServiceCapability_RPC_GET_CAPACITY             ControllerServiceCapability_RPC_Type = 4
+	// Currently the only way to consume a snapshot is to create
+	// a volume from it. Therefore plugins supporting
+	// CREATE_DELETE_SNAPSHOT MUST support creating volume from
+	// snapshot.
+	ControllerServiceCapability_RPC_CREATE_DELETE_SNAPSHOT ControllerServiceCapability_RPC_Type = 5
+	// LIST_SNAPSHOTS is NOT REQUIRED. For plugins that need to upload
+	// a snapshot after it is being cut, LIST_SNAPSHOTS COULD be used
+	// with the snapshot_id as the filter to query whether the
+	// uploading process is complete or not.
+	ControllerServiceCapability_RPC_LIST_SNAPSHOTS ControllerServiceCapability_RPC_Type = 6
 )
 
 var ControllerServiceCapability_RPC_Type_name = map[int32]string{
@@ -114,6 +124,8 @@ var ControllerServiceCapability_RPC_Type_name = map[int32]string{
 	2: "PUBLISH_UNPUBLISH_VOLUME",
 	3: "LIST_VOLUMES",
 	4: "GET_CAPACITY",
+	5: "CREATE_DELETE_SNAPSHOT",
+	6: "LIST_SNAPSHOTS",
 }
 var ControllerServiceCapability_RPC_Type_value = map[string]int32{
 	"UNKNOWN":                  0,
@@ -121,13 +133,57 @@ var ControllerServiceCapability_RPC_Type_value = map[string]int32{
 	"PUBLISH_UNPUBLISH_VOLUME": 2,
 	"LIST_VOLUMES":             3,
 	"GET_CAPACITY":             4,
+	"CREATE_DELETE_SNAPSHOT":   5,
+	"LIST_SNAPSHOTS":           6,
 }
 
 func (x ControllerServiceCapability_RPC_Type) String() string {
 	return proto.EnumName(ControllerServiceCapability_RPC_Type_name, int32(x))
 }
 func (ControllerServiceCapability_RPC_Type) EnumDescriptor() ([]byte, []int) {
-	return fileDescriptor_csi_b09f5c5da9b60591, []int{26, 0, 0}
+	return fileDescriptor_csi_1b72f25a8660f57b, []int{27, 0, 0}
+}
+
+type SnapshotStatus_Type int32
+
+const (
+	SnapshotStatus_UNKNOWN SnapshotStatus_Type = 0
+	// A snapshot is ready for use.
+	SnapshotStatus_READY SnapshotStatus_Type = 1
+	// A snapshot is cut and is now being uploaded.
+	// Some cloud providers and storage systems uploads the snapshot
+	// to the cloud after the snapshot is cut. During this phase,
+	// `thaw` can be done so the application can be running again if
+	// `freeze` was done before taking the snapshot.
+	SnapshotStatus_UPLOADING SnapshotStatus_Type = 2
+	// An error occurred during the snapshot uploading process.
+	// This error status is specific for uploading because
+	// `CreateSnaphot` is a blocking call before the snapshot is
+	// cut and therefore it SHOULD NOT come back with an error
+	// status when an error occurs. Instead a gRPC error code SHALL
+	// be returned by `CreateSnapshot` when an error occurs before
+	// a snapshot is cut.
+	SnapshotStatus_ERROR_UPLOADING SnapshotStatus_Type = 3
+)
+
+var SnapshotStatus_Type_name = map[int32]string{
+	0: "UNKNOWN",
+	1: "READY",
+	2: "UPLOADING",
+	3: "ERROR_UPLOADING",
+}
+var SnapshotStatus_Type_value = map[string]int32{
+	"UNKNOWN":         0,
+	"READY":           1,
+	"UPLOADING":       2,
+	"ERROR_UPLOADING": 3,
+}
+
+func (x SnapshotStatus_Type) String() string {
+	return proto.EnumName(SnapshotStatus_Type_name, int32(x))
+}
+func (SnapshotStatus_Type) EnumDescriptor() ([]byte, []int) {
+	return fileDescriptor_csi_1b72f25a8660f57b, []int{31, 0}
 }
 
 type NodeServiceCapability_RPC_Type int32
@@ -150,7 +206,7 @@ func (x NodeServiceCapability_RPC_Type) String() string {
 	return proto.EnumName(NodeServiceCapability_RPC_Type_name, int32(x))
 }
 func (NodeServiceCapability_RPC_Type) EnumDescriptor() ([]byte, []int) {
-	return fileDescriptor_csi_b09f5c5da9b60591, []int{39, 0, 0}
+	return fileDescriptor_csi_1b72f25a8660f57b, []int{48, 0, 0}
 }
 
 type GetPluginInfoRequest struct {
@@ -163,7 +219,7 @@ func (m *GetPluginInfoRequest) Reset()         { *m = GetPluginInfoRequest{} }
 func (m *GetPluginInfoRequest) String() string { return proto.CompactTextString(m) }
 func (*GetPluginInfoRequest) ProtoMessage()    {}
 func (*GetPluginInfoRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_csi_b09f5c5da9b60591, []int{0}
+	return fileDescriptor_csi_1b72f25a8660f57b, []int{0}
 }
 func (m *GetPluginInfoRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetPluginInfoRequest.Unmarshal(m, b)
@@ -205,7 +261,7 @@ func (m *GetPluginInfoResponse) Reset()         { *m = GetPluginInfoResponse{} }
 func (m *GetPluginInfoResponse) String() string { return proto.CompactTextString(m) }
 func (*GetPluginInfoResponse) ProtoMessage()    {}
 func (*GetPluginInfoResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_csi_b09f5c5da9b60591, []int{1}
+	return fileDescriptor_csi_1b72f25a8660f57b, []int{1}
 }
 func (m *GetPluginInfoResponse) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetPluginInfoResponse.Unmarshal(m, b)
@@ -256,7 +312,7 @@ func (m *GetPluginCapabilitiesRequest) Reset()         { *m = GetPluginCapabilit
 func (m *GetPluginCapabilitiesRequest) String() string { return proto.CompactTextString(m) }
 func (*GetPluginCapabilitiesRequest) ProtoMessage()    {}
 func (*GetPluginCapabilitiesRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_csi_b09f5c5da9b60591, []int{2}
+	return fileDescriptor_csi_1b72f25a8660f57b, []int{2}
 }
 func (m *GetPluginCapabilitiesRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetPluginCapabilitiesRequest.Unmarshal(m, b)
@@ -289,7 +345,7 @@ func (m *GetPluginCapabilitiesResponse) Reset()         { *m = GetPluginCapabili
 func (m *GetPluginCapabilitiesResponse) String() string { return proto.CompactTextString(m) }
 func (*GetPluginCapabilitiesResponse) ProtoMessage()    {}
 func (*GetPluginCapabilitiesResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_csi_b09f5c5da9b60591, []int{3}
+	return fileDescriptor_csi_1b72f25a8660f57b, []int{3}
 }
 func (m *GetPluginCapabilitiesResponse) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetPluginCapabilitiesResponse.Unmarshal(m, b)
@@ -330,7 +386,7 @@ func (m *PluginCapability) Reset()         { *m = PluginCapability{} }
 func (m *PluginCapability) String() string { return proto.CompactTextString(m) }
 func (*PluginCapability) ProtoMessage()    {}
 func (*PluginCapability) Descriptor() ([]byte, []int) {
-	return fileDescriptor_csi_b09f5c5da9b60591, []int{4}
+	return fileDescriptor_csi_1b72f25a8660f57b, []int{4}
 }
 func (m *PluginCapability) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_PluginCapability.Unmarshal(m, b)
@@ -440,7 +496,7 @@ func (m *PluginCapability_Service) Reset()         { *m = PluginCapability_Servi
 func (m *PluginCapability_Service) String() string { return proto.CompactTextString(m) }
 func (*PluginCapability_Service) ProtoMessage()    {}
 func (*PluginCapability_Service) Descriptor() ([]byte, []int) {
-	return fileDescriptor_csi_b09f5c5da9b60591, []int{4, 0}
+	return fileDescriptor_csi_1b72f25a8660f57b, []int{4, 0}
 }
 func (m *PluginCapability_Service) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_PluginCapability_Service.Unmarshal(m, b)
@@ -477,7 +533,7 @@ func (m *ProbeRequest) Reset()         { *m = ProbeRequest{} }
 func (m *ProbeRequest) String() string { return proto.CompactTextString(m) }
 func (*ProbeRequest) ProtoMessage()    {}
 func (*ProbeRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_csi_b09f5c5da9b60591, []int{5}
+	return fileDescriptor_csi_1b72f25a8660f57b, []int{5}
 }
 func (m *ProbeRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ProbeRequest.Unmarshal(m, b)
@@ -507,7 +563,7 @@ func (m *ProbeResponse) Reset()         { *m = ProbeResponse{} }
 func (m *ProbeResponse) String() string { return proto.CompactTextString(m) }
 func (*ProbeResponse) ProtoMessage()    {}
 func (*ProbeResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_csi_b09f5c5da9b60591, []int{6}
+	return fileDescriptor_csi_1b72f25a8660f57b, []int{6}
 }
 func (m *ProbeResponse) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ProbeResponse.Unmarshal(m, b)
@@ -562,33 +618,22 @@ type CreateVolumeRequest struct {
 	// validating these parameters. COs will treat these as opaque.
 	Parameters map[string]string `protobuf:"bytes,4,rep,name=parameters" json:"parameters,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
 	// Secrets required by plugin to complete volume creation request.
-	// A secret is a string to string map where the key identifies the
-	// name of the secret (e.g. "username" or "password"), and the value
-	// contains the secret data (e.g. "bob" or "abc123").
-	// Each key MUST consist of alphanumeric characters, '-', '_' or '.'.
-	// Each value MUST contain a valid string. An SP MAY choose to accept
-	// binary (non-string) data by using a binary-to-text encoding scheme,
-	// like base64.
-	// An SP SHALL advertise the requirements for required secret keys and
-	// values in documentation.
-	// CO SHALL permit passing through the required secrets.
-	// A CO MAY pass the same secrets to all RPCs, therefore the keys for
-	// all unique secrets that an SP expects must be unique across all CSI
-	// operations.
-	// This information is sensitive and MUST be treated as such (not
-	// logged, etc.) by the CO.
-	// This field is OPTIONAL.
+	// This field is OPTIONAL. Refer to the `Secrets Requirements`
+	// section on how to use this field.
 	ControllerCreateSecrets map[string]string `protobuf:"bytes,5,rep,name=controller_create_secrets,json=controllerCreateSecrets" json:"controller_create_secrets,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
-	XXX_NoUnkeyedLiteral    struct{}          `json:"-"`
-	XXX_unrecognized        []byte            `json:"-"`
-	XXX_sizecache           int32             `json:"-"`
+	// If specified, the new volume will be pre-populated with data from
+	// this source. This field is OPTIONAL.
+	VolumeContentSource  *VolumeContentSource `protobuf:"bytes,6,opt,name=volume_content_source,json=volumeContentSource" json:"volume_content_source,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}             `json:"-"`
+	XXX_unrecognized     []byte               `json:"-"`
+	XXX_sizecache        int32                `json:"-"`
 }
 
 func (m *CreateVolumeRequest) Reset()         { *m = CreateVolumeRequest{} }
 func (m *CreateVolumeRequest) String() string { return proto.CompactTextString(m) }
 func (*CreateVolumeRequest) ProtoMessage()    {}
 func (*CreateVolumeRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_csi_b09f5c5da9b60591, []int{7}
+	return fileDescriptor_csi_1b72f25a8660f57b, []int{7}
 }
 func (m *CreateVolumeRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_CreateVolumeRequest.Unmarshal(m, b)
@@ -643,6 +688,170 @@ func (m *CreateVolumeRequest) GetControllerCreateSecrets() map[string]string {
 	return nil
 }
 
+func (m *CreateVolumeRequest) GetVolumeContentSource() *VolumeContentSource {
+	if m != nil {
+		return m.VolumeContentSource
+	}
+	return nil
+}
+
+// Specifies what source the volume will be created from. One of the
+// type fields MUST be specified.
+type VolumeContentSource struct {
+	// Types that are valid to be assigned to Type:
+	//	*VolumeContentSource_Snapshot
+	Type                 isVolumeContentSource_Type `protobuf_oneof:"type"`
+	XXX_NoUnkeyedLiteral struct{}                   `json:"-"`
+	XXX_unrecognized     []byte                     `json:"-"`
+	XXX_sizecache        int32                      `json:"-"`
+}
+
+func (m *VolumeContentSource) Reset()         { *m = VolumeContentSource{} }
+func (m *VolumeContentSource) String() string { return proto.CompactTextString(m) }
+func (*VolumeContentSource) ProtoMessage()    {}
+func (*VolumeContentSource) Descriptor() ([]byte, []int) {
+	return fileDescriptor_csi_1b72f25a8660f57b, []int{8}
+}
+func (m *VolumeContentSource) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_VolumeContentSource.Unmarshal(m, b)
+}
+func (m *VolumeContentSource) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_VolumeContentSource.Marshal(b, m, deterministic)
+}
+func (dst *VolumeContentSource) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_VolumeContentSource.Merge(dst, src)
+}
+func (m *VolumeContentSource) XXX_Size() int {
+	return xxx_messageInfo_VolumeContentSource.Size(m)
+}
+func (m *VolumeContentSource) XXX_DiscardUnknown() {
+	xxx_messageInfo_VolumeContentSource.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_VolumeContentSource proto.InternalMessageInfo
+
+type isVolumeContentSource_Type interface {
+	isVolumeContentSource_Type()
+}
+
+type VolumeContentSource_Snapshot struct {
+	Snapshot *VolumeContentSource_SnapshotSource `protobuf:"bytes,1,opt,name=snapshot,oneof"`
+}
+
+func (*VolumeContentSource_Snapshot) isVolumeContentSource_Type() {}
+
+func (m *VolumeContentSource) GetType() isVolumeContentSource_Type {
+	if m != nil {
+		return m.Type
+	}
+	return nil
+}
+
+func (m *VolumeContentSource) GetSnapshot() *VolumeContentSource_SnapshotSource {
+	if x, ok := m.GetType().(*VolumeContentSource_Snapshot); ok {
+		return x.Snapshot
+	}
+	return nil
+}
+
+// XXX_OneofFuncs is for the internal use of the proto package.
+func (*VolumeContentSource) XXX_OneofFuncs() (func(msg proto.Message, b *proto.Buffer) error, func(msg proto.Message, tag, wire int, b *proto.Buffer) (bool, error), func(msg proto.Message) (n int), []interface{}) {
+	return _VolumeContentSource_OneofMarshaler, _VolumeContentSource_OneofUnmarshaler, _VolumeContentSource_OneofSizer, []interface{}{
+		(*VolumeContentSource_Snapshot)(nil),
+	}
+}
+
+func _VolumeContentSource_OneofMarshaler(msg proto.Message, b *proto.Buffer) error {
+	m := msg.(*VolumeContentSource)
+	// type
+	switch x := m.Type.(type) {
+	case *VolumeContentSource_Snapshot:
+		b.EncodeVarint(1<<3 | proto.WireBytes)
+		if err := b.EncodeMessage(x.Snapshot); err != nil {
+			return err
+		}
+	case nil:
+	default:
+		return fmt.Errorf("VolumeContentSource.Type has unexpected type %T", x)
+	}
+	return nil
+}
+
+func _VolumeContentSource_OneofUnmarshaler(msg proto.Message, tag, wire int, b *proto.Buffer) (bool, error) {
+	m := msg.(*VolumeContentSource)
+	switch tag {
+	case 1: // type.snapshot
+		if wire != proto.WireBytes {
+			return true, proto.ErrInternalBadWireType
+		}
+		msg := new(VolumeContentSource_SnapshotSource)
+		err := b.DecodeMessage(msg)
+		m.Type = &VolumeContentSource_Snapshot{msg}
+		return true, err
+	default:
+		return false, nil
+	}
+}
+
+func _VolumeContentSource_OneofSizer(msg proto.Message) (n int) {
+	m := msg.(*VolumeContentSource)
+	// type
+	switch x := m.Type.(type) {
+	case *VolumeContentSource_Snapshot:
+		s := proto.Size(x.Snapshot)
+		n += 1 // tag and wire
+		n += proto.SizeVarint(uint64(s))
+		n += s
+	case nil:
+	default:
+		panic(fmt.Sprintf("proto: unexpected type %T in oneof", x))
+	}
+	return n
+}
+
+type VolumeContentSource_SnapshotSource struct {
+	// Contains identity information for the created snapshot. This
+	// field is REQUIRED. The identity information will be used by
+	// the CO in subsequent calls to refer to the provisioned snapshot.
+	// Plugin is REQUIRED to support creating volume from snapshot if
+	// it supports the capability CREATE_DELETE_SNAPSHOT.
+	Id                   string   `protobuf:"bytes,1,opt,name=id" json:"id,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *VolumeContentSource_SnapshotSource) Reset()         { *m = VolumeContentSource_SnapshotSource{} }
+func (m *VolumeContentSource_SnapshotSource) String() string { return proto.CompactTextString(m) }
+func (*VolumeContentSource_SnapshotSource) ProtoMessage()    {}
+func (*VolumeContentSource_SnapshotSource) Descriptor() ([]byte, []int) {
+	return fileDescriptor_csi_1b72f25a8660f57b, []int{8, 0}
+}
+func (m *VolumeContentSource_SnapshotSource) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_VolumeContentSource_SnapshotSource.Unmarshal(m, b)
+}
+func (m *VolumeContentSource_SnapshotSource) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_VolumeContentSource_SnapshotSource.Marshal(b, m, deterministic)
+}
+func (dst *VolumeContentSource_SnapshotSource) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_VolumeContentSource_SnapshotSource.Merge(dst, src)
+}
+func (m *VolumeContentSource_SnapshotSource) XXX_Size() int {
+	return xxx_messageInfo_VolumeContentSource_SnapshotSource.Size(m)
+}
+func (m *VolumeContentSource_SnapshotSource) XXX_DiscardUnknown() {
+	xxx_messageInfo_VolumeContentSource_SnapshotSource.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_VolumeContentSource_SnapshotSource proto.InternalMessageInfo
+
+func (m *VolumeContentSource_SnapshotSource) GetId() string {
+	if m != nil {
+		return m.Id
+	}
+	return ""
+}
+
 type CreateVolumeResponse struct {
 	// Contains all attributes of the newly created volume that are
 	// relevant to the CO along with information required by the Plugin
@@ -657,7 +866,7 @@ func (m *CreateVolumeResponse) Reset()         { *m = CreateVolumeResponse{} }
 func (m *CreateVolumeResponse) String() string { return proto.CompactTextString(m) }
 func (*CreateVolumeResponse) ProtoMessage()    {}
 func (*CreateVolumeResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_csi_b09f5c5da9b60591, []int{8}
+	return fileDescriptor_csi_1b72f25a8660f57b, []int{9}
 }
 func (m *CreateVolumeResponse) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_CreateVolumeResponse.Unmarshal(m, b)
@@ -704,7 +913,7 @@ func (m *VolumeCapability) Reset()         { *m = VolumeCapability{} }
 func (m *VolumeCapability) String() string { return proto.CompactTextString(m) }
 func (*VolumeCapability) ProtoMessage()    {}
 func (*VolumeCapability) Descriptor() ([]byte, []int) {
-	return fileDescriptor_csi_b09f5c5da9b60591, []int{9}
+	return fileDescriptor_csi_1b72f25a8660f57b, []int{10}
 }
 func (m *VolumeCapability) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_VolumeCapability.Unmarshal(m, b)
@@ -851,7 +1060,7 @@ func (m *VolumeCapability_BlockVolume) Reset()         { *m = VolumeCapability_B
 func (m *VolumeCapability_BlockVolume) String() string { return proto.CompactTextString(m) }
 func (*VolumeCapability_BlockVolume) ProtoMessage()    {}
 func (*VolumeCapability_BlockVolume) Descriptor() ([]byte, []int) {
-	return fileDescriptor_csi_b09f5c5da9b60591, []int{9, 0}
+	return fileDescriptor_csi_1b72f25a8660f57b, []int{10, 0}
 }
 func (m *VolumeCapability_BlockVolume) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_VolumeCapability_BlockVolume.Unmarshal(m, b)
@@ -891,7 +1100,7 @@ func (m *VolumeCapability_MountVolume) Reset()         { *m = VolumeCapability_M
 func (m *VolumeCapability_MountVolume) String() string { return proto.CompactTextString(m) }
 func (*VolumeCapability_MountVolume) ProtoMessage()    {}
 func (*VolumeCapability_MountVolume) Descriptor() ([]byte, []int) {
-	return fileDescriptor_csi_b09f5c5da9b60591, []int{9, 1}
+	return fileDescriptor_csi_1b72f25a8660f57b, []int{10, 1}
 }
 func (m *VolumeCapability_MountVolume) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_VolumeCapability_MountVolume.Unmarshal(m, b)
@@ -938,7 +1147,7 @@ func (m *VolumeCapability_AccessMode) Reset()         { *m = VolumeCapability_Ac
 func (m *VolumeCapability_AccessMode) String() string { return proto.CompactTextString(m) }
 func (*VolumeCapability_AccessMode) ProtoMessage()    {}
 func (*VolumeCapability_AccessMode) Descriptor() ([]byte, []int) {
-	return fileDescriptor_csi_b09f5c5da9b60591, []int{9, 2}
+	return fileDescriptor_csi_1b72f25a8660f57b, []int{10, 2}
 }
 func (m *VolumeCapability_AccessMode) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_VolumeCapability_AccessMode.Unmarshal(m, b)
@@ -986,7 +1195,7 @@ func (m *CapacityRange) Reset()         { *m = CapacityRange{} }
 func (m *CapacityRange) String() string { return proto.CompactTextString(m) }
 func (*CapacityRange) ProtoMessage()    {}
 func (*CapacityRange) Descriptor() ([]byte, []int) {
-	return fileDescriptor_csi_b09f5c5da9b60591, []int{10}
+	return fileDescriptor_csi_1b72f25a8660f57b, []int{11}
 }
 func (m *CapacityRange) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_CapacityRange.Unmarshal(m, b)
@@ -1039,17 +1248,21 @@ type Volume struct {
 	// a volume. A volume uniquely identified by `id` SHALL always report
 	// the same attributes. This field is OPTIONAL and when present MUST
 	// be passed to volume validation and publishing calls.
-	Attributes           map[string]string `protobuf:"bytes,3,rep,name=attributes" json:"attributes,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
-	XXX_NoUnkeyedLiteral struct{}          `json:"-"`
-	XXX_unrecognized     []byte            `json:"-"`
-	XXX_sizecache        int32             `json:"-"`
+	Attributes map[string]string `protobuf:"bytes,3,rep,name=attributes" json:"attributes,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	// If specified, indicates that the volume is not empty and is
+	// pre-populated with data from the specified source.
+	// This field is OPTIONAL.
+	ContentSource        *VolumeContentSource `protobuf:"bytes,4,opt,name=content_source,json=contentSource" json:"content_source,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}             `json:"-"`
+	XXX_unrecognized     []byte               `json:"-"`
+	XXX_sizecache        int32                `json:"-"`
 }
 
 func (m *Volume) Reset()         { *m = Volume{} }
 func (m *Volume) String() string { return proto.CompactTextString(m) }
 func (*Volume) ProtoMessage()    {}
 func (*Volume) Descriptor() ([]byte, []int) {
-	return fileDescriptor_csi_b09f5c5da9b60591, []int{11}
+	return fileDescriptor_csi_1b72f25a8660f57b, []int{12}
 }
 func (m *Volume) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_Volume.Unmarshal(m, b)
@@ -1090,27 +1303,20 @@ func (m *Volume) GetAttributes() map[string]string {
 	return nil
 }
 
+func (m *Volume) GetContentSource() *VolumeContentSource {
+	if m != nil {
+		return m.ContentSource
+	}
+	return nil
+}
+
 type DeleteVolumeRequest struct {
 	// The ID of the volume to be deprovisioned.
 	// This field is REQUIRED.
 	VolumeId string `protobuf:"bytes,1,opt,name=volume_id,json=volumeId" json:"volume_id,omitempty"`
 	// Secrets required by plugin to complete volume deletion request.
-	// A secret is a string to string map where the key identifies the
-	// name of the secret (e.g. "username" or "password"), and the value
-	// contains the secret data (e.g. "bob" or "abc123").
-	// Each key MUST consist of alphanumeric characters, '-', '_' or '.'.
-	// Each value MUST contain a valid string. An SP MAY choose to accept
-	// binary (non-string) data by using a binary-to-text encoding scheme,
-	// like base64.
-	// An SP SHALL advertise the requirements for required secret keys and
-	// values in documentation.
-	// CO SHALL permit passing through the required secrets.
-	// A CO MAY pass the same secrets to all RPCs, therefore the keys for
-	// all unique secrets that an SP expects must be unique across all CSI
-	// operations.
-	// This information is sensitive and MUST be treated as such (not
-	// logged, etc.) by the CO.
-	// This field is OPTIONAL.
+	// This field is OPTIONAL. Refer to the `Secrets Requirements`
+	// section on how to use this field.
 	ControllerDeleteSecrets map[string]string `protobuf:"bytes,2,rep,name=controller_delete_secrets,json=controllerDeleteSecrets" json:"controller_delete_secrets,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
 	XXX_NoUnkeyedLiteral    struct{}          `json:"-"`
 	XXX_unrecognized        []byte            `json:"-"`
@@ -1121,7 +1327,7 @@ func (m *DeleteVolumeRequest) Reset()         { *m = DeleteVolumeRequest{} }
 func (m *DeleteVolumeRequest) String() string { return proto.CompactTextString(m) }
 func (*DeleteVolumeRequest) ProtoMessage()    {}
 func (*DeleteVolumeRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_csi_b09f5c5da9b60591, []int{12}
+	return fileDescriptor_csi_1b72f25a8660f57b, []int{13}
 }
 func (m *DeleteVolumeRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_DeleteVolumeRequest.Unmarshal(m, b)
@@ -1165,7 +1371,7 @@ func (m *DeleteVolumeResponse) Reset()         { *m = DeleteVolumeResponse{} }
 func (m *DeleteVolumeResponse) String() string { return proto.CompactTextString(m) }
 func (*DeleteVolumeResponse) ProtoMessage()    {}
 func (*DeleteVolumeResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_csi_b09f5c5da9b60591, []int{13}
+	return fileDescriptor_csi_1b72f25a8660f57b, []int{14}
 }
 func (m *DeleteVolumeResponse) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_DeleteVolumeResponse.Unmarshal(m, b)
@@ -1199,23 +1405,8 @@ type ControllerPublishVolumeRequest struct {
 	// REQUIRED.
 	Readonly bool `protobuf:"varint,4,opt,name=readonly" json:"readonly,omitempty"`
 	// Secrets required by plugin to complete controller publish volume
-	// request.
-	// A secret is a string to string map where the key identifies the
-	// name of the secret (e.g. "username" or "password"), and the value
-	// contains the secret data (e.g. "bob" or "abc123").
-	// Each key MUST consist of alphanumeric characters, '-', '_' or '.'.
-	// Each value MUST contain a valid string. An SP MAY choose to accept
-	// binary (non-string) data by using a binary-to-text encoding scheme,
-	// like base64.
-	// An SP SHALL advertise the requirements for required secret keys and
-	// values in documentation.
-	// CO SHALL permit passing through the required secrets.
-	// A CO MAY pass the same secrets to all RPCs, therefore the keys for
-	// all unique secrets that an SP expects must be unique across all CSI
-	// operations.
-	// This information is sensitive and MUST be treated as such (not
-	// logged, etc.) by the CO.
-	// This field is OPTIONAL.
+	// request. This field is OPTIONAL. Refer to the
+	// `Secrets Requirements` section on how to use this field.
 	ControllerPublishSecrets map[string]string `protobuf:"bytes,5,rep,name=controller_publish_secrets,json=controllerPublishSecrets" json:"controller_publish_secrets,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
 	// Attributes of the volume to be used on a node. This field is
 	// OPTIONAL and MUST match the attributes of the Volume identified
@@ -1230,7 +1421,7 @@ func (m *ControllerPublishVolumeRequest) Reset()         { *m = ControllerPublis
 func (m *ControllerPublishVolumeRequest) String() string { return proto.CompactTextString(m) }
 func (*ControllerPublishVolumeRequest) ProtoMessage()    {}
 func (*ControllerPublishVolumeRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_csi_b09f5c5da9b60591, []int{14}
+	return fileDescriptor_csi_1b72f25a8660f57b, []int{15}
 }
 func (m *ControllerPublishVolumeRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ControllerPublishVolumeRequest.Unmarshal(m, b)
@@ -1307,7 +1498,7 @@ func (m *ControllerPublishVolumeResponse) Reset()         { *m = ControllerPubli
 func (m *ControllerPublishVolumeResponse) String() string { return proto.CompactTextString(m) }
 func (*ControllerPublishVolumeResponse) ProtoMessage()    {}
 func (*ControllerPublishVolumeResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_csi_b09f5c5da9b60591, []int{15}
+	return fileDescriptor_csi_1b72f25a8660f57b, []int{16}
 }
 func (m *ControllerPublishVolumeResponse) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ControllerPublishVolumeResponse.Unmarshal(m, b)
@@ -1345,24 +1536,9 @@ type ControllerUnpublishVolumeRequest struct {
 	NodeId string `protobuf:"bytes,2,opt,name=node_id,json=nodeId" json:"node_id,omitempty"`
 	// Secrets required by plugin to complete controller unpublish volume
 	// request. This SHOULD be the same secrets passed to the
-	// ControllerPublishVolume.
-	// call for the specified volume.
-	// A secret is a string to string map where the key identifies the
-	// name of the secret (e.g. "username" or "password"), and the value
-	// contains the secret data (e.g. "bob" or "abc123").
-	// Each key MUST consist of alphanumeric characters, '-', '_' or '.'.
-	// Each value MUST contain a valid string. An SP MAY choose to accept
-	// binary (non-string) data by using a binary-to-text encoding scheme,
-	// like base64.
-	// An SP SHALL advertise the requirements for required secret keys and
-	// values in documentation.
-	// CO SHALL permit passing through the required secrets.
-	// A CO MAY pass the same secrets to all RPCs, therefore the keys for
-	// all unique secrets that an SP expects must be unique across all CSI
-	// operations.
-	// This information is sensitive and MUST be treated as such (not
-	// logged, etc.) by the CO.
-	// This field is OPTIONAL.
+	// ControllerPublishVolume call for the specified volume.
+	// This field is OPTIONAL. Refer to the `Secrets Requirements`
+	// section on how to use this field.
 	ControllerUnpublishSecrets map[string]string `protobuf:"bytes,3,rep,name=controller_unpublish_secrets,json=controllerUnpublishSecrets" json:"controller_unpublish_secrets,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
 	XXX_NoUnkeyedLiteral       struct{}          `json:"-"`
 	XXX_unrecognized           []byte            `json:"-"`
@@ -1373,7 +1549,7 @@ func (m *ControllerUnpublishVolumeRequest) Reset()         { *m = ControllerUnpu
 func (m *ControllerUnpublishVolumeRequest) String() string { return proto.CompactTextString(m) }
 func (*ControllerUnpublishVolumeRequest) ProtoMessage()    {}
 func (*ControllerUnpublishVolumeRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_csi_b09f5c5da9b60591, []int{16}
+	return fileDescriptor_csi_1b72f25a8660f57b, []int{17}
 }
 func (m *ControllerUnpublishVolumeRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ControllerUnpublishVolumeRequest.Unmarshal(m, b)
@@ -1424,7 +1600,7 @@ func (m *ControllerUnpublishVolumeResponse) Reset()         { *m = ControllerUnp
 func (m *ControllerUnpublishVolumeResponse) String() string { return proto.CompactTextString(m) }
 func (*ControllerUnpublishVolumeResponse) ProtoMessage()    {}
 func (*ControllerUnpublishVolumeResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_csi_b09f5c5da9b60591, []int{17}
+	return fileDescriptor_csi_1b72f25a8660f57b, []int{18}
 }
 func (m *ControllerUnpublishVolumeResponse) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ControllerUnpublishVolumeResponse.Unmarshal(m, b)
@@ -1463,7 +1639,7 @@ func (m *ValidateVolumeCapabilitiesRequest) Reset()         { *m = ValidateVolum
 func (m *ValidateVolumeCapabilitiesRequest) String() string { return proto.CompactTextString(m) }
 func (*ValidateVolumeCapabilitiesRequest) ProtoMessage()    {}
 func (*ValidateVolumeCapabilitiesRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_csi_b09f5c5da9b60591, []int{18}
+	return fileDescriptor_csi_1b72f25a8660f57b, []int{19}
 }
 func (m *ValidateVolumeCapabilitiesRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ValidateVolumeCapabilitiesRequest.Unmarshal(m, b)
@@ -1521,7 +1697,7 @@ func (m *ValidateVolumeCapabilitiesResponse) Reset()         { *m = ValidateVolu
 func (m *ValidateVolumeCapabilitiesResponse) String() string { return proto.CompactTextString(m) }
 func (*ValidateVolumeCapabilitiesResponse) ProtoMessage()    {}
 func (*ValidateVolumeCapabilitiesResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_csi_b09f5c5da9b60591, []int{19}
+	return fileDescriptor_csi_1b72f25a8660f57b, []int{20}
 }
 func (m *ValidateVolumeCapabilitiesResponse) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ValidateVolumeCapabilitiesResponse.Unmarshal(m, b)
@@ -1579,7 +1755,7 @@ func (m *ListVolumesRequest) Reset()         { *m = ListVolumesRequest{} }
 func (m *ListVolumesRequest) String() string { return proto.CompactTextString(m) }
 func (*ListVolumesRequest) ProtoMessage()    {}
 func (*ListVolumesRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_csi_b09f5c5da9b60591, []int{20}
+	return fileDescriptor_csi_1b72f25a8660f57b, []int{21}
 }
 func (m *ListVolumesRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ListVolumesRequest.Unmarshal(m, b)
@@ -1631,7 +1807,7 @@ func (m *ListVolumesResponse) Reset()         { *m = ListVolumesResponse{} }
 func (m *ListVolumesResponse) String() string { return proto.CompactTextString(m) }
 func (*ListVolumesResponse) ProtoMessage()    {}
 func (*ListVolumesResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_csi_b09f5c5da9b60591, []int{21}
+	return fileDescriptor_csi_1b72f25a8660f57b, []int{22}
 }
 func (m *ListVolumesResponse) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ListVolumesResponse.Unmarshal(m, b)
@@ -1676,7 +1852,7 @@ func (m *ListVolumesResponse_Entry) Reset()         { *m = ListVolumesResponse_E
 func (m *ListVolumesResponse_Entry) String() string { return proto.CompactTextString(m) }
 func (*ListVolumesResponse_Entry) ProtoMessage()    {}
 func (*ListVolumesResponse_Entry) Descriptor() ([]byte, []int) {
-	return fileDescriptor_csi_b09f5c5da9b60591, []int{21, 0}
+	return fileDescriptor_csi_1b72f25a8660f57b, []int{22, 0}
 }
 func (m *ListVolumesResponse_Entry) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ListVolumesResponse_Entry.Unmarshal(m, b)
@@ -1724,7 +1900,7 @@ func (m *GetCapacityRequest) Reset()         { *m = GetCapacityRequest{} }
 func (m *GetCapacityRequest) String() string { return proto.CompactTextString(m) }
 func (*GetCapacityRequest) ProtoMessage()    {}
 func (*GetCapacityRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_csi_b09f5c5da9b60591, []int{22}
+	return fileDescriptor_csi_1b72f25a8660f57b, []int{23}
 }
 func (m *GetCapacityRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetCapacityRequest.Unmarshal(m, b)
@@ -1775,7 +1951,7 @@ func (m *GetCapacityResponse) Reset()         { *m = GetCapacityResponse{} }
 func (m *GetCapacityResponse) String() string { return proto.CompactTextString(m) }
 func (*GetCapacityResponse) ProtoMessage()    {}
 func (*GetCapacityResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_csi_b09f5c5da9b60591, []int{23}
+	return fileDescriptor_csi_1b72f25a8660f57b, []int{24}
 }
 func (m *GetCapacityResponse) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetCapacityResponse.Unmarshal(m, b)
@@ -1812,7 +1988,7 @@ func (m *ControllerGetCapabilitiesRequest) Reset()         { *m = ControllerGetC
 func (m *ControllerGetCapabilitiesRequest) String() string { return proto.CompactTextString(m) }
 func (*ControllerGetCapabilitiesRequest) ProtoMessage()    {}
 func (*ControllerGetCapabilitiesRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_csi_b09f5c5da9b60591, []int{24}
+	return fileDescriptor_csi_1b72f25a8660f57b, []int{25}
 }
 func (m *ControllerGetCapabilitiesRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ControllerGetCapabilitiesRequest.Unmarshal(m, b)
@@ -1845,7 +2021,7 @@ func (m *ControllerGetCapabilitiesResponse) Reset()         { *m = ControllerGet
 func (m *ControllerGetCapabilitiesResponse) String() string { return proto.CompactTextString(m) }
 func (*ControllerGetCapabilitiesResponse) ProtoMessage()    {}
 func (*ControllerGetCapabilitiesResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_csi_b09f5c5da9b60591, []int{25}
+	return fileDescriptor_csi_1b72f25a8660f57b, []int{26}
 }
 func (m *ControllerGetCapabilitiesResponse) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ControllerGetCapabilitiesResponse.Unmarshal(m, b)
@@ -1886,7 +2062,7 @@ func (m *ControllerServiceCapability) Reset()         { *m = ControllerServiceCa
 func (m *ControllerServiceCapability) String() string { return proto.CompactTextString(m) }
 func (*ControllerServiceCapability) ProtoMessage()    {}
 func (*ControllerServiceCapability) Descriptor() ([]byte, []int) {
-	return fileDescriptor_csi_b09f5c5da9b60591, []int{26}
+	return fileDescriptor_csi_1b72f25a8660f57b, []int{27}
 }
 func (m *ControllerServiceCapability) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ControllerServiceCapability.Unmarshal(m, b)
@@ -1996,7 +2172,7 @@ func (m *ControllerServiceCapability_RPC) Reset()         { *m = ControllerServi
 func (m *ControllerServiceCapability_RPC) String() string { return proto.CompactTextString(m) }
 func (*ControllerServiceCapability_RPC) ProtoMessage()    {}
 func (*ControllerServiceCapability_RPC) Descriptor() ([]byte, []int) {
-	return fileDescriptor_csi_b09f5c5da9b60591, []int{26, 0}
+	return fileDescriptor_csi_1b72f25a8660f57b, []int{27, 0}
 }
 func (m *ControllerServiceCapability_RPC) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ControllerServiceCapability_RPC.Unmarshal(m, b)
@@ -2023,6 +2199,520 @@ func (m *ControllerServiceCapability_RPC) GetType() ControllerServiceCapability_
 	return ControllerServiceCapability_RPC_UNKNOWN
 }
 
+type CreateSnapshotRequest struct {
+	// The ID of the source volume to be snapshotted.
+	// This field is REQUIRED.
+	SourceVolumeId string `protobuf:"bytes,1,opt,name=source_volume_id,json=sourceVolumeId" json:"source_volume_id,omitempty"`
+	// The suggested name for the snapshot. This field is REQUIRED for
+	// idempotency.
+	Name string `protobuf:"bytes,2,opt,name=name" json:"name,omitempty"`
+	// Secrets required by plugin to complete snapshot creation request.
+	// This field is OPTIONAL. Refer to the `Secrets Requirements`
+	// section on how to use this field.
+	CreateSnapshotSecrets map[string]string `protobuf:"bytes,3,rep,name=create_snapshot_secrets,json=createSnapshotSecrets" json:"create_snapshot_secrets,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	// Plugin specific parameters passed in as opaque key-value pairs.
+	// This field is OPTIONAL. The Plugin is responsible for parsing and
+	// validating these parameters. COs will treat these as opaque.
+	// Use cases for opaque parameters:
+	// - Specify a policy to automatically clean up the snapshot.
+	// - Specify an expiration date for the snapshot.
+	// - Specify whether the snapshot is readonly or read/write.
+	// - Specify if the snapshot should be replicated to some place.
+	// - Specify primary or secondary for replication systems that
+	//   support snapshotting only on primary.
+	Parameters           map[string]string `protobuf:"bytes,4,rep,name=parameters" json:"parameters,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	XXX_NoUnkeyedLiteral struct{}          `json:"-"`
+	XXX_unrecognized     []byte            `json:"-"`
+	XXX_sizecache        int32             `json:"-"`
+}
+
+func (m *CreateSnapshotRequest) Reset()         { *m = CreateSnapshotRequest{} }
+func (m *CreateSnapshotRequest) String() string { return proto.CompactTextString(m) }
+func (*CreateSnapshotRequest) ProtoMessage()    {}
+func (*CreateSnapshotRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_csi_1b72f25a8660f57b, []int{28}
+}
+func (m *CreateSnapshotRequest) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_CreateSnapshotRequest.Unmarshal(m, b)
+}
+func (m *CreateSnapshotRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_CreateSnapshotRequest.Marshal(b, m, deterministic)
+}
+func (dst *CreateSnapshotRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_CreateSnapshotRequest.Merge(dst, src)
+}
+func (m *CreateSnapshotRequest) XXX_Size() int {
+	return xxx_messageInfo_CreateSnapshotRequest.Size(m)
+}
+func (m *CreateSnapshotRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_CreateSnapshotRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_CreateSnapshotRequest proto.InternalMessageInfo
+
+func (m *CreateSnapshotRequest) GetSourceVolumeId() string {
+	if m != nil {
+		return m.SourceVolumeId
+	}
+	return ""
+}
+
+func (m *CreateSnapshotRequest) GetName() string {
+	if m != nil {
+		return m.Name
+	}
+	return ""
+}
+
+func (m *CreateSnapshotRequest) GetCreateSnapshotSecrets() map[string]string {
+	if m != nil {
+		return m.CreateSnapshotSecrets
+	}
+	return nil
+}
+
+func (m *CreateSnapshotRequest) GetParameters() map[string]string {
+	if m != nil {
+		return m.Parameters
+	}
+	return nil
+}
+
+type CreateSnapshotResponse struct {
+	// Contains all attributes of the newly created snapshot that are
+	// relevant to the CO along with information required by the Plugin
+	// to uniquely identify the snapshot. This field is REQUIRED.
+	Snapshot             *Snapshot `protobuf:"bytes,1,opt,name=snapshot" json:"snapshot,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}  `json:"-"`
+	XXX_unrecognized     []byte    `json:"-"`
+	XXX_sizecache        int32     `json:"-"`
+}
+
+func (m *CreateSnapshotResponse) Reset()         { *m = CreateSnapshotResponse{} }
+func (m *CreateSnapshotResponse) String() string { return proto.CompactTextString(m) }
+func (*CreateSnapshotResponse) ProtoMessage()    {}
+func (*CreateSnapshotResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_csi_1b72f25a8660f57b, []int{29}
+}
+func (m *CreateSnapshotResponse) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_CreateSnapshotResponse.Unmarshal(m, b)
+}
+func (m *CreateSnapshotResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_CreateSnapshotResponse.Marshal(b, m, deterministic)
+}
+func (dst *CreateSnapshotResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_CreateSnapshotResponse.Merge(dst, src)
+}
+func (m *CreateSnapshotResponse) XXX_Size() int {
+	return xxx_messageInfo_CreateSnapshotResponse.Size(m)
+}
+func (m *CreateSnapshotResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_CreateSnapshotResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_CreateSnapshotResponse proto.InternalMessageInfo
+
+func (m *CreateSnapshotResponse) GetSnapshot() *Snapshot {
+	if m != nil {
+		return m.Snapshot
+	}
+	return nil
+}
+
+// The information about a provisioned snapshot.
+type Snapshot struct {
+	// This is the complete size of the snapshot in bytes. The purpose of
+	// this field is to give CO guidance on how much space is needed to
+	// create a volume from this snapshot. The size of the volume MUST NOT
+	// be less than the size of the source snapshot. This field is
+	// OPTIONAL. If this field is not set, it indicates that this size is
+	// unknown. The value of this field MUST NOT be negative and a size of
+	// zero means it is unspecified.
+	SizeBytes int64 `protobuf:"varint,1,opt,name=size_bytes,json=sizeBytes" json:"size_bytes,omitempty"`
+	// Uniquely identifies a snapshot and is generated by the plugin. It
+	// will not change over time. This field is REQUIRED. The identity
+	// information will be used by the CO in subsequent calls to refer to
+	// the provisioned snapshot.
+	Id string `protobuf:"bytes,2,opt,name=id" json:"id,omitempty"`
+	// Identity information for the source volume. Note that creating a
+	// snapshot from a snapshot is not supported here so the source has to
+	// be a volume. This field is REQUIRED.
+	SourceVolumeId string `protobuf:"bytes,3,opt,name=source_volume_id,json=sourceVolumeId" json:"source_volume_id,omitempty"`
+	// Timestamp when the point-in-time snapshot is taken on the storage
+	// system. The format of this field should be a Unix nanoseconds time
+	// encoded as an int64. On Unix, the command `date +%s%N` returns the
+	// current time in nanoseconds since 1970-01-01 00:00:00 UTC. This
+	// field is REQUIRED.
+	CreatedAt int64 `protobuf:"varint,4,opt,name=created_at,json=createdAt" json:"created_at,omitempty"`
+	// The status of a snapshot.
+	Status               *SnapshotStatus `protobuf:"bytes,5,opt,name=status" json:"status,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}        `json:"-"`
+	XXX_unrecognized     []byte          `json:"-"`
+	XXX_sizecache        int32           `json:"-"`
+}
+
+func (m *Snapshot) Reset()         { *m = Snapshot{} }
+func (m *Snapshot) String() string { return proto.CompactTextString(m) }
+func (*Snapshot) ProtoMessage()    {}
+func (*Snapshot) Descriptor() ([]byte, []int) {
+	return fileDescriptor_csi_1b72f25a8660f57b, []int{30}
+}
+func (m *Snapshot) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_Snapshot.Unmarshal(m, b)
+}
+func (m *Snapshot) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_Snapshot.Marshal(b, m, deterministic)
+}
+func (dst *Snapshot) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_Snapshot.Merge(dst, src)
+}
+func (m *Snapshot) XXX_Size() int {
+	return xxx_messageInfo_Snapshot.Size(m)
+}
+func (m *Snapshot) XXX_DiscardUnknown() {
+	xxx_messageInfo_Snapshot.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_Snapshot proto.InternalMessageInfo
+
+func (m *Snapshot) GetSizeBytes() int64 {
+	if m != nil {
+		return m.SizeBytes
+	}
+	return 0
+}
+
+func (m *Snapshot) GetId() string {
+	if m != nil {
+		return m.Id
+	}
+	return ""
+}
+
+func (m *Snapshot) GetSourceVolumeId() string {
+	if m != nil {
+		return m.SourceVolumeId
+	}
+	return ""
+}
+
+func (m *Snapshot) GetCreatedAt() int64 {
+	if m != nil {
+		return m.CreatedAt
+	}
+	return 0
+}
+
+func (m *Snapshot) GetStatus() *SnapshotStatus {
+	if m != nil {
+		return m.Status
+	}
+	return nil
+}
+
+// The status of a snapshot.
+type SnapshotStatus struct {
+	// This field is REQUIRED.
+	Type SnapshotStatus_Type `protobuf:"varint,1,opt,name=type,enum=csi.v0.SnapshotStatus_Type" json:"type,omitempty"`
+	// Additional information to describe why a snapshot ended up in the
+	// `ERROR_UPLOADING` status. This field is OPTIONAL.
+	Details              string   `protobuf:"bytes,2,opt,name=details" json:"details,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *SnapshotStatus) Reset()         { *m = SnapshotStatus{} }
+func (m *SnapshotStatus) String() string { return proto.CompactTextString(m) }
+func (*SnapshotStatus) ProtoMessage()    {}
+func (*SnapshotStatus) Descriptor() ([]byte, []int) {
+	return fileDescriptor_csi_1b72f25a8660f57b, []int{31}
+}
+func (m *SnapshotStatus) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_SnapshotStatus.Unmarshal(m, b)
+}
+func (m *SnapshotStatus) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_SnapshotStatus.Marshal(b, m, deterministic)
+}
+func (dst *SnapshotStatus) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_SnapshotStatus.Merge(dst, src)
+}
+func (m *SnapshotStatus) XXX_Size() int {
+	return xxx_messageInfo_SnapshotStatus.Size(m)
+}
+func (m *SnapshotStatus) XXX_DiscardUnknown() {
+	xxx_messageInfo_SnapshotStatus.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_SnapshotStatus proto.InternalMessageInfo
+
+func (m *SnapshotStatus) GetType() SnapshotStatus_Type {
+	if m != nil {
+		return m.Type
+	}
+	return SnapshotStatus_UNKNOWN
+}
+
+func (m *SnapshotStatus) GetDetails() string {
+	if m != nil {
+		return m.Details
+	}
+	return ""
+}
+
+type DeleteSnapshotRequest struct {
+	// The ID of the snapshot to be deleted.
+	// This field is REQUIRED.
+	SnapshotId string `protobuf:"bytes,1,opt,name=snapshot_id,json=snapshotId" json:"snapshot_id,omitempty"`
+	// Secrets required by plugin to complete snapshot deletion request.
+	// This field is OPTIONAL. Refer to the `Secrets Requirements`
+	// section on how to use this field.
+	DeleteSnapshotSecrets map[string]string `protobuf:"bytes,2,rep,name=delete_snapshot_secrets,json=deleteSnapshotSecrets" json:"delete_snapshot_secrets,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	XXX_NoUnkeyedLiteral  struct{}          `json:"-"`
+	XXX_unrecognized      []byte            `json:"-"`
+	XXX_sizecache         int32             `json:"-"`
+}
+
+func (m *DeleteSnapshotRequest) Reset()         { *m = DeleteSnapshotRequest{} }
+func (m *DeleteSnapshotRequest) String() string { return proto.CompactTextString(m) }
+func (*DeleteSnapshotRequest) ProtoMessage()    {}
+func (*DeleteSnapshotRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_csi_1b72f25a8660f57b, []int{32}
+}
+func (m *DeleteSnapshotRequest) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_DeleteSnapshotRequest.Unmarshal(m, b)
+}
+func (m *DeleteSnapshotRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_DeleteSnapshotRequest.Marshal(b, m, deterministic)
+}
+func (dst *DeleteSnapshotRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_DeleteSnapshotRequest.Merge(dst, src)
+}
+func (m *DeleteSnapshotRequest) XXX_Size() int {
+	return xxx_messageInfo_DeleteSnapshotRequest.Size(m)
+}
+func (m *DeleteSnapshotRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_DeleteSnapshotRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_DeleteSnapshotRequest proto.InternalMessageInfo
+
+func (m *DeleteSnapshotRequest) GetSnapshotId() string {
+	if m != nil {
+		return m.SnapshotId
+	}
+	return ""
+}
+
+func (m *DeleteSnapshotRequest) GetDeleteSnapshotSecrets() map[string]string {
+	if m != nil {
+		return m.DeleteSnapshotSecrets
+	}
+	return nil
+}
+
+type DeleteSnapshotResponse struct {
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *DeleteSnapshotResponse) Reset()         { *m = DeleteSnapshotResponse{} }
+func (m *DeleteSnapshotResponse) String() string { return proto.CompactTextString(m) }
+func (*DeleteSnapshotResponse) ProtoMessage()    {}
+func (*DeleteSnapshotResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_csi_1b72f25a8660f57b, []int{33}
+}
+func (m *DeleteSnapshotResponse) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_DeleteSnapshotResponse.Unmarshal(m, b)
+}
+func (m *DeleteSnapshotResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_DeleteSnapshotResponse.Marshal(b, m, deterministic)
+}
+func (dst *DeleteSnapshotResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_DeleteSnapshotResponse.Merge(dst, src)
+}
+func (m *DeleteSnapshotResponse) XXX_Size() int {
+	return xxx_messageInfo_DeleteSnapshotResponse.Size(m)
+}
+func (m *DeleteSnapshotResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_DeleteSnapshotResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_DeleteSnapshotResponse proto.InternalMessageInfo
+
+// List all snapshots on the storage system regardless of how they were
+// created.
+type ListSnapshotsRequest struct {
+	// If specified (non-zero value), the Plugin MUST NOT return more
+	// entries than this number in the response. If the actual number of
+	// entries is more than this number, the Plugin MUST set `next_token`
+	// in the response which can be used to get the next page of entries
+	// in the subsequent `ListSnapshots` call. This field is OPTIONAL. If
+	// not specified (zero value), it means there is no restriction on the
+	// number of entries that can be returned.
+	// The value of this field MUST NOT be negative.
+	MaxEntries int32 `protobuf:"varint,1,opt,name=max_entries,json=maxEntries" json:"max_entries,omitempty"`
+	// A token to specify where to start paginating. Set this field to
+	// `next_token` returned by a previous `ListSnapshots` call to get the
+	// next page of entries. This field is OPTIONAL.
+	// An empty string is equal to an unspecified field value.
+	StartingToken string `protobuf:"bytes,2,opt,name=starting_token,json=startingToken" json:"starting_token,omitempty"`
+	// Identity information for the source volume. This field is OPTIONAL.
+	// It can be used to list snapshots by volume.
+	SourceVolumeId string `protobuf:"bytes,3,opt,name=source_volume_id,json=sourceVolumeId" json:"source_volume_id,omitempty"`
+	// Identity information for a specific snapshot. This field is
+	// OPTIONAL. It can be used to list only a specific snapshot.
+	// ListSnapshots will return with current snapshot information
+	// and will not block if the snapshot is being uploaded.
+	SnapshotId           string   `protobuf:"bytes,4,opt,name=snapshot_id,json=snapshotId" json:"snapshot_id,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *ListSnapshotsRequest) Reset()         { *m = ListSnapshotsRequest{} }
+func (m *ListSnapshotsRequest) String() string { return proto.CompactTextString(m) }
+func (*ListSnapshotsRequest) ProtoMessage()    {}
+func (*ListSnapshotsRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_csi_1b72f25a8660f57b, []int{34}
+}
+func (m *ListSnapshotsRequest) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_ListSnapshotsRequest.Unmarshal(m, b)
+}
+func (m *ListSnapshotsRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_ListSnapshotsRequest.Marshal(b, m, deterministic)
+}
+func (dst *ListSnapshotsRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ListSnapshotsRequest.Merge(dst, src)
+}
+func (m *ListSnapshotsRequest) XXX_Size() int {
+	return xxx_messageInfo_ListSnapshotsRequest.Size(m)
+}
+func (m *ListSnapshotsRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_ListSnapshotsRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_ListSnapshotsRequest proto.InternalMessageInfo
+
+func (m *ListSnapshotsRequest) GetMaxEntries() int32 {
+	if m != nil {
+		return m.MaxEntries
+	}
+	return 0
+}
+
+func (m *ListSnapshotsRequest) GetStartingToken() string {
+	if m != nil {
+		return m.StartingToken
+	}
+	return ""
+}
+
+func (m *ListSnapshotsRequest) GetSourceVolumeId() string {
+	if m != nil {
+		return m.SourceVolumeId
+	}
+	return ""
+}
+
+func (m *ListSnapshotsRequest) GetSnapshotId() string {
+	if m != nil {
+		return m.SnapshotId
+	}
+	return ""
+}
+
+type ListSnapshotsResponse struct {
+	Entries []*ListSnapshotsResponse_Entry `protobuf:"bytes,1,rep,name=entries" json:"entries,omitempty"`
+	// This token allows you to get the next page of entries for
+	// `ListSnapshots` request. If the number of entries is larger than
+	// `max_entries`, use the `next_token` as a value for the
+	// `starting_token` field in the next `ListSnapshots` request. This
+	// field is OPTIONAL.
+	// An empty string is equal to an unspecified field value.
+	NextToken            string   `protobuf:"bytes,2,opt,name=next_token,json=nextToken" json:"next_token,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *ListSnapshotsResponse) Reset()         { *m = ListSnapshotsResponse{} }
+func (m *ListSnapshotsResponse) String() string { return proto.CompactTextString(m) }
+func (*ListSnapshotsResponse) ProtoMessage()    {}
+func (*ListSnapshotsResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_csi_1b72f25a8660f57b, []int{35}
+}
+func (m *ListSnapshotsResponse) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_ListSnapshotsResponse.Unmarshal(m, b)
+}
+func (m *ListSnapshotsResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_ListSnapshotsResponse.Marshal(b, m, deterministic)
+}
+func (dst *ListSnapshotsResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ListSnapshotsResponse.Merge(dst, src)
+}
+func (m *ListSnapshotsResponse) XXX_Size() int {
+	return xxx_messageInfo_ListSnapshotsResponse.Size(m)
+}
+func (m *ListSnapshotsResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_ListSnapshotsResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_ListSnapshotsResponse proto.InternalMessageInfo
+
+func (m *ListSnapshotsResponse) GetEntries() []*ListSnapshotsResponse_Entry {
+	if m != nil {
+		return m.Entries
+	}
+	return nil
+}
+
+func (m *ListSnapshotsResponse) GetNextToken() string {
+	if m != nil {
+		return m.NextToken
+	}
+	return ""
+}
+
+type ListSnapshotsResponse_Entry struct {
+	Snapshot             *Snapshot `protobuf:"bytes,1,opt,name=snapshot" json:"snapshot,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}  `json:"-"`
+	XXX_unrecognized     []byte    `json:"-"`
+	XXX_sizecache        int32     `json:"-"`
+}
+
+func (m *ListSnapshotsResponse_Entry) Reset()         { *m = ListSnapshotsResponse_Entry{} }
+func (m *ListSnapshotsResponse_Entry) String() string { return proto.CompactTextString(m) }
+func (*ListSnapshotsResponse_Entry) ProtoMessage()    {}
+func (*ListSnapshotsResponse_Entry) Descriptor() ([]byte, []int) {
+	return fileDescriptor_csi_1b72f25a8660f57b, []int{35, 0}
+}
+func (m *ListSnapshotsResponse_Entry) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_ListSnapshotsResponse_Entry.Unmarshal(m, b)
+}
+func (m *ListSnapshotsResponse_Entry) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_ListSnapshotsResponse_Entry.Marshal(b, m, deterministic)
+}
+func (dst *ListSnapshotsResponse_Entry) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ListSnapshotsResponse_Entry.Merge(dst, src)
+}
+func (m *ListSnapshotsResponse_Entry) XXX_Size() int {
+	return xxx_messageInfo_ListSnapshotsResponse_Entry.Size(m)
+}
+func (m *ListSnapshotsResponse_Entry) XXX_DiscardUnknown() {
+	xxx_messageInfo_ListSnapshotsResponse_Entry.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_ListSnapshotsResponse_Entry proto.InternalMessageInfo
+
+func (m *ListSnapshotsResponse_Entry) GetSnapshot() *Snapshot {
+	if m != nil {
+		return m.Snapshot
+	}
+	return nil
+}
+
 type NodeStageVolumeRequest struct {
 	// The ID of the volume to publish. This field is REQUIRED.
 	VolumeId string `protobuf:"bytes,1,opt,name=volume_id,json=volumeId" json:"volume_id,omitempty"`
@@ -2042,22 +2732,8 @@ type NodeStageVolumeRequest struct {
 	// This is a REQUIRED field.
 	VolumeCapability *VolumeCapability `protobuf:"bytes,4,opt,name=volume_capability,json=volumeCapability" json:"volume_capability,omitempty"`
 	// Secrets required by plugin to complete node stage volume request.
-	// A secret is a string to string map where the key identifies the
-	// name of the secret (e.g. "username" or "password"), and the value
-	// contains the secret data (e.g. "bob" or "abc123").
-	// Each key MUST consist of alphanumeric characters, '-', '_' or '.'.
-	// Each value MUST contain a valid string. An SP MAY choose to accept
-	// binary (non-string) data by using a binary-to-text encoding scheme,
-	// like base64.
-	// An SP SHALL advertise the requirements for required secret keys and
-	// values in documentation.
-	// CO SHALL permit passing through the required secrets.
-	// A CO MAY pass the same secrets to all RPCs, therefore the keys for
-	// all unique secrets that an SP expects must be unique across all CSI
-	// operations.
-	// This information is sensitive and MUST be treated as such (not
-	// logged, etc.) by the CO.
-	// This field is OPTIONAL.
+	// This field is OPTIONAL. Refer to the `Secrets Requirements`
+	// section on how to use this field.
 	NodeStageSecrets map[string]string `protobuf:"bytes,5,rep,name=node_stage_secrets,json=nodeStageSecrets" json:"node_stage_secrets,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
 	// Attributes of the volume to publish. This field is OPTIONAL and
 	// MUST match the attributes of the `Volume` identified by
@@ -2072,7 +2748,7 @@ func (m *NodeStageVolumeRequest) Reset()         { *m = NodeStageVolumeRequest{}
 func (m *NodeStageVolumeRequest) String() string { return proto.CompactTextString(m) }
 func (*NodeStageVolumeRequest) ProtoMessage()    {}
 func (*NodeStageVolumeRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_csi_b09f5c5da9b60591, []int{27}
+	return fileDescriptor_csi_1b72f25a8660f57b, []int{36}
 }
 func (m *NodeStageVolumeRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_NodeStageVolumeRequest.Unmarshal(m, b)
@@ -2144,7 +2820,7 @@ func (m *NodeStageVolumeResponse) Reset()         { *m = NodeStageVolumeResponse
 func (m *NodeStageVolumeResponse) String() string { return proto.CompactTextString(m) }
 func (*NodeStageVolumeResponse) ProtoMessage()    {}
 func (*NodeStageVolumeResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_csi_b09f5c5da9b60591, []int{28}
+	return fileDescriptor_csi_1b72f25a8660f57b, []int{37}
 }
 func (m *NodeStageVolumeResponse) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_NodeStageVolumeResponse.Unmarshal(m, b)
@@ -2180,7 +2856,7 @@ func (m *NodeUnstageVolumeRequest) Reset()         { *m = NodeUnstageVolumeReque
 func (m *NodeUnstageVolumeRequest) String() string { return proto.CompactTextString(m) }
 func (*NodeUnstageVolumeRequest) ProtoMessage()    {}
 func (*NodeUnstageVolumeRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_csi_b09f5c5da9b60591, []int{29}
+	return fileDescriptor_csi_1b72f25a8660f57b, []int{38}
 }
 func (m *NodeUnstageVolumeRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_NodeUnstageVolumeRequest.Unmarshal(m, b)
@@ -2224,7 +2900,7 @@ func (m *NodeUnstageVolumeResponse) Reset()         { *m = NodeUnstageVolumeResp
 func (m *NodeUnstageVolumeResponse) String() string { return proto.CompactTextString(m) }
 func (*NodeUnstageVolumeResponse) ProtoMessage()    {}
 func (*NodeUnstageVolumeResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_csi_b09f5c5da9b60591, []int{30}
+	return fileDescriptor_csi_1b72f25a8660f57b, []int{39}
 }
 func (m *NodeUnstageVolumeResponse) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_NodeUnstageVolumeResponse.Unmarshal(m, b)
@@ -2274,22 +2950,8 @@ type NodePublishVolumeRequest struct {
 	// REQUIRED.
 	Readonly bool `protobuf:"varint,6,opt,name=readonly" json:"readonly,omitempty"`
 	// Secrets required by plugin to complete node publish volume request.
-	// A secret is a string to string map where the key identifies the
-	// name of the secret (e.g. "username" or "password"), and the value
-	// contains the secret data (e.g. "bob" or "abc123").
-	// Each key MUST consist of alphanumeric characters, '-', '_' or '.'.
-	// Each value MUST contain a valid string. An SP MAY choose to accept
-	// binary (non-string) data by using a binary-to-text encoding scheme,
-	// like base64.
-	// An SP SHALL advertise the requirements for required secret keys and
-	// values in documentation.
-	// CO SHALL permit passing through the required secrets.
-	// A CO MAY pass the same secrets to all RPCs, therefore the keys for
-	// all unique secrets that an SP expects must be unique across all CSI
-	// operations.
-	// This information is sensitive and MUST be treated as such (not
-	// logged, etc.) by the CO.
-	// This field is OPTIONAL.
+	// This field is OPTIONAL. Refer to the `Secrets Requirements`
+	// section on how to use this field.
 	NodePublishSecrets map[string]string `protobuf:"bytes,7,rep,name=node_publish_secrets,json=nodePublishSecrets" json:"node_publish_secrets,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
 	// Attributes of the volume to publish. This field is OPTIONAL and
 	// MUST match the attributes of the Volume identified by
@@ -2304,7 +2966,7 @@ func (m *NodePublishVolumeRequest) Reset()         { *m = NodePublishVolumeReque
 func (m *NodePublishVolumeRequest) String() string { return proto.CompactTextString(m) }
 func (*NodePublishVolumeRequest) ProtoMessage()    {}
 func (*NodePublishVolumeRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_csi_b09f5c5da9b60591, []int{31}
+	return fileDescriptor_csi_1b72f25a8660f57b, []int{40}
 }
 func (m *NodePublishVolumeRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_NodePublishVolumeRequest.Unmarshal(m, b)
@@ -2390,7 +3052,7 @@ func (m *NodePublishVolumeResponse) Reset()         { *m = NodePublishVolumeResp
 func (m *NodePublishVolumeResponse) String() string { return proto.CompactTextString(m) }
 func (*NodePublishVolumeResponse) ProtoMessage()    {}
 func (*NodePublishVolumeResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_csi_b09f5c5da9b60591, []int{32}
+	return fileDescriptor_csi_1b72f25a8660f57b, []int{41}
 }
 func (m *NodePublishVolumeResponse) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_NodePublishVolumeResponse.Unmarshal(m, b)
@@ -2426,7 +3088,7 @@ func (m *NodeUnpublishVolumeRequest) Reset()         { *m = NodeUnpublishVolumeR
 func (m *NodeUnpublishVolumeRequest) String() string { return proto.CompactTextString(m) }
 func (*NodeUnpublishVolumeRequest) ProtoMessage()    {}
 func (*NodeUnpublishVolumeRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_csi_b09f5c5da9b60591, []int{33}
+	return fileDescriptor_csi_1b72f25a8660f57b, []int{42}
 }
 func (m *NodeUnpublishVolumeRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_NodeUnpublishVolumeRequest.Unmarshal(m, b)
@@ -2470,7 +3132,7 @@ func (m *NodeUnpublishVolumeResponse) Reset()         { *m = NodeUnpublishVolume
 func (m *NodeUnpublishVolumeResponse) String() string { return proto.CompactTextString(m) }
 func (*NodeUnpublishVolumeResponse) ProtoMessage()    {}
 func (*NodeUnpublishVolumeResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_csi_b09f5c5da9b60591, []int{34}
+	return fileDescriptor_csi_1b72f25a8660f57b, []int{43}
 }
 func (m *NodeUnpublishVolumeResponse) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_NodeUnpublishVolumeResponse.Unmarshal(m, b)
@@ -2500,7 +3162,7 @@ func (m *NodeGetIdRequest) Reset()         { *m = NodeGetIdRequest{} }
 func (m *NodeGetIdRequest) String() string { return proto.CompactTextString(m) }
 func (*NodeGetIdRequest) ProtoMessage()    {}
 func (*NodeGetIdRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_csi_b09f5c5da9b60591, []int{35}
+	return fileDescriptor_csi_1b72f25a8660f57b, []int{44}
 }
 func (m *NodeGetIdRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_NodeGetIdRequest.Unmarshal(m, b)
@@ -2534,7 +3196,7 @@ func (m *NodeGetIdResponse) Reset()         { *m = NodeGetIdResponse{} }
 func (m *NodeGetIdResponse) String() string { return proto.CompactTextString(m) }
 func (*NodeGetIdResponse) ProtoMessage()    {}
 func (*NodeGetIdResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_csi_b09f5c5da9b60591, []int{36}
+	return fileDescriptor_csi_1b72f25a8660f57b, []int{45}
 }
 func (m *NodeGetIdResponse) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_NodeGetIdResponse.Unmarshal(m, b)
@@ -2571,7 +3233,7 @@ func (m *NodeGetCapabilitiesRequest) Reset()         { *m = NodeGetCapabilitiesR
 func (m *NodeGetCapabilitiesRequest) String() string { return proto.CompactTextString(m) }
 func (*NodeGetCapabilitiesRequest) ProtoMessage()    {}
 func (*NodeGetCapabilitiesRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_csi_b09f5c5da9b60591, []int{37}
+	return fileDescriptor_csi_1b72f25a8660f57b, []int{46}
 }
 func (m *NodeGetCapabilitiesRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_NodeGetCapabilitiesRequest.Unmarshal(m, b)
@@ -2604,7 +3266,7 @@ func (m *NodeGetCapabilitiesResponse) Reset()         { *m = NodeGetCapabilities
 func (m *NodeGetCapabilitiesResponse) String() string { return proto.CompactTextString(m) }
 func (*NodeGetCapabilitiesResponse) ProtoMessage()    {}
 func (*NodeGetCapabilitiesResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_csi_b09f5c5da9b60591, []int{38}
+	return fileDescriptor_csi_1b72f25a8660f57b, []int{47}
 }
 func (m *NodeGetCapabilitiesResponse) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_NodeGetCapabilitiesResponse.Unmarshal(m, b)
@@ -2645,7 +3307,7 @@ func (m *NodeServiceCapability) Reset()         { *m = NodeServiceCapability{} }
 func (m *NodeServiceCapability) String() string { return proto.CompactTextString(m) }
 func (*NodeServiceCapability) ProtoMessage()    {}
 func (*NodeServiceCapability) Descriptor() ([]byte, []int) {
-	return fileDescriptor_csi_b09f5c5da9b60591, []int{39}
+	return fileDescriptor_csi_1b72f25a8660f57b, []int{48}
 }
 func (m *NodeServiceCapability) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_NodeServiceCapability.Unmarshal(m, b)
@@ -2755,7 +3417,7 @@ func (m *NodeServiceCapability_RPC) Reset()         { *m = NodeServiceCapability
 func (m *NodeServiceCapability_RPC) String() string { return proto.CompactTextString(m) }
 func (*NodeServiceCapability_RPC) ProtoMessage()    {}
 func (*NodeServiceCapability_RPC) Descriptor() ([]byte, []int) {
-	return fileDescriptor_csi_b09f5c5da9b60591, []int{39, 0}
+	return fileDescriptor_csi_1b72f25a8660f57b, []int{48, 0}
 }
 func (m *NodeServiceCapability_RPC) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_NodeServiceCapability_RPC.Unmarshal(m, b)
@@ -2795,6 +3457,8 @@ func init() {
 	proto.RegisterType((*CreateVolumeRequest)(nil), "csi.v0.CreateVolumeRequest")
 	proto.RegisterMapType((map[string]string)(nil), "csi.v0.CreateVolumeRequest.ControllerCreateSecretsEntry")
 	proto.RegisterMapType((map[string]string)(nil), "csi.v0.CreateVolumeRequest.ParametersEntry")
+	proto.RegisterType((*VolumeContentSource)(nil), "csi.v0.VolumeContentSource")
+	proto.RegisterType((*VolumeContentSource_SnapshotSource)(nil), "csi.v0.VolumeContentSource.SnapshotSource")
 	proto.RegisterType((*CreateVolumeResponse)(nil), "csi.v0.CreateVolumeResponse")
 	proto.RegisterType((*VolumeCapability)(nil), "csi.v0.VolumeCapability")
 	proto.RegisterType((*VolumeCapability_BlockVolume)(nil), "csi.v0.VolumeCapability.BlockVolume")
@@ -2827,6 +3491,18 @@ func init() {
 	proto.RegisterType((*ControllerGetCapabilitiesResponse)(nil), "csi.v0.ControllerGetCapabilitiesResponse")
 	proto.RegisterType((*ControllerServiceCapability)(nil), "csi.v0.ControllerServiceCapability")
 	proto.RegisterType((*ControllerServiceCapability_RPC)(nil), "csi.v0.ControllerServiceCapability.RPC")
+	proto.RegisterType((*CreateSnapshotRequest)(nil), "csi.v0.CreateSnapshotRequest")
+	proto.RegisterMapType((map[string]string)(nil), "csi.v0.CreateSnapshotRequest.CreateSnapshotSecretsEntry")
+	proto.RegisterMapType((map[string]string)(nil), "csi.v0.CreateSnapshotRequest.ParametersEntry")
+	proto.RegisterType((*CreateSnapshotResponse)(nil), "csi.v0.CreateSnapshotResponse")
+	proto.RegisterType((*Snapshot)(nil), "csi.v0.Snapshot")
+	proto.RegisterType((*SnapshotStatus)(nil), "csi.v0.SnapshotStatus")
+	proto.RegisterType((*DeleteSnapshotRequest)(nil), "csi.v0.DeleteSnapshotRequest")
+	proto.RegisterMapType((map[string]string)(nil), "csi.v0.DeleteSnapshotRequest.DeleteSnapshotSecretsEntry")
+	proto.RegisterType((*DeleteSnapshotResponse)(nil), "csi.v0.DeleteSnapshotResponse")
+	proto.RegisterType((*ListSnapshotsRequest)(nil), "csi.v0.ListSnapshotsRequest")
+	proto.RegisterType((*ListSnapshotsResponse)(nil), "csi.v0.ListSnapshotsResponse")
+	proto.RegisterType((*ListSnapshotsResponse_Entry)(nil), "csi.v0.ListSnapshotsResponse.Entry")
 	proto.RegisterType((*NodeStageVolumeRequest)(nil), "csi.v0.NodeStageVolumeRequest")
 	proto.RegisterMapType((map[string]string)(nil), "csi.v0.NodeStageVolumeRequest.NodeStageSecretsEntry")
 	proto.RegisterMapType((map[string]string)(nil), "csi.v0.NodeStageVolumeRequest.PublishInfoEntry")
@@ -2850,6 +3526,7 @@ func init() {
 	proto.RegisterEnum("csi.v0.PluginCapability_Service_Type", PluginCapability_Service_Type_name, PluginCapability_Service_Type_value)
 	proto.RegisterEnum("csi.v0.VolumeCapability_AccessMode_Mode", VolumeCapability_AccessMode_Mode_name, VolumeCapability_AccessMode_Mode_value)
 	proto.RegisterEnum("csi.v0.ControllerServiceCapability_RPC_Type", ControllerServiceCapability_RPC_Type_name, ControllerServiceCapability_RPC_Type_value)
+	proto.RegisterEnum("csi.v0.SnapshotStatus_Type", SnapshotStatus_Type_name, SnapshotStatus_Type_value)
 	proto.RegisterEnum("csi.v0.NodeServiceCapability_RPC_Type", NodeServiceCapability_RPC_Type_name, NodeServiceCapability_RPC_Type_value)
 }
 
@@ -3002,6 +3679,9 @@ type ControllerClient interface {
 	ListVolumes(ctx context.Context, in *ListVolumesRequest, opts ...grpc.CallOption) (*ListVolumesResponse, error)
 	GetCapacity(ctx context.Context, in *GetCapacityRequest, opts ...grpc.CallOption) (*GetCapacityResponse, error)
 	ControllerGetCapabilities(ctx context.Context, in *ControllerGetCapabilitiesRequest, opts ...grpc.CallOption) (*ControllerGetCapabilitiesResponse, error)
+	CreateSnapshot(ctx context.Context, in *CreateSnapshotRequest, opts ...grpc.CallOption) (*CreateSnapshotResponse, error)
+	DeleteSnapshot(ctx context.Context, in *DeleteSnapshotRequest, opts ...grpc.CallOption) (*DeleteSnapshotResponse, error)
+	ListSnapshots(ctx context.Context, in *ListSnapshotsRequest, opts ...grpc.CallOption) (*ListSnapshotsResponse, error)
 }
 
 type controllerClient struct {
@@ -3084,6 +3764,33 @@ func (c *controllerClient) ControllerGetCapabilities(ctx context.Context, in *Co
 	return out, nil
 }
 
+func (c *controllerClient) CreateSnapshot(ctx context.Context, in *CreateSnapshotRequest, opts ...grpc.CallOption) (*CreateSnapshotResponse, error) {
+	out := new(CreateSnapshotResponse)
+	err := grpc.Invoke(ctx, "/csi.v0.Controller/CreateSnapshot", in, out, c.cc, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *controllerClient) DeleteSnapshot(ctx context.Context, in *DeleteSnapshotRequest, opts ...grpc.CallOption) (*DeleteSnapshotResponse, error) {
+	out := new(DeleteSnapshotResponse)
+	err := grpc.Invoke(ctx, "/csi.v0.Controller/DeleteSnapshot", in, out, c.cc, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *controllerClient) ListSnapshots(ctx context.Context, in *ListSnapshotsRequest, opts ...grpc.CallOption) (*ListSnapshotsResponse, error) {
+	out := new(ListSnapshotsResponse)
+	err := grpc.Invoke(ctx, "/csi.v0.Controller/ListSnapshots", in, out, c.cc, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // Server API for Controller service
 
 type ControllerServer interface {
@@ -3095,6 +3802,9 @@ type ControllerServer interface {
 	ListVolumes(context.Context, *ListVolumesRequest) (*ListVolumesResponse, error)
 	GetCapacity(context.Context, *GetCapacityRequest) (*GetCapacityResponse, error)
 	ControllerGetCapabilities(context.Context, *ControllerGetCapabilitiesRequest) (*ControllerGetCapabilitiesResponse, error)
+	CreateSnapshot(context.Context, *CreateSnapshotRequest) (*CreateSnapshotResponse, error)
+	DeleteSnapshot(context.Context, *DeleteSnapshotRequest) (*DeleteSnapshotResponse, error)
+	ListSnapshots(context.Context, *ListSnapshotsRequest) (*ListSnapshotsResponse, error)
 }
 
 func RegisterControllerServer(s *grpc.Server, srv ControllerServer) {
@@ -3245,6 +3955,60 @@ func _Controller_ControllerGetCapabilities_Handler(srv interface{}, ctx context.
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Controller_CreateSnapshot_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateSnapshotRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ControllerServer).CreateSnapshot(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/csi.v0.Controller/CreateSnapshot",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ControllerServer).CreateSnapshot(ctx, req.(*CreateSnapshotRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Controller_DeleteSnapshot_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteSnapshotRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ControllerServer).DeleteSnapshot(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/csi.v0.Controller/DeleteSnapshot",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ControllerServer).DeleteSnapshot(ctx, req.(*DeleteSnapshotRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Controller_ListSnapshots_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListSnapshotsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ControllerServer).ListSnapshots(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/csi.v0.Controller/ListSnapshots",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ControllerServer).ListSnapshots(ctx, req.(*ListSnapshotsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 var _Controller_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "csi.v0.Controller",
 	HandlerType: (*ControllerServer)(nil),
@@ -3280,6 +4044,18 @@ var _Controller_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ControllerGetCapabilities",
 			Handler:    _Controller_ControllerGetCapabilities_Handler,
+		},
+		{
+			MethodName: "CreateSnapshot",
+			Handler:    _Controller_CreateSnapshot_Handler,
+		},
+		{
+			MethodName: "DeleteSnapshot",
+			Handler:    _Controller_DeleteSnapshot_Handler,
+		},
+		{
+			MethodName: "ListSnapshots",
+			Handler:    _Controller_ListSnapshots_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
@@ -3515,144 +4291,174 @@ var _Node_serviceDesc = grpc.ServiceDesc{
 	Metadata: "csi.proto",
 }
 
-func init() { proto.RegisterFile("csi.proto", fileDescriptor_csi_b09f5c5da9b60591) }
+func init() { proto.RegisterFile("csi.proto", fileDescriptor_csi_1b72f25a8660f57b) }
 
-var fileDescriptor_csi_b09f5c5da9b60591 = []byte{
-	// 2173 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xcc, 0x1a, 0x4d, 0x53, 0xe3, 0xc8,
-	0x15, 0xf9, 0x0b, 0x78, 0x06, 0xd6, 0xd3, 0x30, 0x83, 0x11, 0x30, 0x03, 0x62, 0x67, 0x96, 0xfd,
-	0xf2, 0x26, 0x24, 0xd9, 0xda, 0xec, 0x90, 0x49, 0xc0, 0x28, 0xe0, 0xc5, 0x18, 0x4a, 0x18, 0xa6,
-	0x76, 0xb2, 0x29, 0xad, 0xb0, 0x1b, 0x46, 0x19, 0x23, 0x79, 0x24, 0x99, 0x1a, 0x6e, 0xa9, 0x5c,
-	0x52, 0x95, 0x5b, 0xee, 0x49, 0xa5, 0x2a, 0xc7, 0x9c, 0x73, 0x48, 0x55, 0xaa, 0xe6, 0x9c, 0xaa,
-	0xfc, 0x81, 0x9c, 0xf2, 0x03, 0x52, 0x39, 0xe6, 0x94, 0x53, 0x4a, 0xdd, 0x2d, 0xb9, 0x25, 0xb7,
-	0x64, 0x7b, 0x67, 0x6a, 0x2b, 0x27, 0xac, 0xf7, 0xdd, 0xaf, 0xdf, 0x7b, 0xfd, 0x5e, 0x37, 0x30,
-	0xdd, 0x72, 0xcd, 0x4a, 0xd7, 0xb1, 0x3d, 0x1b, 0x15, 0xfc, 0x9f, 0x37, 0xdf, 0x51, 0xee, 0xc1,
-	0xc2, 0x3e, 0xf6, 0x4e, 0x3a, 0xbd, 0x2b, 0xd3, 0xaa, 0x59, 0x97, 0xb6, 0x86, 0x5f, 0xf6, 0xb0,
-	0xeb, 0x29, 0xff, 0x90, 0xe0, 0x6e, 0x0c, 0xe1, 0x76, 0x6d, 0xcb, 0xc5, 0x08, 0x41, 0xce, 0x32,
-	0xae, 0x71, 0x59, 0x5a, 0x93, 0x36, 0xa7, 0x35, 0xf2, 0x1b, 0x3d, 0x84, 0xb9, 0x1b, 0x6c, 0xb5,
-	0x6d, 0x47, 0xbf, 0xc1, 0x8e, 0x6b, 0xda, 0x56, 0x39, 0x43, 0xb0, 0xb3, 0x14, 0x7a, 0x4e, 0x81,
-	0x68, 0x1f, 0xa6, 0xae, 0x0d, 0xcb, 0xbc, 0xc4, 0xae, 0x57, 0xce, 0xae, 0x65, 0x37, 0x8b, 0x5b,
-	0x1f, 0x56, 0xa8, 0x1d, 0x15, 0xa1, 0xae, 0xca, 0x11, 0xa3, 0x56, 0x2d, 0xcf, 0xb9, 0xd5, 0x42,
-	0x66, 0xf9, 0x31, 0xcc, 0x46, 0x50, 0xa8, 0x04, 0xd9, 0x17, 0xf8, 0x96, 0xd9, 0xe4, 0xff, 0x44,
-	0x0b, 0x90, 0xbf, 0x31, 0x3a, 0x3d, 0xcc, 0x2c, 0xa1, 0x1f, 0x9f, 0x67, 0x3e, 0x93, 0x94, 0xfb,
-	0xb0, 0x12, 0x6a, 0xab, 0x1a, 0x5d, 0xe3, 0xc2, 0xec, 0x98, 0x9e, 0x89, 0xdd, 0x60, 0xe9, 0x3f,
-	0x87, 0xd5, 0x04, 0x3c, 0xf3, 0xc0, 0x36, 0xcc, 0xb4, 0x38, 0x78, 0x39, 0x43, 0x96, 0x52, 0x0e,
-	0x96, 0x12, 0xe3, 0xbc, 0xd5, 0x22, 0xd4, 0xca, 0xdf, 0x25, 0x28, 0xc5, 0x49, 0xd0, 0x36, 0x4c,
-	0xba, 0xd8, 0xb9, 0x31, 0x5b, 0xd4, 0xaf, 0xc5, 0xad, 0xb5, 0x24, 0x69, 0x95, 0x53, 0x4a, 0x77,
-	0x30, 0xa1, 0x05, 0x2c, 0xf2, 0x4b, 0x98, 0x64, 0x50, 0xf4, 0x43, 0xc8, 0x79, 0xb7, 0x5d, 0x2a,
-	0x65, 0x6e, 0xeb, 0xe1, 0x30, 0x29, 0x95, 0xe6, 0x6d, 0x17, 0x6b, 0x84, 0x45, 0xf9, 0x10, 0x72,
-	0xfe, 0x17, 0x2a, 0xc2, 0xe4, 0x59, 0xe3, 0xb0, 0x71, 0xfc, 0xb4, 0x51, 0x9a, 0x40, 0xf7, 0x00,
-	0x55, 0x8f, 0x1b, 0x4d, 0xed, 0xb8, 0x5e, 0x57, 0x35, 0xfd, 0x54, 0xd5, 0xce, 0x6b, 0x55, 0xb5,
-	0x24, 0xed, 0x16, 0xa8, 0x1e, 0x65, 0x0e, 0x66, 0x4e, 0x1c, 0xfb, 0x02, 0x07, 0xce, 0x7b, 0x07,
-	0x66, 0xd9, 0x37, 0x75, 0x96, 0xf2, 0xcb, 0x1c, 0xcc, 0x57, 0x1d, 0x6c, 0x78, 0xf8, 0xdc, 0xee,
-	0xf4, 0xae, 0x03, 0x42, 0x61, 0x18, 0x6d, 0xc3, 0x9c, 0xef, 0xaa, 0x96, 0xe9, 0xdd, 0xea, 0x8e,
-	0x61, 0x5d, 0xd1, 0xcd, 0x2b, 0x6e, 0xdd, 0x0d, 0x96, 0x51, 0x65, 0x58, 0xcd, 0x47, 0x6a, 0xb3,
-	0x2d, 0xfe, 0x13, 0xd5, 0x60, 0xfe, 0x86, 0xa8, 0xd0, 0x23, 0xbb, 0x93, 0x8d, 0xee, 0x0e, 0xb5,
-	0x82, 0xdb, 0x1d, 0x74, 0x13, 0x85, 0x98, 0xd8, 0x45, 0x87, 0x00, 0x5d, 0xc3, 0x31, 0xae, 0xb1,
-	0x87, 0x1d, 0xb7, 0x9c, 0x8b, 0x86, 0xaa, 0x60, 0x35, 0x95, 0x93, 0x90, 0x9a, 0x86, 0x2a, 0xc7,
-	0x8e, 0x3c, 0x58, 0x6a, 0xd9, 0x96, 0xe7, 0xd8, 0x9d, 0x0e, 0x76, 0xf4, 0x16, 0xe1, 0xd6, 0x5d,
-	0xdc, 0x72, 0xb0, 0xe7, 0x96, 0xf3, 0x44, 0xf6, 0x67, 0x69, 0xb2, 0xab, 0x21, 0x33, 0xc5, 0x9e,
-	0x52, 0x56, 0xaa, 0x68, 0xb1, 0x25, 0xc6, 0xca, 0x3f, 0x82, 0x77, 0x62, 0x46, 0x8d, 0x93, 0x24,
-	0xf2, 0x17, 0xb0, 0x92, 0xa6, 0x77, 0xac, 0x84, 0x7b, 0x02, 0x0b, 0xd1, 0x75, 0xb1, 0x3c, 0x7a,
-	0x04, 0x05, 0xea, 0x7b, 0x16, 0xf3, 0x73, 0xd1, 0x3d, 0xd2, 0x18, 0x56, 0xf9, 0x53, 0x0e, 0x4a,
-	0xf1, 0x6d, 0x43, 0xdb, 0x90, 0xbf, 0xe8, 0xd8, 0xad, 0x17, 0x8c, 0xf7, 0xdd, 0xa4, 0xfd, 0xad,
-	0xec, 0xfa, 0x54, 0x14, 0x7a, 0x30, 0xa1, 0x51, 0x26, 0x9f, 0xfb, 0xda, 0xee, 0x59, 0x1e, 0x0b,
-	0xb0, 0x64, 0xee, 0x23, 0x9f, 0xaa, 0xcf, 0x4d, 0x98, 0xd0, 0x1e, 0x14, 0x8d, 0x56, 0x0b, 0xbb,
-	0xae, 0x7e, 0x6d, 0xb7, 0x71, 0x39, 0x4b, 0x64, 0x6c, 0x24, 0xca, 0xd8, 0x21, 0xb4, 0x47, 0x76,
-	0x1b, 0x6b, 0x60, 0x84, 0xbf, 0xe5, 0x59, 0x28, 0x72, 0xb6, 0xc9, 0xfb, 0x50, 0xe4, 0x94, 0xa1,
-	0x45, 0x98, 0xbc, 0x74, 0xf5, 0x30, 0x97, 0xa7, 0xb5, 0xc2, 0xa5, 0x4b, 0xd2, 0xf3, 0x01, 0x14,
-	0x89, 0x15, 0xfa, 0x65, 0xc7, 0xb8, 0xa2, 0xc5, 0x67, 0x5a, 0x03, 0x02, 0xfa, 0xa9, 0x0f, 0x91,
-	0xff, 0x2d, 0x01, 0xf4, 0x55, 0xa2, 0x6d, 0xc8, 0x11, 0x2b, 0x69, 0x45, 0xd8, 0x1c, 0xc1, 0xca,
-	0x0a, 0x31, 0x95, 0x70, 0x29, 0x7f, 0x90, 0x20, 0x47, 0xc4, 0xc4, 0xab, 0xc2, 0x69, 0xad, 0xb1,
-	0x5f, 0x57, 0xf5, 0xc6, 0xf1, 0x9e, 0xaa, 0x3f, 0xd5, 0x6a, 0x4d, 0x55, 0x2b, 0x49, 0x68, 0x19,
-	0x16, 0x79, 0xb8, 0xa6, 0xee, 0xec, 0xa9, 0x9a, 0x7e, 0xdc, 0xa8, 0x7f, 0x59, 0xca, 0x20, 0x19,
-	0xee, 0x1d, 0x9d, 0xd5, 0x9b, 0xb5, 0x41, 0x5c, 0x16, 0xad, 0x40, 0x99, 0xc3, 0x31, 0x19, 0x4c,
-	0x6c, 0xce, 0x17, 0xcb, 0x61, 0xe9, 0x4f, 0x86, 0xcc, 0xef, 0xce, 0x86, 0x9b, 0x41, 0x0a, 0xd2,
-	0x53, 0x98, 0x8d, 0x54, 0x09, 0xff, 0x6c, 0x72, 0xf0, 0xcb, 0x9e, 0xe9, 0xe0, 0xb6, 0x7e, 0x71,
-	0xeb, 0x61, 0x97, 0x78, 0x22, 0xab, 0xcd, 0x06, 0xd0, 0x5d, 0x1f, 0xe8, 0xbb, 0xb5, 0x63, 0x5e,
-	0x9b, 0x1e, 0xa3, 0xc9, 0x10, 0x1a, 0x20, 0x20, 0x42, 0xa0, 0xbc, 0x96, 0xa0, 0xc0, 0xf6, 0xe6,
-	0x21, 0x57, 0xa7, 0x22, 0x22, 0x03, 0x28, 0x15, 0x39, 0x07, 0x19, 0xb3, 0xcd, 0xd2, 0x21, 0x63,
-	0xb6, 0xd1, 0x13, 0x00, 0xc3, 0xf3, 0x1c, 0xf3, 0xa2, 0xe7, 0x85, 0x75, 0xe9, 0x7e, 0x74, 0x3f,
-	0x2a, 0x3b, 0x21, 0x01, 0x2b, 0x24, 0x7d, 0x0e, 0x3f, 0xa5, 0x63, 0xe8, 0xb1, 0xd2, 0xf0, 0x3f,
-	0x12, 0xcc, 0xef, 0xe1, 0x0e, 0x8e, 0x57, 0xe2, 0x65, 0x98, 0x66, 0x75, 0xd3, 0x6c, 0x33, 0x49,
-	0x53, 0x14, 0x50, 0x6b, 0xc7, 0x8a, 0x57, 0x9b, 0xb0, 0x87, 0xc5, 0x2b, 0x13, 0x2d, 0x5e, 0x02,
-	0xe1, 0x5c, 0xf1, 0xa2, 0xd8, 0xa4, 0xe2, 0x15, 0xc1, 0x46, 0xab, 0xcf, 0x20, 0xe3, 0x58, 0xcb,
-	0xbe, 0x07, 0x0b, 0x51, 0xc3, 0xd8, 0xc1, 0xf4, 0xd7, 0x1c, 0xdc, 0xef, 0x2b, 0x39, 0xe9, 0x5d,
-	0x74, 0x4c, 0xf7, 0xf9, 0x18, 0x9e, 0x59, 0x84, 0x49, 0xcb, 0x6e, 0x13, 0x14, 0xd5, 0x59, 0xf0,
-	0x3f, 0x6b, 0x6d, 0xa4, 0xc2, 0x9d, 0xf8, 0x39, 0x74, 0xcb, 0x6a, 0x44, 0xf2, 0x29, 0x54, 0xba,
-	0x89, 0x17, 0x38, 0x19, 0xa6, 0x1c, 0x6c, 0xb4, 0x6d, 0xab, 0x73, 0x5b, 0xce, 0xad, 0x49, 0x9b,
-	0x53, 0x5a, 0xf8, 0x8d, 0x7e, 0x25, 0x81, 0xcc, 0x6d, 0x4b, 0x97, 0x1a, 0x1f, 0x3b, 0x54, 0xf6,
-	0xc2, 0x43, 0x25, 0x75, 0x95, 0x83, 0xe8, 0xc8, 0x1e, 0x95, 0x5b, 0x09, 0x68, 0x64, 0x86, 0xeb,
-	0xe4, 0xa2, 0xba, 0x40, 0x54, 0x6f, 0x8f, 0xa8, 0x9a, 0x7e, 0xc5, 0x63, 0x9e, 0xf9, 0xa2, 0x0f,
-	0x96, 0x0f, 0x61, 0x35, 0xd5, 0xca, 0xb1, 0x8e, 0xb6, 0x2a, 0xdc, 0x15, 0xea, 0x1d, 0x2b, 0xaa,
-	0x5e, 0x4b, 0xf0, 0x20, 0x71, 0x71, 0xec, 0x7c, 0xfb, 0x19, 0xcc, 0x04, 0x3b, 0x63, 0x5a, 0x97,
-	0x76, 0x59, 0x8a, 0x9d, 0xf5, 0xe9, 0xec, 0x15, 0x06, 0xf5, 0x1b, 0x62, 0xea, 0x97, 0x62, 0xb7,
-	0x0f, 0x91, 0x9f, 0x40, 0x29, 0x4e, 0x30, 0xd6, 0x02, 0xfe, 0x9c, 0x81, 0xb5, 0xbe, 0x05, 0x67,
-	0x56, 0xf7, 0xed, 0x25, 0xc0, 0x6f, 0x24, 0x58, 0xe1, 0xa2, 0xb3, 0x67, 0xc5, 0xe3, 0x93, 0x96,
-	0xbe, 0x83, 0x41, 0x47, 0x88, 0xcd, 0x10, 0x11, 0x44, 0x62, 0x94, 0xcb, 0x85, 0x38, 0x81, 0x7c,
-	0xc4, 0xef, 0x93, 0x90, 0x7d, 0x2c, 0xb7, 0x6d, 0xc0, 0x7a, 0x8a, 0xb9, 0xac, 0xb4, 0xbc, 0xce,
-	0xc0, 0xfa, 0xb9, 0xd1, 0x31, 0xdb, 0x61, 0xcf, 0x23, 0x98, 0x33, 0xd2, 0x9d, 0x9b, 0xd0, 0xcc,
-	0x66, 0xbe, 0x41, 0x33, 0xdb, 0x11, 0xe5, 0x29, 0xdd, 0x82, 0x1f, 0x87, 0x82, 0x86, 0x59, 0x3b,
-	0x72, 0xaa, 0xbe, 0x95, 0xec, 0xfa, 0x0a, 0x94, 0x34, 0x8b, 0x58, 0x7e, 0xad, 0xc0, 0xb4, 0xdb,
-	0xeb, 0x76, 0x6d, 0xc7, 0xc3, 0xd4, 0x81, 0x53, 0x5a, 0x1f, 0x80, 0xca, 0x30, 0x79, 0x8d, 0x5d,
-	0xd7, 0xb8, 0x0a, 0xe4, 0x07, 0x9f, 0xca, 0x57, 0x80, 0xea, 0xa6, 0xcb, 0x1a, 0xad, 0x70, 0x3b,
-	0xfc, 0xbe, 0xca, 0x78, 0xa5, 0x63, 0xcb, 0x73, 0x4c, 0x76, 0xa2, 0xe7, 0x35, 0xb8, 0x36, 0x5e,
-	0xa9, 0x14, 0xe2, 0x9f, 0xfa, 0xae, 0x67, 0x38, 0x9e, 0x69, 0x5d, 0xe9, 0x9e, 0xfd, 0x02, 0x87,
-	0x43, 0x6e, 0x00, 0x6d, 0xfa, 0x40, 0xe5, 0x8f, 0x12, 0xcc, 0x47, 0xc4, 0x33, 0x6b, 0x1f, 0xc3,
-	0x64, 0x5f, 0xb6, 0xef, 0xfc, 0xf5, 0xc0, 0xf9, 0x02, 0xea, 0x0a, 0x75, 0x6f, 0xc0, 0x81, 0x56,
-	0x01, 0x2c, 0xfc, 0xca, 0x8b, 0xe8, 0x9d, 0xf6, 0x21, 0x44, 0xa7, 0xfc, 0x09, 0xe4, 0xa9, 0x93,
-	0x47, 0x6d, 0xa9, 0xff, 0x25, 0x01, 0xda, 0xc7, 0x5e, 0xd8, 0x29, 0x31, 0x1f, 0x24, 0x44, 0x9d,
-	0xf4, 0x0d, 0xa2, 0xee, 0x8b, 0xc8, 0x08, 0x45, 0xe3, 0xf6, 0x03, 0x6e, 0xda, 0x8f, 0xa9, 0x4e,
-	0x9b, 0xa0, 0xde, 0x70, 0x96, 0x51, 0xf6, 0x60, 0x3e, 0xa2, 0x90, 0x6d, 0xc8, 0xc7, 0x80, 0x8c,
-	0x1b, 0xc3, 0xec, 0x18, 0x17, 0x1d, 0xba, 0x5e, 0x1f, 0xcb, 0x3a, 0xb9, 0x3b, 0x21, 0x26, 0x60,
-	0x53, 0x14, 0xbe, 0x5e, 0x32, 0x79, 0xf1, 0xab, 0x83, 0x0e, 0x5f, 0x1d, 0x06, 0x68, 0x98, 0xde,
-	0x7d, 0xe1, 0xf5, 0xc1, 0xc6, 0x60, 0x35, 0x64, 0x33, 0x7a, 0xe2, 0x4d, 0xc2, 0xef, 0x33, 0xb0,
-	0x9c, 0x42, 0x8d, 0x1e, 0x43, 0xd6, 0xe9, 0xb6, 0x58, 0x24, 0xbc, 0x37, 0x82, 0xfc, 0x8a, 0x76,
-	0x52, 0x3d, 0x98, 0xd0, 0x7c, 0x2e, 0xf9, 0x2f, 0x12, 0x64, 0xb5, 0x93, 0x2a, 0xfa, 0x49, 0xe4,
-	0x42, 0xe1, 0xa3, 0x11, 0xa5, 0xf0, 0xf7, 0x0a, 0xb6, 0xe8, 0x5e, 0xa1, 0x0c, 0x0b, 0x55, 0x4d,
-	0xdd, 0x69, 0xaa, 0xfa, 0x9e, 0x5a, 0x57, 0x9b, 0xaa, 0x7e, 0x7e, 0x5c, 0x3f, 0x3b, 0x52, 0x4b,
-	0x92, 0x3f, 0x0a, 0x9c, 0x9c, 0xed, 0xd6, 0x6b, 0xa7, 0x07, 0xfa, 0x59, 0x23, 0xf8, 0xc5, 0xb0,
-	0x19, 0x54, 0x82, 0x99, 0x7a, 0xed, 0xb4, 0xc9, 0x00, 0xa7, 0xa5, 0xac, 0x0f, 0xd9, 0x57, 0x9b,
-	0x7a, 0x75, 0xe7, 0x64, 0xa7, 0x5a, 0x6b, 0x7e, 0x59, 0xca, 0x85, 0x77, 0x13, 0xbf, 0xcd, 0xc3,
-	0xbd, 0x86, 0xdd, 0xc6, 0xa7, 0x9e, 0x71, 0x35, 0x4e, 0xcf, 0xab, 0xc5, 0xce, 0x6d, 0xba, 0x41,
-	0x9f, 0x04, 0x4b, 0x17, 0x8b, 0x4c, 0x3f, 0xae, 0x51, 0x05, 0xe6, 0x5d, 0xcf, 0xb8, 0x22, 0xb5,
-	0xc3, 0x70, 0xae, 0xb0, 0xa7, 0x77, 0x0d, 0xef, 0x39, 0x69, 0x0b, 0xa7, 0xb5, 0x3b, 0x0c, 0xd5,
-	0x24, 0x98, 0x13, 0xc3, 0x7b, 0x2e, 0x6e, 0x22, 0x73, 0x63, 0x37, 0x91, 0x17, 0x80, 0xc8, 0x19,
-	0xed, 0x2b, 0x88, 0x5f, 0x3a, 0x7c, 0x7f, 0xc8, 0x82, 0x42, 0x70, 0xe4, 0xac, 0x2d, 0x59, 0x31,
-	0x30, 0x32, 0x92, 0xfb, 0xc0, 0x61, 0x2a, 0x46, 0x3d, 0x54, 0xde, 0xb0, 0xd9, 0xf1, 0x0f, 0x25,
-	0xe1, 0x6a, 0xbe, 0xfd, 0xbe, 0x71, 0x09, 0x16, 0x07, 0x7c, 0xc1, 0xba, 0x86, 0x2b, 0x28, 0xfb,
-	0xa8, 0x33, 0xcb, 0x1d, 0x33, 0x5e, 0x13, 0x62, 0x2b, 0x93, 0x10, 0x5b, 0xca, 0x32, 0x2c, 0x09,
-	0x14, 0x31, 0x2b, 0xfe, 0x99, 0xa7, 0x66, 0x8c, 0x3f, 0x10, 0x35, 0x85, 0x69, 0xf3, 0x5d, 0x3e,
-	0x04, 0x84, 0x43, 0xc0, 0xdb, 0x4d, 0x9c, 0x07, 0x50, 0xe4, 0xe9, 0x72, 0x84, 0x0e, 0xbc, 0x21,
-	0x99, 0x95, 0x7f, 0xa3, 0xf1, 0xac, 0x10, 0x1b, 0xcf, 0x7e, 0x01, 0x0b, 0x24, 0xeb, 0xe2, 0x7d,
-	0xef, 0x64, 0x74, 0x00, 0x48, 0xf4, 0x08, 0x87, 0x88, 0xe4, 0x1e, 0xc9, 0xe5, 0xd8, 0x14, 0xd6,
-	0x12, 0x65, 0xdf, 0x14, 0x51, 0xf4, 0xe9, 0x50, 0x45, 0xdf, 0x56, 0xfe, 0xa9, 0x34, 0xea, 0xff,
-	0x2f, 0x26, 0x37, 0x16, 0xfd, 0xc2, 0x99, 0x4b, 0x79, 0x06, 0x32, 0x4d, 0x8d, 0xf1, 0xc7, 0xa1,
-	0x58, 0xe0, 0x65, 0xe2, 0x81, 0xa7, 0xac, 0xc2, 0xb2, 0x50, 0x36, 0x53, 0x8d, 0xa0, 0xe4, 0xa3,
-	0xf7, 0xb1, 0x57, 0x6b, 0x07, 0xfd, 0xc4, 0x47, 0x70, 0x87, 0x83, 0xb1, 0xfe, 0x81, 0x9b, 0xbb,
-	0x24, 0x7e, 0xee, 0x52, 0x56, 0xa8, 0xf1, 0x09, 0xbd, 0xc9, 0xd7, 0x54, 0x7d, 0x52, 0x57, 0xb2,
-	0x13, 0xeb, 0x4a, 0x68, 0xcf, 0xb7, 0x1a, 0x29, 0xe0, 0x43, 0xfa, 0x91, 0xbf, 0x49, 0xac, 0xcc,
-	0x0e, 0x74, 0x22, 0x3f, 0xe0, 0x3b, 0x91, 0xf5, 0x54, 0x99, 0x7c, 0x0f, 0xd2, 0xa5, 0x2d, 0xc8,
-	0xe7, 0x91, 0x16, 0xe4, 0xd1, 0x50, 0x76, 0xbe, 0xf9, 0xf8, 0x38, 0xa1, 0xf9, 0x38, 0x6d, 0xee,
-	0xec, 0xab, 0xfa, 0x59, 0x83, 0xfe, 0x0d, 0x9a, 0x8f, 0xa0, 0x75, 0xd8, 0xfa, 0xaf, 0x04, 0x53,
-	0xb5, 0x36, 0xb6, 0x3c, 0xdf, 0xfa, 0x06, 0xcc, 0x46, 0x9e, 0xa7, 0xd0, 0x4a, 0xc2, 0xab, 0x15,
-	0x71, 0xb4, 0xbc, 0x9a, 0xfa, 0xa6, 0xa5, 0x4c, 0xa0, 0x4b, 0xee, 0x69, 0x2d, 0xd2, 0x33, 0xbf,
-	0x3b, 0xc0, 0x29, 0xd8, 0x48, 0xf9, 0xe1, 0x10, 0xaa, 0x50, 0xcf, 0xa7, 0x90, 0x27, 0x6f, 0x31,
-	0x68, 0x21, 0x7c, 0x06, 0xe2, 0x9e, 0x6a, 0xe4, 0xbb, 0x31, 0x68, 0xc0, 0xb7, 0xf5, 0xeb, 0x02,
-	0x40, 0xbf, 0xbf, 0x43, 0x87, 0x30, 0xc3, 0x5f, 0xdf, 0xa3, 0xe5, 0x94, 0xc7, 0x0a, 0x79, 0x45,
-	0x8c, 0x0c, 0x6d, 0x3a, 0x84, 0x19, 0xfe, 0x36, 0xae, 0x2f, 0x4c, 0x70, 0x79, 0xd8, 0x17, 0x26,
-	0xbc, 0xc0, 0x9b, 0x40, 0x1d, 0x58, 0x4c, 0xb8, 0x44, 0x41, 0x8f, 0x46, 0xbb, 0x81, 0x92, 0xdf,
-	0x1b, 0xf1, 0x36, 0x46, 0x99, 0x40, 0x0e, 0x2c, 0x25, 0x8e, 0xfe, 0x68, 0x73, 0xd4, 0xcb, 0x0c,
-	0xf9, 0xfd, 0x11, 0x28, 0x43, 0x9d, 0x3d, 0x90, 0x93, 0x07, 0x61, 0xf4, 0xfe, 0xc8, 0xe3, 0xbb,
-	0xfc, 0xc1, 0x28, 0xa4, 0xa1, 0xda, 0x03, 0x28, 0x72, 0x43, 0x29, 0x92, 0x85, 0x93, 0x2a, 0x15,
-	0xbc, 0x9c, 0x32, 0xc5, 0x52, 0x49, 0xdc, 0xec, 0xd5, 0x97, 0x34, 0x38, 0x01, 0xf6, 0x25, 0x09,
-	0x86, 0xb5, 0xb8, 0xfb, 0x63, 0x55, 0x4c, 0xe4, 0x7e, 0x71, 0x19, 0x14, 0xb9, 0x3f, 0xa1, 0x24,
-	0x2a, 0x13, 0x5b, 0xbf, 0xcb, 0x41, 0xce, 0x2f, 0x33, 0xa8, 0x09, 0xef, 0xc4, 0xda, 0x36, 0x74,
-	0x3f, 0xbd, 0xb7, 0x95, 0x1f, 0x24, 0xe2, 0xc3, 0x25, 0x3d, 0xa3, 0xe5, 0x3d, 0xd2, 0x88, 0xa1,
-	0x35, 0x9e, 0x4f, 0xd4, 0x0c, 0xca, 0xeb, 0x29, 0x14, 0x71, 0xd9, 0xd1, 0xac, 0x58, 0x1b, 0xd6,
-	0x11, 0x44, 0x65, 0x27, 0x65, 0xc2, 0xd7, 0x30, 0x2f, 0x38, 0xc9, 0x90, 0x12, 0xb5, 0x4b, 0x18,
-	0xfd, 0x1b, 0xa9, 0x34, 0xa1, 0x86, 0x5d, 0x98, 0x0e, 0x0f, 0x3e, 0x54, 0xe6, 0x79, 0xf8, 0xf3,
-	0x51, 0x5e, 0x12, 0x60, 0xe2, 0x56, 0xc6, 0x43, 0x45, 0x89, 0xf1, 0x88, 0x82, 0x64, 0x23, 0x95,
-	0x26, 0xd0, 0xb0, 0x9b, 0x7f, 0x96, 0x6d, 0xb9, 0xe6, 0x45, 0x81, 0xfc, 0x4b, 0xc5, 0xf7, 0xfe,
-	0x17, 0x00, 0x00, 0xff, 0xff, 0x69, 0xaa, 0xdb, 0x41, 0x5f, 0x21, 0x00, 0x00,
+var fileDescriptor_csi_1b72f25a8660f57b = []byte{
+	// 2647 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xcc, 0x3a, 0x4d, 0x6c, 0xdb, 0xc8,
+	0xd5, 0xa6, 0xfe, 0x6c, 0x3d, 0xd9, 0x8a, 0x32, 0xfe, 0x53, 0x68, 0x3b, 0x71, 0xe8, 0xcd, 0x6e,
+	0x76, 0x37, 0x51, 0xbe, 0xcf, 0xed, 0x2e, 0xb6, 0x1b, 0x6f, 0x5a, 0x5b, 0xd6, 0xda, 0xda, 0xd8,
+	0xb2, 0x4b, 0xc9, 0x0e, 0x92, 0x6e, 0xc1, 0xa5, 0xa5, 0xb1, 0xc3, 0x46, 0x26, 0x15, 0x92, 0x32,
+	0xe2, 0x1e, 0xf7, 0xd6, 0xde, 0x7a, 0x2f, 0xb0, 0x40, 0x6f, 0x2d, 0x7a, 0x2a, 0x7a, 0x2b, 0xb0,
+	0xe7, 0x02, 0x05, 0x0a, 0xf4, 0xd6, 0x53, 0xef, 0x2d, 0x7a, 0xec, 0xa9, 0x40, 0x81, 0x82, 0x9c,
+	0x21, 0xc5, 0x19, 0x0d, 0x69, 0x69, 0x13, 0x2c, 0x7a, 0x92, 0xf8, 0xfe, 0xe7, 0xcd, 0x7b, 0x6f,
+	0xe6, 0x3d, 0x12, 0xf2, 0x6d, 0xc7, 0xa8, 0xf4, 0x6c, 0xcb, 0xb5, 0x50, 0xce, 0xfb, 0x7b, 0xf1,
+	0x7f, 0xca, 0x02, 0xcc, 0xed, 0x60, 0xf7, 0xb0, 0xdb, 0x3f, 0x33, 0xcc, 0xba, 0x79, 0x6a, 0xa9,
+	0xf8, 0x65, 0x1f, 0x3b, 0xae, 0xf2, 0x57, 0x09, 0xe6, 0x39, 0x84, 0xd3, 0xb3, 0x4c, 0x07, 0x23,
+	0x04, 0x19, 0x53, 0x3f, 0xc7, 0x65, 0x69, 0x55, 0xba, 0x9b, 0x57, 0xfd, 0xff, 0xe8, 0x0e, 0x14,
+	0x2f, 0xb0, 0xd9, 0xb1, 0x6c, 0xed, 0x02, 0xdb, 0x8e, 0x61, 0x99, 0xe5, 0x94, 0x8f, 0x9d, 0x21,
+	0xd0, 0x63, 0x02, 0x44, 0x3b, 0x30, 0x75, 0xae, 0x9b, 0xc6, 0x29, 0x76, 0xdc, 0x72, 0x7a, 0x35,
+	0x7d, 0xb7, 0xb0, 0xfe, 0x7e, 0x85, 0xd8, 0x51, 0x11, 0xea, 0xaa, 0xec, 0x53, 0xea, 0x9a, 0xe9,
+	0xda, 0x97, 0x6a, 0xc8, 0x2c, 0x3f, 0x84, 0x19, 0x06, 0x85, 0x4a, 0x90, 0x7e, 0x81, 0x2f, 0xa9,
+	0x4d, 0xde, 0x5f, 0x34, 0x07, 0xd9, 0x0b, 0xbd, 0xdb, 0xc7, 0xd4, 0x12, 0xf2, 0xf0, 0x71, 0xea,
+	0x23, 0x49, 0xb9, 0x09, 0xcb, 0xa1, 0xb6, 0xaa, 0xde, 0xd3, 0x4f, 0x8c, 0xae, 0xe1, 0x1a, 0xd8,
+	0x09, 0x96, 0xfe, 0x63, 0x58, 0x89, 0xc1, 0x53, 0x0f, 0x6c, 0xc0, 0x74, 0x3b, 0x02, 0x2f, 0xa7,
+	0xfc, 0xa5, 0x94, 0x83, 0xa5, 0x70, 0x9c, 0x97, 0x2a, 0x43, 0xad, 0xfc, 0x49, 0x82, 0x12, 0x4f,
+	0x82, 0x36, 0x60, 0xd2, 0xc1, 0xf6, 0x85, 0xd1, 0x26, 0x7e, 0x2d, 0xac, 0xaf, 0xc6, 0x49, 0xab,
+	0x34, 0x09, 0xdd, 0xee, 0x84, 0x1a, 0xb0, 0xc8, 0x2f, 0x61, 0x92, 0x42, 0xd1, 0xf7, 0x20, 0xe3,
+	0x5e, 0xf6, 0x88, 0x94, 0xe2, 0xfa, 0x9d, 0xab, 0xa4, 0x54, 0x5a, 0x97, 0x3d, 0xac, 0xfa, 0x2c,
+	0xca, 0xfb, 0x90, 0xf1, 0x9e, 0x50, 0x01, 0x26, 0x8f, 0x1a, 0x8f, 0x1b, 0x07, 0x4f, 0x1a, 0xa5,
+	0x09, 0xb4, 0x00, 0xa8, 0x7a, 0xd0, 0x68, 0xa9, 0x07, 0x7b, 0x7b, 0x35, 0x55, 0x6b, 0xd6, 0xd4,
+	0xe3, 0x7a, 0xb5, 0x56, 0x92, 0xb6, 0x72, 0x44, 0x8f, 0x52, 0x84, 0xe9, 0x43, 0xdb, 0x3a, 0xc1,
+	0x81, 0xf3, 0xae, 0xc1, 0x0c, 0x7d, 0x26, 0xce, 0x52, 0xfe, 0x92, 0x81, 0xd9, 0xaa, 0x8d, 0x75,
+	0x17, 0x1f, 0x5b, 0xdd, 0xfe, 0x79, 0x40, 0x28, 0x0c, 0xa3, 0x0d, 0x28, 0x7a, 0xae, 0x6a, 0x1b,
+	0xee, 0xa5, 0x66, 0xeb, 0xe6, 0x19, 0xd9, 0xbc, 0xc2, 0xfa, 0x7c, 0xb0, 0x8c, 0x2a, 0xc5, 0xaa,
+	0x1e, 0x52, 0x9d, 0x69, 0x47, 0x1f, 0x51, 0x1d, 0x66, 0x2f, 0x7c, 0x15, 0x1a, 0xb3, 0x3b, 0x69,
+	0x76, 0x77, 0x88, 0x15, 0x91, 0xdd, 0x41, 0x17, 0x2c, 0xc4, 0xc0, 0x0e, 0x7a, 0x0c, 0xd0, 0xd3,
+	0x6d, 0xfd, 0x1c, 0xbb, 0xd8, 0x76, 0xca, 0x19, 0x36, 0x54, 0x05, 0xab, 0xa9, 0x1c, 0x86, 0xd4,
+	0x24, 0x54, 0x23, 0xec, 0xc8, 0x85, 0x1b, 0x6d, 0xcb, 0x74, 0x6d, 0xab, 0xdb, 0xc5, 0xb6, 0xd6,
+	0xf6, 0xb9, 0x35, 0x07, 0xb7, 0x6d, 0xec, 0x3a, 0xe5, 0xac, 0x2f, 0xfb, 0xa3, 0x24, 0xd9, 0xd5,
+	0x90, 0x99, 0x60, 0x9b, 0x84, 0x95, 0x28, 0x5a, 0x6c, 0x8b, 0xb1, 0xe8, 0x00, 0xe6, 0x03, 0x6f,
+	0x58, 0xa6, 0x8b, 0x4d, 0x57, 0x73, 0xac, 0xbe, 0xdd, 0xc6, 0xe5, 0x9c, 0xef, 0xd2, 0x25, 0xce,
+	0x1f, 0x84, 0xa6, 0xe9, 0x93, 0xa8, 0xd4, 0x8f, 0x0c, 0x50, 0xfe, 0x04, 0xae, 0x71, 0xab, 0x1c,
+	0x27, 0xeb, 0xe4, 0xcf, 0x60, 0x39, 0x69, 0x21, 0x63, 0x65, 0xf0, 0xcf, 0x24, 0x98, 0x15, 0xd8,
+	0x8d, 0x76, 0x61, 0xca, 0x31, 0xf5, 0x9e, 0xf3, 0xdc, 0x72, 0x69, 0x1a, 0xbd, 0x97, 0xb0, 0xcc,
+	0x4a, 0x93, 0xd2, 0x92, 0xc7, 0xdd, 0x09, 0x35, 0xe4, 0x96, 0x57, 0xa1, 0xc8, 0x62, 0x51, 0x11,
+	0x52, 0x46, 0x87, 0x9a, 0x97, 0x32, 0x3a, 0x61, 0x02, 0x3c, 0x82, 0x39, 0x76, 0xd3, 0x68, 0x91,
+	0x78, 0x1b, 0x72, 0xc4, 0x8b, 0xd4, 0x92, 0x22, 0x6b, 0x89, 0x4a, 0xb1, 0xca, 0x6f, 0x32, 0x50,
+	0xe2, 0x63, 0x12, 0x6d, 0x40, 0xf6, 0xa4, 0x6b, 0xb5, 0x5f, 0x50, 0xde, 0xb7, 0xe2, 0x82, 0xb7,
+	0xb2, 0xe5, 0x51, 0x11, 0xe8, 0xee, 0x84, 0x4a, 0x98, 0x3c, 0xee, 0x73, 0xab, 0x6f, 0xba, 0x34,
+	0x7b, 0xe2, 0xb9, 0xf7, 0x3d, 0xaa, 0x01, 0xb7, 0xcf, 0x84, 0xb6, 0xa1, 0xa0, 0xb7, 0xdb, 0xd8,
+	0x71, 0xb4, 0x73, 0xab, 0x83, 0xcb, 0x69, 0x5f, 0xc6, 0x5a, 0xac, 0x8c, 0x4d, 0x9f, 0x76, 0xdf,
+	0xea, 0x60, 0x15, 0xf4, 0xf0, 0xbf, 0x3c, 0x03, 0x85, 0x88, 0x6d, 0xf2, 0x0e, 0x14, 0x22, 0xca,
+	0xd0, 0x22, 0x4c, 0x9e, 0x3a, 0x5a, 0x58, 0xa8, 0xf2, 0x6a, 0xee, 0xd4, 0xf1, 0x6b, 0xcf, 0x2d,
+	0x28, 0xf8, 0x56, 0x68, 0xa7, 0x5d, 0xfd, 0x8c, 0x54, 0xd6, 0xbc, 0x0a, 0x3e, 0xe8, 0x53, 0x0f,
+	0x22, 0xff, 0x53, 0x02, 0x18, 0xa8, 0x44, 0x1b, 0x90, 0xf1, 0xad, 0x24, 0xe5, 0xee, 0xee, 0x08,
+	0x56, 0x56, 0x7c, 0x53, 0x7d, 0x2e, 0xe5, 0x2b, 0x09, 0x32, 0xbe, 0x18, 0xbe, 0xe4, 0x35, 0xeb,
+	0x8d, 0x9d, 0xbd, 0x9a, 0xd6, 0x38, 0xd8, 0xae, 0x69, 0x4f, 0xd4, 0x7a, 0xab, 0xa6, 0x96, 0x24,
+	0xb4, 0x04, 0x8b, 0x51, 0xb8, 0x5a, 0xdb, 0xdc, 0xae, 0xa9, 0xda, 0x41, 0x63, 0xef, 0x69, 0x29,
+	0x85, 0x64, 0x58, 0xd8, 0x3f, 0xda, 0x6b, 0xd5, 0x87, 0x71, 0x69, 0xb4, 0x0c, 0xe5, 0x08, 0x8e,
+	0xca, 0xa0, 0x62, 0x33, 0x9e, 0xd8, 0x08, 0x96, 0xfc, 0xa5, 0xc8, 0xec, 0xd6, 0x4c, 0xb8, 0x19,
+	0x7e, 0xb0, 0x3d, 0x81, 0x19, 0xa6, 0x04, 0x7a, 0x07, 0xaf, 0x8d, 0x5f, 0xf6, 0x0d, 0x1b, 0x77,
+	0xb4, 0x93, 0x4b, 0x17, 0x3b, 0xbe, 0x27, 0xd2, 0xea, 0x4c, 0x00, 0xdd, 0xf2, 0x80, 0x9e, 0x5b,
+	0xbb, 0xc6, 0xb9, 0xe1, 0x52, 0x9a, 0x94, 0x4f, 0x03, 0x3e, 0xc8, 0x27, 0x50, 0xbe, 0x4c, 0x41,
+	0x8e, 0xee, 0xcd, 0x9d, 0x48, 0x11, 0x66, 0x44, 0x06, 0x50, 0x22, 0x92, 0xe4, 0x43, 0x2a, 0xc8,
+	0x07, 0xf4, 0x08, 0x40, 0x77, 0x5d, 0xdb, 0x38, 0xe9, 0xbb, 0x61, 0xd1, 0xbd, 0xc9, 0xee, 0x47,
+	0x65, 0x33, 0x24, 0xa0, 0x55, 0x72, 0xc0, 0x81, 0xb6, 0xa0, 0xc8, 0x15, 0xaa, 0xcc, 0xd5, 0x85,
+	0x6a, 0xa6, 0xcd, 0x97, 0x28, 0x4e, 0xc5, 0x58, 0x65, 0xe5, 0x5f, 0x12, 0xcc, 0x6e, 0xe3, 0x2e,
+	0xe6, 0x8f, 0xaa, 0x25, 0xc8, 0xd3, 0x52, 0x1a, 0x56, 0x80, 0x29, 0x02, 0xa8, 0x77, 0xb8, 0xea,
+	0xde, 0xf1, 0xd9, 0xc3, 0xea, 0x9e, 0x62, 0xab, 0xbb, 0x40, 0x78, 0xa4, 0xba, 0x13, 0x6c, 0x5c,
+	0x75, 0x67, 0xb0, 0x6c, 0x35, 0x1d, 0x66, 0x1c, 0x6b, 0xd9, 0x0b, 0x30, 0xc7, 0x1a, 0x46, 0x4f,
+	0xee, 0x3f, 0x64, 0xe0, 0xe6, 0x40, 0xc9, 0x61, 0xff, 0xa4, 0x6b, 0x38, 0xcf, 0xc7, 0xf0, 0xcc,
+	0x22, 0x4c, 0x9a, 0x56, 0xc7, 0x47, 0x11, 0x9d, 0x39, 0xef, 0xb1, 0xde, 0x41, 0x35, 0xb8, 0xce,
+	0x1f, 0xd4, 0x97, 0xb4, 0xce, 0xc4, 0x1f, 0xd3, 0xa5, 0x0b, 0xbe, 0x48, 0xca, 0x30, 0x65, 0x63,
+	0xbd, 0x63, 0x99, 0xdd, 0x4b, 0x3f, 0x56, 0xa6, 0xd4, 0xf0, 0x19, 0x7d, 0x29, 0x81, 0x1c, 0xd9,
+	0x96, 0x1e, 0x31, 0x9e, 0x3b, 0x75, 0xb7, 0xc3, 0x53, 0x37, 0x71, 0x95, 0xc3, 0x68, 0x66, 0x8f,
+	0xca, 0xed, 0x18, 0x34, 0x32, 0xc2, 0x75, 0x46, 0x32, 0x23, 0xe7, 0xab, 0xde, 0x18, 0x51, 0x35,
+	0x79, 0xe2, 0xf3, 0x86, 0xfa, 0x62, 0x00, 0x96, 0x1f, 0xc3, 0x4a, 0xa2, 0x95, 0x63, 0x1d, 0xd5,
+	0x55, 0x98, 0x17, 0xea, 0x1d, 0x2b, 0xaa, 0xbe, 0x96, 0xe0, 0x56, 0xec, 0xe2, 0xe8, 0x19, 0xf9,
+	0x23, 0x98, 0x0e, 0x76, 0xc6, 0x30, 0x4f, 0xad, 0xb2, 0xc4, 0x5d, 0x86, 0x92, 0xd9, 0x2b, 0x14,
+	0xea, 0x75, 0x0c, 0xc4, 0x2f, 0x85, 0xde, 0x00, 0x22, 0x3f, 0x82, 0x12, 0x4f, 0x30, 0xd6, 0x02,
+	0x7e, 0x9f, 0x82, 0xd5, 0x81, 0x05, 0x47, 0x66, 0xef, 0xcd, 0x25, 0xc0, 0xcf, 0x25, 0x58, 0x8e,
+	0x44, 0x67, 0xdf, 0xe4, 0xe3, 0x93, 0x94, 0xcf, 0xdd, 0x61, 0x47, 0x88, 0xcd, 0x10, 0x11, 0x30,
+	0x31, 0x1a, 0xc9, 0x05, 0x9e, 0x40, 0xde, 0x8f, 0xee, 0x93, 0x90, 0x7d, 0x2c, 0xb7, 0xad, 0xc1,
+	0xed, 0x04, 0x73, 0x69, 0x69, 0xf9, 0x3a, 0x05, 0xb7, 0x8f, 0xf5, 0xae, 0xd1, 0x09, 0xef, 0x4d,
+	0x82, 0x46, 0x2c, 0xd9, 0xb9, 0x31, 0xb7, 0xfd, 0xd4, 0x37, 0xb8, 0xed, 0x77, 0x45, 0x79, 0x4a,
+	0xb6, 0xe0, 0xfb, 0xa1, 0xa0, 0xab, 0xac, 0x1d, 0x39, 0x55, 0xdf, 0x48, 0x76, 0x7d, 0x0e, 0x4a,
+	0x92, 0x45, 0x34, 0xbf, 0x96, 0x21, 0xef, 0xf4, 0x7b, 0x3d, 0xcb, 0x76, 0x31, 0x71, 0xe0, 0x94,
+	0x3a, 0x00, 0xa0, 0x32, 0x4c, 0x9e, 0x63, 0xc7, 0xd1, 0xcf, 0x02, 0xf9, 0xc1, 0xa3, 0xf2, 0x39,
+	0xa0, 0x3d, 0xc3, 0xa1, 0x97, 0xb5, 0x70, 0x3b, 0xbc, 0xbb, 0x99, 0xfe, 0x4a, 0xc3, 0xa6, 0x6b,
+	0x1b, 0xf4, 0x56, 0x90, 0x55, 0xe1, 0x5c, 0x7f, 0x55, 0x23, 0x10, 0xef, 0xe6, 0xe0, 0xb8, 0xba,
+	0xed, 0x1a, 0xe6, 0x99, 0xe6, 0x5a, 0x2f, 0x70, 0x38, 0x05, 0x08, 0xa0, 0x2d, 0x0f, 0xa8, 0xfc,
+	0x4a, 0x82, 0x59, 0x46, 0x3c, 0xb5, 0xf6, 0x21, 0x4c, 0x0e, 0x64, 0x7b, 0xce, 0xbf, 0x1d, 0x38,
+	0x5f, 0x40, 0x5d, 0x21, 0xee, 0x0d, 0x38, 0xd0, 0x0a, 0x80, 0x89, 0x5f, 0xb9, 0x8c, 0xde, 0xbc,
+	0x07, 0xf1, 0x75, 0xca, 0x0f, 0x20, 0x4b, 0x9c, 0x3c, 0xea, 0xb5, 0xfc, 0x1f, 0x12, 0xa0, 0x1d,
+	0xec, 0x86, 0xb7, 0x2d, 0xea, 0x83, 0x98, 0xa8, 0x93, 0xbe, 0x41, 0xd4, 0x7d, 0xc6, 0xf4, 0x98,
+	0x24, 0x6e, 0xdf, 0x8b, 0x8c, 0x43, 0x38, 0xd5, 0x49, 0x2d, 0xe6, 0x6b, 0xf6, 0x66, 0xca, 0x36,
+	0xcc, 0x32, 0x0a, 0xe9, 0x86, 0xdc, 0x07, 0xa4, 0x5f, 0xe8, 0x46, 0x57, 0x3f, 0xe9, 0x92, 0xf5,
+	0x7a, 0x58, 0x7a, 0x1b, 0xbc, 0x1e, 0x62, 0x02, 0x36, 0x45, 0x89, 0xd6, 0x4b, 0x2a, 0x8f, 0x9f,
+	0xad, 0x74, 0xa3, 0xd5, 0x61, 0x88, 0x86, 0xea, 0xdd, 0x11, 0xce, 0x57, 0xd6, 0x86, 0xab, 0x21,
+	0x1d, 0x62, 0xc4, 0x8e, 0x5a, 0xfe, 0x9c, 0x82, 0xa5, 0x04, 0x6a, 0xf4, 0x10, 0xd2, 0x76, 0xaf,
+	0x4d, 0x23, 0xe1, 0x9d, 0x11, 0xe4, 0x57, 0xd4, 0xc3, 0xea, 0xee, 0x84, 0xea, 0x71, 0xc9, 0x7f,
+	0x97, 0x20, 0xad, 0x1e, 0x56, 0xd1, 0x0f, 0x98, 0x89, 0xcb, 0xbd, 0x11, 0xa5, 0x44, 0x07, 0x2f,
+	0x5e, 0x1b, 0x32, 0x3c, 0x79, 0x29, 0xc3, 0x5c, 0x55, 0xad, 0x6d, 0xb6, 0x6a, 0xda, 0x76, 0x6d,
+	0xaf, 0xd6, 0xaa, 0x69, 0xc7, 0x07, 0x7b, 0x47, 0xfb, 0xb5, 0x92, 0xe4, 0xf5, 0x13, 0x87, 0x47,
+	0x5b, 0x7b, 0xf5, 0xe6, 0xae, 0x76, 0xd4, 0x08, 0xfe, 0x51, 0x6c, 0x0a, 0x95, 0x60, 0x7a, 0xaf,
+	0xde, 0x6c, 0x51, 0x40, 0xb3, 0x94, 0xf6, 0x20, 0x3b, 0xb5, 0x96, 0x56, 0xdd, 0x3c, 0xdc, 0xac,
+	0xd6, 0x5b, 0x4f, 0x4b, 0x19, 0xaf, 0x5b, 0x61, 0x65, 0x37, 0x1b, 0x9b, 0x87, 0xcd, 0xdd, 0x83,
+	0x56, 0x29, 0x8b, 0x10, 0x14, 0x7d, 0xfe, 0x00, 0xd4, 0x2c, 0xe5, 0xc2, 0x66, 0xf7, 0xab, 0x34,
+	0xcc, 0xd3, 0xde, 0x9d, 0x76, 0xc7, 0x41, 0x62, 0xdc, 0x85, 0x12, 0xb9, 0xb6, 0x6b, 0x7c, 0xc9,
+	0x2e, 0x12, 0xf8, 0x71, 0x50, 0xb8, 0x83, 0xc1, 0x4f, 0x2a, 0x32, 0xf8, 0xe9, 0xc1, 0x62, 0x30,
+	0x17, 0xa1, 0x72, 0xb9, 0xa3, 0x90, 0x1b, 0x90, 0x70, 0xda, 0x39, 0x28, 0x73, 0xf4, 0xcd, 0xb7,
+	0x45, 0x38, 0xb4, 0x2f, 0x98, 0xf0, 0xdc, 0x4f, 0x56, 0x92, 0x94, 0x80, 0xbb, 0x20, 0xc7, 0xdb,
+	0x30, 0xd6, 0xe5, 0xeb, 0x35, 0x53, 0xf9, 0x53, 0x58, 0xe0, 0xad, 0xa7, 0x59, 0x75, 0x6f, 0x68,
+	0x38, 0x52, 0x0a, 0xd6, 0x1b, 0xd2, 0x86, 0x14, 0xca, 0xef, 0x24, 0x98, 0x0a, 0xc0, 0x5e, 0x71,
+	0x75, 0x8c, 0x9f, 0x62, 0xa6, 0x1d, 0xcc, 0x7b, 0x10, 0x71, 0x2b, 0x28, 0x8a, 0x85, 0xb4, 0x30,
+	0x16, 0x56, 0x00, 0xc8, 0xf6, 0x74, 0x34, 0xdd, 0xf5, 0x2f, 0xf1, 0x69, 0x35, 0x4f, 0x21, 0x9b,
+	0x2e, 0xaa, 0x40, 0xce, 0x71, 0x75, 0xb7, 0xef, 0x5d, 0xd8, 0x3d, 0x83, 0x17, 0x78, 0x83, 0x9b,
+	0x3e, 0x56, 0xa5, 0x54, 0x5e, 0x22, 0x15, 0x59, 0x14, 0x7a, 0xc0, 0x64, 0xe7, 0x92, 0x58, 0x40,
+	0x24, 0x19, 0xbd, 0x53, 0xb1, 0x83, 0x5d, 0xdd, 0xe8, 0x3a, 0xc1, 0xa9, 0x48, 0x1f, 0x95, 0x2d,
+	0x51, 0x96, 0xe6, 0x21, 0xeb, 0x35, 0xfb, 0x4f, 0x4b, 0x12, 0x9a, 0x81, 0xfc, 0xd1, 0xe1, 0xde,
+	0xc1, 0xe6, 0x76, 0xbd, 0xb1, 0x53, 0x4a, 0xa1, 0x59, 0xb8, 0x56, 0x53, 0xd5, 0x03, 0x55, 0x1b,
+	0x00, 0xd3, 0x5e, 0x8b, 0x39, 0x4f, 0xdb, 0x35, 0x2e, 0x81, 0x6e, 0x41, 0x21, 0x8c, 0xfd, 0x30,
+	0x77, 0x20, 0x00, 0xd5, 0x3b, 0x5e, 0x8e, 0x04, 0xdd, 0x25, 0x9f, 0x23, 0xc2, 0x36, 0x93, 0x0f,
+	0x5f, 0x16, 0xca, 0xe6, 0x48, 0x47, 0x84, 0xf3, 0x82, 0x3a, 0x9e, 0x69, 0xac, 0xa8, 0x2c, 0xc3,
+	0x02, 0x6f, 0x14, 0xbd, 0x09, 0xfe, 0x5a, 0x82, 0x39, 0xef, 0x78, 0x0f, 0x10, 0x6f, 0xfa, 0xb6,
+	0x31, 0x46, 0x30, 0x72, 0x3b, 0x90, 0xe1, 0x77, 0x40, 0xf9, 0xad, 0x04, 0xf3, 0x9c, 0xad, 0x34,
+	0xb7, 0x3e, 0xe1, 0xaf, 0x2e, 0x6b, 0xd1, 0xab, 0xcb, 0x10, 0xfd, 0x98, 0x97, 0x97, 0x0f, 0x82,
+	0xcb, 0xcb, 0x78, 0x29, 0xfc, 0x8b, 0x2c, 0x2c, 0x34, 0xac, 0x0e, 0x6e, 0xba, 0xfa, 0xd9, 0x38,
+	0x13, 0x0d, 0x95, 0xeb, 0xca, 0x48, 0x74, 0x3d, 0x08, 0x34, 0x89, 0x45, 0x26, 0x37, 0x63, 0xa8,
+	0x02, 0xb3, 0x8e, 0xab, 0x9f, 0xf9, 0x7b, 0xa5, 0xdb, 0x67, 0xd8, 0xd5, 0x7a, 0xba, 0xfb, 0x9c,
+	0x6e, 0xc4, 0x75, 0x8a, 0x6a, 0xf9, 0x98, 0x43, 0xdd, 0x7d, 0x2e, 0x1e, 0x11, 0x64, 0xc6, 0x1e,
+	0x11, 0x9c, 0x00, 0xf2, 0x3b, 0x30, 0x4f, 0x01, 0x3f, 0x73, 0xff, 0xee, 0x15, 0x0b, 0x0a, 0xc1,
+	0x4c, 0xaa, 0x94, 0x4c, 0x0e, 0x8c, 0xf4, 0xf8, 0x2e, 0xff, 0x2a, 0x15, 0xa3, 0xb6, 0x0c, 0xaf,
+	0xd9, 0xca, 0x7a, 0x2d, 0x87, 0x70, 0x35, 0xdf, 0xfe, 0x54, 0xe0, 0x06, 0x2c, 0x0e, 0xf9, 0x82,
+	0x56, 0x82, 0x33, 0x28, 0x7b, 0xa8, 0x23, 0xd3, 0x19, 0x33, 0x5e, 0x63, 0x62, 0x2b, 0x15, 0x13,
+	0x5b, 0xca, 0x12, 0xdc, 0x10, 0x28, 0xa2, 0x56, 0xfc, 0x2d, 0x4b, 0xcc, 0x18, 0x7f, 0xdc, 0xd5,
+	0x12, 0xa6, 0xcd, 0xff, 0x47, 0x43, 0x40, 0x38, 0xe2, 0x79, 0xb3, 0x89, 0x73, 0x0b, 0x0a, 0x51,
+	0x3a, 0x5a, 0xc4, 0xdc, 0x2b, 0x32, 0x2b, 0xfb, 0x5a, 0xc3, 0xb7, 0x1c, 0x37, 0x7c, 0xfb, 0x09,
+	0xcc, 0xf9, 0x59, 0xc7, 0x4f, 0x35, 0x26, 0xd9, 0x63, 0x2a, 0xd6, 0x23, 0x11, 0x04, 0x93, 0x7b,
+	0x7e, 0x2e, 0x73, 0x33, 0xb6, 0xb6, 0x28, 0xfb, 0xa6, 0x7c, 0x45, 0x1f, 0x5e, 0xa9, 0xe8, 0xdb,
+	0xca, 0xbf, 0x1a, 0x89, 0xfa, 0xff, 0x89, 0xb9, 0x1c, 0x8d, 0x7e, 0xe1, 0x44, 0x4d, 0x79, 0x06,
+	0x32, 0x49, 0x8d, 0xf1, 0x87, 0x5d, 0x5c, 0xe0, 0xa5, 0xf8, 0xc0, 0x53, 0x56, 0x60, 0x49, 0x28,
+	0x9b, 0xaa, 0x46, 0x50, 0xf2, 0xd0, 0x3b, 0xd8, 0xad, 0x77, 0x82, 0x6e, 0xf1, 0x1e, 0x5c, 0x8f,
+	0xc0, 0xe8, 0x59, 0x1b, 0x99, 0xaa, 0x49, 0xd1, 0xa9, 0x9a, 0xb2, 0x4c, 0x8c, 0x8f, 0xe9, 0x3c,
+	0xbf, 0x20, 0xea, 0xe3, 0x7a, 0xce, 0x4d, 0xae, 0xe7, 0x24, 0xc7, 0xf8, 0x0a, 0x53, 0xc0, 0xaf,
+	0xe8, 0x36, 0xff, 0x28, 0xd1, 0x32, 0x3b, 0xd4, 0x67, 0x7e, 0x10, 0xed, 0x33, 0x6f, 0x27, 0xca,
+	0x8c, 0x76, 0x98, 0x3d, 0xd2, 0x60, 0x7e, 0xcc, 0x5c, 0x61, 0xdf, 0xbe, 0x92, 0x3d, 0xda, 0x5a,
+	0xde, 0x8f, 0xe9, 0x2c, 0x9b, 0xad, 0xcd, 0x9d, 0x9a, 0x76, 0xd4, 0x20, 0xbf, 0x41, 0x67, 0x19,
+	0xf4, 0x79, 0xeb, 0xff, 0x96, 0x60, 0xaa, 0xde, 0xc1, 0xa6, 0xeb, 0x59, 0xdf, 0x80, 0x19, 0xe6,
+	0xeb, 0x0c, 0xb4, 0x1c, 0xf3, 0xd1, 0x86, 0xef, 0x68, 0x79, 0x25, 0xf1, 0x93, 0x0e, 0x65, 0x02,
+	0x9d, 0x46, 0xbe, 0x2c, 0x61, 0x26, 0x22, 0x6f, 0x0d, 0x71, 0x0a, 0x36, 0x52, 0xbe, 0x73, 0x05,
+	0x55, 0xa8, 0xe7, 0x43, 0xc8, 0xfa, 0x9f, 0x22, 0xa0, 0xb9, 0xf0, 0x2b, 0x88, 0xc8, 0x97, 0x0a,
+	0xf2, 0x3c, 0x07, 0x0d, 0xf8, 0xd6, 0xff, 0x33, 0x09, 0x30, 0xe8, 0xde, 0xd1, 0x63, 0x98, 0x8e,
+	0xbe, 0xe0, 0x45, 0x4b, 0x09, 0xef, 0xea, 0xe5, 0x65, 0x31, 0x32, 0xb4, 0xe9, 0x31, 0x4c, 0x47,
+	0xdf, 0xb5, 0x0c, 0x84, 0x09, 0x5e, 0x0d, 0x0d, 0x84, 0x09, 0x5f, 0xcf, 0x4c, 0xa0, 0x2e, 0x2c,
+	0xc6, 0x8c, 0xc8, 0xd1, 0xdb, 0xa3, 0xbd, 0x5f, 0x90, 0xdf, 0x19, 0x71, 0xd6, 0xae, 0x4c, 0x20,
+	0x1b, 0x6e, 0xc4, 0x0e, 0x76, 0xd1, 0xdd, 0x51, 0x47, 0xd5, 0xf2, 0xbb, 0x23, 0x50, 0x86, 0x3a,
+	0xfb, 0x20, 0xc7, 0x8f, 0x39, 0xd1, 0xbb, 0x23, 0x0f, 0x67, 0xe5, 0xf7, 0x46, 0x21, 0x0d, 0xd5,
+	0xee, 0x42, 0x21, 0x32, 0x72, 0x44, 0xb2, 0x70, 0x0e, 0x49, 0x04, 0x2f, 0x25, 0xcc, 0x28, 0x89,
+	0xa4, 0xc8, 0x64, 0x6d, 0x20, 0x69, 0x78, 0xbe, 0x37, 0x90, 0x24, 0x18, 0xc5, 0xf1, 0xee, 0xe7,
+	0xaa, 0x98, 0xc8, 0xfd, 0xe2, 0x32, 0x28, 0x72, 0x7f, 0x4c, 0x49, 0x54, 0x26, 0xd0, 0x0f, 0xa1,
+	0xc8, 0x0e, 0x13, 0xd0, 0x4a, 0xe2, 0x88, 0x44, 0xbe, 0x19, 0x87, 0x8e, 0x8a, 0x64, 0x3b, 0xc1,
+	0x81, 0x48, 0x61, 0xdb, 0x3a, 0x10, 0x19, 0xd3, 0x40, 0x4e, 0x78, 0xf5, 0x89, 0xe9, 0xb2, 0x06,
+	0xf5, 0x49, 0xd4, 0x58, 0x0e, 0xea, 0x93, 0xb0, 0x35, 0x53, 0x26, 0xd6, 0x7f, 0x99, 0x81, 0x8c,
+	0x57, 0x5c, 0x51, 0x0b, 0xae, 0x71, 0x97, 0x55, 0x74, 0x33, 0xf9, 0x46, 0x2f, 0xdf, 0x8a, 0xc5,
+	0x87, 0xe6, 0x3e, 0x23, 0x87, 0x1a, 0x73, 0xfd, 0x44, 0xab, 0x51, 0x3e, 0xd1, 0x15, 0x58, 0xbe,
+	0x9d, 0x40, 0xc1, 0xcb, 0x66, 0x6b, 0xc1, 0xea, 0x55, 0xf7, 0x20, 0x56, 0x76, 0x5c, 0xfe, 0x7f,
+	0x01, 0xb3, 0x82, 0xf3, 0x1b, 0x29, 0xac, 0x5d, 0xc2, 0x9c, 0x5f, 0x4b, 0xa4, 0x09, 0x35, 0x6c,
+	0x41, 0x3e, 0x3c, 0xee, 0x51, 0x39, 0xca, 0x13, 0xbd, 0x15, 0xc8, 0x37, 0x04, 0x18, 0xde, 0x4a,
+	0x3e, 0x41, 0x14, 0x8e, 0x47, 0x94, 0x1a, 0x6b, 0x89, 0x34, 0x81, 0x86, 0xad, 0xec, 0xb3, 0x74,
+	0xdb, 0x31, 0x4e, 0x72, 0xfe, 0x77, 0x94, 0xdf, 0xf9, 0x6f, 0x00, 0x00, 0x00, 0xff, 0xff, 0x44,
+	0xa8, 0x1c, 0xaf, 0x54, 0x29, 0x00, 0x00,
 }
