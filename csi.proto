@@ -818,6 +818,7 @@ message NodeServiceCapability {
     enum Type {
       UNKNOWN = 0;
       STAGE_UNSTAGE_VOLUME = 1;
+      DRAIN_VOLUMES = 2;
     }
 
     Type type = 1;
@@ -843,4 +844,9 @@ message NodeGetInfoResponse {
   // plugin MUST NOT set negative values here.
   // This field is OPTIONAL.
   int64 max_volumes_per_node = 2;
+}
+message NodeDrainRequest {
+}
+
+message NodeDrainResponse {
 }
