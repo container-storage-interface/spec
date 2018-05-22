@@ -214,11 +214,10 @@ message CreateVolumeRequest {
 // type fields MUST be specified.
 message VolumeContentSource {
   message SnapshotSource {
-    // Contains identity information for the created snapshot. This
-    // field is REQUIRED. The identity information will be used by
-    // the CO in subsequent calls to refer to the provisioned snapshot.
-    // Plugin is REQUIRED to support creating volume from snapshot if
-    // it supports the capability CREATE_DELETE_SNAPSHOT.
+    // Contains identity information for the existing source snapshot.
+    // This field is REQUIRED. Plugin is REQUIRED to support creating
+    // volume from snapshot if it supports the capability
+    // CREATE_DELETE_SNAPSHOT.
     string id = 1;
   }
 
