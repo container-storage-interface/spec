@@ -182,7 +182,11 @@ message CreateVolumeRequest {
 
   // This field is OPTIONAL. This allows the CO to specify the capacity
   // requirement of the volume to be provisioned. If not specified, the
-  // Plugin MAY choose an implementation-defined capacity range.
+  // Plugin MAY choose an implementation-defined capacity range. If
+  // specified it MUST always be honored, even when creating volumes
+  // from a source; which may force some backends to internally extend
+  // the volume after creating it.
+
   CapacityRange capacity_range = 2;
 
   // The capabilities that the provisioned volume MUST have: the Plugin
