@@ -1739,6 +1739,7 @@ message NodeServiceCapability {
     enum Type {
       UNKNOWN = 0;
       STAGE_UNSTAGE_VOLUME = 1;
+      DRAIN_VOLUMES = 2;
     }
 
     Type type = 1;
@@ -1792,6 +1793,27 @@ Condition | gRPC Code | Description | Recovery Behavior
 | --- | --- | --- | --- |
 | Call not implemented | 12 UNIMPLEMENTED | NodeGetInfo call is not implemented by the plugin or disabled in the Plugin's current mode of operation. | Caller MUST NOT retry. Caller MAY call `ControllerGetCapabilities` or `NodeGetCapabilities` to discover Plugin capabilities. |
 
+#### `NodeDrain`
+
+A Node Plugin MUST implement this RPC call if the plugin has `DRAIN_VOLUMES` node capability.
+
+If the plugin has DRAIN_VOLUMES capability, the CO SHOULD call NodeDrain prior to terminating the plugin. During normal 
+operation, the CO will already have called `NodeUnpublishVolume` and `NodeUnstageVolume` on all volumes published or staged 
+on the node, however in some failure cases it is easy for clean-up to fail and mountpoints to be left on the node. 
+NodeDrain provides the plugin an opportunity to clean up.
+
+The CO MUST NOT call other RPCs on the node after NodeDrain is called.  The plugin should treat any other Node RPC after 
+NodeDrain as an error condition.
+
+It is expected the plugin process will terminate after NodeDrainResponse is sent.
+
+```protobuf
+message NodeDrainRequest {
+}
+
+message NodeDrainResponse {
+}
+```
 
 ## Protocol
 
