@@ -606,6 +606,12 @@ This RPC will be called by the CO to provision a new volume on behalf of a user 
 This operation MUST be idempotent.
 If a volume corresponding to the specified volume `name` already exists, is accessible from `accessibility_requirements`, and is compatible with the specified `capacity_range`, `volume_capabilities` and `parameters` in the `CreateVolumeRequest`, the Plugin MUST reply `0 OK` with the corresponding `CreateVolumeResponse`.
 
+Plugins MAY create 3 types of volumes:
+
+- Empty volumes. When plugin supports `CREATE_DELETE_VOLUME` optional capability.
+- From an existing snapshot. When plugin supports `CREATE_DELETE_VOLUME` and `CREATE_DELETE_SNAPSHOT` optional capabilities.
+- From an existing volume. When plugin supports cloning, and reports the optional capabilities `CREATE_DELETE_VOLUME` and `CLONE_VOLUME`.
+
 ```protobuf
 message CreateVolumeRequest {
   // The suggested name for the storage space. This field is REQUIRED.
@@ -687,8 +693,16 @@ message VolumeContentSource {
     string id = 1;
   }
 
+  message VolumeSource {
+    // Contains identity information for the existing source volume.
+    // This field is REQUIRED. Plugins reporting CLONE_VOLUME
+    // capability MUST support creating a volume from another volume.
+    string id = 1;
+  }
+
   oneof type {
     SnapshotSource snapshot = 1;
+    VolumeSource volume = 2;
   }
 }
 
@@ -1004,6 +1018,8 @@ The CO MUST implement the specified error recovery behavior when it encounters t
 
 | Condition | gRPC Code | Description | Recovery Behavior |
 |-----------|-----------|-------------|-------------------|
+| Source incompatible or not supported | 3 INVALID_ARGUMENT | Besides the general cases, this code MUST also be used to indicate when plugin supporting CREATE_DELETE_VOLUME cannot create a volume from the requested source (`SnapshotSource` or `VolumeSource`). Failure may be caused by not supporting the source (CO shouldn't have provided that source) or incompatibility between `parameters` from the source and the ones requested for the new volume. More human-readable information SHOULD be provided in the gRPC `status.message` field if the problem is the source. | On source related issues, caller MUST use different parameters, a different source, or no source at all. |
+| Source does not exist | 5 NOT_FOUND | Indicates that the specified source does not exist. | Caller MUST verify that the `volume_content_source` is correct, the source is accessible, and has not been deleted before retrying with exponential back off. |
 | Volume already exists but is incompatible | 6 ALREADY_EXISTS | Indicates that a volume corresponding to the specified volume `name` already exists but is incompatible with the specified `capacity_range`, `volume_capabilities` or `parameters`. | Caller MUST fix the arguments or use a different `name` before retrying. |
 | Unable to provision in `accessible_topology` | 8 RESOURCE_EXHAUSTED | Indicates that although the `accessible_topology` field is valid, a new volume can not be provisioned with the specified topology constraints. More human-readable information MAY be provided in the gRPC `status.message` field. | Caller MUST ensure that whatever is preventing volumes from being provisioned in the specified location (e.g. quota issues) is addressed before retrying with exponential backoff. |
 | Unsupported `capacity_range` | 11 OUT_OF_RANGE | Indicates that the capacity range is not allowed by the Plugin, for example when trying to create a volume smaller than the source snapshot. More human-readable information MAY be provided in the gRPC `status.message` field. | Caller MUST fix the capacity range before retrying. |
@@ -1371,6 +1387,11 @@ message ControllerServiceCapability {
       // with the snapshot_id as the filter to query whether the
       // uploading process is complete or not.
       LIST_SNAPSHOTS = 6;
+      // Plugins supporting volume cloning at the storage level MAY
+      // report this capability. The source volume must be managed by
+      // the same plugin. Not all volume sources and parameters
+      // combinations may work.
+      CLONE_VOLUME = 7;
     }
 
     Type type = 1;
