@@ -1074,8 +1074,8 @@ message GetCapacityRequest {
 }
 
 message GetCapacityResponse {
-  // The available capacity of the storage that can be used to
-  // provision volumes. If `volume_capabilities` or `parameters` is
+  // The available capacity, in bytes, of the storage that can be used
+  // to provision volumes. If `volume_capabilities` or `parameters` is
   // specified in the request, the Plugin SHALL take those into
   // consideration when calculating the available capacity of the
   // storage. This field is REQUIRED.
