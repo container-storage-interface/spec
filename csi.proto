@@ -242,8 +242,16 @@ message VolumeContentSource {
     string id = 1;
   }
 
+  message VolumeSource {
+    // Contains identity information for the existing source volume.
+    // This field is REQUIRED. Plugins reporting CLONE_VOLUME
+    // capability MUST support creating a volume from another volume.
+    string id = 1;
+  }
+
   oneof type {
     SnapshotSource snapshot = 1;
+    VolumeSource volume = 2;
   }
 }
 
@@ -767,6 +775,11 @@ message ControllerServiceCapability {
       // with the snapshot_id as the filter to query whether the
       // uploading process is complete or not.
       LIST_SNAPSHOTS = 6;
+      // Plugins supporting volume cloning at the storage level MAY
+      // report this capability. The source volume must be managed by
+      // the same plugin. Not all volume sources and parameters
+      // combinations may work.
+      CLONE_VOLUME = 7;
     }
 
     Type type = 1;
