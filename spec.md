@@ -320,7 +320,7 @@ service Controller {
     returns (GetCapacityResponse) {}
 
   rpc ControllerGetCapabilities (ControllerGetCapabilitiesRequest)
-    returns (ControllerGetCapabilitiesResponse) {}  
+    returns (ControllerGetCapabilitiesResponse) {}
 
   rpc CreateSnapshot (CreateSnapshotRequest)
     returns (CreateSnapshotResponse) {}
@@ -696,7 +696,7 @@ message VolumeCapability {
     // Therefore, the CO and the Plugin MUST NOT leak this information
     // to untrusted entities. The total size of this repeated field
     // SHALL NOT exceed 4 KiB.
-    repeated string mount_flags = 2;    
+    repeated string mount_flags = 2;
   }
 
   // Specify how a volume can be accessed.
@@ -745,12 +745,12 @@ message VolumeCapability {
 message CapacityRange {
   // Volume MUST be at least this big. This field is OPTIONAL.
   // A value of 0 is equal to an unspecified field value.
-  // The value of this field MUST NOT be negative. 
+  // The value of this field MUST NOT be negative.
   int64 required_bytes = 1;
 
   // Volume MUST not be bigger than this. This field is OPTIONAL.
   // A value of 0 is equal to an unspecified field value.
-  // The value of this field MUST NOT be negative. 
+  // The value of this field MUST NOT be negative.
   int64 limit_bytes = 2;
 }
 
@@ -759,7 +759,7 @@ message Volume {
   // The capacity of the volume in bytes. This field is OPTIONAL. If not
   // set (value of 0), it indicates that the capacity of the volume is
   // unknown (e.g., NFS share).
-  // The value of this field MUST NOT be negative. 
+  // The value of this field MUST NOT be negative.
   int64 capacity_bytes = 1;
 
   // Contains identity information for the created volume. This field is
@@ -1017,7 +1017,7 @@ message ListVolumesRequest {
   // in the subsequent `ListVolumes` call. This field is OPTIONAL. If
   // not specified (zero value), it means there is no restriction on the
   // number of entries that can be returned.
-  // The value of this field MUST NOT be negative. 
+  // The value of this field MUST NOT be negative.
   int32 max_entries = 1;
 
   // A token to specify where to start paginating. Set this field to
@@ -1082,7 +1082,7 @@ message GetCapacityResponse {
   // specified in the request, the Plugin SHALL take those into
   // consideration when calculating the available capacity of the
   // storage. This field is REQUIRED.
-  // The value of this field MUST NOT be negative. 
+  // The value of this field MUST NOT be negative.
   int64 available_capacity = 1;
 }
 ```
@@ -1462,7 +1462,7 @@ message NodeStageVolumeRequest {
 
   // The path to which the volume will be published. It MUST be an
   // absolute path in the root filesystem of the process serving this
-  // request. The CO SHALL ensure that there is only one 
+  // request. The CO SHALL ensure that there is only one
   // staging_target_path per volume.
   // This is a REQUIRED field.
   string staging_target_path = 3;
@@ -1550,7 +1550,7 @@ The CO MUST implement the specified error recovery behavior when it encounters t
 #### RPC Interactions and Reference Counting
 `NodeStageVolume`, `NodeUnstageVolume`, `NodePublishVolume`, `NodeUnpublishVolume`
 
-The following interaction semantics ARE REQUIRED if the plugin advertises the `STAGE_UNSTAGE_VOLUME` capability. 
+The following interaction semantics ARE REQUIRED if the plugin advertises the `STAGE_UNSTAGE_VOLUME` capability.
 `NodeStageVolume` MUST be called and return success once per volume per node before any `NodePublishVolume` MAY be called for the volume.
 All `NodeUnpublishVolume` MUST be called and return success for a volume before `NodeUnstageVolume` MAY be called for the volume.
 
@@ -1593,7 +1593,7 @@ message NodePublishVolumeRequest {
   // The path to which the device was mounted by `NodeStageVolume`.
   // It MUST be an absolute path in the root filesystem of the process
   // serving this request.
-  // It MUST be set if the Node Plugin implements the 
+  // It MUST be set if the Node Plugin implements the
   // `STAGE_UNSTAGE_VOLUME` node capability.
   // This is an OPTIONAL field.
   string staging_target_path = 3;
@@ -1777,7 +1777,7 @@ message NodeGetInfoResponse {
   string node_id = 1;
 
   // Maximum number of volumes that controller can publish to the node.
-  // If value is not set or zero CO SHALL decide how many volumes of 
+  // If value is not set or zero CO SHALL decide how many volumes of
   // this type can be published by the controller to the node. The
   // plugin MUST NOT set negative values here.
   // This field is OPTIONAL.
@@ -1873,7 +1873,7 @@ The following address types SHALL be supported by Plugins:
 
     unix:///path/to/unix/socket.sock
 
-Note: All UNIX endpoints SHALL end with `.sock`. See [gRPC Name Resolution](https://github.com/grpc/grpc/blob/master/doc/naming.md).  
+Note: All UNIX endpoints SHALL end with `.sock`. See [gRPC Name Resolution](https://github.com/grpc/grpc/blob/master/doc/naming.md).
 
 This variable is REQUIRED.
 
