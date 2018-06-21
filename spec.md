@@ -1122,6 +1122,8 @@ This RPC is a reverse operation of `ControllerPublishVolume`.
 It MUST be called after all `NodeUnstageVolume` and `NodeUnpublishVolume` on the volume are called and succeed.
 The Plugin SHOULD perform the work that is necessary for making the volume ready to be consumed by a different node.
 The Plugin MUST NOT assume that this RPC will be executed on the node where the volume was previously used.
+The CO MAY omit `controller_unpublish_secrets` in case when it looses access to the secrets after `ControllerPublishVolume` call.
+It is RECOMMENDED for the Plugin not to depend on presence of `controller_unpublish_secrets`.
 
 This RPC is typically called by the CO when the workload using the volume is being moved to a different node, or all the workload using the volume on a node has finished.
 
