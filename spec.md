@@ -1849,6 +1849,24 @@ message NodePublishVolumeRequest {
   // MUST match the attributes of the Volume identified by
   // `volume_id`.
   map<string, string> volume_attributes = 8;
+
+  // Information about workload that wants to use the volume.
+  // This is an OPTIONAL field. The Plugin MAY choose to ignore
+  // this field if it does not need any workload related information
+  // to fullfill the request.
+  Workload workload = 9;
+}
+
+// Parameters of a CO workload that lead to CSI request.
+message Workload {
+    // CO name. This name defines content of parameters map. Each CO
+    // SHOULD clearly document which co_name it uses and which parameter
+    // names and format of values it provides. This filed is REQUIRED.
+    string co_name = 1;
+
+    // CO specific parameters of the workload, such as workload name.
+    // Exact format depends on the CO. This filed is REQUIRED.
+    map<string, string> parameters = 2;
 }
 
 message NodePublishVolumeResponse {
