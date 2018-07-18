@@ -83,18 +83,24 @@ export PATH := $(shell pwd):$(PATH)
 ##                              BUILD                                 ##
 ########################################################################
 CSI_PROTO := ../../csi.proto
-CSI_PKG := $(shell cat $(CSI_PROTO) | sed -n -e 's/^package.\([^;]*\);$$/\1/p'|tr '.' '/')
-CSI_GO := $(CSI_PKG)/csi.pb.go
+CSI_PKG_ROOT := github.com/container-storage-interface/spec
+CSI_PKG_SUB := $(shell cat $(CSI_PROTO) | sed -n -e 's/^package.\([^;]*\);$$/\1/p'|tr '.' '/')
+CSI_BUILD := $(CSI_PKG_SUB)/.build
+CSI_GO := $(CSI_PKG_SUB)/csi.pb.go
 CSI_A := csi.a
-CSI_GO_TMP := $(CSI_PKG)/.build/csi.pb.go
+CSI_GO_TMP := $(CSI_BUILD)/$(CSI_PKG_ROOT)/csi.pb.go
 
 # This recipe generates the go language bindings to a temp area.
+$(CSI_GO_TMP): HERE := $(shell pwd)
+$(CSI_GO_TMP): PTYPES_PKG := github.com/golang/protobuf/ptypes
 $(CSI_GO_TMP): GO_OUT := plugins=grpc
-$(CSI_GO_TMP): GO_OUT := $(GO_OUT),Mgoogle/protobuf/wrappers.proto=github.com/golang/protobuf/ptypes/wrappers
-$(CSI_GO_TMP): INCLUDE = -I$(PROTOC_TMP_DIR)/include
+$(CSI_GO_TMP): GO_OUT := $(GO_OUT),Mgoogle/protobuf/wrappers.proto=$(PTYPES_PKG)/wrappers
+$(CSI_GO_TMP): GO_OUT := $(GO_OUT):"$(HERE)/$(CSI_BUILD)"
+$(CSI_GO_TMP): INCLUDE := -I$(GOPATH)/src -I$(HERE)/$(PROTOC_TMP_DIR)/include
 $(CSI_GO_TMP): $(CSI_PROTO) | $(PROTOC) $(PROTOC_GEN_GO)
 	@mkdir -p "$(@D)"
-	$(PROTOC) -I "$(<D)" $(INCLUDE) --go_out=$(GO_OUT):"$(@D)" "$<"
+	(cd "$(GOPATH)/src" && \
+		$(HERE)/$(PROTOC) $(INCLUDE) --go_out=$(GO_OUT) "$(CSI_PKG_ROOT)/$(<F)")
 
 # The temp language bindings are compared to the ones that are
 # versioned. If they are different then it means the language
@@ -114,16 +120,16 @@ endif
 #   3. Build the archive file.
 $(CSI_A): $(CSI_GO)
 	go get -v -d ./...
-	go install ./$(CSI_PKG)
-	go build -o "$@" ./$(CSI_PKG)
+	go install ./$(CSI_PKG_SUB)
+	go build -o "$@" ./$(CSI_PKG_SUB)
 
 build: $(CSI_A)
 
 clean:
 	go clean -i ./...
-	rm -f "$(CSI_A)" "$(CSI_GO)" "$(CSI_GO_TMP)"
+	rm -rf "$(CSI_A)" "$(CSI_GO)" "$(CSI_BUILD)"
 
 clobber: clean
-	rm -fr "$(PROTOC)" "$(PROTOC_GEN_GO)" "$(CSI_PKG)"
+	rm -fr "$(PROTOC)" "$(PROTOC_GEN_GO)" "$(CSI_PKG_SUB)"
 
 .PHONY: clean clobber
