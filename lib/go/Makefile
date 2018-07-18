@@ -121,7 +121,7 @@ build: $(CSI_A)
 
 clean:
 	go clean -i ./...
-	rm -f "$(CSI_A)"
+	rm -f "$(CSI_A)" "$(CSI_GO)" "$(CSI_GO_TMP)"
 
 clobber: clean
 	rm -fr "$(PROTOC)" "$(PROTOC_GEN_GO)" "$(CSI_PKG)"
