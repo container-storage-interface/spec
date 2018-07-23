@@ -345,6 +345,9 @@ service Node {
   rpc NodeUnpublishVolume (NodeUnpublishVolumeRequest)
     returns (NodeUnpublishVolumeResponse) {}
 
+  rpc NodeGetVolumeStats (NodeGetVolumeStatsRequest)
+    returns (NodeGetVolumeStatsResponse) {}
+
   // NodeGetId is being deprecated in favor of NodeGetInfo and will be
   // removed in CSI 1.0. Existing drivers, however, may depend on this
   // RPC call and hence this RPC call MUST be implemented by the CSI
@@ -1913,6 +1916,68 @@ The CO MUST implement the specified error recovery behavior when it encounters t
 | Operation pending for volume | 10 ABORTED | Indicates that there is a already an operation pending for the specified volume. In general the Cluster Orchestrator (CO) is responsible for ensuring that there is no more than one call "in-flight" per volume at a given time. However, in some circumstances, the CO MAY lose state (for example when the CO crashes and restarts), and MAY issue multiple calls simultaneously for the same volume. The Plugin, SHOULD handle this as gracefully as possible, and MAY return this error code to reject secondary calls. | Caller SHOULD ensure that there are no other calls pending for the specified volume, and then retry with exponential back off. |
 
 
+#### `NodeGetVolumeStats`
+
+A Node plugin MUST implement this RPC call if it has GET_VOLUME_STATS node capability.
+`NodeGetVolumeStats` RPC call returns the volume capacity statistics available for the volume.
+
+If the volume is being used in `BlockVolume` mode then `used` and `available` MAY be omitted from `usage` field of `NodeGetVolumeStatsResponse`.
+Similarly, inode information may be omitted from `NodeGetVolumeStatsResponse` when unavailable.
+
+
+```protobuf
+message NodeGetVolumeStatsRequest {
+  // The ID of the volume. This field is REQUIRED.
+  string volume_id = 1;
+
+  // It can be any valid path where volume was previously
+  // staged or published.
+  // It MUST be an absolute path in the root filesystem of
+  // the process serving this request.
+  // This is a REQUIRED field.
+  string volume_path = 2;
+}
+
+message NodeGetVolumeStatsResponse {
+  // This field is OPTIONAL.
+  repeated VolumeUsage usage = 1;
+}
+
+message VolumeUsage {
+  enum Unit {
+    UNKNOWN = 0;
+    BYTES = 1;
+    INODES = 2;
+  }
+  // The available capacity in specified Unit. This field is OPTIONAL.
+  // The value of this field MUST NOT be negative.
+  int64 available = 1;
+
+  // The total capacity in specified Unit. This field is REQUIRED.
+  // The value of this field MUST NOT be negative.
+  int64 total = 2;
+
+  // The used capacity in specified Unit. This field is OPTIONAL.
+  // The value of this field MUST NOT be negative.
+  int64 used = 3;
+
+  // Units by which values are measured. This field is REQUIRED.
+  Unit unit = 4;
+}
+```
+
+##### NodeGetVolumeStats Errors
+
+If the plugin is unable to complete the `NodeGetVolumeStats` call successfully, it MUST return a non-ok gRPC code in the gRPC status.
+If the conditions defined below are encountered, the plugin MUST return the specified gRPC error code.
+The CO MUST implement the specified error recovery behavior when it encounters the gRPC error code.
+
+
+| Condition | gRPC Code | Description | Recovery Behavior |
+|-----------|-----------|-------------|-------------------|
+| Volume does not exist | 5 NOT_FOUND | Indicates that a volume corresponding to the specified `volume_id` does not exist on specified `volume_path`. | Caller MUST verify that the `volume_id` is correct and that the volume is accessible on specified `volume_path` and has not been deleted before retrying with exponential back off. |
+| Call not implemented | 12 UNIMPLEMENTED | NodeGetVolumeStats call is not implemented by the plugin or disabled in the Plugin's current mode of operation. | Caller MUST NOT retry. |
+
 #### `NodeGetId`
 
 `NodeGetId` RPC call is deprecated.
@@ -1968,6 +2033,10 @@ message NodeServiceCapability {
     enum Type {
       UNKNOWN = 0;
       STAGE_UNSTAGE_VOLUME = 1;
+      // If Plugin implements GET_VOLUME_STATS capability
+      // then it MUST implement NodeGetVolumeStats RPC
+      // call for fetching volume statistics.
+      GET_VOLUME_STATS = 2;
     }
 
     Type type = 1;
