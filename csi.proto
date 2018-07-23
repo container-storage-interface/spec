@@ -64,6 +64,9 @@ service Node {
   rpc NodeUnpublishVolume (NodeUnpublishVolumeRequest)
     returns (NodeUnpublishVolumeResponse) {}
 
+  rpc NodeGetVolumeStats (NodeGetVolumeStatsRequest)
+    returns (NodeGetVolumeStatsResponse) {}
+
   // NodeGetId is being deprecated in favor of NodeGetInfo and will be
   // removed in CSI 1.0. Existing drivers, however, may depend on this
   // RPC call and hence this RPC call MUST be implemented by the CSI
@@ -1020,6 +1023,44 @@ message NodeUnpublishVolumeRequest {
 message NodeUnpublishVolumeResponse {
   // Intentionally empty.
 }
+message NodeGetVolumeStatsRequest {
+  // The ID of the volume. This field is REQUIRED.
+  string volume_id = 1;
+
+  // It can be any valid path where volume was previously
+  // staged or published.
+  // It MUST be an absolute path in the root filesystem of
+  // the process serving this request.
+  // This is a REQUIRED field.
+  string volume_path = 2;
+}
+
+message NodeGetVolumeStatsResponse {
+  // This field is OPTIONAL.
+  repeated VolumeUsage usage = 1;
+}
+
+message VolumeUsage {
+  enum Unit {
+    UNKNOWN = 0;
+    BYTES = 1;
+    INODES = 2;
+  }
+  // The available capacity in specified Unit. This field is OPTIONAL.
+  // The value of this field MUST NOT be negative.
+  int64 available = 1;
+
+  // The total capacity in specified Unit. This field is REQUIRED.
+  // The value of this field MUST NOT be negative.
+  int64 total = 2;
+
+  // The used capacity in specified Unit. This field is OPTIONAL.
+  // The value of this field MUST NOT be negative.
+  int64 used = 3;
+
+  // Units by which values are measured. This field is REQUIRED.
+  Unit unit = 4;
+}
 message NodeGetIdRequest {
   // Intentionally empty.
 }
@@ -1046,6 +1087,10 @@ message NodeServiceCapability {
     enum Type {
       UNKNOWN = 0;
       STAGE_UNSTAGE_VOLUME = 1;
+      // If Plugin implements GET_VOLUME_STATS capability
+      // then it MUST implement NodeGetVolumeStats RPC
+      // call for fetching volume statistics.
+      GET_VOLUME_STATS = 2;
     }
 
     Type type = 1;
