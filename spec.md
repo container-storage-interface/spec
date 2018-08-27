@@ -558,51 +558,47 @@ message PluginCapability {
   message VolumeExpansion {
     enum Type {
       UNKNOWN = 0;
-      // ONLINE indicates that the volume can be expanded
-      // when published to a node.
-      // When a Plugin implements this capability it MUST implement
-      // either EXPAND_VOLUME controller capability or EXPAND_VOLUME
-      // node capability or both.
-      // When a plugin has this capability and also
-      // has EXPAND_VOLUME controller capability then the plugin
-      // MUST support expansion of controller published volumes via
-      // ControllerExpandVolume.
-      // A plugin MAY support this capability if it does not have
-      // controller EXPAND_VOLUME capability but only node EXPAND_VOLUME
-      // capability.
-      // Example 1:
-      //    Given a shared filesystem volume (ex. GlusterFs) -
-      //    the Plugin will set ONLINE capability
-      //    and implement ControllerExpandVolume but not
-      //    NodeExpandVolume.
-      // Example 2:
-      //    Given a block storage volume type(ex. EBS) -
-      //    the Plugin will set ONLINE capability
-      //    and implement ControllerExpandVolume and
-      //    NodeExpandVolume.
-      // Example 3:
-      //    Given a volume that is only expandable on node,
-      //    the Plugin will set ONLINE capability
-      //    and implement NodeExpandVolume but not
-      //    ControllerExpandVolume.
+
+      // ONLINE indicates that volumes may be expanded when published to
+      // a node. When a Plugin implements this capability it MUST
+      // implement either the EXPAND_VOLUME controller capability or the
+      // EXPAND_VOLUME node capability or both. When a plugin supports
+      // ONLINE volume expansion and also has the EXPAND_VOLUME
+      // controller capability then the plugin MUST support expansion of
+      // controller-published volumes via ControllerExpandVolume. When a
+      // plugin supports ONLINE volume expansion and also has the
+      // EXPAND_VOLUME node capability then the plugin MAY support
+      // expansion of node-published volume via NodeExpandVolume.
+      //
+      // Example 1: Given a shared filesystem volume (e.g. GlusterFs),
+      //   the Plugin may set the ONLINE volume expansion capability and
+      //   implement ControllerExpandVolume but not NodeExpandVolume.
+      //
+      // Example 2: Given a block storage volume type (e.g. EBS), the
+      //   Plugin may set the ONLINE volume expansion capability and
+      //   implement both ControllerExpandVolume and NodeExpandVolume.
+      //
+      // Example 3: Given a Plugin that supports volume expansion only
+      //   on upon a node, the Plugin may set the ONLINE volume
+      //   expansion capability and implement NodeExpandVolume but not
+      //   ControllerExpandVolume.
       ONLINE = 1;
 
-      // OFFLINE indicates that the volume can not
-      // be expanded when controller published to a node.
-      // When a Plugin implements this capability it MUST implement
-      // either EXPAND_VOLUME controller capability or EXPAND_VOLUME
-      // node capability or both.
-      // Example 1:
-      //    Given a block storage volume type(ex. Azure Disk) -
-      //    that does not support expansion of controller published
-      //    volumes. The Plugin will set OFFLINE
-      //    capability and implement ControllerExpandVolume and
-      //    NodeExpandVolume.
-      // Example 2:
-      //    Given a volume type that only has node
-      //    EXPAND_VOLUME capability. The Plugin MUST NOT
-      //    set OFFLINE capability and SHOULD
-      //    instead set ONLINE capability.
+      // OFFLINE indicates that volumes cannot be expanded upon being
+      // controller-published. When a plugin supports OFFLINE volume
+      // expansion it MUST implement either the EXPAND_VOLUME controller
+      // capability or the EXPAND_VOLUME node capability or both.
+      //
+      // Example 1: Given a block storage volume type (e.g. Azure Disk)
+      //   that does not support expansion of "node-attached" (i.e.
+      //   controller-published) volumes, the Plugin may indicate
+      //   OFFLINE volume expansion support and implement both
+      //   ControllerExpandVolume and NodeExpandVolume.
+      //
+      // Example 2: Given a Plugin that only has the node EXPAND_VOLUME
+      //   capability, the Plugin MUST NOT indicate OFFLINE volume
+      //   expansion and SHOULD instead indicate ONLINE volume
+      //   expansion.
       OFFLINE = 2;
     }
   }
@@ -1513,7 +1509,7 @@ message ControllerServiceCapability {
       // field.
       PUBLISH_READONLY = 8;
 
-
+      // See VolumeExpansion for details.
       EXPAND_VOLUME = 9;
     }
 
@@ -1801,8 +1797,8 @@ message ControllerExpandVolumeRequest {
   // The ID of the volume to expand. This field is REQUIRED.
   string volume_id = 1;
 
-  // This field is REQUIRED. This allows CO to specify the
-  // capacity requirements of the volume after expansion.
+  // This allows CO to specify the capacity requirements of the volume
+  // after expansion. This field is REQUIRED.
   CapacityRange capacity_range = 2;
 
   // Secrets required by the plugin for expanding the volume.
@@ -1811,13 +1807,12 @@ message ControllerExpandVolumeRequest {
 }
 
 message ControllerExpandVolumeResponse {
-  // Capacity of volume after expansion.
-  // This field is REQUIRED.
+  // Capacity of volume after expansion. This field is REQUIRED.
   int64 capacity_bytes = 1;
 
-  // Whether file system expansion is required for the volume.
-  // When true the CO MUST make NodeExpandVolume RPC call
-  // on the node. This field is REQUIRED.
+  // Whether file system expansion is required for the volume. When true
+  // the CO MUST make NodeExpandVolume RPC call on the node. This field
+  // is REQUIRED.
   bool fs_resize_required = 2;
 }
 ```
@@ -1828,7 +1823,7 @@ message ControllerExpandVolumeResponse {
 |-----------|-----------|-------------|-------------------|
 | Volume in use | 9 FAILED_PRECONDITION | Indicates that the volume corresponding to the specified `volume_id` could not be expanded because it is currently published on a node but the plugin does not have ONLINE expansion capability. | Caller SHOULD ensure that volume is not published and retry with exponential back off. |
 | Volume does not exist | 5 NOT FOUND | Indicates that a volume corresponding to the specified volume_id does not exist. | Caller MUST verify that the volume_id is correct and that the volume is accessible and has not been deleted before retrying with exponential back off. |
-| Operation pending for volume | 10 ABORTED | Indicates that there is already a resize operation pending for the specified volume. In general the Cluster Orchestrator(CO) is responsible for ensuring that there is no more than one call "in-flight" per volume at a given time. However in some circumstances, the CO MAY lose state and MAY issue multiple calls simultaneously for the same volume. The Plugin, SHOULD handle this as gracefully as possible, and MAY return this error code to reject secondary calls| Caller SHOULD ensure that there are no other calls pending for the specified volume, and then retry with exponential back off. |
+| Operation pending for volume | 10 ABORTED | Indicates that there is already an expansion operation pending for the specified volume. In general the Cluster Orchestrator (CO) is responsible for ensuring that there is no more than one call "in-flight" per volume at a given time. However in some circumstances, the CO MAY lose state and MAY issue multiple calls simultaneously for the same volume. The Plugin, SHOULD handle this as gracefully as possible, and MAY return this error code to reject secondary calls| Caller SHOULD ensure that there are no other calls pending for the specified volume, and then retry with exponential back off. |
 | Unsupported `capacity_range` | 11 OUT_OF_RANGE | Indicates that the capacity range is not allowed by the Plugin. More human-readable information MAY be provided in the gRPC `status.message` field. | Caller MUST fix the capacity range before retrying. |
 | Call not implemented | 12 UNIMPLEMENTED | ControllerExpandVolume call is not implemented by the plugin or disabled in the Plugin's current mode of operation. | Caller MUST NOT retry. Caller MAY call `ControllerGetCapabilities` or `NodeGetCapabilities` to discover Plugin capabilities. |
 
@@ -2208,6 +2203,7 @@ message NodeServiceCapability {
       // then it MUST implement NodeGetVolumeStats RPC
       // call for fetching volume statistics.
       GET_VOLUME_STATS = 2;
+      // See VolumeExpansion for details.
       EXPAND_VOLUME = 3;
     }
 
@@ -2287,7 +2283,7 @@ The CO MUST implement the specified error recovery behavior when it encounters t
 A Node Plugin MUST implement this RPC call if it has `EXPAND_VOLUME` node capability.
 This RPC call allows CO to expand volume on a node.
 
-`NodeExpandVolume` ONLY supports expansion of already node published or node staged volumes on given `volume_path`.
+`NodeExpandVolume` ONLY supports expansion of already node-published or node-staged volumes on the given `volume_path`.
 
 `NodeExpandVolume` MUST be called after calling `NodeStageVolume` and is successful if the plugin has `STAGE_UNSTAGE_VOLUME` node capability.
 `NodeExpandVolume` MAY be called before or after `NodePublishVolume`.
@@ -2297,20 +2293,17 @@ message NodeExpandVolumeRequest {
   // The ID of the volume. This field is REQUIRED.
   string volume_id = 1;
 
-  // The path on which volume is available.
-  // This field is REQUIRED.
+  // The path on which volume is available. This field is REQUIRED.
   string volume_path = 2;
 
-  // This field is OPTIONAL. This allows CO to specify the
-  // capacity requirements of the volume after expansion.
-  // If omitted the volume will be expanded to maximum available 
-  // size.
+  // This allows CO to specify the capacity requirements of the volume
+  // after expansion. If omitted the volume will be expanded to maximum
+  // available size. This field is OPTIONAL.
   CapacityRange capacity_range = 3;
 }
 
 message NodeExpandVolumeResponse {
-  // The capacity of the volume in bytes.
-  // This field is OPTIONAL.
+  // The capacity of the volume in bytes. This field is OPTIONAL.
   int64 capacity_bytes = 1;
 }
 ```
@@ -2319,10 +2312,10 @@ message NodeExpandVolumeResponse {
 
 | Condition             | gRPC code | Description           | Recovery Behavior                 |
 |-----------------------|-----------|-----------------------|-----------------------------------|
-| Volume in use | 9 FAILED_PRECONDITION | Indicates that the volume corresponding to the specified `volume_id` could not be expanded because it is node published or node staged and underlying filesystem does not support expansion of published or staged volumes. | Caller MUST not retry. |
+| Volume in use | 9 FAILED_PRECONDITION | Indicates that the volume corresponding to the specified `volume_id` could not be expanded because it is node-published or node-staged and the underlying filesystem does not support expansion of published or staged volumes. | Caller MUST NOT retry. |
 | Volume does not exist | 5 NOT FOUND | Indicates that a volume corresponding to the specified volume_id does not exist. | Caller MUST verify that the volume_id is correct and that the volume is accessible and has not been deleted before retrying with exponential back off. |
-| Operating pending for Volume | 10 ABORTED | Indicates that there is already a expand operation pending for the specified volume. In general the Cluster Orchestrator(CO) is responsible for ensuring that there is no more than one call "in-flight" per volume at a given time. However in some circumstances, the CO MAY lose state and MAY issue multiple calls simultaneously for the same volume. The Plugin, SHOULD handle this as gracefully as possible, and MAY return this error code to reject secondary calls. | Caller SHOULD ensure that there are no other calls pending for the specified volume, and then retry with exponential back off. |
-| Unsupported capacity_range | 11 OUT_OF_RANGE | Indicates that the capacity range is not allowed by the Plugin. More human-readable information MAY be provided in the gRPC status.message field. | Caller MUST fix the capacity range before retrying. |
+| Operating pending for Volume | 10 ABORTED | Indicates that there is already an expansion operation pending for the specified volume. In general the Cluster Orchestrator (CO) is responsible for ensuring that there is no more than one call "in-flight" per volume at a given time. However in some circumstances, the CO MAY lose state and MAY issue multiple calls simultaneously for the same volume. The Plugin, SHOULD handle this as gracefully as possible, and MAY return this error code to reject secondary calls. | Caller SHOULD ensure that there are no other calls pending for the specified volume, and then retry with exponential back off. |
+| Unsupported capacity_range | 11 OUT_OF_RANGE | Indicates that the capacity range is not allowed by the Plugin. More human-readable information MAY be provided in the gRPC `status.message` field. | Caller MUST fix the capacity range before retrying. |
 | Call not implemented | 12 UNIMPLEMENTED | NodeExpandVolume call is not implemented by the plugin or disabled in the Plugin's current mode of operation. | Caller MUST NOT retry. Caller MAY call ControllerGetCapabilities or NodeGetCapabilities to discover Plugin capabilities. |
 
 ## Protocol
