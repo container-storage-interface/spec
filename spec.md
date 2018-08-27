@@ -594,11 +594,6 @@ message PluginCapability {
       //   controller-published) volumes, the Plugin may indicate
       //   OFFLINE volume expansion support and implement both
       //   ControllerExpandVolume and NodeExpandVolume.
-      //
-      // Example 2: Given a Plugin that only has the node EXPAND_VOLUME
-      //   capability, the Plugin MUST NOT indicate OFFLINE volume
-      //   expansion and SHOULD instead indicate ONLINE volume
-      //   expansion.
       OFFLINE = 2;
     }
   }
@@ -1769,26 +1764,26 @@ A Controller plugin MUST implement this RPC call if plugin has `EXPAND_VOLUME` c
 This RPC allows the CO to expand the size of a volume.
 
 This call MAY be made by the CO during any time in the lifecycle of the volume after creation if plugin has `VolumeExpansion.ONLINE` capability.
-If plugin has `EXPAND_VOLUME` node capability, then `NodeExpandVolume` MUST be called after `ControllerExpandVolume` has completed and is successful and `fs_resize_required` in `ControllerExpandVolumeResponse` is `true`.
+If plugin has `EXPAND_VOLUME` node capability, then `NodeExpandVolume` MUST be called after successful `ControllerExpandVolume` and `fs_resize_required` in `ControllerExpandVolumeResponse` is `true`.
 
-If the plugin has only `VolumeExpansion.OFFLINE` expansion capability, `ControllerExpandVolume` MUST be called after `ControllerUnpublishVolume` is called and is successful if the volume is currently published to a node.
+If the plugin has only `VolumeExpansion.OFFLINE` expansion capability and volume is currently controller-published to a node , `ControllerExpandVolume` MUST be called ONLY after succesful `ControllerUnpublishVolume`.
 
-`ControllerExpandVolume` RPC call MUST be idempotent and if size of underlying volume already meets requested capacity, the plugin MUST respond with successfull response.
+`ControllerExpandVolume` RPC call MUST be idempotent and if size of underlying volume already meets requested capacity, the plugin MUST respond with successful response.
 
 Examples:
 * Offline Volume Expansion:
-  Given a ElasticSearch process that runs on Azure Disk and needs more space.
-  - The administrator takes the elasticsearch server offline by stopping the workload and CO calls `ControllerUnpublishVolume`.
+  Given an ElasticSearch process that runs on Azure Disk and needs more space.
+  - The administrator takes the Elasticsearch server offline by stopping the workload and CO calls `ControllerUnpublishVolume`.
   - The administrator requests more space for the volume from CO.
   - The CO in turn first makes `ControllerExpandVolume` RPC call which results in requesting more space from Azure cloudprovider for volume-id that was being used by ElasticSearch.
   - Once `ControllerExpandVolume` is completed and successful, the CO will inform administrator about it and administrator will resume the ElasticSearch workload.
-  - On node where ElasticSearch workload is scheduled when workload starts after `NodeStageVolume` the CO calls `NodeExpandVolume`.
+  - The node on which ElasticSearch workload is scheduled the CO calls `NodeExpandVolume` after calling `NodeStageVolume`.
   - Calling `NodeExpandVolume` on volume results in expanding the underlying file system and added space becomes available to workload when it starts up.
 * Online Volume Expansion:
   Given a Mysql server running on Openstack Cinder and needs more space.
   - The administrator requests more space for volume from the CO.
   - The CO in turn first makes `ControllerExpandVolume` RPC call which results in requesting more space from Openstack Cinder for given volume.
-  - The node where mysql workload is running the CO makes `NodeExpandVolume` RPC call while volume is in-use using path where volume is staged.
+  - The node on which mysql workload is running the CO makes `NodeExpandVolume` RPC call while volume is in-use using path where volume is staged.
   - Calling `NodeExpandVolume` on volume results in expanding the underlying file system and added space automatically becomes available to mysql workload without any downtime.
 
 
@@ -2285,7 +2280,7 @@ This RPC call allows CO to expand volume on a node.
 
 `NodeExpandVolume` ONLY supports expansion of already node-published or node-staged volumes on the given `volume_path`.
 
-`NodeExpandVolume` MUST be called after calling `NodeStageVolume` and is successful if the plugin has `STAGE_UNSTAGE_VOLUME` node capability.
+If plugin has `STAGE_UNSTAGE_VOLUME` node capability - `NodeExpandVolume` MUST be called after successful `NodeStageVolume`.
 `NodeExpandVolume` MAY be called before or after `NodePublishVolume`.
 
 ```protobuf
