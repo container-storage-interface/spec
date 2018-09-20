@@ -289,11 +289,11 @@ type GetPluginInfoResponse struct {
 	// characters or less, beginning and ending with an alphanumeric
 	// character ([a-z0-9A-Z]) with dashes (-), underscores (_),
 	// dots (.), and alphanumerics between. This field is REQUIRED.
-	Name string `protobuf:"bytes,1,opt,name=name" json:"name,omitempty"`
+	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
 	// This field is REQUIRED. Value of this field is opaque to the CO.
-	VendorVersion string `protobuf:"bytes,2,opt,name=vendor_version,json=vendorVersion" json:"vendor_version,omitempty"`
+	VendorVersion string `protobuf:"bytes,2,opt,name=vendor_version,json=vendorVersion,proto3" json:"vendor_version,omitempty"`
 	// This field is OPTIONAL. Values are opaque to the CO.
-	Manifest             map[string]string `protobuf:"bytes,3,rep,name=manifest" json:"manifest,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	Manifest             map[string]string `protobuf:"bytes,3,rep,name=manifest,proto3" json:"manifest,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
 	XXX_NoUnkeyedLiteral struct{}          `json:"-"`
 	XXX_unrecognized     []byte            `json:"-"`
 	XXX_sizecache        int32             `json:"-"`
@@ -377,7 +377,7 @@ var xxx_messageInfo_GetPluginCapabilitiesRequest proto.InternalMessageInfo
 type GetPluginCapabilitiesResponse struct {
 	// All the capabilities that the controller service supports. This
 	// field is OPTIONAL.
-	Capabilities         []*PluginCapability `protobuf:"bytes,2,rep,name=capabilities" json:"capabilities,omitempty"`
+	Capabilities         []*PluginCapability `protobuf:"bytes,2,rep,name=capabilities,proto3" json:"capabilities,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}            `json:"-"`
 	XXX_unrecognized     []byte              `json:"-"`
 	XXX_sizecache        int32               `json:"-"`
@@ -453,7 +453,7 @@ type isPluginCapability_Type interface {
 }
 
 type PluginCapability_Service_ struct {
-	Service *PluginCapability_Service `protobuf:"bytes,1,opt,name=service,oneof"`
+	Service *PluginCapability_Service `protobuf:"bytes,1,opt,name=service,proto3,oneof"`
 }
 
 func (*PluginCapability_Service_) isPluginCapability_Type() {}
@@ -528,7 +528,7 @@ func _PluginCapability_OneofSizer(msg proto.Message) (n int) {
 }
 
 type PluginCapability_Service struct {
-	Type                 PluginCapability_Service_Type `protobuf:"varint,1,opt,name=type,enum=csi.v0.PluginCapability_Service_Type" json:"type,omitempty"`
+	Type                 PluginCapability_Service_Type `protobuf:"varint,1,opt,name=type,proto3,enum=csi.v0.PluginCapability_Service_Type" json:"type,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}                      `json:"-"`
 	XXX_unrecognized     []byte                        `json:"-"`
 	XXX_sizecache        int32                         `json:"-"`
@@ -616,7 +616,7 @@ type ProbeResponse struct {
 	// that the plugin is in a ready state and is accepting calls to its
 	// Controller and/or Node services (according to the plugin's reported
 	// capabilities).
-	Ready                *wrappers.BoolValue `protobuf:"bytes,1,opt,name=ready" json:"ready,omitempty"`
+	Ready                *wrappers.BoolValue `protobuf:"bytes,1,opt,name=ready,proto3" json:"ready,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}            `json:"-"`
 	XXX_unrecognized     []byte              `json:"-"`
 	XXX_sizecache        int32               `json:"-"`
@@ -669,8 +669,8 @@ type CreateVolumeRequest struct {
 	//    an identifier by which to refer to the newly provisioned
 	//    storage. If a storage system supports this, it can optionally
 	//    use this name as the identifier for the new volume.
-	Name          string         `protobuf:"bytes,1,opt,name=name" json:"name,omitempty"`
-	CapacityRange *CapacityRange `protobuf:"bytes,2,opt,name=capacity_range,json=capacityRange" json:"capacity_range,omitempty"`
+	Name          string         `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	CapacityRange *CapacityRange `protobuf:"bytes,2,opt,name=capacity_range,json=capacityRange,proto3" json:"capacity_range,omitempty"`
 	// The capabilities that the provisioned volume MUST have: the Plugin
 	// MUST provision a volume that could satisfy ALL of the
 	// capabilities specified in this list. The Plugin MUST assume that
@@ -679,18 +679,18 @@ type CreateVolumeRequest struct {
 	// early validation: if ANY of the specified volume capabilities are
 	// not supported by the Plugin, the call SHALL fail. This field is
 	// REQUIRED.
-	VolumeCapabilities []*VolumeCapability `protobuf:"bytes,3,rep,name=volume_capabilities,json=volumeCapabilities" json:"volume_capabilities,omitempty"`
+	VolumeCapabilities []*VolumeCapability `protobuf:"bytes,3,rep,name=volume_capabilities,json=volumeCapabilities,proto3" json:"volume_capabilities,omitempty"`
 	// Plugin specific parameters passed in as opaque key-value pairs.
 	// This field is OPTIONAL. The Plugin is responsible for parsing and
 	// validating these parameters. COs will treat these as opaque.
-	Parameters map[string]string `protobuf:"bytes,4,rep,name=parameters" json:"parameters,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	Parameters map[string]string `protobuf:"bytes,4,rep,name=parameters,proto3" json:"parameters,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
 	// Secrets required by plugin to complete volume creation request.
 	// This field is OPTIONAL. Refer to the `Secrets Requirements`
 	// section on how to use this field.
-	ControllerCreateSecrets map[string]string `protobuf:"bytes,5,rep,name=controller_create_secrets,json=controllerCreateSecrets" json:"controller_create_secrets,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	ControllerCreateSecrets map[string]string `protobuf:"bytes,5,rep,name=controller_create_secrets,json=controllerCreateSecrets,proto3" json:"controller_create_secrets,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
 	// If specified, the new volume will be pre-populated with data from
 	// this source. This field is OPTIONAL.
-	VolumeContentSource *VolumeContentSource `protobuf:"bytes,6,opt,name=volume_content_source,json=volumeContentSource" json:"volume_content_source,omitempty"`
+	VolumeContentSource *VolumeContentSource `protobuf:"bytes,6,opt,name=volume_content_source,json=volumeContentSource,proto3" json:"volume_content_source,omitempty"`
 	// Specifies where (regions, zones, racks, etc.) the provisioned
 	// volume MUST be accessible from.
 	// An SP SHALL advertise the requirements for topological
@@ -702,7 +702,7 @@ type CreateVolumeRequest struct {
 	// If this field is not specified and the SP has the
 	// ACCESSIBILITY_CONSTRAINTS plugin capability, the SP MAY choose
 	// where the provisioned volume is accessible from.
-	AccessibilityRequirements *TopologyRequirement `protobuf:"bytes,7,opt,name=accessibility_requirements,json=accessibilityRequirements" json:"accessibility_requirements,omitempty"`
+	AccessibilityRequirements *TopologyRequirement `protobuf:"bytes,7,opt,name=accessibility_requirements,json=accessibilityRequirements,proto3" json:"accessibility_requirements,omitempty"`
 	XXX_NoUnkeyedLiteral      struct{}             `json:"-"`
 	XXX_unrecognized          []byte               `json:"-"`
 	XXX_sizecache             int32                `json:"-"`
@@ -821,7 +821,7 @@ type isVolumeContentSource_Type interface {
 }
 
 type VolumeContentSource_Snapshot struct {
-	Snapshot *VolumeContentSource_SnapshotSource `protobuf:"bytes,1,opt,name=snapshot,oneof"`
+	Snapshot *VolumeContentSource_SnapshotSource `protobuf:"bytes,1,opt,name=snapshot,proto3,oneof"`
 }
 
 func (*VolumeContentSource_Snapshot) isVolumeContentSource_Type() {}
@@ -900,7 +900,7 @@ type VolumeContentSource_SnapshotSource struct {
 	// This field is REQUIRED. Plugin is REQUIRED to support creating
 	// volume from snapshot if it supports the capability
 	// CREATE_DELETE_SNAPSHOT.
-	Id                   string   `protobuf:"bytes,1,opt,name=id" json:"id,omitempty"`
+	Id                   string   `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -941,7 +941,7 @@ type CreateVolumeResponse struct {
 	// Contains all attributes of the newly created volume that are
 	// relevant to the CO along with information required by the Plugin
 	// to uniquely identify the volume. This field is REQUIRED.
-	Volume               *Volume  `protobuf:"bytes,1,opt,name=volume" json:"volume,omitempty"`
+	Volume               *Volume  `protobuf:"bytes,1,opt,name=volume,proto3" json:"volume,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -988,7 +988,7 @@ type VolumeCapability struct {
 	//	*VolumeCapability_Mount
 	AccessType isVolumeCapability_AccessType `protobuf_oneof:"access_type"`
 	// This is a REQUIRED field.
-	AccessMode           *VolumeCapability_AccessMode `protobuf:"bytes,3,opt,name=access_mode,json=accessMode" json:"access_mode,omitempty"`
+	AccessMode           *VolumeCapability_AccessMode `protobuf:"bytes,3,opt,name=access_mode,json=accessMode,proto3" json:"access_mode,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}                     `json:"-"`
 	XXX_unrecognized     []byte                       `json:"-"`
 	XXX_sizecache        int32                        `json:"-"`
@@ -1023,13 +1023,15 @@ type isVolumeCapability_AccessType interface {
 }
 
 type VolumeCapability_Block struct {
-	Block *VolumeCapability_BlockVolume `protobuf:"bytes,1,opt,name=block,oneof"`
+	Block *VolumeCapability_BlockVolume `protobuf:"bytes,1,opt,name=block,proto3,oneof"`
 }
+
 type VolumeCapability_Mount struct {
-	Mount *VolumeCapability_MountVolume `protobuf:"bytes,2,opt,name=mount,oneof"`
+	Mount *VolumeCapability_MountVolume `protobuf:"bytes,2,opt,name=mount,proto3,oneof"`
 }
 
 func (*VolumeCapability_Block) isVolumeCapability_AccessType() {}
+
 func (*VolumeCapability_Mount) isVolumeCapability_AccessType() {}
 
 func (m *VolumeCapability) GetAccessType() isVolumeCapability_AccessType {
@@ -1169,13 +1171,13 @@ var xxx_messageInfo_VolumeCapability_BlockVolume proto.InternalMessageInfo
 type VolumeCapability_MountVolume struct {
 	// The filesystem type. This field is OPTIONAL.
 	// An empty string is equal to an unspecified field value.
-	FsType string `protobuf:"bytes,1,opt,name=fs_type,json=fsType" json:"fs_type,omitempty"`
+	FsType string `protobuf:"bytes,1,opt,name=fs_type,json=fsType,proto3" json:"fs_type,omitempty"`
 	// The mount options that can be used for the volume. This field is
 	// OPTIONAL. `mount_flags` MAY contain sensitive information.
 	// Therefore, the CO and the Plugin MUST NOT leak this information
 	// to untrusted entities. The total size of this repeated field
 	// SHALL NOT exceed 4 KiB.
-	MountFlags           []string `protobuf:"bytes,2,rep,name=mount_flags,json=mountFlags" json:"mount_flags,omitempty"`
+	MountFlags           []string `protobuf:"bytes,2,rep,name=mount_flags,json=mountFlags,proto3" json:"mount_flags,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -1222,7 +1224,7 @@ func (m *VolumeCapability_MountVolume) GetMountFlags() []string {
 // Specify how a volume can be accessed.
 type VolumeCapability_AccessMode struct {
 	// This field is REQUIRED.
-	Mode                 VolumeCapability_AccessMode_Mode `protobuf:"varint,1,opt,name=mode,enum=csi.v0.VolumeCapability_AccessMode_Mode" json:"mode,omitempty"`
+	Mode                 VolumeCapability_AccessMode_Mode `protobuf:"varint,1,opt,name=mode,proto3,enum=csi.v0.VolumeCapability_AccessMode_Mode" json:"mode,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}                         `json:"-"`
 	XXX_unrecognized     []byte                           `json:"-"`
 	XXX_sizecache        int32                            `json:"-"`
@@ -1266,11 +1268,11 @@ type CapacityRange struct {
 	// Volume MUST be at least this big. This field is OPTIONAL.
 	// A value of 0 is equal to an unspecified field value.
 	// The value of this field MUST NOT be negative.
-	RequiredBytes int64 `protobuf:"varint,1,opt,name=required_bytes,json=requiredBytes" json:"required_bytes,omitempty"`
+	RequiredBytes int64 `protobuf:"varint,1,opt,name=required_bytes,json=requiredBytes,proto3" json:"required_bytes,omitempty"`
 	// Volume MUST not be bigger than this. This field is OPTIONAL.
 	// A value of 0 is equal to an unspecified field value.
 	// The value of this field MUST NOT be negative.
-	LimitBytes           int64    `protobuf:"varint,2,opt,name=limit_bytes,json=limitBytes" json:"limit_bytes,omitempty"`
+	LimitBytes           int64    `protobuf:"varint,2,opt,name=limit_bytes,json=limitBytes,proto3" json:"limit_bytes,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -1320,11 +1322,11 @@ type Volume struct {
 	// set (value of 0), it indicates that the capacity of the volume is
 	// unknown (e.g., NFS share).
 	// The value of this field MUST NOT be negative.
-	CapacityBytes int64 `protobuf:"varint,1,opt,name=capacity_bytes,json=capacityBytes" json:"capacity_bytes,omitempty"`
+	CapacityBytes int64 `protobuf:"varint,1,opt,name=capacity_bytes,json=capacityBytes,proto3" json:"capacity_bytes,omitempty"`
 	// Contains identity information for the created volume. This field is
 	// REQUIRED. The identity information will be used by the CO in
 	// subsequent calls to refer to the provisioned volume.
-	Id string `protobuf:"bytes,2,opt,name=id" json:"id,omitempty"`
+	Id string `protobuf:"bytes,2,opt,name=id,proto3" json:"id,omitempty"`
 	// Attributes reflect static properties of a volume and MUST be passed
 	// to volume validation and publishing calls.
 	// Attributes SHALL be opaque to a CO. Attributes SHALL NOT be mutable
@@ -1333,11 +1335,11 @@ type Volume struct {
 	// a volume. A volume uniquely identified by `id` SHALL always report
 	// the same attributes. This field is OPTIONAL and when present MUST
 	// be passed to volume validation and publishing calls.
-	Attributes map[string]string `protobuf:"bytes,3,rep,name=attributes" json:"attributes,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	Attributes map[string]string `protobuf:"bytes,3,rep,name=attributes,proto3" json:"attributes,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
 	// If specified, indicates that the volume is not empty and is
 	// pre-populated with data from the specified source.
 	// This field is OPTIONAL.
-	ContentSource *VolumeContentSource `protobuf:"bytes,4,opt,name=content_source,json=contentSource" json:"content_source,omitempty"`
+	ContentSource *VolumeContentSource `protobuf:"bytes,4,opt,name=content_source,json=contentSource,proto3" json:"content_source,omitempty"`
 	// Specifies where (regions, zones, racks, etc.) the provisioned
 	// volume is accessible from.
 	// A plugin that returns this field MUST also set the
@@ -1363,7 +1365,7 @@ type Volume struct {
 	//     {"region": "R1", "zone": "Z3"}
 	// Indicates a volume accessible from both "zone" "Z2" and "zone" "Z3"
 	// in the "region" "R1".
-	AccessibleTopology   []*Topology `protobuf:"bytes,5,rep,name=accessible_topology,json=accessibleTopology" json:"accessible_topology,omitempty"`
+	AccessibleTopology   []*Topology `protobuf:"bytes,5,rep,name=accessible_topology,json=accessibleTopology,proto3" json:"accessible_topology,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}    `json:"-"`
 	XXX_unrecognized     []byte      `json:"-"`
 	XXX_sizecache        int32       `json:"-"`
@@ -1485,7 +1487,7 @@ type TopologyRequirement struct {
 	// then the provisioned volume MUST be accessible from the "region"
 	// "R1" and the "zone" "Z2" and the SP may select the second zone
 	// independently, e.g. "R1/Z4".
-	Requisite []*Topology `protobuf:"bytes,1,rep,name=requisite" json:"requisite,omitempty"`
+	Requisite []*Topology `protobuf:"bytes,1,rep,name=requisite,proto3" json:"requisite,omitempty"`
 	// Specifies the list of topologies the CO would prefer the volume to
 	// be provisioned in.
 	//
@@ -1555,7 +1557,7 @@ type TopologyRequirement struct {
 	// combination of "Z3" and other possibilities from the list of
 	// requisite. If that's not possible, it should fall back  to a
 	// combination of other possibilities from the list of requisite.
-	Preferred            []*Topology `protobuf:"bytes,2,rep,name=preferred" json:"preferred,omitempty"`
+	Preferred            []*Topology `protobuf:"bytes,2,rep,name=preferred,proto3" json:"preferred,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}    `json:"-"`
 	XXX_unrecognized     []byte      `json:"-"`
 	XXX_sizecache        int32       `json:"-"`
@@ -1626,7 +1628,7 @@ func (m *TopologyRequirement) GetPreferred() []*Topology {
 // alphanumeric character with '-', '_', '.', or alphanumerics in
 // between.
 type Topology struct {
-	Segments             map[string]string `protobuf:"bytes,1,rep,name=segments" json:"segments,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	Segments             map[string]string `protobuf:"bytes,1,rep,name=segments,proto3" json:"segments,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
 	XXX_NoUnkeyedLiteral struct{}          `json:"-"`
 	XXX_unrecognized     []byte            `json:"-"`
 	XXX_sizecache        int32             `json:"-"`
@@ -1666,11 +1668,11 @@ func (m *Topology) GetSegments() map[string]string {
 type DeleteVolumeRequest struct {
 	// The ID of the volume to be deprovisioned.
 	// This field is REQUIRED.
-	VolumeId string `protobuf:"bytes,1,opt,name=volume_id,json=volumeId" json:"volume_id,omitempty"`
+	VolumeId string `protobuf:"bytes,1,opt,name=volume_id,json=volumeId,proto3" json:"volume_id,omitempty"`
 	// Secrets required by plugin to complete volume deletion request.
 	// This field is OPTIONAL. Refer to the `Secrets Requirements`
 	// section on how to use this field.
-	ControllerDeleteSecrets map[string]string `protobuf:"bytes,2,rep,name=controller_delete_secrets,json=controllerDeleteSecrets" json:"controller_delete_secrets,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	ControllerDeleteSecrets map[string]string `protobuf:"bytes,2,rep,name=controller_delete_secrets,json=controllerDeleteSecrets,proto3" json:"controller_delete_secrets,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
 	XXX_NoUnkeyedLiteral    struct{}          `json:"-"`
 	XXX_unrecognized        []byte            `json:"-"`
 	XXX_sizecache           int32             `json:"-"`
@@ -1747,24 +1749,24 @@ var xxx_messageInfo_DeleteVolumeResponse proto.InternalMessageInfo
 type ControllerPublishVolumeRequest struct {
 	// The ID of the volume to be used on a node.
 	// This field is REQUIRED.
-	VolumeId string `protobuf:"bytes,1,opt,name=volume_id,json=volumeId" json:"volume_id,omitempty"`
+	VolumeId string `protobuf:"bytes,1,opt,name=volume_id,json=volumeId,proto3" json:"volume_id,omitempty"`
 	// The ID of the node. This field is REQUIRED. The CO SHALL set this
 	// field to match the node ID returned by `NodeGetInfo`.
-	NodeId string `protobuf:"bytes,2,opt,name=node_id,json=nodeId" json:"node_id,omitempty"`
+	NodeId string `protobuf:"bytes,2,opt,name=node_id,json=nodeId,proto3" json:"node_id,omitempty"`
 	// The capability of the volume the CO expects the volume to have.
 	// This is a REQUIRED field.
-	VolumeCapability *VolumeCapability `protobuf:"bytes,3,opt,name=volume_capability,json=volumeCapability" json:"volume_capability,omitempty"`
+	VolumeCapability *VolumeCapability `protobuf:"bytes,3,opt,name=volume_capability,json=volumeCapability,proto3" json:"volume_capability,omitempty"`
 	// Whether to publish the volume in readonly mode. This field is
 	// REQUIRED.
-	Readonly bool `protobuf:"varint,4,opt,name=readonly" json:"readonly,omitempty"`
+	Readonly bool `protobuf:"varint,4,opt,name=readonly,proto3" json:"readonly,omitempty"`
 	// Secrets required by plugin to complete controller publish volume
 	// request. This field is OPTIONAL. Refer to the
 	// `Secrets Requirements` section on how to use this field.
-	ControllerPublishSecrets map[string]string `protobuf:"bytes,5,rep,name=controller_publish_secrets,json=controllerPublishSecrets" json:"controller_publish_secrets,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	ControllerPublishSecrets map[string]string `protobuf:"bytes,5,rep,name=controller_publish_secrets,json=controllerPublishSecrets,proto3" json:"controller_publish_secrets,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
 	// Attributes of the volume to be used on a node. This field is
 	// OPTIONAL and MUST match the attributes of the Volume identified
 	// by `volume_id`.
-	VolumeAttributes     map[string]string `protobuf:"bytes,6,rep,name=volume_attributes,json=volumeAttributes" json:"volume_attributes,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	VolumeAttributes     map[string]string `protobuf:"bytes,6,rep,name=volume_attributes,json=volumeAttributes,proto3" json:"volume_attributes,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
 	XXX_NoUnkeyedLiteral struct{}          `json:"-"`
 	XXX_unrecognized     []byte            `json:"-"`
 	XXX_sizecache        int32             `json:"-"`
@@ -1841,7 +1843,7 @@ type ControllerPublishVolumeResponse struct {
 	// the subsequent `NodeStageVolume` or `NodePublishVolume` calls
 	// for the given volume.
 	// This information is opaque to the CO. This field is OPTIONAL.
-	PublishInfo          map[string]string `protobuf:"bytes,1,rep,name=publish_info,json=publishInfo" json:"publish_info,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	PublishInfo          map[string]string `protobuf:"bytes,1,rep,name=publish_info,json=publishInfo,proto3" json:"publish_info,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
 	XXX_NoUnkeyedLiteral struct{}          `json:"-"`
 	XXX_unrecognized     []byte            `json:"-"`
 	XXX_sizecache        int32             `json:"-"`
@@ -1880,19 +1882,19 @@ func (m *ControllerPublishVolumeResponse) GetPublishInfo() map[string]string {
 
 type ControllerUnpublishVolumeRequest struct {
 	// The ID of the volume. This field is REQUIRED.
-	VolumeId string `protobuf:"bytes,1,opt,name=volume_id,json=volumeId" json:"volume_id,omitempty"`
+	VolumeId string `protobuf:"bytes,1,opt,name=volume_id,json=volumeId,proto3" json:"volume_id,omitempty"`
 	// The ID of the node. This field is OPTIONAL. The CO SHOULD set this
 	// field to match the node ID returned by `NodeGetInfo` or leave it
 	// unset. If the value is set, the SP MUST unpublish the volume from
 	// the specified node. If the value is unset, the SP MUST unpublish
 	// the volume from all nodes it is published to.
-	NodeId string `protobuf:"bytes,2,opt,name=node_id,json=nodeId" json:"node_id,omitempty"`
+	NodeId string `protobuf:"bytes,2,opt,name=node_id,json=nodeId,proto3" json:"node_id,omitempty"`
 	// Secrets required by plugin to complete controller unpublish volume
 	// request. This SHOULD be the same secrets passed to the
 	// ControllerPublishVolume call for the specified volume.
 	// This field is OPTIONAL. Refer to the `Secrets Requirements`
 	// section on how to use this field.
-	ControllerUnpublishSecrets map[string]string `protobuf:"bytes,3,rep,name=controller_unpublish_secrets,json=controllerUnpublishSecrets" json:"controller_unpublish_secrets,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	ControllerUnpublishSecrets map[string]string `protobuf:"bytes,3,rep,name=controller_unpublish_secrets,json=controllerUnpublishSecrets,proto3" json:"controller_unpublish_secrets,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
 	XXX_NoUnkeyedLiteral       struct{}          `json:"-"`
 	XXX_unrecognized           []byte            `json:"-"`
 	XXX_sizecache              int32             `json:"-"`
@@ -1975,21 +1977,21 @@ var xxx_messageInfo_ControllerUnpublishVolumeResponse proto.InternalMessageInfo
 
 type ValidateVolumeCapabilitiesRequest struct {
 	// The ID of the volume to check. This field is REQUIRED.
-	VolumeId string `protobuf:"bytes,1,opt,name=volume_id,json=volumeId" json:"volume_id,omitempty"`
+	VolumeId string `protobuf:"bytes,1,opt,name=volume_id,json=volumeId,proto3" json:"volume_id,omitempty"`
 	// The capabilities that the CO wants to check for the volume. This
 	// call SHALL return "supported" only if all the volume capabilities
 	// specified below are supported. This field is REQUIRED.
-	VolumeCapabilities []*VolumeCapability `protobuf:"bytes,2,rep,name=volume_capabilities,json=volumeCapabilities" json:"volume_capabilities,omitempty"`
+	VolumeCapabilities []*VolumeCapability `protobuf:"bytes,2,rep,name=volume_capabilities,json=volumeCapabilities,proto3" json:"volume_capabilities,omitempty"`
 	// Attributes of the volume to check. This field is OPTIONAL and MUST
 	// match the attributes of the Volume identified by `volume_id`.
-	VolumeAttributes map[string]string `protobuf:"bytes,3,rep,name=volume_attributes,json=volumeAttributes" json:"volume_attributes,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	VolumeAttributes map[string]string `protobuf:"bytes,3,rep,name=volume_attributes,json=volumeAttributes,proto3" json:"volume_attributes,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
 	// Specifies where (regions, zones, racks, etc.) the caller believes
 	// the volume is accessible from.
 	// A caller MAY specify multiple topologies to indicate they believe
 	// the volume to be accessible from multiple locations.
 	// This field is OPTIONAL. This field SHALL NOT be set unless the
 	// plugin advertises the ACCESSIBILITY_CONSTRAINTS capability.
-	AccessibleTopology   []*Topology `protobuf:"bytes,4,rep,name=accessible_topology,json=accessibleTopology" json:"accessible_topology,omitempty"`
+	AccessibleTopology   []*Topology `protobuf:"bytes,4,rep,name=accessible_topology,json=accessibleTopology,proto3" json:"accessible_topology,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}    `json:"-"`
 	XXX_unrecognized     []byte      `json:"-"`
 	XXX_sizecache        int32       `json:"-"`
@@ -2050,11 +2052,11 @@ func (m *ValidateVolumeCapabilitiesRequest) GetAccessibleTopology() []*Topology 
 type ValidateVolumeCapabilitiesResponse struct {
 	// True if the Plugin supports the specified capabilities for the
 	// given volume. This field is REQUIRED.
-	Supported bool `protobuf:"varint,1,opt,name=supported" json:"supported,omitempty"`
+	Supported bool `protobuf:"varint,1,opt,name=supported,proto3" json:"supported,omitempty"`
 	// Message to the CO if `supported` above is false. This field is
 	// OPTIONAL.
 	// An empty string is equal to an unspecified field value.
-	Message              string   `protobuf:"bytes,2,opt,name=message" json:"message,omitempty"`
+	Message              string   `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -2107,12 +2109,12 @@ type ListVolumesRequest struct {
 	// not specified (zero value), it means there is no restriction on the
 	// number of entries that can be returned.
 	// The value of this field MUST NOT be negative.
-	MaxEntries int32 `protobuf:"varint,1,opt,name=max_entries,json=maxEntries" json:"max_entries,omitempty"`
+	MaxEntries int32 `protobuf:"varint,1,opt,name=max_entries,json=maxEntries,proto3" json:"max_entries,omitempty"`
 	// A token to specify where to start paginating. Set this field to
 	// `next_token` returned by a previous `ListVolumes` call to get the
 	// next page of entries. This field is OPTIONAL.
 	// An empty string is equal to an unspecified field value.
-	StartingToken        string   `protobuf:"bytes,2,opt,name=starting_token,json=startingToken" json:"starting_token,omitempty"`
+	StartingToken        string   `protobuf:"bytes,2,opt,name=starting_token,json=startingToken,proto3" json:"starting_token,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -2157,14 +2159,14 @@ func (m *ListVolumesRequest) GetStartingToken() string {
 }
 
 type ListVolumesResponse struct {
-	Entries []*ListVolumesResponse_Entry `protobuf:"bytes,1,rep,name=entries" json:"entries,omitempty"`
+	Entries []*ListVolumesResponse_Entry `protobuf:"bytes,1,rep,name=entries,proto3" json:"entries,omitempty"`
 	// This token allows you to get the next page of entries for
 	// `ListVolumes` request. If the number of entries is larger than
 	// `max_entries`, use the `next_token` as a value for the
 	// `starting_token` field in the next `ListVolumes` request. This
 	// field is OPTIONAL.
 	// An empty string is equal to an unspecified field value.
-	NextToken            string   `protobuf:"bytes,2,opt,name=next_token,json=nextToken" json:"next_token,omitempty"`
+	NextToken            string   `protobuf:"bytes,2,opt,name=next_token,json=nextToken,proto3" json:"next_token,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -2209,7 +2211,7 @@ func (m *ListVolumesResponse) GetNextToken() string {
 }
 
 type ListVolumesResponse_Entry struct {
-	Volume               *Volume  `protobuf:"bytes,1,opt,name=volume" json:"volume,omitempty"`
+	Volume               *Volume  `protobuf:"bytes,1,opt,name=volume,proto3" json:"volume,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -2252,19 +2254,19 @@ type GetCapacityRequest struct {
 	// specified `volume_capabilities`. These are the same
 	// `volume_capabilities` the CO will use in `CreateVolumeRequest`.
 	// This field is OPTIONAL.
-	VolumeCapabilities []*VolumeCapability `protobuf:"bytes,1,rep,name=volume_capabilities,json=volumeCapabilities" json:"volume_capabilities,omitempty"`
+	VolumeCapabilities []*VolumeCapability `protobuf:"bytes,1,rep,name=volume_capabilities,json=volumeCapabilities,proto3" json:"volume_capabilities,omitempty"`
 	// If specified, the Plugin SHALL report the capacity of the storage
 	// that can be used to provision volumes with the given Plugin
 	// specific `parameters`. These are the same `parameters` the CO will
 	// use in `CreateVolumeRequest`. This field is OPTIONAL.
-	Parameters map[string]string `protobuf:"bytes,2,rep,name=parameters" json:"parameters,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	Parameters map[string]string `protobuf:"bytes,2,rep,name=parameters,proto3" json:"parameters,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
 	// If specified, the Plugin SHALL report the capacity of the storage
 	// that can be used to provision volumes that in the specified
 	// `accessible_topology`. This is the same as the
 	// `accessible_topology` the CO returns in a `CreateVolumeResponse`.
 	// This field is OPTIONAL. This field SHALL NOT be set unless the
 	// plugin advertises the ACCESSIBILITY_CONSTRAINTS capability.
-	AccessibleTopology   *Topology `protobuf:"bytes,3,opt,name=accessible_topology,json=accessibleTopology" json:"accessible_topology,omitempty"`
+	AccessibleTopology   *Topology `protobuf:"bytes,3,opt,name=accessible_topology,json=accessibleTopology,proto3" json:"accessible_topology,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}  `json:"-"`
 	XXX_unrecognized     []byte    `json:"-"`
 	XXX_sizecache        int32     `json:"-"`
@@ -2322,7 +2324,7 @@ type GetCapacityResponse struct {
 	// consideration when calculating the available capacity of the
 	// storage. This field is REQUIRED.
 	// The value of this field MUST NOT be negative.
-	AvailableCapacity    int64    `protobuf:"varint,1,opt,name=available_capacity,json=availableCapacity" json:"available_capacity,omitempty"`
+	AvailableCapacity    int64    `protobuf:"varint,1,opt,name=available_capacity,json=availableCapacity,proto3" json:"available_capacity,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -2392,7 +2394,7 @@ var xxx_messageInfo_ControllerGetCapabilitiesRequest proto.InternalMessageInfo
 type ControllerGetCapabilitiesResponse struct {
 	// All the capabilities that the controller service supports. This
 	// field is OPTIONAL.
-	Capabilities         []*ControllerServiceCapability `protobuf:"bytes,2,rep,name=capabilities" json:"capabilities,omitempty"`
+	Capabilities         []*ControllerServiceCapability `protobuf:"bytes,2,rep,name=capabilities,proto3" json:"capabilities,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}                       `json:"-"`
 	XXX_unrecognized     []byte                         `json:"-"`
 	XXX_sizecache        int32                          `json:"-"`
@@ -2468,7 +2470,7 @@ type isControllerServiceCapability_Type interface {
 }
 
 type ControllerServiceCapability_Rpc struct {
-	Rpc *ControllerServiceCapability_RPC `protobuf:"bytes,1,opt,name=rpc,oneof"`
+	Rpc *ControllerServiceCapability_RPC `protobuf:"bytes,1,opt,name=rpc,proto3,oneof"`
 }
 
 func (*ControllerServiceCapability_Rpc) isControllerServiceCapability_Type() {}
@@ -2543,7 +2545,7 @@ func _ControllerServiceCapability_OneofSizer(msg proto.Message) (n int) {
 }
 
 type ControllerServiceCapability_RPC struct {
-	Type                 ControllerServiceCapability_RPC_Type `protobuf:"varint,1,opt,name=type,enum=csi.v0.ControllerServiceCapability_RPC_Type" json:"type,omitempty"`
+	Type                 ControllerServiceCapability_RPC_Type `protobuf:"varint,1,opt,name=type,proto3,enum=csi.v0.ControllerServiceCapability_RPC_Type" json:"type,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}                             `json:"-"`
 	XXX_unrecognized     []byte                               `json:"-"`
 	XXX_sizecache        int32                                `json:"-"`
@@ -2583,14 +2585,14 @@ func (m *ControllerServiceCapability_RPC) GetType() ControllerServiceCapability_
 type CreateSnapshotRequest struct {
 	// The ID of the source volume to be snapshotted.
 	// This field is REQUIRED.
-	SourceVolumeId string `protobuf:"bytes,1,opt,name=source_volume_id,json=sourceVolumeId" json:"source_volume_id,omitempty"`
+	SourceVolumeId string `protobuf:"bytes,1,opt,name=source_volume_id,json=sourceVolumeId,proto3" json:"source_volume_id,omitempty"`
 	// The suggested name for the snapshot. This field is REQUIRED for
 	// idempotency.
-	Name string `protobuf:"bytes,2,opt,name=name" json:"name,omitempty"`
+	Name string `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
 	// Secrets required by plugin to complete snapshot creation request.
 	// This field is OPTIONAL. Refer to the `Secrets Requirements`
 	// section on how to use this field.
-	CreateSnapshotSecrets map[string]string `protobuf:"bytes,3,rep,name=create_snapshot_secrets,json=createSnapshotSecrets" json:"create_snapshot_secrets,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	CreateSnapshotSecrets map[string]string `protobuf:"bytes,3,rep,name=create_snapshot_secrets,json=createSnapshotSecrets,proto3" json:"create_snapshot_secrets,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
 	// Plugin specific parameters passed in as opaque key-value pairs.
 	// This field is OPTIONAL. The Plugin is responsible for parsing and
 	// validating these parameters. COs will treat these as opaque.
@@ -2601,7 +2603,7 @@ type CreateSnapshotRequest struct {
 	// - Specify if the snapshot should be replicated to some place.
 	// - Specify primary or secondary for replication systems that
 	//   support snapshotting only on primary.
-	Parameters           map[string]string `protobuf:"bytes,4,rep,name=parameters" json:"parameters,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	Parameters           map[string]string `protobuf:"bytes,4,rep,name=parameters,proto3" json:"parameters,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
 	XXX_NoUnkeyedLiteral struct{}          `json:"-"`
 	XXX_unrecognized     []byte            `json:"-"`
 	XXX_sizecache        int32             `json:"-"`
@@ -2663,7 +2665,7 @@ type CreateSnapshotResponse struct {
 	// Contains all attributes of the newly created snapshot that are
 	// relevant to the CO along with information required by the Plugin
 	// to uniquely identify the snapshot. This field is REQUIRED.
-	Snapshot             *Snapshot `protobuf:"bytes,1,opt,name=snapshot" json:"snapshot,omitempty"`
+	Snapshot             *Snapshot `protobuf:"bytes,1,opt,name=snapshot,proto3" json:"snapshot,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}  `json:"-"`
 	XXX_unrecognized     []byte    `json:"-"`
 	XXX_sizecache        int32     `json:"-"`
@@ -2709,24 +2711,24 @@ type Snapshot struct {
 	// OPTIONAL. If this field is not set, it indicates that this size is
 	// unknown. The value of this field MUST NOT be negative and a size of
 	// zero means it is unspecified.
-	SizeBytes int64 `protobuf:"varint,1,opt,name=size_bytes,json=sizeBytes" json:"size_bytes,omitempty"`
+	SizeBytes int64 `protobuf:"varint,1,opt,name=size_bytes,json=sizeBytes,proto3" json:"size_bytes,omitempty"`
 	// Uniquely identifies a snapshot and is generated by the plugin. It
 	// will not change over time. This field is REQUIRED. The identity
 	// information will be used by the CO in subsequent calls to refer to
 	// the provisioned snapshot.
-	Id string `protobuf:"bytes,2,opt,name=id" json:"id,omitempty"`
+	Id string `protobuf:"bytes,2,opt,name=id,proto3" json:"id,omitempty"`
 	// Identity information for the source volume. Note that creating a
 	// snapshot from a snapshot is not supported here so the source has to
 	// be a volume. This field is REQUIRED.
-	SourceVolumeId string `protobuf:"bytes,3,opt,name=source_volume_id,json=sourceVolumeId" json:"source_volume_id,omitempty"`
+	SourceVolumeId string `protobuf:"bytes,3,opt,name=source_volume_id,json=sourceVolumeId,proto3" json:"source_volume_id,omitempty"`
 	// Timestamp when the point-in-time snapshot is taken on the storage
 	// system. The format of this field should be a Unix nanoseconds time
 	// encoded as an int64. On Unix, the command `date +%s%N` returns the
 	// current time in nanoseconds since 1970-01-01 00:00:00 UTC. This
 	// field is REQUIRED.
-	CreatedAt int64 `protobuf:"varint,4,opt,name=created_at,json=createdAt" json:"created_at,omitempty"`
+	CreatedAt int64 `protobuf:"varint,4,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
 	// The status of a snapshot.
-	Status               *SnapshotStatus `protobuf:"bytes,5,opt,name=status" json:"status,omitempty"`
+	Status               *SnapshotStatus `protobuf:"bytes,5,opt,name=status,proto3" json:"status,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}        `json:"-"`
 	XXX_unrecognized     []byte          `json:"-"`
 	XXX_sizecache        int32           `json:"-"`
@@ -2794,10 +2796,10 @@ func (m *Snapshot) GetStatus() *SnapshotStatus {
 // The status of a snapshot.
 type SnapshotStatus struct {
 	// This field is REQUIRED.
-	Type SnapshotStatus_Type `protobuf:"varint,1,opt,name=type,enum=csi.v0.SnapshotStatus_Type" json:"type,omitempty"`
+	Type SnapshotStatus_Type `protobuf:"varint,1,opt,name=type,proto3,enum=csi.v0.SnapshotStatus_Type" json:"type,omitempty"`
 	// Additional information to describe why a snapshot ended up in the
 	// `ERROR_UPLOADING` status. This field is OPTIONAL.
-	Details              string   `protobuf:"bytes,2,opt,name=details" json:"details,omitempty"`
+	Details              string   `protobuf:"bytes,2,opt,name=details,proto3" json:"details,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -2844,11 +2846,11 @@ func (m *SnapshotStatus) GetDetails() string {
 type DeleteSnapshotRequest struct {
 	// The ID of the snapshot to be deleted.
 	// This field is REQUIRED.
-	SnapshotId string `protobuf:"bytes,1,opt,name=snapshot_id,json=snapshotId" json:"snapshot_id,omitempty"`
+	SnapshotId string `protobuf:"bytes,1,opt,name=snapshot_id,json=snapshotId,proto3" json:"snapshot_id,omitempty"`
 	// Secrets required by plugin to complete snapshot deletion request.
 	// This field is OPTIONAL. Refer to the `Secrets Requirements`
 	// section on how to use this field.
-	DeleteSnapshotSecrets map[string]string `protobuf:"bytes,2,rep,name=delete_snapshot_secrets,json=deleteSnapshotSecrets" json:"delete_snapshot_secrets,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	DeleteSnapshotSecrets map[string]string `protobuf:"bytes,2,rep,name=delete_snapshot_secrets,json=deleteSnapshotSecrets,proto3" json:"delete_snapshot_secrets,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
 	XXX_NoUnkeyedLiteral  struct{}          `json:"-"`
 	XXX_unrecognized      []byte            `json:"-"`
 	XXX_sizecache         int32             `json:"-"`
@@ -2933,20 +2935,20 @@ type ListSnapshotsRequest struct {
 	// not specified (zero value), it means there is no restriction on the
 	// number of entries that can be returned.
 	// The value of this field MUST NOT be negative.
-	MaxEntries int32 `protobuf:"varint,1,opt,name=max_entries,json=maxEntries" json:"max_entries,omitempty"`
+	MaxEntries int32 `protobuf:"varint,1,opt,name=max_entries,json=maxEntries,proto3" json:"max_entries,omitempty"`
 	// A token to specify where to start paginating. Set this field to
 	// `next_token` returned by a previous `ListSnapshots` call to get the
 	// next page of entries. This field is OPTIONAL.
 	// An empty string is equal to an unspecified field value.
-	StartingToken string `protobuf:"bytes,2,opt,name=starting_token,json=startingToken" json:"starting_token,omitempty"`
+	StartingToken string `protobuf:"bytes,2,opt,name=starting_token,json=startingToken,proto3" json:"starting_token,omitempty"`
 	// Identity information for the source volume. This field is OPTIONAL.
 	// It can be used to list snapshots by volume.
-	SourceVolumeId string `protobuf:"bytes,3,opt,name=source_volume_id,json=sourceVolumeId" json:"source_volume_id,omitempty"`
+	SourceVolumeId string `protobuf:"bytes,3,opt,name=source_volume_id,json=sourceVolumeId,proto3" json:"source_volume_id,omitempty"`
 	// Identity information for a specific snapshot. This field is
 	// OPTIONAL. It can be used to list only a specific snapshot.
 	// ListSnapshots will return with current snapshot information
 	// and will not block if the snapshot is being uploaded.
-	SnapshotId           string   `protobuf:"bytes,4,opt,name=snapshot_id,json=snapshotId" json:"snapshot_id,omitempty"`
+	SnapshotId           string   `protobuf:"bytes,4,opt,name=snapshot_id,json=snapshotId,proto3" json:"snapshot_id,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -3005,14 +3007,14 @@ func (m *ListSnapshotsRequest) GetSnapshotId() string {
 }
 
 type ListSnapshotsResponse struct {
-	Entries []*ListSnapshotsResponse_Entry `protobuf:"bytes,1,rep,name=entries" json:"entries,omitempty"`
+	Entries []*ListSnapshotsResponse_Entry `protobuf:"bytes,1,rep,name=entries,proto3" json:"entries,omitempty"`
 	// This token allows you to get the next page of entries for
 	// `ListSnapshots` request. If the number of entries is larger than
 	// `max_entries`, use the `next_token` as a value for the
 	// `starting_token` field in the next `ListSnapshots` request. This
 	// field is OPTIONAL.
 	// An empty string is equal to an unspecified field value.
-	NextToken            string   `protobuf:"bytes,2,opt,name=next_token,json=nextToken" json:"next_token,omitempty"`
+	NextToken            string   `protobuf:"bytes,2,opt,name=next_token,json=nextToken,proto3" json:"next_token,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -3057,7 +3059,7 @@ func (m *ListSnapshotsResponse) GetNextToken() string {
 }
 
 type ListSnapshotsResponse_Entry struct {
-	Snapshot             *Snapshot `protobuf:"bytes,1,opt,name=snapshot" json:"snapshot,omitempty"`
+	Snapshot             *Snapshot `protobuf:"bytes,1,opt,name=snapshot,proto3" json:"snapshot,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}  `json:"-"`
 	XXX_unrecognized     []byte    `json:"-"`
 	XXX_sizecache        int32     `json:"-"`
@@ -3096,30 +3098,30 @@ func (m *ListSnapshotsResponse_Entry) GetSnapshot() *Snapshot {
 
 type NodeStageVolumeRequest struct {
 	// The ID of the volume to publish. This field is REQUIRED.
-	VolumeId string `protobuf:"bytes,1,opt,name=volume_id,json=volumeId" json:"volume_id,omitempty"`
+	VolumeId string `protobuf:"bytes,1,opt,name=volume_id,json=volumeId,proto3" json:"volume_id,omitempty"`
 	// The CO SHALL set this field to the value returned by
 	// `ControllerPublishVolume` if the corresponding Controller Plugin
 	// has `PUBLISH_UNPUBLISH_VOLUME` controller capability, and SHALL be
 	// left unset if the corresponding Controller Plugin does not have
 	// this capability. This is an OPTIONAL field.
-	PublishInfo map[string]string `protobuf:"bytes,2,rep,name=publish_info,json=publishInfo" json:"publish_info,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	PublishInfo map[string]string `protobuf:"bytes,2,rep,name=publish_info,json=publishInfo,proto3" json:"publish_info,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
 	// The path to which the volume will be published. It MUST be an
 	// absolute path in the root filesystem of the process serving this
 	// request. The CO SHALL ensure that there is only one
 	// staging_target_path per volume.
 	// This is a REQUIRED field.
-	StagingTargetPath string `protobuf:"bytes,3,opt,name=staging_target_path,json=stagingTargetPath" json:"staging_target_path,omitempty"`
+	StagingTargetPath string `protobuf:"bytes,3,opt,name=staging_target_path,json=stagingTargetPath,proto3" json:"staging_target_path,omitempty"`
 	// The capability of the volume the CO expects the volume to have.
 	// This is a REQUIRED field.
-	VolumeCapability *VolumeCapability `protobuf:"bytes,4,opt,name=volume_capability,json=volumeCapability" json:"volume_capability,omitempty"`
+	VolumeCapability *VolumeCapability `protobuf:"bytes,4,opt,name=volume_capability,json=volumeCapability,proto3" json:"volume_capability,omitempty"`
 	// Secrets required by plugin to complete node stage volume request.
 	// This field is OPTIONAL. Refer to the `Secrets Requirements`
 	// section on how to use this field.
-	NodeStageSecrets map[string]string `protobuf:"bytes,5,rep,name=node_stage_secrets,json=nodeStageSecrets" json:"node_stage_secrets,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	NodeStageSecrets map[string]string `protobuf:"bytes,5,rep,name=node_stage_secrets,json=nodeStageSecrets,proto3" json:"node_stage_secrets,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
 	// Attributes of the volume to publish. This field is OPTIONAL and
 	// MUST match the attributes of the `Volume` identified by
 	// `volume_id`.
-	VolumeAttributes     map[string]string `protobuf:"bytes,6,rep,name=volume_attributes,json=volumeAttributes" json:"volume_attributes,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	VolumeAttributes     map[string]string `protobuf:"bytes,6,rep,name=volume_attributes,json=volumeAttributes,proto3" json:"volume_attributes,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
 	XXX_NoUnkeyedLiteral struct{}          `json:"-"`
 	XXX_unrecognized     []byte            `json:"-"`
 	XXX_sizecache        int32             `json:"-"`
@@ -3223,11 +3225,11 @@ var xxx_messageInfo_NodeStageVolumeResponse proto.InternalMessageInfo
 
 type NodeUnstageVolumeRequest struct {
 	// The ID of the volume. This field is REQUIRED.
-	VolumeId string `protobuf:"bytes,1,opt,name=volume_id,json=volumeId" json:"volume_id,omitempty"`
+	VolumeId string `protobuf:"bytes,1,opt,name=volume_id,json=volumeId,proto3" json:"volume_id,omitempty"`
 	// The path at which the volume was published. It MUST be an absolute
 	// path in the root filesystem of the process serving this request.
 	// This is a REQUIRED field.
-	StagingTargetPath    string   `protobuf:"bytes,2,opt,name=staging_target_path,json=stagingTargetPath" json:"staging_target_path,omitempty"`
+	StagingTargetPath    string   `protobuf:"bytes,2,opt,name=staging_target_path,json=stagingTargetPath,proto3" json:"staging_target_path,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -3303,41 +3305,41 @@ var xxx_messageInfo_NodeUnstageVolumeResponse proto.InternalMessageInfo
 
 type NodePublishVolumeRequest struct {
 	// The ID of the volume to publish. This field is REQUIRED.
-	VolumeId string `protobuf:"bytes,1,opt,name=volume_id,json=volumeId" json:"volume_id,omitempty"`
+	VolumeId string `protobuf:"bytes,1,opt,name=volume_id,json=volumeId,proto3" json:"volume_id,omitempty"`
 	// The CO SHALL set this field to the value returned by
 	// `ControllerPublishVolume` if the corresponding Controller Plugin
 	// has `PUBLISH_UNPUBLISH_VOLUME` controller capability, and SHALL be
 	// left unset if the corresponding Controller Plugin does not have
 	// this capability. This is an OPTIONAL field.
-	PublishInfo map[string]string `protobuf:"bytes,2,rep,name=publish_info,json=publishInfo" json:"publish_info,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	PublishInfo map[string]string `protobuf:"bytes,2,rep,name=publish_info,json=publishInfo,proto3" json:"publish_info,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
 	// The path to which the device was mounted by `NodeStageVolume`.
 	// It MUST be an absolute path in the root filesystem of the process
 	// serving this request.
 	// It MUST be set if the Node Plugin implements the
 	// `STAGE_UNSTAGE_VOLUME` node capability.
 	// This is an OPTIONAL field.
-	StagingTargetPath string `protobuf:"bytes,3,opt,name=staging_target_path,json=stagingTargetPath" json:"staging_target_path,omitempty"`
+	StagingTargetPath string `protobuf:"bytes,3,opt,name=staging_target_path,json=stagingTargetPath,proto3" json:"staging_target_path,omitempty"`
 	// The path to which the volume will be published. It MUST be an
 	// absolute path in the root filesystem of the process serving this
 	// request. The CO SHALL ensure uniqueness of target_path per volume.
 	// The CO SHALL ensure that the path exists, and that the process
 	// serving the request has `read` and `write` permissions to the path.
 	// This is a REQUIRED field.
-	TargetPath string `protobuf:"bytes,4,opt,name=target_path,json=targetPath" json:"target_path,omitempty"`
+	TargetPath string `protobuf:"bytes,4,opt,name=target_path,json=targetPath,proto3" json:"target_path,omitempty"`
 	// The capability of the volume the CO expects the volume to have.
 	// This is a REQUIRED field.
-	VolumeCapability *VolumeCapability `protobuf:"bytes,5,opt,name=volume_capability,json=volumeCapability" json:"volume_capability,omitempty"`
+	VolumeCapability *VolumeCapability `protobuf:"bytes,5,opt,name=volume_capability,json=volumeCapability,proto3" json:"volume_capability,omitempty"`
 	// Whether to publish the volume in readonly mode. This field is
 	// REQUIRED.
-	Readonly bool `protobuf:"varint,6,opt,name=readonly" json:"readonly,omitempty"`
+	Readonly bool `protobuf:"varint,6,opt,name=readonly,proto3" json:"readonly,omitempty"`
 	// Secrets required by plugin to complete node publish volume request.
 	// This field is OPTIONAL. Refer to the `Secrets Requirements`
 	// section on how to use this field.
-	NodePublishSecrets map[string]string `protobuf:"bytes,7,rep,name=node_publish_secrets,json=nodePublishSecrets" json:"node_publish_secrets,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	NodePublishSecrets map[string]string `protobuf:"bytes,7,rep,name=node_publish_secrets,json=nodePublishSecrets,proto3" json:"node_publish_secrets,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
 	// Attributes of the volume to publish. This field is OPTIONAL and
 	// MUST match the attributes of the Volume identified by
 	// `volume_id`.
-	VolumeAttributes     map[string]string `protobuf:"bytes,8,rep,name=volume_attributes,json=volumeAttributes" json:"volume_attributes,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	VolumeAttributes     map[string]string `protobuf:"bytes,8,rep,name=volume_attributes,json=volumeAttributes,proto3" json:"volume_attributes,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
 	XXX_NoUnkeyedLiteral struct{}          `json:"-"`
 	XXX_unrecognized     []byte            `json:"-"`
 	XXX_sizecache        int32             `json:"-"`
@@ -3455,11 +3457,11 @@ var xxx_messageInfo_NodePublishVolumeResponse proto.InternalMessageInfo
 
 type NodeUnpublishVolumeRequest struct {
 	// The ID of the volume. This field is REQUIRED.
-	VolumeId string `protobuf:"bytes,1,opt,name=volume_id,json=volumeId" json:"volume_id,omitempty"`
+	VolumeId string `protobuf:"bytes,1,opt,name=volume_id,json=volumeId,proto3" json:"volume_id,omitempty"`
 	// The path at which the volume was published. It MUST be an absolute
 	// path in the root filesystem of the process serving this request.
 	// This is a REQUIRED field.
-	TargetPath           string   `protobuf:"bytes,2,opt,name=target_path,json=targetPath" json:"target_path,omitempty"`
+	TargetPath           string   `protobuf:"bytes,2,opt,name=target_path,json=targetPath,proto3" json:"target_path,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -3535,13 +3537,13 @@ var xxx_messageInfo_NodeUnpublishVolumeResponse proto.InternalMessageInfo
 
 type NodeGetVolumeStatsRequest struct {
 	// The ID of the volume. This field is REQUIRED.
-	VolumeId string `protobuf:"bytes,1,opt,name=volume_id,json=volumeId" json:"volume_id,omitempty"`
+	VolumeId string `protobuf:"bytes,1,opt,name=volume_id,json=volumeId,proto3" json:"volume_id,omitempty"`
 	// It can be any valid path where volume was previously
 	// staged or published.
 	// It MUST be an absolute path in the root filesystem of
 	// the process serving this request.
 	// This is a REQUIRED field.
-	VolumePath           string   `protobuf:"bytes,2,opt,name=volume_path,json=volumePath" json:"volume_path,omitempty"`
+	VolumePath           string   `protobuf:"bytes,2,opt,name=volume_path,json=volumePath,proto3" json:"volume_path,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -3587,7 +3589,7 @@ func (m *NodeGetVolumeStatsRequest) GetVolumePath() string {
 
 type NodeGetVolumeStatsResponse struct {
 	// This field is OPTIONAL.
-	Usage                []*VolumeUsage `protobuf:"bytes,1,rep,name=usage" json:"usage,omitempty"`
+	Usage                []*VolumeUsage `protobuf:"bytes,1,rep,name=usage,proto3" json:"usage,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}       `json:"-"`
 	XXX_unrecognized     []byte         `json:"-"`
 	XXX_sizecache        int32          `json:"-"`
@@ -3627,15 +3629,15 @@ func (m *NodeGetVolumeStatsResponse) GetUsage() []*VolumeUsage {
 type VolumeUsage struct {
 	// The available capacity in specified Unit. This field is OPTIONAL.
 	// The value of this field MUST NOT be negative.
-	Available int64 `protobuf:"varint,1,opt,name=available" json:"available,omitempty"`
+	Available int64 `protobuf:"varint,1,opt,name=available,proto3" json:"available,omitempty"`
 	// The total capacity in specified Unit. This field is REQUIRED.
 	// The value of this field MUST NOT be negative.
-	Total int64 `protobuf:"varint,2,opt,name=total" json:"total,omitempty"`
+	Total int64 `protobuf:"varint,2,opt,name=total,proto3" json:"total,omitempty"`
 	// The used capacity in specified Unit. This field is OPTIONAL.
 	// The value of this field MUST NOT be negative.
-	Used int64 `protobuf:"varint,3,opt,name=used" json:"used,omitempty"`
+	Used int64 `protobuf:"varint,3,opt,name=used,proto3" json:"used,omitempty"`
 	// Units by which values are measured. This field is REQUIRED.
-	Unit                 VolumeUsage_Unit `protobuf:"varint,4,opt,name=unit,enum=csi.v0.VolumeUsage_Unit" json:"unit,omitempty"`
+	Unit                 VolumeUsage_Unit `protobuf:"varint,4,opt,name=unit,proto3,enum=csi.v0.VolumeUsage_Unit" json:"unit,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}         `json:"-"`
 	XXX_unrecognized     []byte           `json:"-"`
 	XXX_sizecache        int32            `json:"-"`
@@ -3727,7 +3729,7 @@ type NodeGetIdResponse struct {
 	// The ID of the node as understood by the SP which SHALL be used by
 	// CO in subsequent `ControllerPublishVolume`.
 	// This is a REQUIRED field.
-	NodeId               string   `protobuf:"bytes,1,opt,name=node_id,json=nodeId" json:"node_id,omitempty"`
+	NodeId               string   `protobuf:"bytes,1,opt,name=node_id,json=nodeId,proto3" json:"node_id,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -3797,7 +3799,7 @@ var xxx_messageInfo_NodeGetCapabilitiesRequest proto.InternalMessageInfo
 type NodeGetCapabilitiesResponse struct {
 	// All the capabilities that the node service supports. This field
 	// is OPTIONAL.
-	Capabilities         []*NodeServiceCapability `protobuf:"bytes,1,rep,name=capabilities" json:"capabilities,omitempty"`
+	Capabilities         []*NodeServiceCapability `protobuf:"bytes,1,rep,name=capabilities,proto3" json:"capabilities,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}                 `json:"-"`
 	XXX_unrecognized     []byte                   `json:"-"`
 	XXX_sizecache        int32                    `json:"-"`
@@ -3873,7 +3875,7 @@ type isNodeServiceCapability_Type interface {
 }
 
 type NodeServiceCapability_Rpc struct {
-	Rpc *NodeServiceCapability_RPC `protobuf:"bytes,1,opt,name=rpc,oneof"`
+	Rpc *NodeServiceCapability_RPC `protobuf:"bytes,1,opt,name=rpc,proto3,oneof"`
 }
 
 func (*NodeServiceCapability_Rpc) isNodeServiceCapability_Type() {}
@@ -3948,7 +3950,7 @@ func _NodeServiceCapability_OneofSizer(msg proto.Message) (n int) {
 }
 
 type NodeServiceCapability_RPC struct {
-	Type                 NodeServiceCapability_RPC_Type `protobuf:"varint,1,opt,name=type,enum=csi.v0.NodeServiceCapability_RPC_Type" json:"type,omitempty"`
+	Type                 NodeServiceCapability_RPC_Type `protobuf:"varint,1,opt,name=type,proto3,enum=csi.v0.NodeServiceCapability_RPC_Type" json:"type,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}                       `json:"-"`
 	XXX_unrecognized     []byte                         `json:"-"`
 	XXX_sizecache        int32                          `json:"-"`
@@ -4019,13 +4021,13 @@ type NodeGetInfoResponse struct {
 	// The ID of the node as understood by the SP which SHALL be used by
 	// CO in subsequent calls to `ControllerPublishVolume`.
 	// This is a REQUIRED field.
-	NodeId string `protobuf:"bytes,1,opt,name=node_id,json=nodeId" json:"node_id,omitempty"`
+	NodeId string `protobuf:"bytes,1,opt,name=node_id,json=nodeId,proto3" json:"node_id,omitempty"`
 	// Maximum number of volumes that controller can publish to the node.
 	// If value is not set or zero CO SHALL decide how many volumes of
 	// this type can be published by the controller to the node. The
 	// plugin MUST NOT set negative values here.
 	// This field is OPTIONAL.
-	MaxVolumesPerNode int64 `protobuf:"varint,2,opt,name=max_volumes_per_node,json=maxVolumesPerNode" json:"max_volumes_per_node,omitempty"`
+	MaxVolumesPerNode int64 `protobuf:"varint,2,opt,name=max_volumes_per_node,json=maxVolumesPerNode,proto3" json:"max_volumes_per_node,omitempty"`
 	// Specifies where (regions, zones, racks, etc.) the node is
 	// accessible from.
 	// A plugin that returns this field MUST also set the
@@ -4043,7 +4045,7 @@ type NodeGetInfoResponse struct {
 	//     {"region": "R1", "zone": "R2"}
 	// Indicates the node exists within the "region" "R1" and the "zone"
 	// "Z2".
-	AccessibleTopology   *Topology `protobuf:"bytes,3,opt,name=accessible_topology,json=accessibleTopology" json:"accessible_topology,omitempty"`
+	AccessibleTopology   *Topology `protobuf:"bytes,3,opt,name=accessible_topology,json=accessibleTopology,proto3" json:"accessible_topology,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}  `json:"-"`
 	XXX_unrecognized     []byte    `json:"-"`
 	XXX_sizecache        int32     `json:"-"`
@@ -4197,8 +4199,9 @@ var _ grpc.ClientConn
 // is compatible with the grpc package it is being compiled against.
 const _ = grpc.SupportPackageIsVersion4
 
-// Client API for Identity service
-
+// IdentityClient is the client API for Identity service.
+//
+// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
 type IdentityClient interface {
 	GetPluginInfo(ctx context.Context, in *GetPluginInfoRequest, opts ...grpc.CallOption) (*GetPluginInfoResponse, error)
 	GetPluginCapabilities(ctx context.Context, in *GetPluginCapabilitiesRequest, opts ...grpc.CallOption) (*GetPluginCapabilitiesResponse, error)
@@ -4215,7 +4218,7 @@ func NewIdentityClient(cc *grpc.ClientConn) IdentityClient {
 
 func (c *identityClient) GetPluginInfo(ctx context.Context, in *GetPluginInfoRequest, opts ...grpc.CallOption) (*GetPluginInfoResponse, error) {
 	out := new(GetPluginInfoResponse)
-	err := grpc.Invoke(ctx, "/csi.v0.Identity/GetPluginInfo", in, out, c.cc, opts...)
+	err := c.cc.Invoke(ctx, "/csi.v0.Identity/GetPluginInfo", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -4224,7 +4227,7 @@ func (c *identityClient) GetPluginInfo(ctx context.Context, in *GetPluginInfoReq
 
 func (c *identityClient) GetPluginCapabilities(ctx context.Context, in *GetPluginCapabilitiesRequest, opts ...grpc.CallOption) (*GetPluginCapabilitiesResponse, error) {
 	out := new(GetPluginCapabilitiesResponse)
-	err := grpc.Invoke(ctx, "/csi.v0.Identity/GetPluginCapabilities", in, out, c.cc, opts...)
+	err := c.cc.Invoke(ctx, "/csi.v0.Identity/GetPluginCapabilities", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -4233,15 +4236,14 @@ func (c *identityClient) GetPluginCapabilities(ctx context.Context, in *GetPlugi
 
 func (c *identityClient) Probe(ctx context.Context, in *ProbeRequest, opts ...grpc.CallOption) (*ProbeResponse, error) {
 	out := new(ProbeResponse)
-	err := grpc.Invoke(ctx, "/csi.v0.Identity/Probe", in, out, c.cc, opts...)
+	err := c.cc.Invoke(ctx, "/csi.v0.Identity/Probe", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-// Server API for Identity service
-
+// IdentityServer is the server API for Identity service.
 type IdentityServer interface {
 	GetPluginInfo(context.Context, *GetPluginInfoRequest) (*GetPluginInfoResponse, error)
 	GetPluginCapabilities(context.Context, *GetPluginCapabilitiesRequest) (*GetPluginCapabilitiesResponse, error)
@@ -4327,8 +4329,9 @@ var _Identity_serviceDesc = grpc.ServiceDesc{
 	Metadata: "github.com/container-storage-interface/spec/csi.proto",
 }
 
-// Client API for Controller service
-
+// ControllerClient is the client API for Controller service.
+//
+// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
 type ControllerClient interface {
 	CreateVolume(ctx context.Context, in *CreateVolumeRequest, opts ...grpc.CallOption) (*CreateVolumeResponse, error)
 	DeleteVolume(ctx context.Context, in *DeleteVolumeRequest, opts ...grpc.CallOption) (*DeleteVolumeResponse, error)
@@ -4353,7 +4356,7 @@ func NewControllerClient(cc *grpc.ClientConn) ControllerClient {
 
 func (c *controllerClient) CreateVolume(ctx context.Context, in *CreateVolumeRequest, opts ...grpc.CallOption) (*CreateVolumeResponse, error) {
 	out := new(CreateVolumeResponse)
-	err := grpc.Invoke(ctx, "/csi.v0.Controller/CreateVolume", in, out, c.cc, opts...)
+	err := c.cc.Invoke(ctx, "/csi.v0.Controller/CreateVolume", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -4362,7 +4365,7 @@ func (c *controllerClient) CreateVolume(ctx context.Context, in *CreateVolumeReq
 
 func (c *controllerClient) DeleteVolume(ctx context.Context, in *DeleteVolumeRequest, opts ...grpc.CallOption) (*DeleteVolumeResponse, error) {
 	out := new(DeleteVolumeResponse)
-	err := grpc.Invoke(ctx, "/csi.v0.Controller/DeleteVolume", in, out, c.cc, opts...)
+	err := c.cc.Invoke(ctx, "/csi.v0.Controller/DeleteVolume", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -4371,7 +4374,7 @@ func (c *controllerClient) DeleteVolume(ctx context.Context, in *DeleteVolumeReq
 
 func (c *controllerClient) ControllerPublishVolume(ctx context.Context, in *ControllerPublishVolumeRequest, opts ...grpc.CallOption) (*ControllerPublishVolumeResponse, error) {
 	out := new(ControllerPublishVolumeResponse)
-	err := grpc.Invoke(ctx, "/csi.v0.Controller/ControllerPublishVolume", in, out, c.cc, opts...)
+	err := c.cc.Invoke(ctx, "/csi.v0.Controller/ControllerPublishVolume", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -4380,7 +4383,7 @@ func (c *controllerClient) ControllerPublishVolume(ctx context.Context, in *Cont
 
 func (c *controllerClient) ControllerUnpublishVolume(ctx context.Context, in *ControllerUnpublishVolumeRequest, opts ...grpc.CallOption) (*ControllerUnpublishVolumeResponse, error) {
 	out := new(ControllerUnpublishVolumeResponse)
-	err := grpc.Invoke(ctx, "/csi.v0.Controller/ControllerUnpublishVolume", in, out, c.cc, opts...)
+	err := c.cc.Invoke(ctx, "/csi.v0.Controller/ControllerUnpublishVolume", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -4389,7 +4392,7 @@ func (c *controllerClient) ControllerUnpublishVolume(ctx context.Context, in *Co
 
 func (c *controllerClient) ValidateVolumeCapabilities(ctx context.Context, in *ValidateVolumeCapabilitiesRequest, opts ...grpc.CallOption) (*ValidateVolumeCapabilitiesResponse, error) {
 	out := new(ValidateVolumeCapabilitiesResponse)
-	err := grpc.Invoke(ctx, "/csi.v0.Controller/ValidateVolumeCapabilities", in, out, c.cc, opts...)
+	err := c.cc.Invoke(ctx, "/csi.v0.Controller/ValidateVolumeCapabilities", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -4398,7 +4401,7 @@ func (c *controllerClient) ValidateVolumeCapabilities(ctx context.Context, in *V
 
 func (c *controllerClient) ListVolumes(ctx context.Context, in *ListVolumesRequest, opts ...grpc.CallOption) (*ListVolumesResponse, error) {
 	out := new(ListVolumesResponse)
-	err := grpc.Invoke(ctx, "/csi.v0.Controller/ListVolumes", in, out, c.cc, opts...)
+	err := c.cc.Invoke(ctx, "/csi.v0.Controller/ListVolumes", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -4407,7 +4410,7 @@ func (c *controllerClient) ListVolumes(ctx context.Context, in *ListVolumesReque
 
 func (c *controllerClient) GetCapacity(ctx context.Context, in *GetCapacityRequest, opts ...grpc.CallOption) (*GetCapacityResponse, error) {
 	out := new(GetCapacityResponse)
-	err := grpc.Invoke(ctx, "/csi.v0.Controller/GetCapacity", in, out, c.cc, opts...)
+	err := c.cc.Invoke(ctx, "/csi.v0.Controller/GetCapacity", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -4416,7 +4419,7 @@ func (c *controllerClient) GetCapacity(ctx context.Context, in *GetCapacityReque
 
 func (c *controllerClient) ControllerGetCapabilities(ctx context.Context, in *ControllerGetCapabilitiesRequest, opts ...grpc.CallOption) (*ControllerGetCapabilitiesResponse, error) {
 	out := new(ControllerGetCapabilitiesResponse)
-	err := grpc.Invoke(ctx, "/csi.v0.Controller/ControllerGetCapabilities", in, out, c.cc, opts...)
+	err := c.cc.Invoke(ctx, "/csi.v0.Controller/ControllerGetCapabilities", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -4425,7 +4428,7 @@ func (c *controllerClient) ControllerGetCapabilities(ctx context.Context, in *Co
 
 func (c *controllerClient) CreateSnapshot(ctx context.Context, in *CreateSnapshotRequest, opts ...grpc.CallOption) (*CreateSnapshotResponse, error) {
 	out := new(CreateSnapshotResponse)
-	err := grpc.Invoke(ctx, "/csi.v0.Controller/CreateSnapshot", in, out, c.cc, opts...)
+	err := c.cc.Invoke(ctx, "/csi.v0.Controller/CreateSnapshot", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -4434,7 +4437,7 @@ func (c *controllerClient) CreateSnapshot(ctx context.Context, in *CreateSnapsho
 
 func (c *controllerClient) DeleteSnapshot(ctx context.Context, in *DeleteSnapshotRequest, opts ...grpc.CallOption) (*DeleteSnapshotResponse, error) {
 	out := new(DeleteSnapshotResponse)
-	err := grpc.Invoke(ctx, "/csi.v0.Controller/DeleteSnapshot", in, out, c.cc, opts...)
+	err := c.cc.Invoke(ctx, "/csi.v0.Controller/DeleteSnapshot", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -4443,15 +4446,14 @@ func (c *controllerClient) DeleteSnapshot(ctx context.Context, in *DeleteSnapsho
 
 func (c *controllerClient) ListSnapshots(ctx context.Context, in *ListSnapshotsRequest, opts ...grpc.CallOption) (*ListSnapshotsResponse, error) {
 	out := new(ListSnapshotsResponse)
-	err := grpc.Invoke(ctx, "/csi.v0.Controller/ListSnapshots", in, out, c.cc, opts...)
+	err := c.cc.Invoke(ctx, "/csi.v0.Controller/ListSnapshots", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-// Server API for Controller service
-
+// ControllerServer is the server API for Controller service.
 type ControllerServer interface {
 	CreateVolume(context.Context, *CreateVolumeRequest) (*CreateVolumeResponse, error)
 	DeleteVolume(context.Context, *DeleteVolumeRequest) (*DeleteVolumeResponse, error)
@@ -4721,8 +4723,9 @@ var _Controller_serviceDesc = grpc.ServiceDesc{
 	Metadata: "github.com/container-storage-interface/spec/csi.proto",
 }
 
-// Client API for Node service
-
+// NodeClient is the client API for Node service.
+//
+// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
 type NodeClient interface {
 	NodeStageVolume(ctx context.Context, in *NodeStageVolumeRequest, opts ...grpc.CallOption) (*NodeStageVolumeResponse, error)
 	NodeUnstageVolume(ctx context.Context, in *NodeUnstageVolumeRequest, opts ...grpc.CallOption) (*NodeUnstageVolumeResponse, error)
@@ -4750,7 +4753,7 @@ func NewNodeClient(cc *grpc.ClientConn) NodeClient {
 
 func (c *nodeClient) NodeStageVolume(ctx context.Context, in *NodeStageVolumeRequest, opts ...grpc.CallOption) (*NodeStageVolumeResponse, error) {
 	out := new(NodeStageVolumeResponse)
-	err := grpc.Invoke(ctx, "/csi.v0.Node/NodeStageVolume", in, out, c.cc, opts...)
+	err := c.cc.Invoke(ctx, "/csi.v0.Node/NodeStageVolume", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -4759,7 +4762,7 @@ func (c *nodeClient) NodeStageVolume(ctx context.Context, in *NodeStageVolumeReq
 
 func (c *nodeClient) NodeUnstageVolume(ctx context.Context, in *NodeUnstageVolumeRequest, opts ...grpc.CallOption) (*NodeUnstageVolumeResponse, error) {
 	out := new(NodeUnstageVolumeResponse)
-	err := grpc.Invoke(ctx, "/csi.v0.Node/NodeUnstageVolume", in, out, c.cc, opts...)
+	err := c.cc.Invoke(ctx, "/csi.v0.Node/NodeUnstageVolume", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -4768,7 +4771,7 @@ func (c *nodeClient) NodeUnstageVolume(ctx context.Context, in *NodeUnstageVolum
 
 func (c *nodeClient) NodePublishVolume(ctx context.Context, in *NodePublishVolumeRequest, opts ...grpc.CallOption) (*NodePublishVolumeResponse, error) {
 	out := new(NodePublishVolumeResponse)
-	err := grpc.Invoke(ctx, "/csi.v0.Node/NodePublishVolume", in, out, c.cc, opts...)
+	err := c.cc.Invoke(ctx, "/csi.v0.Node/NodePublishVolume", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -4777,7 +4780,7 @@ func (c *nodeClient) NodePublishVolume(ctx context.Context, in *NodePublishVolum
 
 func (c *nodeClient) NodeUnpublishVolume(ctx context.Context, in *NodeUnpublishVolumeRequest, opts ...grpc.CallOption) (*NodeUnpublishVolumeResponse, error) {
 	out := new(NodeUnpublishVolumeResponse)
-	err := grpc.Invoke(ctx, "/csi.v0.Node/NodeUnpublishVolume", in, out, c.cc, opts...)
+	err := c.cc.Invoke(ctx, "/csi.v0.Node/NodeUnpublishVolume", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -4786,7 +4789,7 @@ func (c *nodeClient) NodeUnpublishVolume(ctx context.Context, in *NodeUnpublishV
 
 func (c *nodeClient) NodeGetVolumeStats(ctx context.Context, in *NodeGetVolumeStatsRequest, opts ...grpc.CallOption) (*NodeGetVolumeStatsResponse, error) {
 	out := new(NodeGetVolumeStatsResponse)
-	err := grpc.Invoke(ctx, "/csi.v0.Node/NodeGetVolumeStats", in, out, c.cc, opts...)
+	err := c.cc.Invoke(ctx, "/csi.v0.Node/NodeGetVolumeStats", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -4796,7 +4799,7 @@ func (c *nodeClient) NodeGetVolumeStats(ctx context.Context, in *NodeGetVolumeSt
 // Deprecated: Do not use.
 func (c *nodeClient) NodeGetId(ctx context.Context, in *NodeGetIdRequest, opts ...grpc.CallOption) (*NodeGetIdResponse, error) {
 	out := new(NodeGetIdResponse)
-	err := grpc.Invoke(ctx, "/csi.v0.Node/NodeGetId", in, out, c.cc, opts...)
+	err := c.cc.Invoke(ctx, "/csi.v0.Node/NodeGetId", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -4805,7 +4808,7 @@ func (c *nodeClient) NodeGetId(ctx context.Context, in *NodeGetIdRequest, opts .
 
 func (c *nodeClient) NodeGetCapabilities(ctx context.Context, in *NodeGetCapabilitiesRequest, opts ...grpc.CallOption) (*NodeGetCapabilitiesResponse, error) {
 	out := new(NodeGetCapabilitiesResponse)
-	err := grpc.Invoke(ctx, "/csi.v0.Node/NodeGetCapabilities", in, out, c.cc, opts...)
+	err := c.cc.Invoke(ctx, "/csi.v0.Node/NodeGetCapabilities", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -4814,15 +4817,14 @@ func (c *nodeClient) NodeGetCapabilities(ctx context.Context, in *NodeGetCapabil
 
 func (c *nodeClient) NodeGetInfo(ctx context.Context, in *NodeGetInfoRequest, opts ...grpc.CallOption) (*NodeGetInfoResponse, error) {
 	out := new(NodeGetInfoResponse)
-	err := grpc.Invoke(ctx, "/csi.v0.Node/NodeGetInfo", in, out, c.cc, opts...)
+	err := c.cc.Invoke(ctx, "/csi.v0.Node/NodeGetInfo", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-// Server API for Node service
-
+// NodeServer is the server API for Node service.
 type NodeServer interface {
 	NodeStageVolume(context.Context, *NodeStageVolumeRequest) (*NodeStageVolumeResponse, error)
 	NodeUnstageVolume(context.Context, *NodeUnstageVolumeRequest) (*NodeUnstageVolumeResponse, error)
