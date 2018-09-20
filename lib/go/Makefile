@@ -58,14 +58,14 @@ $(PROTOC):
 PROTOC_GEN_GO_PKG := github.com/golang/protobuf/protoc-gen-go
 PROTOC_GEN_GO := protoc-gen-go
 $(PROTOC_GEN_GO): PROTOBUF_PKG := $(dir $(PROTOC_GEN_GO_PKG))
-$(PROTOC_GEN_GO): PROTOBUF_VERSION := v1.1.0
+$(PROTOC_GEN_GO): PROTOBUF_VERSION := v1.2.0
 $(PROTOC_GEN_GO):
 	mkdir -p $(dir $(GOPATH)/src/$(PROTOBUF_PKG))
 	test -d $(GOPATH)/src/$(PROTOBUF_PKG)/.git || git clone https://$(PROTOBUF_PKG) $(GOPATH)/src/$(PROTOBUF_PKG)
 	(cd $(GOPATH)/src/$(PROTOBUF_PKG) && \
 		(test "$$(git describe --tags | head -1)" = "$(PROTOBUF_VERSION)" || \
 			(git fetch && git checkout tags/$(PROTOBUF_VERSION))))
-	(cd $(GOPATH)/src/$(PROTOBUF_PKG) && go get -v -d ./...) && \
+	(cd $(GOPATH)/src/$(PROTOBUF_PKG) && go get -v -d $$(go list -f '{{ .ImportPath }}' ./...)) && \
 	go build -o "$@" $(PROTOC_GEN_GO_PKG)
 
 
