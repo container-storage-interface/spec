@@ -1178,33 +1178,52 @@ This RPC will be called by the CO to check if a pre-provisioned volume has all t
 This RPC call SHALL return `supported` only if all the volume capabilities specified in the request are supported.
 This operation MUST be idempotent.
 
+NOTE: Older plugins will parse but likely not "process" newer fields that may be present in capability-validation messages (and sub-messages) sent by a CO that is communicating using a newer, backwards-compatible version of the CSI protobufs.
+Therefore, the CO SHALL reconcile successful capability-validation responses by comparing the validated capabilities with those that it had originally requested.
+
 ```protobuf
 message ValidateVolumeCapabilitiesRequest {
   // The ID of the volume to check. This field is REQUIRED.
   string volume_id = 1;
 
+  // Attributes of the volume to check. This field is OPTIONAL and MUST
+  // match the attributes of the Volume identified by `volume_id`.
+  map<string, string> volume_attributes = 2;
+
   // The capabilities that the CO wants to check for the volume. This
   // call SHALL return "supported" only if all the volume capabilities
   // specified below are supported. This field is REQUIRED.
-  repeated VolumeCapability volume_capabilities = 2;
+  repeated VolumeCapability volume_capabilities = 3;
 
-  // Attributes of the volume to check. This field is OPTIONAL and MUST
-  // match the attributes of the Volume identified by `volume_id`.
-  map<string, string> volume_attributes = 3;
+  // See CreateVolumeRequest.parameters.
+  // This field is OPTIONAL.
+  map<string, string> parameters = 4;
 
-  // Specifies where (regions, zones, racks, etc.) the caller believes
-  // the volume is accessible from.
-  // A caller MAY specify multiple topologies to indicate they believe
-  // the volume to be accessible from multiple locations.
-  // This field is OPTIONAL. This field SHALL NOT be set unless the
-  // plugin advertises the ACCESSIBILITY_CONSTRAINTS capability.
-  repeated Topology accessible_topology = 4;
+  // See CreateVolumeRequest.accessibility_requirements.
+  // This field is OPTIONAL.
+  TopologyRequirement accessibility_requirements = 5;
 }
 
 message ValidateVolumeCapabilitiesResponse {
-  // True if the Plugin supports the specified capabilities for the
-  // given volume. This field is REQUIRED.
-  bool supported = 1;
+  message Confirmed {
+    // Volume capabilities supported by the plugin.
+    // This field is REQUIRED.
+    repeated VolumeCapability volume_capabilities = 1;
+
+    // Topology requirements supported by the plugin.
+    // This field is OPTIONAL.
+    TopologyRequirement accessibility_requirements = 2;
+  }
+
+  // Confirmed indicates to the CO the set of capabilities that the
+  // plugin has validated. This field SHALL only be set to a non-empty
+  // value for successful validation responses.
+  // For successful validation responses, the CO SHALL compare the
+  // fields of this message to the originally requested capabilities in
+  // order to guard against an older plugin reporting "valid" for newer
+  // capability fields that it does not yet understand.
+  // This field is OPTIONAL.
+  Confirmed confirmed = 1;
 
   // Message to the CO if `supported` above is false. This field is
   // OPTIONAL.
