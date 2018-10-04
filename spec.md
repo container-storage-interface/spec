@@ -1202,6 +1202,11 @@ message ValidateVolumeCapabilitiesRequest {
   // See CreateVolumeRequest.accessibility_requirements.
   // This field is OPTIONAL.
   TopologyRequirement accessibility_requirements = 5;
+
+  // Secrets required by plugin to complete volume validation request.
+  // This field is OPTIONAL. Refer to the `Secrets Requirements`
+  // section on how to use this field.
+  map<string, string> controller_validate_secrets = 6;
 }
 
 message ValidateVolumeCapabilitiesResponse {
