@@ -1225,7 +1225,7 @@ message ValidateVolumeCapabilitiesResponse {
   // This field is OPTIONAL.
   Confirmed confirmed = 1;
 
-  // Message to the CO if `supported` above is false. This field is
+  // Message to the CO if `confirmed` above is empty. This field is
   // OPTIONAL.
   // An empty string is equal to an unspecified field value.
   string message = 2;
