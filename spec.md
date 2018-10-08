@@ -551,6 +551,20 @@ message PluginCapability {
       // returned by NodeGetInfo to ensure that a given volume is
       // accessible from a given node when scheduling workloads.
       VOLUME_ACCESSIBILITY_CONSTRAINTS = 2;
+
+      // SNAPSHOT_ACCESSIBILITY_CONSTRAINTS indicates that the snapshots
+      // for this plugin may not be equally accessible by all nodes in
+      // the cluster. The topology for a snapshot is different from that
+      // for a volume. The accessibility of a snapshot is only relevant
+      // to a node if a volume is created from a snapshot as part of a
+      // workload. The CO MUST use the topology information returned by
+      // CreateVolumeRequest and the topology information returned by
+      // CreateSnapshotResponse if the snapshot is the source of the
+      // volume, along with the topology information returned by
+      // NodeGetInfo to ensure that a given volume and its source
+      // snapshot are accessible from a given node when scheduling
+      // workloads.
+      SNAPSHOT_ACCESSIBILITY_CONSTRAINTS = 3;
     }
     Type type = 1;
   }
@@ -944,8 +958,10 @@ message Volume {
 }
 
 message TopologyRequirement {
-  // Specifies the list of topologies the provisioned volume MUST be
-  // accessible from.
+  // Specifies the list of topologies the provisioned resource MUST be
+  // accessible from. The resource can be either a volume or a snapshot.
+  // The examples given below use volume but can be applied to snapshot
+  // as well.
   // This field is OPTIONAL. If TopologyRequirement is specified either
   // requisite or preferred or both MUST be specified.
   // 
@@ -1597,6 +1613,19 @@ message CreateSnapshotRequest {
   // - Specify primary or secondary for replication systems that
   //   support snapshotting only on primary.
   map<string, string> parameters = 4;
+
+  // Specifies where (regions, zones, racks, etc.) the provisioned
+  // snapshot MUST be accessible from.
+  // An SP SHALL advertise the requirements for topological
+  // accessibility information in documentation. COs SHALL only specify
+  // topological accessibility information supported by the SP.
+  // This field is OPTIONAL.
+  // This field SHALL NOT be specified unless the SP has the
+  // SNAPSHOT_ACCESSIBILITY_CONSTRAINTS plugin capability.
+  // If this field is not specified and the SP has the
+  // SNAPSHOT_ACCESSIBILITY_CONSTRAINTS plugin capability, the SP MAY
+  // choose where the provisioned snapshot is accessible from.
+  TopologyRequirement accessibility_requirements = 5;
 }
 
 message CreateSnapshotResponse {
@@ -1641,6 +1670,20 @@ message Snapshot {
   // `volume_content_source` in a `CreateVolumeRequest`. The default
   // value is false. This field is REQUIRED.
   bool ready_to_use = 5;
+
+  // Specifies where (regions, zones, racks, etc.) the provisioned
+  // snapshot is accessible from.
+  // A plugin that returns this field MUST also set the
+  // SNAPSHOT_ACCESSIBILITY_CONSTRAINTS plugin capability.
+  // An SP MAY specify multiple topologies to indicate the snapshot is
+  // accessible from multiple locations.
+  // COs MAY use this information along with the topology information
+  // returned by CreateVolumeRequest and NodeGetInfo to ensure that a
+  // given volume and its source snapshot are accessible from a given
+  // node when scheduling workloads.
+  // This field is OPTIONAL. If it is not specified, the CO MAY assume
+  // the snapshot is equally accessible from all nodes in the cluster.
+  repeated Topology accessible_topology = 6;
 }
 ```
 
