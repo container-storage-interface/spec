@@ -2281,7 +2281,7 @@ This RPC call allows CO to expand volume on a node.
 `NodeExpandVolume` ONLY supports expansion of already node-published or node-staged volumes on the given `volume_path`.
 
 If plugin has `STAGE_UNSTAGE_VOLUME` node capability - `NodeExpandVolume` MUST be called after successful `NodeStageVolume`.
-`NodeExpandVolume` MAY be called before or after `NodePublishVolume`.
+`NodeExpandVolume` MAY be called before or after `NodePublishVolume` if plugin has `STAGE_UNSTAGE_VOLUME` node capability otherwise `NodeExpandVolume` MUST be called after successful `NodePublishVolume`.
 
 ```protobuf
 message NodeExpandVolumeRequest {
