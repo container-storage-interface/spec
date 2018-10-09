@@ -848,7 +848,7 @@ message TopologyRequirement {
   //   x = number of topologies provisioned volume is accessible from
   //   n = number of requisite topologies
   // The CO MUST ensure n >= 1. The SP MUST ensure x >= 1
-  // If x==n, than the SP MUST make the provisioned volume available to
+  // If x==n, then the SP MUST make the provisioned volume available to
   // all topologies from the list of requisite topologies. If it is
   // unable to do so, the SP MUST fail the CreateVolume call.
   // For example, if a volume should be accessible from a single zone,
@@ -863,7 +863,7 @@ message TopologyRequirement {
   // then the provisioned volume MUST be accessible from the "region"
   // "R1" and both "zone" "Z2" and "zone" "Z3".
   //
-  // If x<n, than the SP SHALL choose x unique topologies from the list
+  // If x<n, then the SP SHALL choose x unique topologies from the list
   // of requisite topologies. If it is unable to do so, the SP MUST fail
   // the CreateVolume call.
   // For example, if a volume should be accessible from a single zone,
@@ -881,7 +881,7 @@ message TopologyRequirement {
   // of two unique topologies: e.g. "R1/Z2" and "R1/Z3", or "R1/Z2" and
   //  "R1/Z4", or "R1/Z3" and "R1/Z4".
   //
-  // If x>n, than the SP MUST make the provisioned volume available from
+  // If x>n, then the SP MUST make the provisioned volume available from
   // all topologies from the list of requisite topologies and MAY choose
   // the remaining x-n unique topologies from the list of all possible
   // topologies. If it is unable to do so, the SP MUST fail the
@@ -2085,7 +2085,7 @@ message NodeGetInfoResponse {
   //
   // Example 1:
   //   accessible_topology =
-  //     {"region": "R1", "zone": "R2"}
+  //     {"region": "R1", "zone": "Z2"}
   // Indicates the node exists within the "region" "R1" and the "zone"
   // "Z2".
   Topology accessible_topology = 3;
