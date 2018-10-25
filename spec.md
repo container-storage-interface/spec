@@ -565,7 +565,7 @@ message PluginCapability {
       // EXPAND_VOLUME node capability or both. When a plugin supports
       // ONLINE volume expansion and also has the EXPAND_VOLUME
       // controller capability then the plugin MUST support expansion of
-      // controller-published volumes via ControllerExpandVolume. When a
+      // volumes currently published and available on a node. When a
       // plugin supports ONLINE volume expansion and also has the
       // EXPAND_VOLUME node capability then the plugin MAY support
       // expansion of node-published volume via NodeExpandVolume.
@@ -584,10 +584,11 @@ message PluginCapability {
       //   ControllerExpandVolume.
       ONLINE = 1;
 
-      // OFFLINE indicates that volumes cannot be expanded upon being
-      // controller-published. When a plugin supports OFFLINE volume
-      // expansion it MUST implement either the EXPAND_VOLUME controller
-      // capability or the EXPAND_VOLUME node capability or both.
+      // OFFLINE indicates that volumes currently published and
+      // available on a node MAY NOT be expanded. When a plugin support
+      // OFFLINE volume expansion it MUST implement either the
+      // EXPAND_VOLUME controller capability or the EXPAND_VOLUME
+      // node capability or both.
       //
       // Example 1: Given a block storage volume type (e.g. Azure Disk)
       //   that does not support expansion of "node-attached" (i.e.
@@ -1766,7 +1767,12 @@ This RPC allows the CO to expand the size of a volume.
 This call MAY be made by the CO during any time in the lifecycle of the volume after creation if plugin has `VolumeExpansion.ONLINE` capability.
 If plugin has `EXPAND_VOLUME` node capability, then `NodeExpandVolume` MUST be called after successful `ControllerExpandVolume` and `fs_resize_required` in `ControllerExpandVolumeResponse` is `true`.
 
-If the plugin has only `VolumeExpansion.OFFLINE` expansion capability and volume is currently controller-published to a node , `ControllerExpandVolume` MUST be called ONLY after succesful `ControllerUnpublishVolume`.
+If the plugin has only `VolumeExpansion.OFFLINE` expansion capability and volume is currently published or available on a node - `ControllerExpandVolume` MUST be called ONLY after either:
+- Successful completion of `ControllerUnpublishVolume` if plugin has `PUBLISH_UNPUBLISH_VOLUME` controller capability.
+OR
+- Successful completion of `NodeUnstageVolume` if volume was made available on the node via `NodeStageVolume` and plugin does not have `PUBLISH_UNPUBLISH_VOLUME` controller capability.
+OR
+- Successful completion of `NodeUnpublishVolume` if volume was made available on the node via `NodePublishVolume` and plugin does not have `PUBLISH_UNPUBLISH_VOLUME` controller capability and `STAGE_UNSTAGE_VOLUME` node capability.
 
 `ControllerExpandVolume` RPC call MUST be idempotent and if size of underlying volume already meets requested capacity, the plugin MUST respond with successful response.
 
