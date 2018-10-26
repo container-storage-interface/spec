@@ -89,13 +89,13 @@ message GetPluginInfoRequest {
 }
 
 message GetPluginInfoResponse {
-  // The name MUST follow reverse domain name notation format
-  // (https://en.wikipedia.org/wiki/Reverse_domain_name_notation).
-  // It SHOULD include the plugin's host company name and the plugin
-  // name, to minimize the possibility of collisions. It MUST be 63
+  // The name MUST follow domain name notation format
+  // (https://tools.ietf.org/html/rfc1035#section-2.3.1). It SHOULD
+  // include the plugin's host company name and the plugin name,
+  // to minimize the possibility of collisions. It MUST be 63
   // characters or less, beginning and ending with an alphanumeric
-  // character ([a-z0-9A-Z]) with dashes (-), underscores (_),
-  // dots (.), and alphanumerics between. This field is REQUIRED.
+  // character ([a-z0-9A-Z]) with dashes (-), dots (.), and
+  // alphanumerics between. This field is REQUIRED.
   string name = 1;
 
   // This field is REQUIRED. Value of this field is opaque to the CO.
@@ -533,12 +533,15 @@ message TopologyRequirement {
 // Valid keys have two segments: an optional prefix and name, separated
 // by a slash (/), for example: "com.company.example/zone".
 // The key name segment is required. The prefix is optional.
-// Both the key name and the prefix MUST each be 63 characters or less,
-// begin and end with an alphanumeric character ([a-z0-9A-Z]) and
-// contain only dashes (-), underscores (_), dots (.), or alphanumerics
-// in between, for example "zone".
-// The key prefix MUST follow reverse domain name notation format
-// (https://en.wikipedia.org/wiki/Reverse_domain_name_notation).
+// The key name MUST be 63 characters or less, begin and end with an
+// alphanumeric character ([a-z0-9A-Z]), and contain only dashes (-),
+// underscores (_), dots (.), or alphanumerics in between, for example
+// "zone".
+// The key prefix MUST be 63 characters or less, begin and end with a
+// lower-case alphanumeric character ([a-z0-9]), contain only
+// dashes (-), dots (.), or lower-case alphanumerics in between, and
+// follow domain name notation format
+// (https://tools.ietf.org/html/rfc1035#section-2.3.1).
 // The key prefix SHOULD include the plugin's host company name and/or
 // the plugin name, to minimize the possibility of collisions with keys
 // from other plugins.
