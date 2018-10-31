@@ -1770,9 +1770,13 @@ If plugin has `EXPAND_VOLUME` node capability, then `NodeExpandVolume` MUST be c
 
 If the plugin has only `VolumeExpansion.OFFLINE` expansion capability and volume is currently published or available on a node - `ControllerExpandVolume` MUST be called ONLY after either:
 - The plugin has controller `PUBLISH_UNPUBLISH_VOLUME` capability and `ControllerUnpublishVolume` has been invoked successfully.
+
 OR ELSE
+
 - The plugin does NOT have controller `PUBLISH_UNPUBLISH_VOLUME` capability, the plugin has node `STAGE_UNSTAGE_VOLUME` capability, and `NodeUnstageVolume` has been completed successfully.
+
 OR ELSE
+
 - The plugin does NOT have controller `PUBLISH_UNPUBLISH_VOLUME` capability, nor node `STAGE_UNSTAGE_VOLUME` capability, and `NodeUnpublishVolume` has completed successfully.
 
 Examples:
