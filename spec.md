@@ -959,9 +959,9 @@ message Volume {
 
 message TopologyRequirement {
   // Specifies the list of topologies the provisioned resource MUST be
-  // accessible from. The resource can be either a volume or a snapshot.
-  // The examples given below use volume but can be applied to snapshot
-  // as well.
+  // accessible from.
+  // The resource can be either a volume or a snapshot. The examples
+  // given below use volume but can be applied to snapshot as well.
   // This field is OPTIONAL. If TopologyRequirement is specified either
   // requisite or preferred or both MUST be specified.
   // 
