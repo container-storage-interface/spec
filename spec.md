@@ -585,7 +585,8 @@ message PluginCapability {
       ONLINE = 1;
 
       // OFFLINE indicates that volumes currently published and
-      // available on a node MAY NOT be expanded. When a plugin support
+      // available on a node MAY NOT be expanded via
+      // ControllerExpandVolume. When a plugin support
       // OFFLINE volume expansion it MUST implement either the
       // EXPAND_VOLUME controller capability or the EXPAND_VOLUME
       // node capability or both.
@@ -1768,13 +1769,11 @@ This call MAY be made by the CO during any time in the lifecycle of the volume a
 If plugin has `EXPAND_VOLUME` node capability, then `NodeExpandVolume` MUST be called after successful `ControllerExpandVolume` and `fs_resize_required` in `ControllerExpandVolumeResponse` is `true`.
 
 If the plugin has only `VolumeExpansion.OFFLINE` expansion capability and volume is currently published or available on a node - `ControllerExpandVolume` MUST be called ONLY after either:
-- Successful completion of `ControllerUnpublishVolume` if plugin has `PUBLISH_UNPUBLISH_VOLUME` controller capability.
-OR
-- Successful completion of `NodeUnstageVolume` if volume was made available on the node via `NodeStageVolume` and plugin does not have `PUBLISH_UNPUBLISH_VOLUME` controller capability.
-OR
-- Successful completion of `NodeUnpublishVolume` if volume was made available on the node via `NodePublishVolume` and plugin does not have `PUBLISH_UNPUBLISH_VOLUME` controller capability and `STAGE_UNSTAGE_VOLUME` node capability.
-
-`ControllerExpandVolume` RPC call MUST be idempotent and if size of underlying volume already meets requested capacity, the plugin MUST respond with successful response.
+- The plugin has controller `PUBLISH_UNPUBLISH_VOLUME` capability and `ControllerUnpublishVolume` has been invoked successfully.
+OR ELSE
+- The plugin does NOT have controller `PUBLISH_UNPUBLISH_VOLUME` capability, the plugin has node `STAGE_UNSTAGE_VOLUME` capability, and `NodeUnstageVolume` has been completed successfully.
+OR ELSE
+- The plugin does NOT have controller `PUBLISH_UNPUBLISH_VOLUME` capability, nor node `STAGE_UNSTAGE_VOLUME` capability, and `NodeUnpublishVolume` has completed successfully.
 
 Examples:
 * Offline Volume Expansion:
