@@ -1767,7 +1767,7 @@ A Controller plugin MUST implement this RPC call if plugin has `EXPAND_VOLUME` c
 This RPC allows the CO to expand the size of a volume.
 
 This call MAY be made by the CO during any time in the lifecycle of the volume after creation if plugin has `VolumeExpansion.ONLINE` capability.
-If plugin has `EXPAND_VOLUME` node capability, then `NodeExpandVolume` MUST be called after successful `ControllerExpandVolume` and `fs_resize_required` in `ControllerExpandVolumeResponse` is `true`.
+If plugin has `EXPAND_VOLUME` node capability, then `NodeExpandVolume` MUST be called after successful `ControllerExpandVolume` and `node_expansion_required` in `ControllerExpandVolumeResponse` is `true`.
 
 If the plugin has only `VolumeExpansion.OFFLINE` expansion capability and volume is currently published or available on a node - `ControllerExpandVolume` MUST be called ONLY after either:
 - The plugin has controller `PUBLISH_UNPUBLISH_VOLUME` capability and `ControllerUnpublishVolume` has been invoked successfully.
@@ -1815,10 +1815,10 @@ message ControllerExpandVolumeResponse {
   // Capacity of volume after expansion. This field is REQUIRED.
   int64 capacity_bytes = 1;
 
-  // Whether file system expansion is required for the volume. When true
+  // Whether node expansion is required for the volume. When true
   // the CO MUST make NodeExpandVolume RPC call on the node. This field
   // is REQUIRED.
-  bool fs_resize_required = 2;
+  bool node_expansion_required = 2;
 }
 ```
 
