@@ -1175,7 +1175,7 @@ The CO MUST implement the specified error recovery behavior when it encounters t
 
 A Controller Plugin MUST implement this RPC call.
 This RPC will be called by the CO to check if a pre-provisioned volume has all the capabilities that the CO wants.
-This RPC call SHALL return `supported` only if all the volume capabilities specified in the request are supported.
+This RPC call SHALL return `confirmed` only if all the volume capabilities specified in the request are supported.
 This operation MUST be idempotent.
 
 NOTE: Older plugins will parse but likely not "process" newer fields that may be present in capability-validation messages (and sub-messages) sent by a CO that is communicating using a newer, backwards-compatible version of the CSI protobufs.
