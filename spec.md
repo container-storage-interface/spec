@@ -1199,14 +1199,10 @@ message ValidateVolumeCapabilitiesRequest {
   // This field is OPTIONAL.
   map<string, string> parameters = 4;
 
-  // See CreateVolumeRequest.accessibility_requirements.
-  // This field is OPTIONAL.
-  TopologyRequirement accessibility_requirements = 5;
-
   // Secrets required by plugin to complete volume validation request.
   // This field is OPTIONAL. Refer to the `Secrets Requirements`
   // section on how to use this field.
-  map<string, string> controller_validate_secrets = 6;
+  map<string, string> controller_validate_secrets = 5;
 }
 
 message ValidateVolumeCapabilitiesResponse {
@@ -1219,13 +1215,9 @@ message ValidateVolumeCapabilitiesResponse {
     // This field is REQUIRED.
     repeated VolumeCapability volume_capabilities = 2;
 
-    // Topology requirements supported by the plugin.
-    // This field is OPTIONAL.
-    TopologyRequirement accessibility_requirements = 3;
-
     // The volume creation parameters validated by the plugin.
     // This field is OPTIONAL.
-    map<string, string> parameters = 4;
+    map<string, string> parameters = 3;
   }
 
   // Confirmed indicates to the CO the set of capabilities that the
