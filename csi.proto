@@ -189,6 +189,10 @@ message CreateVolumeRequest {
   //    an identifier by which to refer to the newly provisioned
   //    storage. If a storage system supports this, it can optionally
   //    use this name as the identifier for the new volume.
+  // Any Unicode string that conforms to the length limit is allowed
+  // except those containing the following banned characters:
+  // U+0000-U+0008, U+000B, U+000C, U+000E-U+001F, U+007F-U+009F.
+  // (These are control characters other than commonly used whitespace.)
   string name = 1;
 
   // This field is OPTIONAL. This allows the CO to specify the capacity
@@ -791,6 +795,10 @@ message CreateSnapshotRequest {
 
   // The suggested name for the snapshot. This field is REQUIRED for
   // idempotency.
+  // Any Unicode string that conforms to the length limit is allowed
+  // except those containing the following banned characters:
+  // U+0000-U+0008, U+000B, U+000C, U+000E-U+001F, U+007F-U+009F.
+  // (These are control characters other than commonly used whitespace.)
   string name = 2;
 
   // Secrets required by plugin to complete snapshot creation request.
