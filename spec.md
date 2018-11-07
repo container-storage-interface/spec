@@ -1175,7 +1175,7 @@ The CO MUST implement the specified error recovery behavior when it encounters t
 
 A Controller Plugin MUST implement this RPC call.
 This RPC will be called by the CO to check if a pre-provisioned volume has all the capabilities that the CO wants.
-This RPC call SHALL return `confirmed` only if all the volume capabilities specified in the request are supported.
+This RPC call SHALL return `confirmed` only if all the volume capabilities specified in the request are supported (see caveat below).
 This operation MUST be idempotent.
 
 NOTE: Older plugins will parse but likely not "process" newer fields that may be present in capability-validation messages (and sub-messages) sent by a CO that is communicating using a newer, backwards-compatible version of the CSI protobufs.
@@ -1211,13 +1211,21 @@ message ValidateVolumeCapabilitiesRequest {
 
 message ValidateVolumeCapabilitiesResponse {
   message Confirmed {
+    // Volume attributes validated by the plugin.
+    // This field is OPTIONAL.
+    map<string, string> volume_attributes = 1;
+
     // Volume capabilities supported by the plugin.
     // This field is REQUIRED.
-    repeated VolumeCapability volume_capabilities = 1;
+    repeated VolumeCapability volume_capabilities = 2;
 
     // Topology requirements supported by the plugin.
     // This field is OPTIONAL.
-    TopologyRequirement accessibility_requirements = 2;
+    TopologyRequirement accessibility_requirements = 3;
+
+    // The volume creation parameters validated by the plugin.
+    // This field is OPTIONAL.
+    map<string, string> parameters = 4;
   }
 
   // Confirmed indicates to the CO the set of capabilities that the

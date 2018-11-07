@@ -656,13 +656,21 @@ message ValidateVolumeCapabilitiesRequest {
 
 message ValidateVolumeCapabilitiesResponse {
   message Confirmed {
+    // Volume attributes validated by the plugin.
+    // This field is OPTIONAL.
+    map<string, string> volume_attributes = 1;
+
     // Volume capabilities supported by the plugin.
     // This field is REQUIRED.
-    repeated VolumeCapability volume_capabilities = 1;
+    repeated VolumeCapability volume_capabilities = 2;
 
     // Topology requirements supported by the plugin.
     // This field is OPTIONAL.
-    TopologyRequirement accessibility_requirements = 2;
+    TopologyRequirement accessibility_requirements = 3;
+
+    // The volume creation parameters validated by the plugin.
+    // This field is OPTIONAL.
+    map<string, string> parameters = 4;
   }
 
   // Confirmed indicates to the CO the set of capabilities that the
