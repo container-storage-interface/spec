@@ -10,7 +10,7 @@ option go_package = "csi";
 extend google.protobuf.FieldOptions {
   // Indicates that a field MAY contain information that is sensitive
   // and MUST be treated as such (e.g. not logged).
-  bool csi_secret = 50000;
+  bool csi_secret = 1059;
 }
 service Identity {
   rpc GetPluginInfo(GetPluginInfoRequest)
