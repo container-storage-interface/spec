@@ -1191,7 +1191,7 @@ message ValidateVolumeCapabilitiesRequest {
   map<string, string> volume_attributes = 2;
 
   // The capabilities that the CO wants to check for the volume. This
-  // call SHALL return "supported" only if all the volume capabilities
+  // call SHALL return "confirmed" only if all the volume capabilities
   // specified below are supported. This field is REQUIRED.
   repeated VolumeCapability volume_capabilities = 3;
 
