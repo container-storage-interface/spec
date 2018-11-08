@@ -130,13 +130,13 @@ message PluginCapability {
       // as specific RPCs as indicated by ControllerGetCapabilities.
       CONTROLLER_SERVICE = 1;
 
-      // ACCESSIBILITY_CONSTRAINTS indicates that the volumes for this
-      // plugin may not be equally accessible by all nodes in the
+      // VOLUME_ACCESSIBILITY_CONSTRAINTS indicates that the volumes for
+      // this plugin may not be equally accessible by all nodes in the
       // cluster. The CO MUST use the topology information returned by
       // CreateVolumeRequest along with the topology information
       // returned by NodeGetInfo to ensure that a given volume is
       // accessible from a given node when scheduling workloads.
-      ACCESSIBILITY_CONSTRAINTS = 2;
+      VOLUME_ACCESSIBILITY_CONSTRAINTS = 2;
     }
     Type type = 1;
   }
@@ -235,10 +235,10 @@ message CreateVolumeRequest {
   // topological accessibility information supported by the SP.
   // This field is OPTIONAL.
   // This field SHALL NOT be specified unless the SP has the
-  // ACCESSIBILITY_CONSTRAINTS plugin capability.
+  // VOLUME_ACCESSIBILITY_CONSTRAINTS plugin capability.
   // If this field is not specified and the SP has the
-  // ACCESSIBILITY_CONSTRAINTS plugin capability, the SP MAY choose
-  // where the provisioned volume is accessible from.
+  // VOLUME_ACCESSIBILITY_CONSTRAINTS plugin capability, the SP MAY
+  // choose where the provisioned volume is accessible from.
   TopologyRequirement accessibility_requirements = 7;
 }
 
@@ -372,7 +372,7 @@ message Volume {
   // Specifies where (regions, zones, racks, etc.) the provisioned
   // volume is accessible from.
   // A plugin that returns this field MUST also set the
-  // ACCESSIBILITY_CONSTRAINTS plugin capability.
+  // VOLUME_ACCESSIBILITY_CONSTRAINTS plugin capability.
   // An SP MAY specify multiple topologies to indicate the volume is
   // accessible from multiple locations.
   // COs MAY use this information along with the topology information
@@ -736,7 +736,7 @@ message GetCapacityRequest {
   // `accessible_topology`. This is the same as the
   // `accessible_topology` the CO returns in a `CreateVolumeResponse`.
   // This field is OPTIONAL. This field SHALL NOT be set unless the
-  // plugin advertises the ACCESSIBILITY_CONSTRAINTS capability.
+  // plugin advertises the VOLUME_ACCESSIBILITY_CONSTRAINTS capability.
   Topology accessible_topology = 3;
 }
 
@@ -1152,7 +1152,7 @@ message NodeGetInfoResponse {
   // Specifies where (regions, zones, racks, etc.) the node is
   // accessible from.
   // A plugin that returns this field MUST also set the
-  // ACCESSIBILITY_CONSTRAINTS plugin capability.
+  // VOLUME_ACCESSIBILITY_CONSTRAINTS plugin capability.
   // COs MAY use this information along with the topology information
   // returned in CreateVolumeResponse to ensure that a given volume is
   // accessible from a given node when scheduling workloads.
