@@ -1382,10 +1382,10 @@ message ControllerServiceCapability {
       // CREATE_DELETE_SNAPSHOT MUST support creating volume from
       // snapshot.
       CREATE_DELETE_SNAPSHOT = 5;
-      // LIST_SNAPSHOTS is NOT REQUIRED. For plugins that need to upload
-      // a snapshot after it is being cut, LIST_SNAPSHOTS COULD be used
-      // with the snapshot_id as the filter to query whether the
-      // uploading process is complete or not.
+      // LIST_SNAPSHOTS is NOT REQUIRED. For plugins that need to
+      // process a snapshot after it is being cut, LIST_SNAPSHOTS
+      // COULD be used with the snapshot_id as the filter to query
+      // whether the processing is complete or not.
       LIST_SNAPSHOTS = 6;
       // Plugins supporting volume cloning at the storage level MAY
       // report this capability. The source volume must be managed by
@@ -1414,12 +1414,12 @@ A Controller Plugin MUST implement this RPC call if it has `CREATE_DELETE_SNAPSH
 This RPC will be called by the CO to create a new snapshot from a source volume on behalf of a user.
 
 This operation MUST be idempotent.
-If a snapshot corresponding to the specified snapshot `name` is already successfully cut and uploaded (if upload is part of the process) and is compatible with the specified `source_volume_id` and `parameters` in the `CreateSnapshotRequest`, the Plugin MUST reply `0 OK` with the corresponding `CreateSnapshotResponse`.
+If a snapshot corresponding to the specified snapshot `name` is already successfully cut and processed (i.e., if upload is part of the process) and is compatible with the specified `source_volume_id` and `parameters` in the `CreateSnapshotRequest`, the Plugin MUST reply `0 OK` with the corresponding `CreateSnapshotResponse`.
 
 If an error occurs before a snapshot is cut, `CreateSnapshot` SHOULD return a corresponding gRPC error code that reflects the error condition.
 
-For plugins that implement snapshot uploads, `CreateSnapshot` SHOULD return `10 ABORTED`, a gRPC code that indicates the operation is pending for snapshot, during the snapshot uploading processs.
-If an error occurs during the uploading process, `CreateSnapshot` SHOULD return a corresponding gRPC error code that reflects the error condition.
+For plugins that supports snapshot post processing such as uploading, `CreateSnapshot` SHOULD return `0 OK` and `is_ready_to_use` SHOULD be set to `false` after the snapshot is cut but still being processed.
+If an error occurs during the process, `CreateSnapshot` SHOULD return a corresponding gRPC error code that reflects the error condition.
 
 A snapshot MAY be used as the source to provision a new volume.
 A CreateVolumeRequest message may specify an OPTIONAL source snapshot parameter.
@@ -1493,37 +1493,9 @@ message Snapshot {
   // field is REQUIRED.
   int64 created_at = 4;
 
-  // The status of a snapshot.
-  SnapshotStatus status = 5;
-}
-
-// The status of a snapshot.
-message SnapshotStatus {
-  enum Type {
-     UNKNOWN = 0;
-     // A snapshot is ready for use.
-     READY = 1;
-     // A snapshot is cut and is now being uploaded.
-     // Some cloud providers and storage systems uploads the snapshot
-     // to the cloud after the snapshot is cut. During this phase,
-     // `thaw` can be done so the application can be running again if
-     // `freeze` was done before taking the snapshot.
-     UPLOADING = 2;
-     // An error occurred during the snapshot uploading process.
-     // This error status is specific for uploading because
-     // `CreateSnaphot` is a blocking call before the snapshot is
-     // cut and therefore it SHOULD NOT come back with an error
-     // status when an error occurs. Instead a gRPC error code SHALL
-     // be returned by `CreateSnapshot` when an error occurs before
-     // a snapshot is cut.
-     ERROR_UPLOADING = 3;
-  }
-  // This field is REQUIRED.
-  Type type = 1;
-
-  // Additional information to describe why a snapshot ended up in the
-  // `ERROR_UPLOADING` status. This field is OPTIONAL.
-  string details = 2;
+  // Indicates if a snapshot is ready to use. The default value is
+  // false. This field is REQUIRED.
+  bool is_ready_to_use = 5;
 }
 ```
 
@@ -1610,7 +1582,8 @@ message ListSnapshotsRequest {
   // Identity information for a specific snapshot. This field is
   // OPTIONAL. It can be used to list only a specific snapshot.
   // ListSnapshots will return with current snapshot information
-  // and will not block if the snapshot is being uploaded.
+  // and will not block if the snapshot is being processed after
+  // it is cut.
   string snapshot_id = 4;
 }
 
@@ -1665,40 +1638,37 @@ If a `CreateSnapshot` operation times out before the snapshot is cut, leaving th
 2. The CO takes no further action regarding the timed out RPC, a snapshot is possibly leaked and the operator/user is expected to clean up.
 
 It is NOT REQUIRED for a controller plugin to implement the `LIST_SNAPSHOTS` capability if it supports the `CREATE_DELETE_SNAPSHOT` capability: the onus is upon the CO to take into consideration the full range of plugin capabilities before deciding how to proceed in the above scenario.
-A controller plugin COULD implement the `LIST_SNAPSHOTS` capability and call it repeatedly with the `snapshot_id` as a filter to query whether the uploading process is complete or not if it needs to upload a snapshot after it is being cut.
+A controller plugin COULD implement the `LIST_SNAPSHOTS` capability and call it repeatedly with the `snapshot_id` as a filter to query whether the process is complete or not if it needs to do post processing such as uploading a snapshot after it is being cut.
 
-##### Snapshot Statuses
+##### The is_ready_to_use Parameter
 
-A snapshot could have the following statusus: UPLOADING, READY, and ERROR.
-
-Some cloud providers will upload the snapshot to a location in the cloud (i.e., an object store) after the snapshot is cut.
-Uploading may be a long process that could take hours.
-If a `freeze` operation was done on the application before taking the snapshot, it could be a long time before the application can be running again if we wait until the upload is complete to `thaw` the application.
+Some cloud providers will process the snapshot after the snapshot is cut, i.e., uploading the snapshot to a location in the cloud (i.e., an object store) after the snapshot is cut.
+A process such as uploading may be a long process that could take hours.
+If a `freeze` operation was done on the application before taking the snapshot, it could be a long time before the application can be running again if we wait until the process is complete to `thaw` the application.
 The purpose of `freeze` is to ensure the application data is in consistent state.
 When `freeze` is performed, the container is paused and the application is also paused.
 When `thaw` is performed, the container and the application start running again.
-During the snapshot uploading phase, since the snapshot is already cut, a `thaw` operation can be performed so application can start running without waiting for the upload to complete.
-The status of the snapshot will become `READY` after the upload is complete.
+During the snapshot processing phase, since the snapshot is already cut, a `thaw` operation can be performed so application can start running without waiting for the process to complete.
+The `is_ready_to_use` parameter of the snapshot will become `true` after the process is complete.
 
-For cloud providers and storage systems that don't have the uploading process, the status should be `READY` after the snapshot is cut.
-`thaw` can be done when the status is `READY` in this case.
+For cloud providers and storage systems that don't have the process, the `is_ready_to_use` parameter should be `true` after the snapshot is cut.
+`thaw` can be done when the `is_ready_to_use` parameter is `true` in this case.
 
-A `CREATING` status is not included here because CreateSnapshot is synchronous and will block until the snapshot is cut.
+A gRPC error code SHALL be returned if an error occurs during any stage of the snapshotting process.
+A CO SHOULD explicitly delete snapshots when an error occurs.
 
-`ERROR` is a terminal snapshot status.
-A CO SHOULD explicitly delete snapshots in this status.
-
-The SnapshotStatus parameter provides guidance to the CO on what action can be taken in the process of snapshotting.
+The `is_ready_to_use` parameter provides guidance to the CO on what action can be taken in the process of snapshotting.
 Based on this information, CO can issue repeated (idemponent) calls to CreateSnapshot, monitor the response, and make decisions.
 Note that CreateSnapshot is a synchronous call and it must block until the snapshot is cut.
-If the cloud provider or storage system does not need to upload the snapshot after it is cut, the status returned by CreateSnapshot SHALL be `READY`.
-If the cloud provider or storage system needs to upload the snapshot after the snapshot is cut, the status returned by CreateSnapshot SHALL be `UPLOADING`.
-CO MAY continue to call CreateSnapshot while waiting for the upload to complete until the status becomes `READY`.
+If the cloud provider or storage system does not need to process the snapshot (i.e., upload the snapshot) after it is cut, the `is_ready_to_use` parameter returned by CreateSnapshot SHALL be `true`.
+If the cloud provider or storage system needs to process the snapshot after the snapshot is cut, the `is_ready_to_use` parameter returned by CreateSnapshot SHALL be `false`.
+CO MAY continue to call CreateSnapshot while waiting for the process to complete until `is_ready_to_use` becomes `true`.
 Note that CreateSnapshot no longer blocks after the snapshot is cut.
 
-Alternatively, ListSnapshots can be called repeatedly with snapshot_id as filtering to wait for the upload to complete.
+Alternatively, ListSnapshots can be called repeatedly with snapshot_id as filtering to wait for the process to complete.
 ListSnapshots SHALL return with current information regarding the snapshots on the storage system.
-When upload is complete, the status of the snapshot from ListSnapshots SHALL become `READY`.
+When the process is complete, the `is_ready_to_use` parameter of the snapshot from ListSnapshots SHALL become `true`.
+The downside of calling ListSnapshots is that ListSnapshots will not return a gRPC error code if an error occurs during the processing. So calling CreateSnapshot repeatedly is the preferred way to check if the processing is complete.
 
 ### Node Service RPC
 
