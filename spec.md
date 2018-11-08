@@ -2080,6 +2080,8 @@ If the plugin is unable to complete the NodeGetCapabilities call successfully, i
 A Node Plugin MUST implement this RPC call if the plugin has `PUBLISH_UNPUBLISH_VOLUME` controller capability.
 The Plugin SHALL assume that this RPC will be executed on the node where the volume will be used.
 The CO SHOULD call this RPC for the node at which it wants to place the workload.
+The CO MAY call this RPC more than once for a given node.
+The SP SHALL NOT expect the CO to call this RPC more than once.
 The result of this call will be used by CO in `ControllerPublishVolume`.
 
 ```protobuf
