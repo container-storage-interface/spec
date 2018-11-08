@@ -84,7 +84,7 @@ export PATH := $(shell pwd):$(PATH)
 ########################################################################
 CSI_PROTO := ../../csi.proto
 CSI_PKG_ROOT := github.com/container-storage-interface/spec
-CSI_PKG_SUB := $(shell cat $(CSI_PROTO) | sed -n -e 's/^package.\([^;]*\);$$/\1/p'|tr '.' '/')
+CSI_PKG_SUB := $(shell cat $(CSI_PROTO) | sed -n -e 's/^package.\([^;]*\).v[0-9]\+;$$/\1/p'|tr '.' '/')
 CSI_BUILD := $(CSI_PKG_SUB)/.build
 CSI_GO := $(CSI_PKG_SUB)/csi.pb.go
 CSI_A := csi.a
