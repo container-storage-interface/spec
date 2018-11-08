@@ -663,8 +663,7 @@ message CreateVolumeRequest {
   // Secrets required by plugin to complete volume creation request.
   // This field is OPTIONAL. Refer to the `Secrets Requirements`
   // section on how to use this field.
-  map<string, string> controller_create_secrets = 5
-    [(csi_secret) = true];
+  map<string, string> secrets = 5 [(csi_secret) = true];
 
   // If specified, the new volume will be pre-populated with data from
   // this source. This field is OPTIONAL.
@@ -1034,8 +1033,7 @@ message DeleteVolumeRequest {
   // Secrets required by plugin to complete volume deletion request.
   // This field is OPTIONAL. Refer to the `Secrets Requirements`
   // section on how to use this field.
-  map<string, string> controller_delete_secrets = 2
-    [(csi_secret) = true];
+  map<string, string> secrets = 2 [(csi_secret) = true];
 }
 
 message DeleteVolumeResponse {
@@ -1089,8 +1087,7 @@ message ControllerPublishVolumeRequest {
   // Secrets required by plugin to complete controller publish volume
   // request. This field is OPTIONAL. Refer to the
   // `Secrets Requirements` section on how to use this field.
-  map<string, string> controller_publish_secrets = 5
-    [(csi_secret) = true];
+  map<string, string> secrets = 5 [(csi_secret) = true];
 
   // Attributes of the volume to be used on a node. This field is
   // OPTIONAL and MUST match the attributes of the Volume identified
@@ -1152,8 +1149,7 @@ message ControllerUnpublishVolumeRequest {
   // ControllerPublishVolume call for the specified volume.
   // This field is OPTIONAL. Refer to the `Secrets Requirements`
   // section on how to use this field.
-  map<string, string> controller_unpublish_secrets = 3
-    [(csi_secret) = true];
+  map<string, string> secrets = 3 [(csi_secret) = true];
 }
 
 message ControllerUnpublishVolumeResponse {
@@ -1204,8 +1200,7 @@ message ValidateVolumeCapabilitiesRequest {
   // Secrets required by plugin to complete volume validation request.
   // This field is OPTIONAL. Refer to the `Secrets Requirements`
   // section on how to use this field.
-  map<string, string> controller_validate_secrets = 5
-    [(csi_secret) = true];
+  map<string, string> secrets = 5 [(csi_secret) = true];
 }
 
 message ValidateVolumeCapabilitiesResponse {
@@ -1433,7 +1428,7 @@ message CreateSnapshotRequest {
   // Secrets required by plugin to complete snapshot creation request.
   // This field is OPTIONAL. Refer to the `Secrets Requirements`
   // section on how to use this field.
-  map<string, string> create_snapshot_secrets = 3 [(csi_secret) = true];
+  map<string, string> secrets = 3 [(csi_secret) = true];
 
   // Plugin specific parameters passed in as opaque key-value pairs.
   // This field is OPTIONAL. The Plugin is responsible for parsing and
@@ -1548,7 +1543,7 @@ message DeleteSnapshotRequest {
   // Secrets required by plugin to complete snapshot deletion request.
   // This field is OPTIONAL. Refer to the `Secrets Requirements`
   // section on how to use this field.
-  map<string, string> delete_snapshot_secrets = 2 [(csi_secret) = true];
+  map<string, string> secrets = 2 [(csi_secret) = true];
 }
 
 message DeleteSnapshotResponse {}
@@ -1735,7 +1730,7 @@ message NodeStageVolumeRequest {
   // Secrets required by plugin to complete node stage volume request.
   // This field is OPTIONAL. Refer to the `Secrets Requirements`
   // section on how to use this field.
-  map<string, string> node_stage_secrets = 5 [(csi_secret) = true];
+  map<string, string> secrets = 5 [(csi_secret) = true];
 
   // Attributes of the volume to publish. This field is OPTIONAL and
   // MUST match the attributes of the `Volume` identified by
@@ -1835,7 +1830,7 @@ The following table shows what the Plugin SHOULD return when receiving a second 
 | MULTI_NODE     | OK (idempotent) | ALREADY_EXISTS | OK                  | OK                 |
 | Non MULTI_NODE | OK (idempotent) | ALREADY_EXISTS | FAILED_PRECONDITION | FAILED_PRECONDITION|
 
-(`Tn`: target path of the n-th `NodePublishVolume`, `Pn`: other arguments of the n-th `NodePublishVolume` except `node_publish_secrets`)
+(`Tn`: target path of the n-th `NodePublishVolume`, `Pn`: other arguments of the n-th `NodePublishVolume` except `secrets`)
 
 ```protobuf
 message NodePublishVolumeRequest {
@@ -1876,7 +1871,7 @@ message NodePublishVolumeRequest {
   // Secrets required by plugin to complete node publish volume request.
   // This field is OPTIONAL. Refer to the `Secrets Requirements`
   // section on how to use this field.
-  map<string, string> node_publish_secrets = 7 [(csi_secret) = true];
+  map<string, string> secrets = 7 [(csi_secret) = true];
 
   // Attributes of the volume to publish. This field is OPTIONAL and
   // MUST match the attributes of the Volume identified by
