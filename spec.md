@@ -1382,10 +1382,7 @@ message ControllerServiceCapability {
       // CREATE_DELETE_SNAPSHOT MUST support creating volume from
       // snapshot.
       CREATE_DELETE_SNAPSHOT = 5;
-      // LIST_SNAPSHOTS is NOT REQUIRED. For plugins that need to
-      // process a snapshot after it is being cut, LIST_SNAPSHOTS
-      // COULD be used with the snapshot_id as the filter to query
-      // whether the processing is complete or not.
+      // LIST_SNAPSHOTS is NOT REQUIRED.
       LIST_SNAPSHOTS = 6;
       // Plugins supporting volume cloning at the storage level MAY
       // report this capability. The source volume must be managed by
@@ -1414,11 +1411,12 @@ A Controller Plugin MUST implement this RPC call if it has `CREATE_DELETE_SNAPSH
 This RPC will be called by the CO to create a new snapshot from a source volume on behalf of a user.
 
 This operation MUST be idempotent.
-If a snapshot corresponding to the specified snapshot `name` is already successfully cut and processed (i.e., if upload is part of the process) and is compatible with the specified `source_volume_id` and `parameters` in the `CreateSnapshotRequest`, the Plugin MUST reply `0 OK` with the corresponding `CreateSnapshotResponse`.
+If a snapshot corresponding to the specified snapshot `name` is successfully cut and ready to use (meaning it may be specified as a `volume_content_source` in a `CreateVolumeRequest`), the Plugin MUST reply `0 OK` with the corresponding `CreateSnapshotResponse`.
 
 If an error occurs before a snapshot is cut, `CreateSnapshot` SHOULD return a corresponding gRPC error code that reflects the error condition.
 
 For plugins that supports snapshot post processing such as uploading, `CreateSnapshot` SHOULD return `0 OK` and `is_ready_to_use` SHOULD be set to `false` after the snapshot is cut but still being processed.
+CO SHOULD then reissue the same `CreateSnapshotRequest` periodically until boolean `is_ready_to_use` flips to `true` indicating the snapshot has been "processed" and is ready to use to create new volumes.
 If an error occurs during the process, `CreateSnapshot` SHOULD return a corresponding gRPC error code that reflects the error condition.
 
 A snapshot MAY be used as the source to provision a new volume.
@@ -1493,8 +1491,9 @@ message Snapshot {
   // field is REQUIRED.
   int64 created_at = 4;
 
-  // Indicates if a snapshot is ready to use. The default value is
-  // false. This field is REQUIRED.
+  // Indicates if a snapshot is ready to use as a
+  // `volume_content_source` in a `CreateVolumeRequest`. The default
+  // value is false. This field is REQUIRED.
   bool is_ready_to_use = 5;
 }
 ```
@@ -1638,7 +1637,6 @@ If a `CreateSnapshot` operation times out before the snapshot is cut, leaving th
 2. The CO takes no further action regarding the timed out RPC, a snapshot is possibly leaked and the operator/user is expected to clean up.
 
 It is NOT REQUIRED for a controller plugin to implement the `LIST_SNAPSHOTS` capability if it supports the `CREATE_DELETE_SNAPSHOT` capability: the onus is upon the CO to take into consideration the full range of plugin capabilities before deciding how to proceed in the above scenario.
-A controller plugin COULD implement the `LIST_SNAPSHOTS` capability and call it repeatedly with the `snapshot_id` as a filter to query whether the process is complete or not if it needs to do post processing such as uploading a snapshot after it is being cut.
 
 ##### The is_ready_to_use Parameter
 
@@ -1654,20 +1652,19 @@ The `is_ready_to_use` parameter of the snapshot will become `true` after the pro
 For cloud providers and storage systems that don't have the process, the `is_ready_to_use` parameter should be `true` after the snapshot is cut.
 `thaw` can be done when the `is_ready_to_use` parameter is `true` in this case.
 
+If the cloud provider or storage system needs to process the snapshot after the snapshot is cut, the `is_ready_to_use` parameter returned by CreateSnapshot SHALL be `false`.
+CO MAY continue to call CreateSnapshot while waiting for the process to complete until `is_ready_to_use` becomes `true`.
+Note that CreateSnapshot no longer blocks after the snapshot is cut.
+
 A gRPC error code SHALL be returned if an error occurs during any stage of the snapshotting process.
 A CO SHOULD explicitly delete snapshots when an error occurs.
 
 The `is_ready_to_use` parameter provides guidance to the CO on what action can be taken in the process of snapshotting.
 Based on this information, CO can issue repeated (idemponent) calls to CreateSnapshot, monitor the response, and make decisions.
 Note that CreateSnapshot is a synchronous call and it must block until the snapshot is cut.
-If the cloud provider or storage system does not need to process the snapshot (i.e., upload the snapshot) after it is cut, the `is_ready_to_use` parameter returned by CreateSnapshot SHALL be `true`.
-If the cloud provider or storage system needs to process the snapshot after the snapshot is cut, the `is_ready_to_use` parameter returned by CreateSnapshot SHALL be `false`.
-CO MAY continue to call CreateSnapshot while waiting for the process to complete until `is_ready_to_use` becomes `true`.
-Note that CreateSnapshot no longer blocks after the snapshot is cut.
 
-Alternatively, ListSnapshots can be called repeatedly with snapshot_id as filtering to wait for the process to complete.
 ListSnapshots SHALL return with current information regarding the snapshots on the storage system.
-When the process is complete, the `is_ready_to_use` parameter of the snapshot from ListSnapshots SHALL become `true`.
+When processing is complete, the `is_ready_to_use` parameter of the snapshot from ListSnapshots SHALL become `true`.
 The downside of calling ListSnapshots is that ListSnapshots will not return a gRPC error code if an error occurs during the processing. So calling CreateSnapshot repeatedly is the preferred way to check if the processing is complete.
 
 ### Node Service RPC

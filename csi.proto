@@ -770,10 +770,7 @@ message ControllerServiceCapability {
       // CREATE_DELETE_SNAPSHOT MUST support creating volume from
       // snapshot.
       CREATE_DELETE_SNAPSHOT = 5;
-      // LIST_SNAPSHOTS is NOT REQUIRED. For plugins that need to
-      // process a snapshot after it is being cut, LIST_SNAPSHOTS
-      // COULD be used with the snapshot_id as the filter to query
-      // whether the processing is complete or not.
+      // LIST_SNAPSHOTS is NOT REQUIRED.
       LIST_SNAPSHOTS = 6;
       // Plugins supporting volume cloning at the storage level MAY
       // report this capability. The source volume must be managed by
@@ -857,8 +854,9 @@ message Snapshot {
   // field is REQUIRED.
   int64 created_at = 4;
 
-  // Indicates if a snapshot is ready to use. The default value is
-  // false. This field is REQUIRED.
+  // Indicates if a snapshot is ready to use as a
+  // `volume_content_source` in a `CreateVolumeRequest`. The default
+  // value is false. This field is REQUIRED.
   bool is_ready_to_use = 5;
 }
 message DeleteSnapshotRequest {
