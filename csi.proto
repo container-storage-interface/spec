@@ -631,30 +631,51 @@ message ValidateVolumeCapabilitiesRequest {
   // The ID of the volume to check. This field is REQUIRED.
   string volume_id = 1;
 
-  // The capabilities that the CO wants to check for the volume. This
-  // call SHALL return "supported" only if all the volume capabilities
-  // specified below are supported. This field is REQUIRED.
-  repeated VolumeCapability volume_capabilities = 2;
-
   // Attributes of the volume to check. This field is OPTIONAL and MUST
   // match the attributes of the Volume identified by `volume_id`.
-  map<string, string> volume_attributes = 3;
+  map<string, string> volume_attributes = 2;
 
-  // Specifies where (regions, zones, racks, etc.) the caller believes
-  // the volume is accessible from.
-  // A caller MAY specify multiple topologies to indicate they believe
-  // the volume to be accessible from multiple locations.
-  // This field is OPTIONAL. This field SHALL NOT be set unless the
-  // plugin advertises the ACCESSIBILITY_CONSTRAINTS capability.
-  repeated Topology accessible_topology = 4;
+  // The capabilities that the CO wants to check for the volume. This
+  // call SHALL return "confirmed" only if all the volume capabilities
+  // specified below are supported. This field is REQUIRED.
+  repeated VolumeCapability volume_capabilities = 3;
+
+  // See CreateVolumeRequest.parameters.
+  // This field is OPTIONAL.
+  map<string, string> parameters = 4;
+
+  // Secrets required by plugin to complete volume validation request.
+  // This field is OPTIONAL. Refer to the `Secrets Requirements`
+  // section on how to use this field.
+  map<string, string> controller_validate_secrets = 5;
 }
 
 message ValidateVolumeCapabilitiesResponse {
-  // True if the Plugin supports the specified capabilities for the
-  // given volume. This field is REQUIRED.
-  bool supported = 1;
+  message Confirmed {
+    // Volume attributes validated by the plugin.
+    // This field is OPTIONAL.
+    map<string, string> volume_attributes = 1;
 
-  // Message to the CO if `supported` above is false. This field is
+    // Volume capabilities supported by the plugin.
+    // This field is REQUIRED.
+    repeated VolumeCapability volume_capabilities = 2;
+
+    // The volume creation parameters validated by the plugin.
+    // This field is OPTIONAL.
+    map<string, string> parameters = 3;
+  }
+
+  // Confirmed indicates to the CO the set of capabilities that the
+  // plugin has validated. This field SHALL only be set to a non-empty
+  // value for successful validation responses.
+  // For successful validation responses, the CO SHALL compare the
+  // fields of this message to the originally requested capabilities in
+  // order to guard against an older plugin reporting "valid" for newer
+  // capability fields that it does not yet understand.
+  // This field is OPTIONAL.
+  Confirmed confirmed = 1;
+
+  // Message to the CO if `confirmed` above is empty. This field is
   // OPTIONAL.
   // An empty string is equal to an unspecified field value.
   string message = 2;
