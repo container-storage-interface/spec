@@ -348,20 +348,9 @@ service Node {
   rpc NodeGetVolumeStats (NodeGetVolumeStatsRequest)
     returns (NodeGetVolumeStatsResponse) {}
 
-  // NodeGetId is being deprecated in favor of NodeGetInfo and will be
-  // removed in CSI 1.0. Existing drivers, however, may depend on this
-  // RPC call and hence this RPC call MUST be implemented by the CSI
-  // plugin prior to v1.0.
-  rpc NodeGetId (NodeGetIdRequest)
-    returns (NodeGetIdResponse) {
-    option deprecated = true;
-  }
-
   rpc NodeGetCapabilities (NodeGetCapabilitiesRequest)
     returns (NodeGetCapabilitiesResponse) {}
 
-  // Prior to CSI 1.0 - CSI plugins MUST implement both NodeGetId and
-  // NodeGetInfo RPC calls.
   rpc NodeGetInfo (NodeGetInfoRequest)
     returns (NodeGetInfoResponse) {}
 }
@@ -2003,34 +1992,6 @@ The CO MUST implement the specified error recovery behavior when it encounters t
 | Condition | gRPC Code | Description | Recovery Behavior |
 |-----------|-----------|-------------|-------------------|
 | Volume does not exist | 5 NOT_FOUND | Indicates that a volume corresponding to the specified `volume_id` does not exist on specified `volume_path`. | Caller MUST verify that the `volume_id` is correct and that the volume is accessible on specified `volume_path` and has not been deleted before retrying with exponential back off. |
-
-#### `NodeGetId`
-
-`NodeGetId` RPC call is deprecated.
-Users of this RPC call SHOULD use `NodeGetInfo`.
-
-A Node Plugin MUST implement this RPC call if the plugin has `PUBLISH_UNPUBLISH_VOLUME` controller capability.
-The Plugin SHALL assume that this RPC will be executed on the node where the volume will be used.
-The CO SHOULD call this RPC for the node at which it wants to place the workload.
-The result of this call will be used by CO in `ControllerPublishVolume`.
-
-```protobuf
-message NodeGetIdRequest {
-  // Intentionally empty.
-}
-
-message NodeGetIdResponse {
-  // The ID of the node as understood by the SP which SHALL be used by
-  // CO in subsequent `ControllerPublishVolume`.
-  // This is a REQUIRED field.
-  string node_id = 1;
-}
-```
-
-##### NodeGetId Errors
-
-If the plugin is unable to complete the NodeGetId call successfully, it MUST return a non-ok gRPC code in the gRPC status.
-The CO MUST implement the specified error recovery behavior when it encounters the gRPC error code.
 
 #### `NodeGetCapabilities`
 
