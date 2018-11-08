@@ -67,20 +67,9 @@ service Node {
   rpc NodeGetVolumeStats (NodeGetVolumeStatsRequest)
     returns (NodeGetVolumeStatsResponse) {}
 
-  // NodeGetId is being deprecated in favor of NodeGetInfo and will be
-  // removed in CSI 1.0. Existing drivers, however, may depend on this
-  // RPC call and hence this RPC call MUST be implemented by the CSI
-  // plugin prior to v1.0.
-  rpc NodeGetId (NodeGetIdRequest)
-    returns (NodeGetIdResponse) {
-    option deprecated = true;
-  }
-
   rpc NodeGetCapabilities (NodeGetCapabilitiesRequest)
     returns (NodeGetCapabilitiesResponse) {}
 
-  // Prior to CSI 1.0 - CSI plugins MUST implement both NodeGetId and
-  // NodeGetInfo RPC calls.
   rpc NodeGetInfo (NodeGetInfoRequest)
     returns (NodeGetInfoResponse) {}
 }
@@ -1092,16 +1081,6 @@ message VolumeUsage {
 
   // Units by which values are measured. This field is REQUIRED.
   Unit unit = 4;
-}
-message NodeGetIdRequest {
-  // Intentionally empty.
-}
-
-message NodeGetIdResponse {
-  // The ID of the node as understood by the SP which SHALL be used by
-  // CO in subsequent `ControllerPublishVolume`.
-  // This is a REQUIRED field.
-  string node_id = 1;
 }
 message NodeGetCapabilitiesRequest {
   // Intentionally empty.
