@@ -1024,7 +1024,6 @@ The CO MUST implement the specified error recovery behavior when it encounters t
 
 A Controller Plugin MUST implement this RPC call if it has `CREATE_DELETE_VOLUME` capability.
 This RPC will be called by the CO to deprovision a volume.
-If successful, the storage space associated with the volume MUST be released and all the data in the volume SHALL NOT be accessible anymore.
 
 This operation MUST be idempotent.
 If a volume corresponding to the specified `volume_id` does not exist or the artifacts associated with the volume do not exist anymore, the Plugin MUST reply `0 OK`.
@@ -1535,7 +1534,6 @@ The CO MUST implement the specified error recovery behavior when it encounters t
 
 A Controller Plugin MUST implement this RPC call if it has `CREATE_DELETE_SNAPSHOT` capability.
 This RPC will be called by the CO to delete a snapshot.
-If successful, the storage space associated with the snapshot MUST be released and all the data in the snapshot SHALL NOT be accessible anymore.
 
 This operation MUST be idempotent.
 If a snapshot corresponding to the specified `snapshot_id` does not exist or the artifacts associated with the snapshot do not exist anymore, the Plugin MUST reply `0 OK`.
