@@ -1420,8 +1420,33 @@ CO SHOULD then reissue the same `CreateSnapshotRequest` periodically until boole
 If an error occurs during the process, `CreateSnapshot` SHOULD return a corresponding gRPC error code that reflects the error condition.
 
 A snapshot MAY be used as the source to provision a new volume.
-A CreateVolumeRequest message may specify an OPTIONAL source snapshot parameter.
+A CreateVolumeRequest message MAY specify an OPTIONAL source snapshot parameter.
 Reverting a snapshot, where data in the original volume is erased and replaced with data in the snapshot, is an advanced functionality not every storage system can support and therefore is currently out of scope.
+
+##### The is_ready_to_use Parameter
+
+Some SPs MAY "process" the snapshot after the snapshot is cut, for example, maybe uploading the snapshot somewhere after the snapshot is cut.
+The post-cut process may be a long process that could take hours.
+The CO MAY freeze the application using the source volume before taking the snapshot.
+The purpose of `freeze` is to ensure the application data is in consistent state.
+When `freeze` is performed, the container is paused and the application is also paused.
+When `thaw` is performed, the container and the application start running again.
+During the snapshot processing phase, since the snapshot is already cut, a `thaw` operation can be performed so application can start running without waiting for the process to complete.
+The `is_ready_to_use` parameter of the snapshot will become `true` after the process is complete.
+
+For cloud providers and storage systems that don't have the process, the `is_ready_to_use` parameter SHOULD be `true` after the snapshot is cut.
+`thaw` can be done when the `is_ready_to_use` parameter is `true` in this case.
+
+The `is_ready_to_use` parameter provides guidance to the CO on when it can "thaw" the application in the process of snapshotting.
+If the cloud provider or storage system needs to process the snapshot after the snapshot is cut, the `is_ready_to_use` parameter returned by CreateSnapshot SHALL be `false`.
+CO MAY continue to call CreateSnapshot while waiting for the process to complete until `is_ready_to_use` becomes `true`.
+Note that CreateSnapshot no longer blocks after the snapshot is cut.
+
+A gRPC error code SHALL be returned if an error occurs during any stage of the snapshotting process.
+A CO SHOULD explicitly delete snapshots when an error occurs.
+
+Based on this information, CO can issue repeated (idemponent) calls to CreateSnapshot, monitor the response, and make decisions.
+Note that CreateSnapshot is a synchronous call and it MUST block until the snapshot is cut.
 
 ```protobuf
 message CreateSnapshotRequest {
@@ -1508,7 +1533,7 @@ The CO MUST implement the specified error recovery behavior when it encounters t
 |-----------|-----------|-------------|-------------------|
 | Snapshot already exists but is incompatible | 6 ALREADY_EXISTS | Indicates that a snapshot corresponding to the specified snapshot `name` already exists but is incompatible with the specified `volume_id`. | Caller MUST fix the arguments or use a different `name` before retrying. |
 | Operation pending for snapshot | 10 ABORTED | Indicates that there is already an operation pending for the specified snapshot. In general the Cluster Orchestrator (CO) is responsible for ensuring that there is no more than one call "in-flight" per snapshot at a given time. However, in some circumstances, the CO MAY lose state (for example when the CO crashes and restarts), and MAY issue multiple calls simultaneously for the same snapshot. The Plugin, SHOULD handle this as gracefully as possible, and MAY return this error code to reject secondary calls. | Caller SHOULD ensure that there are no other calls pending for the specified snapshot, and then retry with exponential back off. |
-| Not enough space to create snapshot | 13 RESOURCE_EXHAUSTED | There is not enough space on the storage system to handle the create snapshot request. | Caller should fail this request. Future calls to CreateSnapshot may succeed if space is freed up. |
+| Not enough space to create snapshot | 13 RESOURCE_EXHAUSTED | There is not enough space on the storage system to handle the create snapshot request. | Caller should fail this request. Future calls to CreateSnapshot MAY succeed if space is freed up. |
 
 
 #### `DeleteSnapshot`
@@ -1637,31 +1662,6 @@ If a `CreateSnapshot` operation times out before the snapshot is cut, leaving th
 2. The CO takes no further action regarding the timed out RPC, a snapshot is possibly leaked and the operator/user is expected to clean up.
 
 It is NOT REQUIRED for a controller plugin to implement the `LIST_SNAPSHOTS` capability if it supports the `CREATE_DELETE_SNAPSHOT` capability: the onus is upon the CO to take into consideration the full range of plugin capabilities before deciding how to proceed in the above scenario.
-
-##### The is_ready_to_use Parameter
-
-Some cloud providers will process the snapshot after the snapshot is cut, i.e., uploading the snapshot to a location in the cloud (i.e., an object store) after the snapshot is cut.
-A process such as uploading may be a long process that could take hours.
-If a `freeze` operation was done on the application before taking the snapshot, it could be a long time before the application can be running again if we wait until the process is complete to `thaw` the application.
-The purpose of `freeze` is to ensure the application data is in consistent state.
-When `freeze` is performed, the container is paused and the application is also paused.
-When `thaw` is performed, the container and the application start running again.
-During the snapshot processing phase, since the snapshot is already cut, a `thaw` operation can be performed so application can start running without waiting for the process to complete.
-The `is_ready_to_use` parameter of the snapshot will become `true` after the process is complete.
-
-For cloud providers and storage systems that don't have the process, the `is_ready_to_use` parameter should be `true` after the snapshot is cut.
-`thaw` can be done when the `is_ready_to_use` parameter is `true` in this case.
-
-If the cloud provider or storage system needs to process the snapshot after the snapshot is cut, the `is_ready_to_use` parameter returned by CreateSnapshot SHALL be `false`.
-CO MAY continue to call CreateSnapshot while waiting for the process to complete until `is_ready_to_use` becomes `true`.
-Note that CreateSnapshot no longer blocks after the snapshot is cut.
-
-A gRPC error code SHALL be returned if an error occurs during any stage of the snapshotting process.
-A CO SHOULD explicitly delete snapshots when an error occurs.
-
-The `is_ready_to_use` parameter provides guidance to the CO on what action can be taken in the process of snapshotting.
-Based on this information, CO can issue repeated (idemponent) calls to CreateSnapshot, monitor the response, and make decisions.
-Note that CreateSnapshot is a synchronous call and it must block until the snapshot is cut.
 
 ListSnapshots SHALL return with current information regarding the snapshots on the storage system.
 When processing is complete, the `is_ready_to_use` parameter of the snapshot from ListSnapshots SHALL become `true`.
