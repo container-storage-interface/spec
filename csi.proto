@@ -770,7 +770,6 @@ message ControllerServiceCapability {
       // CREATE_DELETE_SNAPSHOT MUST support creating volume from
       // snapshot.
       CREATE_DELETE_SNAPSHOT = 5;
-      // LIST_SNAPSHOTS is NOT REQUIRED.
       LIST_SNAPSHOTS = 6;
       // Plugins supporting volume cloning at the storage level MAY
       // report this capability. The source volume must be managed by
@@ -857,7 +856,7 @@ message Snapshot {
   // Indicates if a snapshot is ready to use as a
   // `volume_content_source` in a `CreateVolumeRequest`. The default
   // value is false. This field is REQUIRED.
-  bool is_ready_to_use = 5;
+  bool ready_to_use = 5;
 }
 message DeleteSnapshotRequest {
   // The ID of the snapshot to be deleted.
