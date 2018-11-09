@@ -4,7 +4,6 @@ approvers:
   - jieyu # Representing Mesos
   - jdef # Representing Mesos
   - ddebroy # Representing Docker
-  - mycure # Representing Docker
   - julian-hj # Representing Cloud Foundry
   - paulcwarren # Representing Cloud Foundry
 reviewers:
