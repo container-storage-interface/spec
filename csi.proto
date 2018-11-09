@@ -770,10 +770,6 @@ message ControllerServiceCapability {
       // CREATE_DELETE_SNAPSHOT MUST support creating volume from
       // snapshot.
       CREATE_DELETE_SNAPSHOT = 5;
-      // LIST_SNAPSHOTS is NOT REQUIRED. For plugins that need to upload
-      // a snapshot after it is being cut, LIST_SNAPSHOTS COULD be used
-      // with the snapshot_id as the filter to query whether the
-      // uploading process is complete or not.
       LIST_SNAPSHOTS = 6;
       // Plugins supporting volume cloning at the storage level MAY
       // report this capability. The source volume must be managed by
@@ -857,37 +853,10 @@ message Snapshot {
   // field is REQUIRED.
   int64 created_at = 4;
 
-  // The status of a snapshot.
-  SnapshotStatus status = 5;
-}
-
-// The status of a snapshot.
-message SnapshotStatus {
-  enum Type {
-     UNKNOWN = 0;
-     // A snapshot is ready for use.
-     READY = 1;
-     // A snapshot is cut and is now being uploaded.
-     // Some cloud providers and storage systems uploads the snapshot
-     // to the cloud after the snapshot is cut. During this phase,
-     // `thaw` can be done so the application can be running again if
-     // `freeze` was done before taking the snapshot.
-     UPLOADING = 2;
-     // An error occurred during the snapshot uploading process.
-     // This error status is specific for uploading because
-     // `CreateSnaphot` is a blocking call before the snapshot is
-     // cut and therefore it SHOULD NOT come back with an error
-     // status when an error occurs. Instead a gRPC error code SHALL
-     // be returned by `CreateSnapshot` when an error occurs before
-     // a snapshot is cut.
-     ERROR_UPLOADING = 3;
-  }
-  // This field is REQUIRED.
-  Type type = 1;
-
-  // Additional information to describe why a snapshot ended up in the
-  // `ERROR_UPLOADING` status. This field is OPTIONAL.
-  string details = 2;
+  // Indicates if a snapshot is ready to use as a
+  // `volume_content_source` in a `CreateVolumeRequest`. The default
+  // value is false. This field is REQUIRED.
+  bool ready_to_use = 5;
 }
 message DeleteSnapshotRequest {
   // The ID of the snapshot to be deleted.
@@ -927,7 +896,8 @@ message ListSnapshotsRequest {
   // Identity information for a specific snapshot. This field is
   // OPTIONAL. It can be used to list only a specific snapshot.
   // ListSnapshots will return with current snapshot information
-  // and will not block if the snapshot is being uploaded.
+  // and will not block if the snapshot is being processed after
+  // it is cut.
   string snapshot_id = 4;
 }
 
