@@ -584,8 +584,10 @@ message ControllerPublishVolumeRequest {
   // This is a REQUIRED field.
   VolumeCapability volume_capability = 3;
 
-  // Whether to publish the volume in readonly mode. This field is
-  // REQUIRED.
+  // Whether to publish the volume in readonly mode.
+  // CO MUST set this field to false if SP does not have the
+  // PUBLISH_READONLY controller capability.
+  // This is a REQUIRED field.
   bool readonly = 4;
 
   // Secrets required by plugin to complete controller publish volume
@@ -776,6 +778,9 @@ message ControllerServiceCapability {
       // the same plugin. Not all volume sources and parameters
       // combinations may work.
       CLONE_VOLUME = 7;
+      // Indicates the SP supports ControllerPublishVolume.readonly
+      // field.
+      PUBLISH_READONLY = 8;
     }
 
     Type type = 1;
