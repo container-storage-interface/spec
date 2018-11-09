@@ -650,7 +650,6 @@ message CreateVolumeRequest {
   // specified it MUST always be honored, even when creating volumes
   // from a source; which may force some backends to internally extend
   // the volume after creating it.
-
   CapacityRange capacity_range = 2;
 
   // The capabilities that the provisioned volume MUST have. SP MUST
