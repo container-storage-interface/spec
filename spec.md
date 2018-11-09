@@ -816,15 +816,22 @@ message Volume {
   // subsequent calls to refer to the provisioned volume.
   string id = 2;
 
-  // Attributes reflect static properties of a volume and MUST be passed
-  // to volume validation and publishing calls.
-  // Attributes SHALL be opaque to a CO. Attributes SHALL NOT be mutable
-  // and SHALL be safe for the CO to cache. Attributes SHOULD NOT
-  // contain sensitive information. Attributes MAY NOT uniquely identify
-  // a volume. A volume uniquely identified by `id` SHALL always report
-  // the same attributes. This field is OPTIONAL and when present MUST
-  // be passed to volume validation and publishing calls.
-  map<string, string> attributes = 3;
+  // Opaque static properties of the volume. SP MAY use this field to
+  // ensure subsequent volume validation and publishing calls have
+  // contextual information.
+  // The contents of this field SHALL be opaque to a CO.
+  // The contents of this field SHALL NOT be mutable.
+  // The contents of this field SHALL be safe for the CO to cache.
+  // The contents of this field SHOULD NOT contain sensitive
+  // information.
+  // The contents of this field SHOULD NOT be used for uniquely
+  // identifying a volume. The `id` alone should be sufficient to
+  // identify the volume.
+  // A volume uniquely identified by `id` SHALL always report the same
+  // volume_context.
+  // This field is OPTIONAL and when present MUST be passed to volume
+  // validation and publishing calls.
+  map<string, string> volume_context = 3;
 
   // If specified, indicates that the volume is not empty and is
   // pre-populated with data from the specified source.
@@ -1116,18 +1123,27 @@ message ControllerPublishVolumeRequest {
   // `Secrets Requirements` section on how to use this field.
   map<string, string> secrets = 5 [(csi_secret) = true];
 
-  // Attributes of the volume to be used on a node. This field is
-  // OPTIONAL and MUST match the attributes of the Volume identified
-  // by `volume_id`.
-  map<string, string> volume_attributes = 6;
+  // Volume context as returned by CO in CreateVolumeRequest. This field
+  // is OPTIONAL and MUST match the volume_context of the volume
+  // identified by `volume_id`.
+  map<string, string> volume_context = 6;
 }
 
 message ControllerPublishVolumeResponse {
-  // The SP specific information that will be passed to the Plugin in
-  // the subsequent `NodeStageVolume` or `NodePublishVolume` calls
-  // for the given volume.
-  // This information is opaque to the CO. This field is OPTIONAL.
-  map<string, string> publish_info = 1;
+  // Opaque static publish properties of the volume. SP MAY use this
+  // field to ensure subsequent `NodeStageVolume` or `NodePublishVolume`
+  // calls calls have contextual information.
+  // The contents of this field SHALL be opaque to a CO.
+  // The contents of this field SHALL NOT be mutable.
+  // The contents of this field SHALL be safe for the CO to cache.
+  // The contents of this field SHOULD NOT contain sensitive
+  // information.
+  // The contents of this field SHOULD NOT be used for uniquely
+  // identifying a volume. The `id` alone should be sufficient to
+  // identify the volume.
+  // This field is OPTIONAL and when present MUST be passed to
+  // subsequent `NodeStageVolume` or `NodePublishVolume` calls
+  map<string, string> publish_context = 1;
 }
 ```
 
@@ -1211,9 +1227,10 @@ message ValidateVolumeCapabilitiesRequest {
   // The ID of the volume to check. This field is REQUIRED.
   string volume_id = 1;
 
-  // Attributes of the volume to check. This field is OPTIONAL and MUST
-  // match the attributes of the Volume identified by `volume_id`.
-  map<string, string> volume_attributes = 2;
+  // Volume context as returned by CO in CreateVolumeRequest. This field
+  // is OPTIONAL and MUST match the volume_context of the volume
+  // identified by `volume_id`.
+  map<string, string> volume_context = 2;
 
   // The capabilities that the CO wants to check for the volume. This
   // call SHALL return "confirmed" only if all the volume capabilities
@@ -1232,9 +1249,9 @@ message ValidateVolumeCapabilitiesRequest {
 
 message ValidateVolumeCapabilitiesResponse {
   message Confirmed {
-    // Volume attributes validated by the plugin.
+    // Volume context validated by the plugin.
     // This field is OPTIONAL.
-    map<string, string> volume_attributes = 1;
+    map<string, string> volume_context = 1;
 
     // Volume capabilities supported by the plugin.
     // This field is REQUIRED.
@@ -1715,7 +1732,7 @@ message NodeStageVolumeRequest {
   // has `PUBLISH_UNPUBLISH_VOLUME` controller capability, and SHALL be
   // left unset if the corresponding Controller Plugin does not have
   // this capability. This is an OPTIONAL field.
-  map<string, string> publish_info = 2;
+  map<string, string> publish_context = 2;
 
   // The path to which the volume MAY be staged. It MUST be an
   // absolute path in the root filesystem of the process serving this
@@ -1738,10 +1755,10 @@ message NodeStageVolumeRequest {
   // section on how to use this field.
   map<string, string> secrets = 5 [(csi_secret) = true];
 
-  // Attributes of the volume to stage. This field is OPTIONAL and
-  // MUST match the attributes of the `Volume` identified by
-  // `volume_id`.
-  map<string, string> volume_attributes = 6;
+  // Volume context as returned by CO in CreateVolumeRequest. This field
+  // is OPTIONAL and MUST match the volume_context of the volume
+  // identified by `volume_id`.
+  map<string, string> volume_context = 6;
 }
 
 message NodeStageVolumeResponse {
@@ -1848,7 +1865,7 @@ message NodePublishVolumeRequest {
   // has `PUBLISH_UNPUBLISH_VOLUME` controller capability, and SHALL be
   // left unset if the corresponding Controller Plugin does not have
   // this capability. This is an OPTIONAL field.
-  map<string, string> publish_info = 2;
+  map<string, string> publish_context = 2;
 
   // The path to which the volume was staged by `NodeStageVolume`.
   // It MUST be an absolute path in the root filesystem of the process
@@ -1882,10 +1899,10 @@ message NodePublishVolumeRequest {
   // section on how to use this field.
   map<string, string> secrets = 7 [(csi_secret) = true];
 
-  // Attributes of the volume to publish. This field is OPTIONAL and
-  // MUST match the attributes of the Volume identified by
-  // `volume_id`.
-  map<string, string> volume_attributes = 8;
+  // Volume context as returned by CO in CreateVolumeRequest. This field
+  // is OPTIONAL and MUST match the volume_context of the volume
+  // identified by `volume_id`.
+  map<string, string> volume_context = 8;
 }
 
 message NodePublishVolumeResponse {
