@@ -1708,10 +1708,13 @@ message NodeStageVolumeRequest {
   // this capability. This is an OPTIONAL field.
   map<string, string> publish_info = 2;
 
-  // The path to which the volume will be published. It MUST be an
+  // The path to which the volume MAY be staged. It MUST be an
   // absolute path in the root filesystem of the process serving this
   // request. The CO SHALL ensure that there is only one
-  // staging_target_path per volume.
+  // `staging_target_path` per volume. The CO SHALL ensure that the
+  // process serving the request has `read` and `write` permission to
+  // the path, and is able to create files or directories at the path
+  // if it does not exist.
   // This is a REQUIRED field.
   string staging_target_path = 3;
 
@@ -1724,7 +1727,7 @@ message NodeStageVolumeRequest {
   // section on how to use this field.
   map<string, string> secrets = 5 [(csi_secret) = true];
 
-  // Attributes of the volume to publish. This field is OPTIONAL and
+  // Attributes of the volume to stage. This field is OPTIONAL and
   // MUST match the attributes of the `Volume` identified by
   // `volume_id`.
   map<string, string> volume_attributes = 6;
@@ -1772,7 +1775,7 @@ message NodeUnstageVolumeRequest {
   // The ID of the volume. This field is REQUIRED.
   string volume_id = 1;
 
-  // The path at which the volume was published. It MUST be an absolute
+  // The path at which the volume was staged. It MUST be an absolute
   // path in the root filesystem of the process serving this request.
   // This is a REQUIRED field.
   string staging_target_path = 2;
@@ -1836,7 +1839,7 @@ message NodePublishVolumeRequest {
   // this capability. This is an OPTIONAL field.
   map<string, string> publish_info = 2;
 
-  // The path to which the device was mounted by `NodeStageVolume`.
+  // The path to which the volume was staged by `NodeStageVolume`.
   // It MUST be an absolute path in the root filesystem of the process
   // serving this request.
   // It MUST be set if the Node Plugin implements the
@@ -1847,8 +1850,9 @@ message NodePublishVolumeRequest {
   // The path to which the volume will be published. It MUST be an
   // absolute path in the root filesystem of the process serving this
   // request. The CO SHALL ensure uniqueness of target_path per volume.
-  // The CO SHALL ensure that the path exists, and that the process
-  // serving the request has `read` and `write` permissions to the path.
+  // The CO SHALL ensure that the process serving the request has
+  // `read` and `write` permissions to the path, and is able to create
+  // files or directories at the path if it does not exist.
   // This is a REQUIRED field.
   string target_path = 4;
 
