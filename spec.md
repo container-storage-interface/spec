@@ -1099,11 +1099,13 @@ message ControllerPublishVolumeRequest {
   // field to match the node ID returned by `NodeGetInfo`.
   string node_id = 2;
 
-  // The capability of the volume the CO expects the volume to have.
+  // Volume capability describing how the CO intends to use this volume.
+  // SP MUST ensure the CO can use the published volume as described.
+  // Otherwise SP MUST return the appropriate gRPC error code.
   // This is a REQUIRED field.
   VolumeCapability volume_capability = 3;
 
-  // Whether to publish the volume in readonly mode.
+  // Indicates SP MUST publish the volume in readonly mode.
   // CO MUST set this field to false if SP does not have the
   // PUBLISH_READONLY controller capability.
   // This is a REQUIRED field.
@@ -1725,7 +1727,9 @@ message NodeStageVolumeRequest {
   // This is a REQUIRED field.
   string staging_target_path = 3;
 
-  // The capability of the volume the CO expects the volume to have.
+  // Volume capability describing how the CO intends to use this volume.
+  // SP MUST ensure the CO can use the staged volume as described.
+  // Otherwise SP MUST return the appropriate gRPC error code.
   // This is a REQUIRED field.
   VolumeCapability volume_capability = 4;
 
@@ -1863,12 +1867,14 @@ message NodePublishVolumeRequest {
   // This is a REQUIRED field.
   string target_path = 4;
 
-  // The capability of the volume the CO expects the volume to have.
+  // Volume capability describing how the CO intends to use this volume.
+  // SP MUST ensure the CO can use the published volume as described.
+  // Otherwise SP MUST return the appropriate gRPC error code.
   // This is a REQUIRED field.
   VolumeCapability volume_capability = 5;
 
-  // Whether to publish the volume in readonly mode. This field is
-  // REQUIRED.
+  // Indicates SP MUST publish the volume in readonly mode.
+  // This field is REQUIRED.
   bool readonly = 6;
 
   // Secrets required by plugin to complete node publish volume request.
