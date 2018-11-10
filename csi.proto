@@ -197,17 +197,22 @@ message CreateVolumeRequest {
   // specified it MUST always be honored, even when creating volumes
   // from a source; which may force some backends to internally extend
   // the volume after creating it.
-
   CapacityRange capacity_range = 2;
 
-  // The capabilities that the provisioned volume MUST have: the Plugin
-  // MUST provision a volume that could satisfy ALL of the
-  // capabilities specified in this list. The Plugin MUST assume that
-  // the CO MAY use the  provisioned volume later with ANY of the
-  // capabilities specified in this list. This also enables the CO to do
-  // early validation: if ANY of the specified volume capabilities are
-  // not supported by the Plugin, the call SHALL fail. This field is
-  // REQUIRED.
+  // The capabilities that the provisioned volume MUST have. SP MUST
+  // provision a volume that will satisfy ALL of the capabilities
+  // specified in this list. Otherwise SP MUST return the appropriate
+  // gRPC error code.
+  // The Plugin MUST assume that the CO MAY use the provisioned volume
+  // with ANY of the capabilities specified in this list.
+  // For example, a CO MAY specify two volume capabilities: one with
+  // access mode SINGLE_NODE_WRITER and another with access mode
+  // MULTI_NODE_READER_ONLY. In this case, the SP MUST verify that the
+  // provisioned volume can be used in either mode.
+  // This also enables the CO to do early validation: If ANY of the
+  // specified volume capabilities are not supported by the SP, the call
+  // MUST return the appropriate gRPC error code.
+  // This field is REQUIRED.
   repeated VolumeCapability volume_capabilities = 3;
 
   // Plugin specific parameters passed in as opaque key-value pairs.
