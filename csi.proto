@@ -251,14 +251,14 @@ message VolumeContentSource {
     // This field is REQUIRED. Plugin is REQUIRED to support creating
     // volume from snapshot if it supports the capability
     // CREATE_DELETE_SNAPSHOT.
-    string id = 1;
+    string snapshot_id = 1;
   }
 
   message VolumeSource {
     // Contains identity information for the existing source volume.
     // This field is REQUIRED. Plugins reporting CLONE_VOLUME
     // capability MUST support creating a volume from another volume.
-    string id = 1;
+    string volume_id = 1;
   }
 
   oneof type {
@@ -361,7 +361,7 @@ message Volume {
   // Contains identity information for the created volume. This field is
   // REQUIRED. The identity information will be used by the CO in
   // subsequent calls to refer to the provisioned volume.
-  string id = 2;
+  string volume_id = 2;
 
   // Opaque static properties of the volume. SP MAY use this field to
   // ensure subsequent volume validation and publishing calls have
@@ -372,10 +372,10 @@ message Volume {
   // The contents of this field SHOULD NOT contain sensitive
   // information.
   // The contents of this field SHOULD NOT be used for uniquely
-  // identifying a volume. The `id` alone should be sufficient to
+  // identifying a volume. The `volume_id` alone should be sufficient to
   // identify the volume.
-  // A volume uniquely identified by `id` SHALL always report the same
-  // volume_context.
+  // A volume uniquely identified by `volume_id` SHALL always report the
+  // same volume_context.
   // This field is OPTIONAL and when present MUST be passed to volume
   // validation and publishing calls.
   map<string, string> volume_context = 3;
@@ -875,7 +875,7 @@ message Snapshot {
   // will not change over time. This field is REQUIRED. The identity
   // information will be used by the CO in subsequent calls to refer to
   // the provisioned snapshot.
-  string id = 2;
+  string snapshot_id = 2;
 
   // Identity information for the source volume. Note that creating a
   // snapshot from a snapshot is not supported here so the source has to
