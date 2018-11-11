@@ -54,7 +54,7 @@ The Container Storage Interface (CSI) will
 
 ### Non-Goals in MVP
 
-The Container Storage Interface (CSI) explicitly will not define, provide, or dictate in v0.1:
+The Container Storage Interface (CSI) explicitly will not define, provide, or dictate:
 
 * Specific mechanisms by which a Plugin Supervisor manages the lifecycle of a Plugin, including:
   * How to maintain state (e.g. what is attached, mounted, etc.).
@@ -272,7 +272,7 @@ Each SP MUST provide:
 
 ```protobuf
 syntax = "proto3";
-package csi.v0;
+package csi.v1;
 
 import "google/protobuf/descriptor.proto";
 import "google/protobuf/wrappers.proto";
