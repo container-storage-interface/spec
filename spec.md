@@ -523,7 +523,7 @@ message GetPluginCapabilitiesRequest {
 message GetPluginCapabilitiesResponse {
   // All the capabilities that the controller service supports. This
   // field is OPTIONAL.
-  repeated PluginCapability capabilities = 2;
+  repeated PluginCapability capabilities = 1;
 }
 
 // Specifies a capability of the plugin.
@@ -1429,7 +1429,7 @@ message ControllerGetCapabilitiesRequest {
 message ControllerGetCapabilitiesResponse {
   // All the capabilities that the controller service supports. This
   // field is OPTIONAL.
-  repeated ControllerServiceCapability capabilities = 2;
+  repeated ControllerServiceCapability capabilities = 1;
 }
 
 // Specifies a capability of the controller service.
