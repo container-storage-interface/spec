@@ -398,7 +398,7 @@ Scalar fields, even REQUIRED ones, will be defaulted if not specified and any fi
 #### Timeouts
 
 Any of the RPCs defined in this spec MAY timeout and MAY be retried.
-The CO MAY chooses the maximum time it is willing to wait for a call, how long it waits between retries, and how many time it retries (these values are not negotiated between plugin and CO).
+The CO MAY choose the maximum time it is willing to wait for a call, how long it waits between retries, and how many time it retries (these values are not negotiated between plugin and CO).
 
 Idempotency requirements ensure that a retried call with the same fields continues where it left off when retried.
 The only way to cancel a call is to issue a "negation" call if one exists.
