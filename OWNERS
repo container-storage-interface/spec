@@ -3,6 +3,7 @@ approvers:
   - thockin # Representing Kubernetes
   - jieyu # Representing Mesos
   - jdef # Representing Mesos
+  - anusha-ragunathan # Representing Docker
   - ddebroy # Representing Docker
   - julian-hj # Representing Cloud Foundry
   - paulcwarren # Representing Cloud Foundry
