@@ -3,6 +3,7 @@ syntax = "proto3";
 package csi.v1;
 
 import "google/protobuf/descriptor.proto";
+import "google/protobuf/timestamp.proto";
 import "google/protobuf/wrappers.proto";
 
 option go_package = "csi";
@@ -900,11 +901,8 @@ message Snapshot {
   string source_volume_id = 3;
 
   // Timestamp when the point-in-time snapshot is taken on the storage
-  // system. The format of this field SHOULD be a Unix nanoseconds time
-  // encoded as an int64. On Unix, the command `date +%s%N` returns the
-  // current time in nanoseconds since 1970-01-01 00:00:00 UTC. This
-  // field is REQUIRED.
-  int64 created_at = 4;
+  // system. This field is REQUIRED.
+  .google.protobuf.Timestamp creation_time = 4;
 
   // Indicates if a snapshot is ready to use as a
   // `volume_content_source` in a `CreateVolumeRequest`. The default
