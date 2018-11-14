@@ -902,7 +902,7 @@ message Snapshot {
 
   // Timestamp when the point-in-time snapshot is taken on the storage
   // system. This field is REQUIRED.
-  .google.protobuf.Timestamp created_at = 4;
+  .google.protobuf.Timestamp creation_time = 4;
 
   // Indicates if a snapshot is ready to use as a
   // `volume_content_source` in a `CreateVolumeRequest`. The default
