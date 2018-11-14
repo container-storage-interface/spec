@@ -585,12 +585,11 @@ message PluginCapability {
       ONLINE = 1;
 
       // OFFLINE indicates that volumes currently published and
-      // available on a node MAY NOT be expanded via
-      // ControllerExpandVolume. When a plugin support
-      // OFFLINE volume expansion it MUST implement either the
-      // EXPAND_VOLUME controller capability or both the EXPAND_VOLUME
-      // controller capability and the EXPAND_VOLUME node
-      // capability.
+      // available on a node SHALL NOT be expanded via
+      // ControllerExpandVolume. When a plugin supports OFFLINE volume
+      // expansion it MUST implement either the EXPAND_VOLUME controller
+      // capability or both the EXPAND_VOLUME controller capability and
+      // the EXPAND_VOLUME node capability.
       //
       // Example 1: Given a block storage volume type (e.g. Azure Disk)
       //   that does not support expansion of "node-attached" (i.e.
@@ -1769,7 +1768,7 @@ This RPC allows the CO to expand the size of a volume.
 This call MAY be made by the CO during any time in the lifecycle of the volume after creation if plugin has `VolumeExpansion.ONLINE` capability.
 If plugin has `EXPAND_VOLUME` node capability, then `NodeExpandVolume` MUST be called after successful `ControllerExpandVolume` and `node_expansion_required` in `ControllerExpandVolumeResponse` is `true`.
 
-If the plugin has only `VolumeExpansion.OFFLINE` expansion capability and volume is currently published or available on a node - `ControllerExpandVolume` MUST be called ONLY after either:
+If the plugin has only `VolumeExpansion.OFFLINE` expansion capability and volume is currently published or available on a node then `ControllerExpandVolume` MUST be called ONLY after either:
 - The plugin has controller `PUBLISH_UNPUBLISH_VOLUME` capability and `ControllerUnpublishVolume` has been invoked successfully.
 
 OR ELSE
@@ -1785,15 +1784,15 @@ Examples:
   Given an ElasticSearch process that runs on Azure Disk and needs more space.
   - The administrator takes the Elasticsearch server offline by stopping the workload and CO calls `ControllerUnpublishVolume`.
   - The administrator requests more space for the volume from CO.
-  - The CO in turn first makes `ControllerExpandVolume` RPC call which results in requesting more space from Azure cloudprovider for volume-id that was being used by ElasticSearch.
+  - The CO in turn first makes `ControllerExpandVolume` RPC call which results in requesting more space from Azure cloud provider for volume ID that was being used by ElasticSearch.
   - Once `ControllerExpandVolume` is completed and successful, the CO will inform administrator about it and administrator will resume the ElasticSearch workload.
-  - The node on which ElasticSearch workload is scheduled the CO calls `NodeExpandVolume` after calling `NodeStageVolume`.
+  - On the node where the ElasticSearch workload is scheduled, the CO calls `NodeExpandVolume` after calling `NodeStageVolume`.
   - Calling `NodeExpandVolume` on volume results in expanding the underlying file system and added space becomes available to workload when it starts up.
 * Online Volume Expansion:
   Given a Mysql server running on Openstack Cinder and needs more space.
   - The administrator requests more space for volume from the CO.
   - The CO in turn first makes `ControllerExpandVolume` RPC call which results in requesting more space from Openstack Cinder for given volume.
-  - The node on which mysql workload is running the CO makes `NodeExpandVolume` RPC call while volume is in-use using path where volume is staged.
+  - On the node where the mysql workload is running, the CO calls `NodeExpandVolume` while volume is in-use using the path where the volume is staged.
   - Calling `NodeExpandVolume` on volume results in expanding the underlying file system and added space automatically becomes available to mysql workload without any downtime.
 
 
@@ -1808,7 +1807,7 @@ message ControllerExpandVolumeRequest {
 
   // Secrets required by the plugin for expanding the volume.
   // This field is OPTIONAL.
-  map<string, string> controller_expand_volume_secrets = 3;
+  map<string, string> secrets = 3 [(csi_secret) = true];
 }
 
 message ControllerExpandVolumeResponse {
@@ -1828,9 +1827,7 @@ message ControllerExpandVolumeResponse {
 |-----------|-----------|-------------|-------------------|
 | Volume does not exist | 5 NOT FOUND | Indicates that a volume corresponding to the specified volume_id does not exist. | Caller MUST verify that the volume_id is correct and that the volume is accessible and has not been deleted before retrying with exponential back off. |
 | Volume in use | 9 FAILED_PRECONDITION | Indicates that the volume corresponding to the specified `volume_id` could not be expanded because it is currently published on a node but the plugin does not have ONLINE expansion capability. | Caller SHOULD ensure that volume is not published and retry with exponential back off. |
-| Operation pending for volume | 10 ABORTED | Indicates that there is already an expansion operation pending for the specified volume. In general the Cluster Orchestrator (CO) is responsible for ensuring that there is no more than one call "in-flight" per volume at a given time. However in some circumstances, the CO MAY lose state and MAY issue multiple calls simultaneously for the same volume. The Plugin, SHOULD handle this as gracefully as possible, and MAY return this error code to reject secondary calls| Caller SHOULD ensure that there are no other calls pending for the specified volume, and then retry with exponential back off. |
 | Unsupported `capacity_range` | 11 OUT_OF_RANGE | Indicates that the capacity range is not allowed by the Plugin. More human-readable information MAY be provided in the gRPC `status.message` field. | Caller MUST fix the capacity range before retrying. |
-| Call not implemented | 12 UNIMPLEMENTED | ControllerExpandVolume call is not implemented by the plugin or disabled in the Plugin's current mode of operation. | Caller MUST NOT retry. Caller MAY call `ControllerGetCapabilities` or `NodeGetCapabilities` to discover Plugin capabilities. |
 
 #### RPC Interactions
 
@@ -2290,8 +2287,11 @@ This RPC call allows CO to expand volume on a node.
 
 `NodeExpandVolume` ONLY supports expansion of already node-published or node-staged volumes on the given `volume_path`.
 
-If plugin has `STAGE_UNSTAGE_VOLUME` node capability - `NodeExpandVolume` MUST be called after successful `NodeStageVolume`.
-`NodeExpandVolume` MAY be called before or after `NodePublishVolume` if plugin has `STAGE_UNSTAGE_VOLUME` node capability otherwise `NodeExpandVolume` MUST be called after successful `NodePublishVolume`.
+If plugin has `STAGE_UNSTAGE_VOLUME` node capability then:
+* `NodeExpandVolume` MUST be called after successful `NodeStageVolume`.
+* `NodeExpandVolume` MAY be called before or after `NodePublishVolume`.
+
+Otherwise `NodeExpandVolume` MUST be called after successful `NodePublishVolume`.
 
 ```protobuf
 message NodeExpandVolumeRequest {
@@ -2302,8 +2302,11 @@ message NodeExpandVolumeRequest {
   string volume_path = 2;
 
   // This allows CO to specify the capacity requirements of the volume
-  // after expansion. If omitted the volume will be expanded to maximum
-  // available size. This field is OPTIONAL.
+  // after expansion. If capacity_range is omitted then a plugin MAY
+  // inspect the file system of the volume to determine the maximum
+  // capacity to which the volume can be expanded. In such cases a
+  // plugin MAY expand the volume to its maximum capacity.
+  // This field is OPTIONAL.
   CapacityRange capacity_range = 3;
 }
 
@@ -2319,9 +2322,7 @@ message NodeExpandVolumeResponse {
 |-----------------------|-----------|-----------------------|-----------------------------------|
 | Volume does not exist | 5 NOT FOUND | Indicates that a volume corresponding to the specified volume_id does not exist. | Caller MUST verify that the volume_id is correct and that the volume is accessible and has not been deleted before retrying with exponential back off. |
 | Volume in use | 9 FAILED_PRECONDITION | Indicates that the volume corresponding to the specified `volume_id` could not be expanded because it is node-published or node-staged and the underlying filesystem does not support expansion of published or staged volumes. | Caller MUST NOT retry. |
-| Operating pending for Volume | 10 ABORTED | Indicates that there is already an expansion operation pending for the specified volume. In general the Cluster Orchestrator (CO) is responsible for ensuring that there is no more than one call "in-flight" per volume at a given time. However in some circumstances, the CO MAY lose state and MAY issue multiple calls simultaneously for the same volume. The Plugin, SHOULD handle this as gracefully as possible, and MAY return this error code to reject secondary calls. | Caller SHOULD ensure that there are no other calls pending for the specified volume, and then retry with exponential back off. |
 | Unsupported capacity_range | 11 OUT_OF_RANGE | Indicates that the capacity range is not allowed by the Plugin. More human-readable information MAY be provided in the gRPC `status.message` field. | Caller MUST fix the capacity range before retrying. |
-| Call not implemented | 12 UNIMPLEMENTED | NodeExpandVolume call is not implemented by the plugin or disabled in the Plugin's current mode of operation. | Caller MUST NOT retry. Caller MAY call ControllerGetCapabilities or NodeGetCapabilities to discover Plugin capabilities. |
 
 ## Protocol
 
