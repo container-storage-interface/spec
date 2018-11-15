@@ -980,11 +980,12 @@ message NodeStageVolumeRequest {
 
   // The path to which the volume MAY be staged. It MUST be an
   // absolute path in the root filesystem of the process serving this
-  // request. The CO SHALL ensure that there is only one
-  // `staging_target_path` per volume. The CO SHALL ensure that the
-  // process serving the request has `read` and `write` permission to
-  // the path, and is able to create files or directories at the path
-  // if it does not exist.
+  // request, and MUST be a directory. The CO SHALL ensure that there
+  // is only one `staging_target_path` per volume. The CO SHALL ensure
+  // that the path is directory and that the process serving the
+  // request has `read` and `write` permission to that directory. The
+  // CO SHALL be responsible for creating the directory if it does not
+  // exist.
   // This is a REQUIRED field.
   string staging_target_path = 3;
 
@@ -1043,9 +1044,14 @@ message NodePublishVolumeRequest {
   // The path to which the volume will be published. It MUST be an
   // absolute path in the root filesystem of the process serving this
   // request. The CO SHALL ensure uniqueness of target_path per volume.
-  // The CO SHALL ensure that the process serving the request has
-  // `read` and `write` permissions to the path, and is able to create
-  // files or directories at the path if it does not exist.
+  // The CO SHALL ensure that the parent directory of this path exists
+  // and that the process serving the request has `read` and `write`
+  // permissions to that parent directory.
+  // For volumes with an access type of block, the SP SHALL place the
+  // block device at target_path.
+  // For volumes with an access type of mount, the SP SHALL place the
+  // mounted directory at target_path.
+  // Creation of target_path is the responsibility of the SP.
   // This is a REQUIRED field.
   string target_path = 4;
 
@@ -1079,6 +1085,7 @@ message NodeUnpublishVolumeRequest {
 
   // The path at which the volume was published. It MUST be an absolute
   // path in the root filesystem of the process serving this request.
+  // The SP MUST delete the file or directory it created at this path.
   // This is a REQUIRED field.
   string target_path = 2;
 }
