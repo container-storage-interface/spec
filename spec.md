@@ -338,6 +338,9 @@ service Controller {
 
   rpc ListSnapshots (ListSnapshotsRequest)
     returns (ListSnapshotsResponse) {}
+
+  rpc ControllerExpandVolume (ControllerExpandVolumeRequest)
+    returns (ControllerExpandVolumeResponse) {}
 }
 
 service Node {
@@ -355,6 +358,11 @@ service Node {
 
   rpc NodeGetVolumeStats (NodeGetVolumeStatsRequest)
     returns (NodeGetVolumeStatsResponse) {}
+
+
+  rpc NodeExpandVolume(NodeExpandVolumeRequest)
+    returns (NodeExpandVolumeResponse) {}
+
 
   rpc NodeGetCapabilities (NodeGetCapabilitiesRequest)
     returns (NodeGetCapabilitiesResponse) {}
@@ -526,7 +534,6 @@ message PluginCapability {
   message Service {
     enum Type {
       UNKNOWN = 0;
-
       // CONTROLLER_SERVICE indicates that the Plugin provides RPCs for
       // the ControllerService. Plugins SHOULD provide this capability.
       // In rare cases certain plugins MAY wish to omit the
@@ -548,9 +555,55 @@ message PluginCapability {
     Type type = 1;
   }
 
+  message VolumeExpansion {
+    enum Type {
+      UNKNOWN = 0;
+
+      // ONLINE indicates that volumes may be expanded when published to
+      // a node. When a Plugin implements this capability it MUST
+      // implement either the EXPAND_VOLUME controller capability or the
+      // EXPAND_VOLUME node capability or both. When a plugin supports
+      // ONLINE volume expansion and also has the EXPAND_VOLUME
+      // controller capability then the plugin MUST support expansion of
+      // volumes currently published and available on a node. When a
+      // plugin supports ONLINE volume expansion and also has the
+      // EXPAND_VOLUME node capability then the plugin MAY support
+      // expansion of node-published volume via NodeExpandVolume.
+      //
+      // Example 1: Given a shared filesystem volume (e.g. GlusterFs),
+      //   the Plugin may set the ONLINE volume expansion capability and
+      //   implement ControllerExpandVolume but not NodeExpandVolume.
+      //
+      // Example 2: Given a block storage volume type (e.g. EBS), the
+      //   Plugin may set the ONLINE volume expansion capability and
+      //   implement both ControllerExpandVolume and NodeExpandVolume.
+      //
+      // Example 3: Given a Plugin that supports volume expansion only
+      //   upon a node, the Plugin may set the ONLINE volume
+      //   expansion capability and implement NodeExpandVolume but not
+      //   ControllerExpandVolume.
+      ONLINE = 1;
+
+      // OFFLINE indicates that volumes currently published and
+      // available on a node SHALL NOT be expanded via
+      // ControllerExpandVolume. When a plugin supports OFFLINE volume
+      // expansion it MUST implement either the EXPAND_VOLUME controller
+      // capability or both the EXPAND_VOLUME controller capability and
+      // the EXPAND_VOLUME node capability.
+      //
+      // Example 1: Given a block storage volume type (e.g. Azure Disk)
+      //   that does not support expansion of "node-attached" (i.e.
+      //   controller-published) volumes, the Plugin may indicate
+      //   OFFLINE volume expansion support and implement both
+      //   ControllerExpandVolume and NodeExpandVolume.
+      OFFLINE = 2;
+    }
+  }
+
   oneof type {
     // Service that the plugin supports.
     Service service = 1;
+    VolumeExpansion volume_expansion = 2;
   }
 }
 ```
@@ -1442,14 +1495,19 @@ message ControllerServiceCapability {
       // snapshot.
       CREATE_DELETE_SNAPSHOT = 5;
       LIST_SNAPSHOTS = 6;
+
       // Plugins supporting volume cloning at the storage level MAY
       // report this capability. The source volume MUST be managed by
       // the same plugin. Not all volume sources and parameters
       // combinations MAY work.
       CLONE_VOLUME = 7;
+
       // Indicates the SP supports ControllerPublishVolume.readonly
       // field.
       PUBLISH_READONLY = 8;
+
+      // See VolumeExpansion for details.
+      EXPAND_VOLUME = 9;
     }
 
     Type type = 1;
@@ -1701,6 +1759,75 @@ The CO MUST implement the specified error recovery behavior when it encounters t
 |-----------|-----------|-------------|-------------------|
 | Invalid `starting_token` | 10 ABORTED | Indicates that `starting_token` is not valid. | Caller SHOULD start the `ListSnapshots` operation again with an empty `starting_token`. |
 
+
+#### `ControllerExpandVolume`
+
+A Controller plugin MUST implement this RPC call if plugin has `EXPAND_VOLUME` controller capability.
+This RPC allows the CO to expand the size of a volume.
+
+This call MAY be made by the CO during any time in the lifecycle of the volume after creation if plugin has `VolumeExpansion.ONLINE` capability.
+If plugin has `EXPAND_VOLUME` node capability, then `NodeExpandVolume` MUST be called after successful `ControllerExpandVolume` and `node_expansion_required` in `ControllerExpandVolumeResponse` is `true`.
+
+If the plugin has only `VolumeExpansion.OFFLINE` expansion capability and volume is currently published or available on a node then `ControllerExpandVolume` MUST be called ONLY after either:
+- The plugin has controller `PUBLISH_UNPUBLISH_VOLUME` capability and `ControllerUnpublishVolume` has been invoked successfully.
+
+OR ELSE
+
+- The plugin does NOT have controller `PUBLISH_UNPUBLISH_VOLUME` capability, the plugin has node `STAGE_UNSTAGE_VOLUME` capability, and `NodeUnstageVolume` has been completed successfully.
+
+OR ELSE
+
+- The plugin does NOT have controller `PUBLISH_UNPUBLISH_VOLUME` capability, nor node `STAGE_UNSTAGE_VOLUME` capability, and `NodeUnpublishVolume` has completed successfully.
+
+Examples:
+* Offline Volume Expansion:
+  Given an ElasticSearch process that runs on Azure Disk and needs more space.
+  - The administrator takes the Elasticsearch server offline by stopping the workload and CO calls `ControllerUnpublishVolume`.
+  - The administrator requests more space for the volume from CO.
+  - The CO in turn first makes `ControllerExpandVolume` RPC call which results in requesting more space from Azure cloud provider for volume ID that was being used by ElasticSearch.
+  - Once `ControllerExpandVolume` is completed and successful, the CO will inform administrator about it and administrator will resume the ElasticSearch workload.
+  - On the node where the ElasticSearch workload is scheduled, the CO calls `NodeExpandVolume` after calling `NodeStageVolume`.
+  - Calling `NodeExpandVolume` on volume results in expanding the underlying file system and added space becomes available to workload when it starts up.
+* Online Volume Expansion:
+  Given a Mysql server running on Openstack Cinder and needs more space.
+  - The administrator requests more space for volume from the CO.
+  - The CO in turn first makes `ControllerExpandVolume` RPC call which results in requesting more space from Openstack Cinder for given volume.
+  - On the node where the mysql workload is running, the CO calls `NodeExpandVolume` while volume is in-use using the path where the volume is staged.
+  - Calling `NodeExpandVolume` on volume results in expanding the underlying file system and added space automatically becomes available to mysql workload without any downtime.
+
+
+```protobuf
+message ControllerExpandVolumeRequest {
+  // The ID of the volume to expand. This field is REQUIRED.
+  string volume_id = 1;
+
+  // This allows CO to specify the capacity requirements of the volume
+  // after expansion. This field is REQUIRED.
+  CapacityRange capacity_range = 2;
+
+  // Secrets required by the plugin for expanding the volume.
+  // This field is OPTIONAL.
+  map<string, string> secrets = 3 [(csi_secret) = true];
+}
+
+message ControllerExpandVolumeResponse {
+  // Capacity of volume after expansion. This field is REQUIRED.
+  int64 capacity_bytes = 1;
+
+  // Whether node expansion is required for the volume. When true
+  // the CO MUST make NodeExpandVolume RPC call on the node. This field
+  // is REQUIRED.
+  bool node_expansion_required = 2;
+}
+```
+
+##### ControllerExpandVolume Errors
+
+| Condition | gRPC Code | Description | Recovery Behavior |
+|-----------|-----------|-------------|-------------------|
+| Volume does not exist | 5 NOT FOUND | Indicates that a volume corresponding to the specified volume_id does not exist. | Caller MUST verify that the volume_id is correct and that the volume is accessible and has not been deleted before retrying with exponential back off. |
+| Volume in use | 9 FAILED_PRECONDITION | Indicates that the volume corresponding to the specified `volume_id` could not be expanded because it is currently published on a node but the plugin does not have ONLINE expansion capability. | Caller SHOULD ensure that volume is not published and retry with exponential back off. |
+| Unsupported `capacity_range` | 11 OUT_OF_RANGE | Indicates that the capacity range is not allowed by the Plugin. More human-readable information MAY be provided in the gRPC `status.message` field. | Caller MUST fix the capacity range before retrying. |
 
 #### RPC Interactions
 
@@ -2085,6 +2212,8 @@ message NodeServiceCapability {
       // then it MUST implement NodeGetVolumeStats RPC
       // call for fetching volume statistics.
       GET_VOLUME_STATS = 2;
+      // See VolumeExpansion for details.
+      EXPAND_VOLUME = 3;
     }
 
     Type type = 1;
@@ -2100,7 +2229,6 @@ message NodeServiceCapability {
 ##### NodeGetCapabilities Errors
 
 If the plugin is unable to complete the NodeGetCapabilities call successfully, it MUST return a non-ok gRPC code in the gRPC status.
-
 
 #### `NodeGetInfo`
 
@@ -2158,6 +2286,50 @@ message NodeGetInfoResponse {
 
 If the plugin is unable to complete the NodeGetInfo call successfully, it MUST return a non-ok gRPC code in the gRPC status.
 The CO MUST implement the specified error recovery behavior when it encounters the gRPC error code.
+
+#### `NodeExpandVolume`
+
+A Node Plugin MUST implement this RPC call if it has `EXPAND_VOLUME` node capability.
+This RPC call allows CO to expand volume on a node.
+
+`NodeExpandVolume` ONLY supports expansion of already node-published or node-staged volumes on the given `volume_path`.
+
+If plugin has `STAGE_UNSTAGE_VOLUME` node capability then:
+* `NodeExpandVolume` MUST be called after successful `NodeStageVolume`.
+* `NodeExpandVolume` MAY be called before or after `NodePublishVolume`.
+
+Otherwise `NodeExpandVolume` MUST be called after successful `NodePublishVolume`.
+
+```protobuf
+message NodeExpandVolumeRequest {
+  // The ID of the volume. This field is REQUIRED.
+  string volume_id = 1;
+
+  // The path on which volume is available. This field is REQUIRED.
+  string volume_path = 2;
+
+  // This allows CO to specify the capacity requirements of the volume
+  // after expansion. If capacity_range is omitted then a plugin MAY
+  // inspect the file system of the volume to determine the maximum
+  // capacity to which the volume can be expanded. In such cases a
+  // plugin MAY expand the volume to its maximum capacity.
+  // This field is OPTIONAL.
+  CapacityRange capacity_range = 3;
+}
+
+message NodeExpandVolumeResponse {
+  // The capacity of the volume in bytes. This field is OPTIONAL.
+  int64 capacity_bytes = 1;
+}
+```
+
+##### NodeExpandVolume Errors
+
+| Condition             | gRPC code | Description           | Recovery Behavior                 |
+|-----------------------|-----------|-----------------------|-----------------------------------|
+| Volume does not exist | 5 NOT FOUND | Indicates that a volume corresponding to the specified volume_id does not exist. | Caller MUST verify that the volume_id is correct and that the volume is accessible and has not been deleted before retrying with exponential back off. |
+| Volume in use | 9 FAILED_PRECONDITION | Indicates that the volume corresponding to the specified `volume_id` could not be expanded because it is node-published or node-staged and the underlying filesystem does not support expansion of published or staged volumes. | Caller MUST NOT retry. |
+| Unsupported capacity_range | 11 OUT_OF_RANGE | Indicates that the capacity range is not allowed by the Plugin. More human-readable information MAY be provided in the gRPC `status.message` field. | Caller MUST fix the capacity range before retrying. |
 
 ## Protocol
 
