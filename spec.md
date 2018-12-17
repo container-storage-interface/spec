@@ -359,10 +359,14 @@ service Node {
   rpc NodeGetVolumeStats (NodeGetVolumeStatsRequest)
     returns (NodeGetVolumeStatsResponse) {}
 
-
   rpc NodeExpandVolume(NodeExpandVolumeRequest)
     returns (NodeExpandVolumeResponse) {}
 
+  rpc NodeFreezeVolumeFilesystem(NodeFreezeVolumeFilesystemRequest)
+    returns (NodeFreezeVolumeFilesystemResponse) {}
+
+  rpc NodeUnfreezeVolumeFilesystem(NodeUnfreezeVolumeFilesystemRequest)
+    returns (NodeUnfreezeVolumeFilesystemResponse) {}
 
   rpc NodeGetCapabilities (NodeGetCapabilitiesRequest)
     returns (NodeGetCapabilitiesResponse) {}
@@ -2214,6 +2218,9 @@ message NodeServiceCapability {
       GET_VOLUME_STATS = 2;
       // See VolumeExpansion for details.
       EXPAND_VOLUME = 3;
+      // See NodeFreezeVolumeFilesystem and
+      // NodeUnfreezeVolumeFilesystem for details.
+      FREEZE_UNFREEZE_VOLUME_FILESYSTEM = 4;
     }
 
     Type type = 1;
@@ -2330,6 +2337,83 @@ message NodeExpandVolumeResponse {
 | Volume does not exist | 5 NOT FOUND | Indicates that a volume corresponding to the specified volume_id does not exist. | Caller MUST verify that the volume_id is correct and that the volume is accessible and has not been deleted before retrying with exponential back off. |
 | Volume in use | 9 FAILED_PRECONDITION | Indicates that the volume corresponding to the specified `volume_id` could not be expanded because it is node-published or node-staged and the underlying filesystem does not support expansion of published or staged volumes. | Caller MUST NOT retry. |
 | Unsupported capacity_range | 11 OUT_OF_RANGE | Indicates that the capacity range is not allowed by the Plugin. More human-readable information MAY be provided in the gRPC `status.message` field. | Caller MUST fix the capacity range before retrying. |
+
+#### `NodeFreezeVolumeFilesystem`
+
+A Node Plugin MUST implement this RPC call if it has `FREEZE_UNFREEZE_VOLUME_FILESYSTEM` node capability.
+This RPC call allows CO to freeze volume filesystem on a node.
+
+`NodeFreezeVolumeFilesystem` ONLY supports the freeze operation of already node-published or node-staged volumes on the given `volume_path`.
+
+`NodeFreezeVolumeFilesystem` MUST be called after successful `NodePublishVolume`.
+
+After `NodeFreezeVolumeFilesystem` is called and the filesystem is still frozen, `NodeUnpublishVolume` and `NodeUnstageVolume` SHALL not be called before `NodeUnfreezeVolumeFilesystem` is called and completed successfully.
+
+`NodeFreezeVolumeFilesystem` is idempotent.
+If `NodeFreezeVolumeFilesystem` is already called, subsequent calls to this RPC with same `volume_id` and `volume_path` should return the same results.
+
+`NodeFreezeVolumeFilesystem` is synchronous.
+It blocks until the call is completed successfully or fails.
+
+CO MAY call `NodeFreezeVolumeFilesystem` before calling `CreateSnapshot` to prepare for the snapshotting.
+
+CO SHALL call `NodeUnfreezeVolumeFilesystem` after `CreateSnapshot` call is returned and the snapshot is cut if `NodeFreezeVolumeFilesystem` was called before the `CreateSnapshot` call.
+
+
+```protobuf
+message NodeFreezeVolumeFilesystemRequest {
+  // The ID of the volume. This field is REQUIRED.
+  string volume_id = 1;
+
+  // It can be any valid path where volume was previously
+  // staged or published.
+  // It MUST be an absolute path in the root filesystem of
+  // the process serving this request.
+  // This is a REQUIRED field.
+  string volume_path = 2;
+}
+
+message NodeFreezeVolumeFilesystemResponse {
+}
+```
+
+##### NodeFreezeVolumeFilesystem Errors
+
+
+#### `NodeUnfreezeVolumeFilesystem`
+
+A Node Plugin MUST implement this RPC call if it has `FREEZE_UNFREEZE_VOLUME_FILESYSTEM` node capability.
+This RPC call allows CO to unfreeze volume filesystem on a node.
+
+`NodeUnfreezeVolumeFilesystem` ONLY supports the unfreeze operation of already node-published or node-staged volumes on the given `volume_path`.
+
+`NodeUnfreezeVolumeFilesystem` MUST be called after successful `NodeFreezeVolumeFilesystem`.
+`NodeUnfreezeVolumeFilesystem` MUST NOT be called if `NodeFreezeVolumeFilesystem` is not called successfully.
+
+`NodeUnfreezeVolumeFilesystem` is idempotent.
+If `NodeUnfreezeVolumeFilesystem` is already called, subsequent calls to this RPC with same `volume_id` and `volume_path` should return the same results.
+
+`NodeUnfreezeVolumeFilesystem` is synchronous.
+It blocks until the call is completed successfully or fails.
+
+```protobuf
+message NodeUnfreezeVolumeFilesystemRequest {
+  // The ID of the volume. This field is REQUIRED.
+  string volume_id = 1;
+
+  // It can be any valid path where volume was previously
+  // staged or published.
+  // It MUST be an absolute path in the root filesystem of
+  // the process serving this request.
+  // This is a REQUIRED field.
+  string volume_path = 2;
+}
+
+message NodeUnfreezeVolumeFilesystemResponse {
+}
+```
+
+##### NodeUnfreezeVolumeFilesystem Errors
 
 ## Protocol
 

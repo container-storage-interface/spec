@@ -78,10 +78,14 @@ service Node {
   rpc NodeGetVolumeStats (NodeGetVolumeStatsRequest)
     returns (NodeGetVolumeStatsResponse) {}
 
-
   rpc NodeExpandVolume(NodeExpandVolumeRequest)
     returns (NodeExpandVolumeResponse) {}
 
+  rpc NodeFreezeVolumeFilesystem(NodeFreezeVolumeFilesystemRequest)
+    returns (NodeFreezeVolumeFilesystemResponse) {}
+
+  rpc NodeUnfreezeVolumeFilesystem(NodeUnfreezeVolumeFilesystemRequest)
+    returns (NodeUnfreezeVolumeFilesystemResponse) {}
 
   rpc NodeGetCapabilities (NodeGetCapabilitiesRequest)
     returns (NodeGetCapabilitiesResponse) {}
@@ -1233,6 +1237,9 @@ message NodeServiceCapability {
       GET_VOLUME_STATS = 2;
       // See VolumeExpansion for details.
       EXPAND_VOLUME = 3;
+      // See NodeFreezeVolumeFilesystem and
+      // NodeUnfreezeVolumeFilesystem for details.
+      FREEZE_UNFREEZE_VOLUME_FILESYSTEM = 4;
     }
 
     Type type = 1;
@@ -1302,4 +1309,32 @@ message NodeExpandVolumeRequest {
 message NodeExpandVolumeResponse {
   // The capacity of the volume in bytes. This field is OPTIONAL.
   int64 capacity_bytes = 1;
+}
+message NodeFreezeVolumeFilesystemRequest {
+  // The ID of the volume. This field is REQUIRED.
+  string volume_id = 1;
+
+  // It can be any valid path where volume was previously
+  // staged or published.
+  // It MUST be an absolute path in the root filesystem of
+  // the process serving this request.
+  // This is a REQUIRED field.
+  string volume_path = 2;
+}
+
+message NodeFreezeVolumeFilesystemResponse {
+}
+message NodeUnfreezeVolumeFilesystemRequest {
+  // The ID of the volume. This field is REQUIRED.
+  string volume_id = 1;
+
+  // It can be any valid path where volume was previously
+  // staged or published.
+  // It MUST be an absolute path in the root filesystem of
+  // the process serving this request.
+  // This is a REQUIRED field.
+  string volume_path = 2;
+}
+
+message NodeUnfreezeVolumeFilesystemResponse {
 }
