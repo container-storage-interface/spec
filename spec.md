@@ -753,7 +753,7 @@ message CreateVolumeRequest {
   // If specified, the new volume will be pre-populated with data from
   // this source. This field is OPTIONAL.
   VolumeContentSource volume_content_source = 6;
-  
+
   // Specifies where (regions, zones, racks, etc.) the provisioned
   // volume MUST be accessible from.
   // An SP SHALL advertise the requirements for topological
@@ -937,7 +937,7 @@ message Volume {
   // Example 2:
   //   accessible_topology =
   //     {"region": "R1", "zone": "Z2"},
-  //     {"region": "R1", "zone": "Z3"} 
+  //     {"region": "R1", "zone": "Z3"}
   // Indicates a volume accessible from both "zone" "Z2" and "zone" "Z3"
   // in the "region" "R1".
   repeated Topology accessible_topology = 5;
@@ -948,10 +948,10 @@ message TopologyRequirement {
   // accessible from.
   // This field is OPTIONAL. If TopologyRequirement is specified either
   // requisite or preferred or both MUST be specified.
-  // 
+  //
   // If requisite is specified, the provisioned volume MUST be
   // accessible from at least one of the requisite topologies.
-  // 
+  //
   // Given
   //   x = number of topologies provisioned volume is accessible from
   //   n = number of requisite topologies
@@ -1007,7 +1007,7 @@ message TopologyRequirement {
   //
   // This field is OPTIONAL. If TopologyRequirement is specified either
   // requisite or preferred or both MUST be specified.
-  // 
+  //
   // An SP MUST attempt to make the provisioned volume available using
   // the preferred topologies in order from first to last.
   //
@@ -1022,7 +1022,7 @@ message TopologyRequirement {
   // If the list of requisite topologies is specified and the SP is
   // unable to to make the provisioned volume available from any of the
   // requisite topologies it MUST fail the CreateVolume call.
-  // 
+  //
   // Example 1:
   // Given a volume should be accessible from a single zone, and
   // requisite =
