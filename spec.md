@@ -425,7 +425,7 @@ The status `code` MUST contain a [canonical error code](https://github.com/grpc/
 | Condition | gRPC Code | Description | Recovery Behavior |
 |-----------|-----------|-------------|-------------------|
 | Missing required field | 3 INVALID_ARGUMENT | Indicates that a required field is missing from the request. More human-readable information MAY be provided in the `status.message` field. | Caller MUST fix the request by adding the missing required field before retrying. |
-| Invalid or unsupported field in the request | 3 INVALID_ARGUMENT | Indicates that the one ore more fields in this field is either not allowed by the Plugin or has an invalid value. More human-readable information MAY be provided in the gRPC `status.message` field. | Caller MUST fix the field before retrying. |
+| Invalid or unsupported field in the request | 3 INVALID_ARGUMENT | Indicates that the one or more fields in this field is either not allowed by the Plugin or has an invalid value. More human-readable information MAY be provided in the gRPC `status.message` field. | Caller MUST fix the field before retrying. |
 | Permission denied | 7 PERMISSION_DENIED | The Plugin is able to derive or otherwise infer an identity from the secrets present within an RPC, but that identity does not have permission to invoke the RPC. | System administrator SHOULD ensure that requisite permissions are granted, after which point the caller MAY retry the attempted RPC. |
 | Operation pending for volume | 10 ABORTED | Indicates that there is already an operation pending for the specified volume. In general the Cluster Orchestrator (CO) is responsible for ensuring that there is no more than one call "in-flight" per volume at a given time. However, in some circumstances, the CO MAY lose state (for example when the CO crashes and restarts), and MAY issue multiple calls simultaneously for the same volume. The Plugin, SHOULD handle this as gracefully as possible, and MAY return this error code to reject secondary calls. | Caller SHOULD ensure that there are no other calls pending for the specified volume, and then retry with exponential back off. |
 | Call not implemented | 12 UNIMPLEMENTED | The invoked RPC is not implemented by the Plugin or disabled in the Plugin's current mode of operation. | Caller MUST NOT retry. Caller MAY call `GetPluginCapabilities`, `ControllerGetCapabilities`, or `NodeGetCapabilities` to discover Plugin capabilities. |
@@ -753,7 +753,7 @@ message CreateVolumeRequest {
   // If specified, the new volume will be pre-populated with data from
   // this source. This field is OPTIONAL.
   VolumeContentSource volume_content_source = 6;
-  
+
   // Specifies where (regions, zones, racks, etc.) the provisioned
   // volume MUST be accessible from.
   // An SP SHALL advertise the requirements for topological
@@ -937,7 +937,7 @@ message Volume {
   // Example 2:
   //   accessible_topology =
   //     {"region": "R1", "zone": "Z2"},
-  //     {"region": "R1", "zone": "Z3"} 
+  //     {"region": "R1", "zone": "Z3"}
   // Indicates a volume accessible from both "zone" "Z2" and "zone" "Z3"
   // in the "region" "R1".
   repeated Topology accessible_topology = 5;
@@ -948,10 +948,10 @@ message TopologyRequirement {
   // accessible from.
   // This field is OPTIONAL. If TopologyRequirement is specified either
   // requisite or preferred or both MUST be specified.
-  // 
+  //
   // If requisite is specified, the provisioned volume MUST be
   // accessible from at least one of the requisite topologies.
-  // 
+  //
   // Given
   //   x = number of topologies provisioned volume is accessible from
   //   n = number of requisite topologies
@@ -1007,7 +1007,7 @@ message TopologyRequirement {
   //
   // This field is OPTIONAL. If TopologyRequirement is specified either
   // requisite or preferred or both MUST be specified.
-  // 
+  //
   // An SP MUST attempt to make the provisioned volume available using
   // the preferred topologies in order from first to last.
   //
@@ -1022,7 +1022,7 @@ message TopologyRequirement {
   // If the list of requisite topologies is specified and the SP is
   // unable to to make the provisioned volume available from any of the
   // requisite topologies it MUST fail the CreateVolume call.
-  // 
+  //
   // Example 1:
   // Given a volume should be accessible from a single zone, and
   // requisite =
@@ -1234,7 +1234,7 @@ The CO MUST implement the specified error recovery behavior when it encounters t
 |-----------|-----------|-------------|-------------------|
 | Volume does not exist | 5 NOT_FOUND | Indicates that a volume corresponding to the specified `volume_id` does not exist. | Caller MUST verify that the `volume_id` is correct and that the volume is accessible and has not been deleted before retrying with exponential back off. |
 | Node does not exist | 5 NOT_FOUND | Indicates that a node corresponding to the specified `node_id` does not exist. | Caller MUST verify that the `node_id` is correct and that the node is available and has not been terminated or deleted before retrying with exponential backoff. |
-| Volume published but is incompatible | 6 ALREADY_EXISTS | Indicates that a volume corresponding to the specified `volume_id` has already been published at the node corresponding to the specified `node_id` but is incompatible with the specified `volume_capability` or `readonly` flag . | Caller MUST fix the arguments before retying. |
+| Volume published but is incompatible | 6 ALREADY_EXISTS | Indicates that a volume corresponding to the specified `volume_id` has already been published at the node corresponding to the specified `node_id` but is incompatible with the specified `volume_capability` or `readonly` flag . | Caller MUST fix the arguments before retrying. |
 | Volume published to another node | 9 FAILED_PRECONDITION | Indicates that a volume corresponding to the specified `volume_id` has already been published at another node and does not have MULTI_NODE volume capability. If this error code is returned, the Plugin SHOULD specify the `node_id` of the node at which the volume is published as part of the gRPC `status.message`. | Caller SHOULD ensure the specified volume is not published at any other node before retrying with exponential back off. |
 | Max volumes attached | 8 RESOURCE_EXHAUSTED | Indicates that the maximum supported number of volumes that can be attached to the specified node are already attached. Therefore, this operation will fail until at least one of the existing attached volumes is detached from the node. | Caller MUST ensure that the number of volumes already attached to the node is less then the maximum supported number of volumes before retrying with exponential backoff. |
 
@@ -1929,7 +1929,7 @@ The CO MUST implement the specified error recovery behavior when it encounters t
 | Condition | gRPC Code | Description | Recovery Behavior |
 |-----------|-----------|-------------|-------------------|
 | Volume does not exist | 5 NOT_FOUND | Indicates that a volume corresponding to the specified `volume_id` does not exist. | Caller MUST verify that the `volume_id` is correct and that the volume is accessible and has not been deleted before retrying with exponential back off. |
-| Volume published but is incompatible | 6 ALREADY_EXISTS | Indicates that a volume corresponding to the specified `volume_id` has already been published at the specified `staging_target_path` but is incompatible with the specified `volume_capability` flag. | Caller MUST fix the arguments before retying. |
+| Volume published but is incompatible | 6 ALREADY_EXISTS | Indicates that a volume corresponding to the specified `volume_id` has already been published at the specified `staging_target_path` but is incompatible with the specified `volume_capability` flag. | Caller MUST fix the arguments before retrying. |
 | Exceeds capabilities | 9 FAILED_PRECONDITION | Indicates that the CO has exceeded the volume's capabilities because the volume does not have MULTI_NODE capability. | Caller MAY choose to call `ValidateVolumeCapabilities` to validate the volume capabilities, or wait for the volume to be unpublished on the node. |
 
 #### `NodeUnstageVolume`
@@ -2078,7 +2078,7 @@ The CO MUST implement the specified error recovery behavior when it encounters t
 | Condition | gRPC Code | Description | Recovery Behavior |
 |-----------|-----------|-------------|-------------------|
 | Volume does not exist | 5 NOT_FOUND | Indicates that a volume corresponding to the specified `volume_id` does not exist. | Caller MUST verify that the `volume_id` is correct and that the volume is accessible and has not been deleted before retrying with exponential back off. |
-| Volume published but is incompatible | 6 ALREADY_EXISTS | Indicates that a volume corresponding to the specified `volume_id` has already been published at the specified `target_path` but is incompatible with the specified `volume_capability` or `readonly` flag. | Caller MUST fix the arguments before retying. |
+| Volume published but is incompatible | 6 ALREADY_EXISTS | Indicates that a volume corresponding to the specified `volume_id` has already been published at the specified `target_path` but is incompatible with the specified `volume_capability` or `readonly` flag. | Caller MUST fix the arguments before retrying. |
 | Exceeds capabilities | 9 FAILED_PRECONDITION | Indicates that the CO has exceeded the volume's capabilities because the volume does not have MULTI_NODE capability. | Caller MAY choose to call `ValidateVolumeCapabilities` to validate the volume capabilities, or wait for the volume to be unpublished on the node. |
 | Staging target path not set | 9 FAILED_PRECONDITION | Indicates that `STAGE_UNSTAGE_VOLUME` capability is set but no `staging_target_path` was set. | Caller MUST make sure call to `NodeStageVolume` is made and returns success before retrying with valid `staging_target_path`. |
 
