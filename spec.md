@@ -598,6 +598,7 @@ message PluginCapability {
       //   ControllerExpandVolume and NodeExpandVolume.
       OFFLINE = 2;
     }
+    Type type = 1;
   }
 
   oneof type {
