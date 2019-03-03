@@ -2275,7 +2275,7 @@ message NodeGetInfoResponse {
   //
   // Example 1:
   //   accessible_topology =
-  //     {"region": "R1", "zone": "R2"}
+  //     {"region": "R1", "zone": "Z2"}
   // Indicates the node exists within the "region" "R1" and the "zone"
   // "Z2".
   Topology accessible_topology = 3;
