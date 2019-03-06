@@ -2301,6 +2301,8 @@ If plugin has `STAGE_UNSTAGE_VOLUME` node capability then:
 
 Otherwise `NodeExpandVolume` MUST be called after successful `NodePublishVolume`.
 
+If a plugin only supports expansion via the `VolumeExpansion.OFFLINE` capability, then the volume MUST first be taken offline and expanded via `ControllerExpandVolume` (see `ControllerExpandVolume` for more details), and then node-staged or node-published before it can be expanded on the node via `NodeExpandVolume`.
+
 ```protobuf
 message NodeExpandVolumeRequest {
   // The ID of the volume. This field is REQUIRED.
