@@ -1132,6 +1132,12 @@ This RPC will be called by the CO to deprovision a volume.
 This operation MUST be idempotent.
 If a volume corresponding to the specified `volume_id` does not exist or the artifacts associated with the volume do not exist anymore, the Plugin MUST reply `0 OK`.
 
+CSI plugins SHOULD treat volumes independent from their snapshots.
+
+If the Controller Plugin supports deleting a volume without affecting its existing snapshots, then these snapshots MUST still be fully operational and acceptable as sources for new volumes as well as appear on `ListSnapshot` calls once the volume has been deleted.
+
+When a Controller Plugin does not support deleting a volume without affecting its existing snapshots, then the volume MUST NOT be altered in any way by the request and the operation must return the `FAILED_PRECONDITION` error code and MAY include meaningful human-readable information in the `status.message` field.
+
 ```protobuf
 message DeleteVolumeRequest {
   // The ID of the volume to be deprovisioned.
@@ -1157,7 +1163,7 @@ The CO MUST implement the specified error recovery behavior when it encounters t
 
 | Condition | gRPC Code | Description | Recovery Behavior |
 |-----------|-----------|-------------|-------------------|
-| Volume in use | 9 FAILED_PRECONDITION | Indicates that the volume corresponding to the specified `volume_id` could not be deleted because it is in use by another resource. | Caller SHOULD ensure that there are no other resources using the volume, and then retry with exponential back off. |
+| Volume in use | 9 FAILED_PRECONDITION | Indicates that the volume corresponding to the specified `volume_id` could not be deleted because it is in use by another resource or has snapshots and the plugin doesn't treat them as independent entities. | Caller SHOULD ensure that there are no other resources using the volume and that it has no snapshots, and then retry with exponential back off. |
 
 
 #### `ControllerPublishVolume`
