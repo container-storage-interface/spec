@@ -1898,7 +1898,7 @@ message NodeStageVolumeRequest {
   // absolute path in the root filesystem of the process serving this
   // request, and MUST be a directory. The CO SHALL ensure that there
   // is only one `staging_target_path` per volume. The CO SHALL ensure
-  // that the path is directory and that the process serving the
+  // that the path is a directory and that the process serving the
   // request has `read` and `write` permission to that directory. The
   // CO SHALL be responsible for creating the directory if it does not
   // exist.
