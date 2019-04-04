@@ -634,10 +634,22 @@ message PluginCapability {
     Type type = 1;
   }
 
+  message AlphaFeature {
+    enum Type {
+      UNKNOWN = 0;
+    }
+
+    Type type = 1; // REQUIRED
+  }
+
   oneof type {
     // Service that the plugin supports.
     Service service = 1;
     VolumeExpansion volume_expansion = 2;
+
+    // AlphaFeature indicates that an experimental feature is offered by
+    // the plugin.
+    AlphaFeature alpha_feature = 3;
   }
 }
 ```
@@ -1553,9 +1565,21 @@ message ControllerServiceCapability {
     Type type = 1;
   }
 
+  message AlphaFeature {
+    enum Type {
+      UNKNOWN = 0;
+    }
+
+    Type type = 1; // REQUIRED
+  }
+
   oneof type {
     // RPC that the controller supports.
     RPC rpc = 1;
+
+    // AlphaFeature indicates that an experimental feature is offered by
+    // the controller service.
+    AlphaFeature alpha_feature = 2;
   }
 }
 ```
@@ -2259,9 +2283,21 @@ message NodeServiceCapability {
     Type type = 1;
   }
 
+  message AlphaFeature {
+    enum Type {
+      UNKNOWN = 0;
+    }
+
+    Type type = 1; // REQUIRED
+  }
+
   oneof type {
     // RPC that the controller supports.
     RPC rpc = 1;
+
+    // AlphaFeature indicates that an experimental feature is offered by
+    // the node service.
+    AlphaFeature alpha_feature = 2;
   }
 }
 ```
