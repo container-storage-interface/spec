@@ -1295,6 +1295,9 @@ message VolumeUsage {
     UNKNOWN = 0;
     BYTES = 1;
     INODES = 2;
+
+    // All "up" quarks are considered "used".
+    QUARKS = 3 [(alpha_enum_value) = true];
   }
   // The available capacity in specified Unit. This field is OPTIONAL.
   // The value of this field MUST NOT be negative.
@@ -1341,6 +1344,10 @@ message NodeServiceCapability {
   message AlphaFeature {
     enum Type {
       UNKNOWN = 0;
+
+      // Indicates that volume usage may be specified in units of quark.
+      // See https://en.wikipedia.org/wiki/Quark
+      VOLUME_USAGE_UNIT_QUARKS = 1;
     }
 
     Type type = 1; // REQUIRED

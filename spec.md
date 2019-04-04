@@ -1937,6 +1937,7 @@ The downside of calling ListSnapshots is that ListSnapshots will not return a gR
 A Controller Plugin MAY implement support for tape rotation schedules.
 Controller implementations that support this feature MUST advertise the `TAPE_ROTATION` feature via `ControllerGetCapabilities`.
 
+
 ```protobuf
 message ControllerTapeRotationRequest {
   option (alpha_message) = true;
@@ -2249,6 +2250,10 @@ A Node plugin MUST implement this RPC call if it has GET_VOLUME_STATS node capab
 If the volume is being used in `BlockVolume` mode then `used` and `available` MAY be omitted from `usage` field of `NodeGetVolumeStatsResponse`.
 Similarly, inode information MAY be omitted from `NodeGetVolumeStatsResponse` when unavailable.
 
+** EXPERIMENTAL FEATURE**
+
+* `QUARKS` is an experimental usage unit and may be removed in a future release.
+
 
 ```protobuf
 message NodeGetVolumeStatsRequest {
@@ -2273,6 +2278,9 @@ message VolumeUsage {
     UNKNOWN = 0;
     BYTES = 1;
     INODES = 2;
+
+    // All "up" quarks are considered "used".
+    QUARKS = 3 [(alpha_enum_value) = true];
   }
   // The available capacity in specified Unit. This field is OPTIONAL.
   // The value of this field MUST NOT be negative.
@@ -2338,6 +2346,10 @@ message NodeServiceCapability {
   message AlphaFeature {
     enum Type {
       UNKNOWN = 0;
+
+      // Indicates that volume usage may be specified in units of quark.
+      // See https://en.wikipedia.org/wiki/Quark
+      VOLUME_USAGE_UNIT_QUARKS = 1;
     }
 
     Type type = 1; // REQUIRED
