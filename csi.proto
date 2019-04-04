@@ -232,6 +232,10 @@ message PluginCapability {
   message AlphaFeature {
     enum Type {
       UNKNOWN = 0;
+
+      // Indicates that the plugin supports data lineage reporting for
+      // volumes.
+      VOLUME_LINEAGE = 1;
     }
 
     Type type = 1; // REQUIRED
@@ -528,6 +532,32 @@ message Volume {
   // Indicates a volume accessible from both "zone" "Z2" and "zone" "Z3"
   // in the "region" "R1".
   repeated Topology accessible_topology = 5;
+
+  // Lineage represent the entities and or processes that have
+  // influenced the data of this volume.
+  // Plugins that report volumes with this field set MUST also report a
+  // VOLUME_LINEAGE plugin capability.
+  // This is an OPTIONAL field.
+  repeated Provenance lineage = 6 [(alpha_field) = true];
+}
+
+// Provenance represents the origin of some storage object.
+message Provenance {
+  option (alpha_message) = true;
+
+  message Identity {
+    enum Type {
+      UNKNOWN = 0;
+      X509 = 1;
+    }
+
+    Type type = 1; // REQUIRED
+    bytes value = 2; // REQUIRED
+  }
+
+  repeated Identity identity = 1; // REQUIRED
+  .google.protobuf.Timestamp data_changed_at = 2; // OPTIONAL
+  .google.protobuf.Timestamp metadata_changed_at = 3; // OPTIONAL
 }
 
 message TopologyRequirement {
