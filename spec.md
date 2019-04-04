@@ -408,6 +408,20 @@ service Node {
   rpc NodeGetInfo (NodeGetInfoRequest)
     returns (NodeGetInfoResponse) {}
 }
+
+service ObjectStore {
+  option (alpha_service) = true;
+
+  rpc ObjectStoreRead(ObjectStoreReadRequest)
+    returns (ObjectStoreReadResponse) {
+      option (alpha_method) = true;
+  }
+
+  rpc ObjectStoreWrite(ObjectStoreWriteRequest)
+    returns (ObjectStoreWriteResponse) {
+      option (alpha_method) = true;
+  }
+}
 ```
 
 #### Concurrency
@@ -646,6 +660,9 @@ message PluginCapability {
       // Indicates that the plugin supports data lineage reporting for
       // volumes.
       VOLUME_LINEAGE = 1;
+
+      // Indicates that the plugin supports the object storage service.
+      OBJECT_STORE = 2;
     }
 
     Type type = 1; // REQUIRED
@@ -2502,6 +2519,74 @@ message NodeExpandVolumeResponse {
 | Volume does not exist | 5 NOT FOUND | Indicates that a volume corresponding to the specified volume_id does not exist. | Caller MUST verify that the volume_id is correct and that the volume is accessible and has not been deleted before retrying with exponential back off. |
 | Volume in use | 9 FAILED_PRECONDITION | Indicates that the volume corresponding to the specified `volume_id` could not be expanded because it is node-published or node-staged and the underlying filesystem does not support expansion of published or staged volumes. | Caller MUST NOT retry. |
 | Unsupported capacity_range | 11 OUT_OF_RANGE | Indicates that the capacity range is not allowed by the Plugin. More human-readable information MAY be provided in the gRPC `status.message` field. | Caller MUST fix the capacity range before retrying. |
+
+### ObjectStore Service RPC
+
+**EXPERIMENTAL FEATURE**
+
+Plugins that implement the `ObjectStore` service MUST advertise the `OBJECT_STORE` plugin capability.
+
+####  `ObjectStoreRead`
+
+**EXPERIMENTAL FEATURE**
+
+```protobuf
+message ObjectStoreReadRequest {
+  option (alpha_message) = true;
+
+  message DataSelector {
+    message Range {
+      int64 offset = 1;
+      int64 length = 2;
+    }
+
+    repeated Range range = 1;
+  }
+
+  string location = 1;
+  map<string, string> secrets = 2 [(csi_secret) = true];
+
+  oneof kind {
+    bool metadata_only = 3;
+    DataSelector selector = 4;
+  }
+}
+
+message ObjectStoreReadResponse {
+  option (alpha_message) = true;
+
+  message Segment {
+    int64 offset = 1;
+    bytes value = 2;
+  }
+
+  repeated Segment segments = 1;
+}
+```
+
+####  `ObjectStoreWrite`
+
+**EXPERIMENTAL FEATURE**
+
+```protobuf
+message ObjectStoreWriteRequest {
+  option (alpha_message) = true;
+
+  string location = 1;
+  map<string, string> secrets = 2 [(csi_secret) = true];
+
+  oneof action {
+    bytes data_append = 3;
+    bytes data_overwrite = 4;
+    bool remove = 5;
+  }
+}
+
+message ObjectStoreWriteResponse {
+  option (alpha_message) = true;
+}
+```
+
 
 ## Protocol
 
