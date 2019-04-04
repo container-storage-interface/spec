@@ -376,6 +376,11 @@ service Controller {
 
   rpc ControllerExpandVolume (ControllerExpandVolumeRequest)
     returns (ControllerExpandVolumeResponse) {}
+
+  rpc ControllerTapeRotation (ControllerTapeRotationRequest)
+    returns (ControllerTapeRotationResponse) {
+      option (alpha_method) = true;
+    }
 }
 
 service Node {
@@ -1568,6 +1573,10 @@ message ControllerServiceCapability {
   message AlphaFeature {
     enum Type {
       UNKNOWN = 0;
+
+      // Indicates that the controller service supports the
+      // ControllerTapeRotation API.
+      TAPE_ROTATION = 1;
     }
 
     Type type = 1; // REQUIRED
@@ -1920,6 +1929,49 @@ It is NOT REQUIRED for a controller plugin to implement the `LIST_SNAPSHOTS` cap
 ListSnapshots SHALL return with current information regarding the snapshots on the storage system.
 When processing is complete, the `ready_to_use` parameter of the snapshot from ListSnapshots SHALL become `true`.
 The downside of calling ListSnapshots is that ListSnapshots will not return a gRPC error code if an error occurs during the processing. So calling CreateSnapshot repeatedly is the preferred way to check if the processing is complete.
+
+#### `ControllerTapeRotation`
+
+**EXPERIMENTAL FEATURE**
+
+A Controller Plugin MAY implement support for tape rotation schedules.
+Controller implementations that support this feature MUST advertise the `TAPE_ROTATION` feature via `ControllerGetCapabilities`.
+
+```protobuf
+message ControllerTapeRotationRequest {
+  option (alpha_message) = true;
+
+  message UpdateStrategy {
+    // https://en.wikipedia.org/wiki/Backup_rotation_scheme#Schemes
+    enum Scheme {
+      UNKNOWN = 0;
+      FIFO = 1;
+      GFS = 2;// Grandfather-father-son
+      SIX_TAPE = 3; // 5 weekday differentials; 1 weekday full backup
+      TOWER_OF_HANOI = 4; // pretty complicated
+    }
+
+    Scheme scheme = 1; // REQURIED
+  }
+
+  // action is OPTIONAL; failure to specify an action is interpreted as
+  // a read-only request, and SHOULD generate a non-error response.
+  oneof action {
+    UpdateStrategy update_strategy = 1;
+    bool rotate_now = 2;
+  }
+}
+
+// All response fields are OPTIONAL.
+message ControllerTapeRotationResponse {
+  option (alpha_message) = true;
+
+  .google.protobuf.Timestamp last_rotation_success = 1;
+  .google.protobuf.Timestamp last_rotation_failure = 2;
+  int32 successive_failures = 3; // failures since last success
+  .google.protobuf.Timestamp next_rotation_time = 4;
+}
+```
 
 ### Node Service RPC
 

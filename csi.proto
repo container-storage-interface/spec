@@ -95,6 +95,11 @@ service Controller {
 
   rpc ControllerExpandVolume (ControllerExpandVolumeRequest)
     returns (ControllerExpandVolumeResponse) {}
+
+  rpc ControllerTapeRotation (ControllerTapeRotationRequest)
+    returns (ControllerTapeRotationResponse) {
+      option (alpha_method) = true;
+    }
 }
 
 service Node {
@@ -937,6 +942,10 @@ message ControllerServiceCapability {
   message AlphaFeature {
     enum Type {
       UNKNOWN = 0;
+
+      // Indicates that the controller service supports the
+      // ControllerTapeRotation API.
+      TAPE_ROTATION = 1;
     }
 
     Type type = 1; // REQUIRED
@@ -1104,6 +1113,39 @@ message ControllerExpandVolumeResponse {
   // the CO MUST make NodeExpandVolume RPC call on the node. This field
   // is REQUIRED.
   bool node_expansion_required = 2;
+}
+message ControllerTapeRotationRequest {
+  option (alpha_message) = true;
+
+  message UpdateStrategy {
+    // https://en.wikipedia.org/wiki/Backup_rotation_scheme#Schemes
+    enum Scheme {
+      UNKNOWN = 0;
+      FIFO = 1;
+      GFS = 2;// Grandfather-father-son
+      SIX_TAPE = 3; // 5 weekday differentials; 1 weekday full backup
+      TOWER_OF_HANOI = 4; // pretty complicated
+    }
+
+    Scheme scheme = 1; // REQURIED
+  }
+
+  // action is OPTIONAL; failure to specify an action is interpreted as
+  // a read-only request, and SHOULD generate a non-error response.
+  oneof action {
+    UpdateStrategy update_strategy = 1;
+    bool rotate_now = 2;
+  }
+}
+
+// All response fields are OPTIONAL.
+message ControllerTapeRotationResponse {
+  option (alpha_message) = true;
+
+  .google.protobuf.Timestamp last_rotation_success = 1;
+  .google.protobuf.Timestamp last_rotation_failure = 2;
+  int32 successive_failures = 3; // failures since last success
+  .google.protobuf.Timestamp next_rotation_time = 4;
 }
 message NodeStageVolumeRequest {
   // The ID of the volume to publish. This field is REQUIRED.
