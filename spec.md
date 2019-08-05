@@ -1737,6 +1737,12 @@ message ListSnapshotsRequest {
   // and will not block if the snapshot is being processed after
   // it is cut.
   string snapshot_id = 4;
+
+  // Secrets necessary for listing snapshots.
+  // This field is OPTIONAL. It can be used to pass secrets
+  // required to access some subset of the snapshots in the
+  // storage backend.
+  map<string, string> secrets = 5 [(csi_secret) = true];
 }
 
 message ListSnapshotsResponse {
