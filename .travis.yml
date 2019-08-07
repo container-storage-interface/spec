@@ -29,8 +29,9 @@ jobs:
     # Lang stage: Go
     - stage:               lang
       language:            go
-      go:                  1.10.4
+      go:                  1.11.12
       go_import_path:      github.com/container-storage-interface/spec
+      env:                 GO111MODULE=on
       install:
         - make -C lib/go protoc
         - make -C lib/go protoc-gen-go
