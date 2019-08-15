@@ -1293,8 +1293,8 @@ The CO MUST implement the specified error recovery behavior when it encounters t
 
 | Condition | gRPC Code | Description | Recovery Behavior |
 |-----------|-----------|-------------|-------------------|
-| Volume does not exist and volume not assumed ControllerUnpublished from node | 5 NOT_FOUND | Indicates that a volume corresponding to the specified `volume_id` does not exist and is not assumed to be ControllerUnpublished from node corresponding to the specified `node_id`. | Caller MUST verify that the `volume_id` is correct and that the volume is accessible and has not been deleted before retrying with exponential back off. |
-| Node does not exist and volume not assumed ControllerUnpublished from node  | 5 NOT_FOUND | Indicates that a node corresponding to the specified `node_id` does not exist and the volume corresponding to the specified `volume_id` is not assumed to be ControllerUnpublished from node. | Caller MUST verify that the `node_id` is correct and that the node is available and has not been terminated or deleted before retrying with exponential backoff. |
+| Volume does not exist and volume not assumed ControllerUnpublished from node | 5 NOT_FOUND | Indicates that a volume corresponding to the specified `volume_id` does not exist and is not assumed to be ControllerUnpublished from node corresponding to the specified `node_id`. | Caller SHOULD verify that the `volume_id` is correct and that the volume is accessible and has not been deleted before retrying with exponential back off. |
+| Node does not exist and volume not assumed ControllerUnpublished from node  | 5 NOT_FOUND | Indicates that a node corresponding to the specified `node_id` does not exist and the volume corresponding to the specified `volume_id` is not assumed to be ControllerUnpublished from node. | Caller SHOULD verify that the `node_id` is correct and that the node is available and has not been terminated or deleted before retrying with exponential backoff. |
 
 
 #### `ValidateVolumeCapabilities`
