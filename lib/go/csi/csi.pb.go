@@ -3385,7 +3385,13 @@ type NodeStageVolumeRequest struct {
 	// that the path is directory and that the process serving the
 	// request has `read` and `write` permission to that directory. The
 	// CO SHALL be responsible for creating the directory if it does not
-	// exist.
+	// exist.The CO will pass around the staging_target_directory from
+	// NodeStageVolume to NodePublishVolume. SP can stage a volume
+	// however it like inside the staging_target_directory.
+	// For example, SP can stage it directly at the
+	// starging_target_directory or a subdirectory or file underneath.
+	// SP can also store other files/metadata inside the
+	// staging_target_directory if it like.
 	// This is a REQUIRED field.
 	StagingTargetPath string `protobuf:"bytes,3,opt,name=staging_target_path,json=stagingTargetPath,proto3" json:"staging_target_path,omitempty"`
 	// Volume capability describing how the CO intends to use this volume.
