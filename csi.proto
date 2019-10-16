@@ -1213,6 +1213,13 @@ message NodeGetVolumeStatsRequest {
   // the process serving this request.
   // This is a REQUIRED field.
   string volume_path = 2;
+
+  // The path where the volume is staged, if the plugin has the
+  // STAGE_UNSTAGE_VOLUME capability, otherwise empty.
+  // If not empty, it MUST be an absolute path in the root
+  // filesystem of the process serving this request.
+  // This field is OPTIONAL.
+  string staging_path = 3;
 }
 
 message NodeGetVolumeStatsResponse {
@@ -1327,6 +1334,13 @@ message NodeExpandVolumeRequest {
   // plugin MAY expand the volume to its maximum capacity.
   // This field is OPTIONAL.
   CapacityRange capacity_range = 3;
+
+  // The path where the volume is staged, if the plugin has the
+  // STAGE_UNSTAGE_VOLUME capability, otherwise empty.
+  // If not empty, it MUST be an absolute path in the root
+  // filesystem of the process serving this request.
+  // This field is OPTIONAL.
+  string staging_path = 4;
 }
 
 message NodeExpandVolumeResponse {

@@ -2170,6 +2170,10 @@ A Node plugin MUST implement this RPC call if it has GET_VOLUME_STATS node capab
 If the volume is being used in `BlockVolume` mode then `used` and `available` MAY be omitted from `usage` field of `NodeGetVolumeStatsResponse`.
 Similarly, inode information MAY be omitted from `NodeGetVolumeStatsResponse` when unavailable.
 
+The `staging_path` field is not required, for backwards compatibility, but the CO SHOULD supply it
+when possible. Plugins can use this field to determine if `volume_path` is where the volume is
+published or staged, and setting this field to non-empty allows plugins to function with less
+stored state on the node.
 
 ```protobuf
 message NodeGetVolumeStatsRequest {
@@ -2182,6 +2186,13 @@ message NodeGetVolumeStatsRequest {
   // the process serving this request.
   // This is a REQUIRED field.
   string volume_path = 2;
+
+  // The path where the volume is staged, if the plugin has the
+  // STAGE_UNSTAGE_VOLUME capability, otherwise empty.
+  // If not empty, it MUST be an absolute path in the root
+  // filesystem of the process serving this request.
+  // This field is OPTIONAL.
+  string staging_path = 3;
 }
 
 message NodeGetVolumeStatsResponse {
@@ -2339,6 +2350,11 @@ Otherwise `NodeExpandVolume` MUST be called after successful `NodePublishVolume`
 
 If a plugin only supports expansion via the `VolumeExpansion.OFFLINE` capability, then the volume MUST first be taken offline and expanded via `ControllerExpandVolume` (see `ControllerExpandVolume` for more details), and then node-staged or node-published before it can be expanded on the node via `NodeExpandVolume`.
 
+The `staging_path` field is not required, for backwards compatibility, but the CO SHOULD supply it
+when possible. Plugins can use this field to determine if `volume_path` is where the volume is
+published or staged, and setting this field to non-empty allows plugins to function with less
+stored state on the node.
+
 ```protobuf
 message NodeExpandVolumeRequest {
   // The ID of the volume. This field is REQUIRED.
@@ -2354,6 +2370,13 @@ message NodeExpandVolumeRequest {
   // plugin MAY expand the volume to its maximum capacity.
   // This field is OPTIONAL.
   CapacityRange capacity_range = 3;
+
+  // The path where the volume is staged, if the plugin has the
+  // STAGE_UNSTAGE_VOLUME capability, otherwise empty.
+  // If not empty, it MUST be an absolute path in the root
+  // filesystem of the process serving this request.
+  // This field is OPTIONAL.
+  string staging_path = 4;
 }
 
 message NodeExpandVolumeResponse {
