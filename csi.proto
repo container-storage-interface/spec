@@ -1228,7 +1228,7 @@ message NodeGetVolumeStatsRequest {
   // If not empty, it MUST be an absolute path in the root
   // filesystem of the process serving this request.
   // This field is OPTIONAL.
-  string staging_path = 3;
+  string staging_target_path = 3;
 }
 
 message NodeGetVolumeStatsResponse {
@@ -1349,7 +1349,7 @@ message NodeExpandVolumeRequest {
   // If not empty, it MUST be an absolute path in the root
   // filesystem of the process serving this request.
   // This field is OPTIONAL.
-  string staging_path = 4;
+  string staging_target_path = 4;
 
   // Volume capability describing how the CO intends to use this volume.
   // This allows SP to determine if volume is being used as a block
