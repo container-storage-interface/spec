@@ -1804,6 +1804,9 @@ The CO MUST implement the specified error recovery behavior when it encounters t
 A Controller plugin MUST implement this RPC call if plugin has `EXPAND_VOLUME` controller capability.
 This RPC allows the CO to expand the size of a volume.
 
+This operation MUST be idempotent.
+If a volume corresponding to the specified volume ID is already larger than or equal to the target capacity of the expansion request, the plugin SHOULD reply 0 OK.
+
 This call MAY be made by the CO during any time in the lifecycle of the volume after creation if plugin has `VolumeExpansion.ONLINE` capability.
 If plugin has `EXPAND_VOLUME` node capability, then `NodeExpandVolume` MUST be called after successful `ControllerExpandVolume` and `node_expansion_required` in `ControllerExpandVolumeResponse` is `true`.
 
@@ -2354,6 +2357,9 @@ The CO MUST implement the specified error recovery behavior when it encounters t
 
 A Node Plugin MUST implement this RPC call if it has `EXPAND_VOLUME` node capability.
 This RPC call allows CO to expand volume on a node.
+
+This operation MUST be idempotent.
+If a volume corresponding to the specified volume ID is already larger than or equal to the target capacity of the expansion request, the plugin SHOULD reply 0 OK.
 
 `NodeExpandVolume` ONLY supports expansion of already node-published or node-staged volumes on the given `volume_path`.
 
