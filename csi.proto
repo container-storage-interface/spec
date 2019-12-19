@@ -683,9 +683,10 @@ message ControllerPublishVolumeRequest {
   // `Secrets Requirements` section on how to use this field.
   map<string, string> secrets = 5 [(csi_secret) = true];
 
-  // Volume context as returned by CO in CreateVolumeRequest. This field
-  // is OPTIONAL and MUST match the volume_context of the volume
-  // identified by `volume_id`.
+  // Volume context as returned by SP in
+  // CreateVolumeResponse.Volume.volume_context.
+  // This field is OPTIONAL and MUST match the volume_context of the
+  // volume identified by `volume_id`.
   map<string, string> volume_context = 6;
 }
 
@@ -731,9 +732,10 @@ message ValidateVolumeCapabilitiesRequest {
   // The ID of the volume to check. This field is REQUIRED.
   string volume_id = 1;
 
-  // Volume context as returned by CO in CreateVolumeRequest. This field
-  // is OPTIONAL and MUST match the volume_context of the volume
-  // identified by `volume_id`.
+  // Volume context as returned by SP in
+  // CreateVolumeResponse.Volume.volume_context.
+  // This field is OPTIONAL and MUST match the volume_context of the
+  // volume identified by `volume_id`.
   map<string, string> volume_context = 2;
 
   // The capabilities that the CO wants to check for the volume. This
@@ -1119,9 +1121,10 @@ message NodeStageVolumeRequest {
   // section on how to use this field.
   map<string, string> secrets = 5 [(csi_secret) = true];
 
-  // Volume context as returned by CO in CreateVolumeRequest. This field
-  // is OPTIONAL and MUST match the volume_context of the volume
-  // identified by `volume_id`.
+  // Volume context as returned by SP in
+  // CreateVolumeResponse.Volume.volume_context.
+  // This field is OPTIONAL and MUST match the volume_context of the
+  // volume identified by `volume_id`.
   map<string, string> volume_context = 6;
 }
 
@@ -1189,9 +1192,10 @@ message NodePublishVolumeRequest {
   // section on how to use this field.
   map<string, string> secrets = 7 [(csi_secret) = true];
 
-  // Volume context as returned by CO in CreateVolumeRequest. This field
-  // is OPTIONAL and MUST match the volume_context of the volume
-  // identified by `volume_id`.
+  // Volume context as returned by SP in
+  // CreateVolumeResponse.Volume.volume_context.
+  // This field is OPTIONAL and MUST match the volume_context of the
+  // volume identified by `volume_id`.
   map<string, string> volume_context = 8;
 }
 
