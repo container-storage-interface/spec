@@ -1831,9 +1831,10 @@ type ControllerPublishVolumeRequest struct {
 	// request. This field is OPTIONAL. Refer to the
 	// `Secrets Requirements` section on how to use this field.
 	Secrets map[string]string `protobuf:"bytes,5,rep,name=secrets,proto3" json:"secrets,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
-	// Volume context as returned by CO in CreateVolumeRequest. This field
-	// is OPTIONAL and MUST match the volume_context of the volume
-	// identified by `volume_id`.
+	// Volume context as returned by SP in
+	// CreateVolumeResponse.Volume.volume_context.
+	// This field is OPTIONAL and MUST match the volume_context of the
+	// volume identified by `volume_id`.
 	VolumeContext        map[string]string `protobuf:"bytes,6,rep,name=volume_context,json=volumeContext,proto3" json:"volume_context,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
 	XXX_NoUnkeyedLiteral struct{}          `json:"-"`
 	XXX_unrecognized     []byte            `json:"-"`
@@ -2059,9 +2060,10 @@ var xxx_messageInfo_ControllerUnpublishVolumeResponse proto.InternalMessageInfo
 type ValidateVolumeCapabilitiesRequest struct {
 	// The ID of the volume to check. This field is REQUIRED.
 	VolumeId string `protobuf:"bytes,1,opt,name=volume_id,json=volumeId,proto3" json:"volume_id,omitempty"`
-	// Volume context as returned by CO in CreateVolumeRequest. This field
-	// is OPTIONAL and MUST match the volume_context of the volume
-	// identified by `volume_id`.
+	// Volume context as returned by SP in
+	// CreateVolumeResponse.Volume.volume_context.
+	// This field is OPTIONAL and MUST match the volume_context of the
+	// volume identified by `volume_id`.
 	VolumeContext map[string]string `protobuf:"bytes,2,rep,name=volume_context,json=volumeContext,proto3" json:"volume_context,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
 	// The capabilities that the CO wants to check for the volume. This
 	// call SHALL return "confirmed" only if all the volume capabilities
@@ -3412,9 +3414,10 @@ type NodeStageVolumeRequest struct {
 	// This field is OPTIONAL. Refer to the `Secrets Requirements`
 	// section on how to use this field.
 	Secrets map[string]string `protobuf:"bytes,5,rep,name=secrets,proto3" json:"secrets,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
-	// Volume context as returned by CO in CreateVolumeRequest. This field
-	// is OPTIONAL and MUST match the volume_context of the volume
-	// identified by `volume_id`.
+	// Volume context as returned by SP in
+	// CreateVolumeResponse.Volume.volume_context.
+	// This field is OPTIONAL and MUST match the volume_context of the
+	// volume identified by `volume_id`.
 	VolumeContext        map[string]string `protobuf:"bytes,6,rep,name=volume_context,json=volumeContext,proto3" json:"volume_context,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
 	XXX_NoUnkeyedLiteral struct{}          `json:"-"`
 	XXX_unrecognized     []byte            `json:"-"`
@@ -3642,9 +3645,10 @@ type NodePublishVolumeRequest struct {
 	// This field is OPTIONAL. Refer to the `Secrets Requirements`
 	// section on how to use this field.
 	Secrets map[string]string `protobuf:"bytes,7,rep,name=secrets,proto3" json:"secrets,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
-	// Volume context as returned by CO in CreateVolumeRequest. This field
-	// is OPTIONAL and MUST match the volume_context of the volume
-	// identified by `volume_id`.
+	// Volume context as returned by SP in
+	// CreateVolumeResponse.Volume.volume_context.
+	// This field is OPTIONAL and MUST match the volume_context of the
+	// volume identified by `volume_id`.
 	VolumeContext        map[string]string `protobuf:"bytes,8,rep,name=volume_context,json=volumeContext,proto3" json:"volume_context,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
 	XXX_NoUnkeyedLiteral struct{}          `json:"-"`
 	XXX_unrecognized     []byte            `json:"-"`
