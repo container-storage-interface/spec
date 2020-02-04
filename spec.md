@@ -166,7 +166,7 @@ capability.
 ```
    CreateVolume +------------+ DeleteVolume
  +------------->|  CREATED   +--------------+
- |              +---+----+---+              |
+ |              +---+----^---+              |
  |       Controller |    | Controller       v
 +++         Publish |    | Unpublish       +++
 |X|          Volume |    | Volume          | |
@@ -187,7 +187,7 @@ creation to destruction.
 ```
    CreateVolume +------------+ DeleteVolume
  +------------->|  CREATED   +--------------+
- |              +---+----+---+              |
+ |              +---+----^---+              |
  |       Controller |    | Controller       v
 +++         Publish |    | Unpublish       +++
 |X|          Volume |    | Volume          | |
@@ -199,7 +199,7 @@ creation to destruction.
              Volume |    | Volume
                 +---v----+---+
                 |  VOL_READY |
-                +------------+
+                +---+----^---+
                Node |    | Node
             Publish |    | Unpublish
              Volume |    | Volume
