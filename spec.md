@@ -376,6 +376,11 @@ service Controller {
 
   rpc ControllerExpandVolume (ControllerExpandVolumeRequest)
     returns (ControllerExpandVolumeResponse) {}
+
+  rpc ControllerGetVolume (ControllerGetVolumeRequest)
+    returns (ControllerGetVolumeResponse) {
+        option (alpha_method) = true;
+    }
 }
 
 service Node {
@@ -1451,6 +1456,12 @@ message ListVolumesResponse {
     // published_node_ids MAY include nodes not published to or
     // reported by the SP. The CO MUST be resilient to that.
     repeated string published_node_ids = 1;
+
+    // Information about the current condition of the volume.
+    // This field is OPTIONAL.
+    // This field MUST be specified if the
+    // VOLUME_CONDITION controller capability is supported.
+    VolumeCondition volume_condition = 2 [(alpha_field) = true];
   }
 
   message Entry {
@@ -1485,6 +1496,65 @@ The CO MUST implement the specified error recovery behavior when it encounters t
 |-----------|-----------|-------------|-------------------|
 | Invalid `starting_token` | 10 ABORTED | Indicates that `starting_token` is not valid. | Caller SHOULD start the `ListVolumes` operation again with an empty `starting_token`. |
 
+#### `ControllerGetVolume`
+
+**ALPHA FEATURE**
+
+This optional RPC MAY be called by the CO to fetch current information about a volume.
+
+A Controller Plugin MUST implement this `ControllerGetVolume` RPC call if it has `GET_VOLUME` capability.
+
+A Controller Plugin MUST provide a non-empty `volume_condition` field in `ControllerGetVolumeResponse` if it has `VOLUME_CONDITION` capability.
+
+`ControllerGetVolumeResponse` should contain current information of a volume if it exists.
+If the volume does not exist any more, `ControllerGetVolume` should return gRPC error code `NOT_FOUND`.
+
+```protobuf
+message ControllerGetVolumeRequest {
+  option (alpha_message) = true;
+
+  // The ID of the volume to fetch current volume information for.
+  // This field is REQUIRED.
+  string volume_id = 1;
+}
+
+message ControllerGetVolumeResponse {
+  option (alpha_message) = true;
+
+  message VolumeStatus{
+    // A list of all the `node_id` of nodes that this volume is
+    // controller published on.
+    // This field is OPTIONAL.
+    // This field MUST be specified if the PUBLISH_UNPUBLISH_VOLUME
+    // controller capability is supported.
+    // published_node_ids MAY include nodes not published to or
+    // reported by the SP. The CO MUST be resilient to that.
+    repeated string published_node_ids = 1;
+
+    // Information about the current condition of the volume.
+    // This field is OPTIONAL.
+    // This field MUST be specified if the
+    // VOLUME_CONDITION controller capability is supported.
+    VolumeCondition volume_condition = 2;
+  }
+
+  // This field is REQUIRED
+  Volume volume = 1;
+
+  // This field is REQUIRED.
+  VolumeStatus status = 2;
+}
+```
+
+##### ControllerGetVolume Errors
+
+If the plugin is unable to complete the ControllerGetVolume call successfully, it MUST return a non-ok gRPC code in the gRPC status.
+If the conditions defined below are encountered, the plugin MUST return the specified gRPC error code.
+The CO MUST implement the specified error recovery behavior when it encounters the gRPC error code.
+
+| Condition | gRPC Code | Description | Recovery Behavior |
+|-----------|-----------|-------------|-------------------|
+| Volume does not exist | 5 NOT_FOUND | Indicates that a volume corresponding to the specified `volume_id` does not exist. | Caller MUST verify that the `volume_id` is correct and that the volume is accessible and has not been deleted before retrying with exponential back off. |
 
 #### `GetCapacity`
 
@@ -1577,6 +1647,24 @@ message ControllerServiceCapability {
       // Indicates the SP supports the
       // ListVolumesResponse.entry.published_nodes field
       LIST_VOLUMES_PUBLISHED_NODES = 10;
+
+      // Indicates that the Controller service can report volume
+      // conditions.
+      // An SP MAY implement `VolumeCondition` in only the Controller
+      // Plugin, only the Node Plugin, or both.
+      // If `VolumeCondition` is implemented in both the Controller and
+      // Node Plugins, it SHALL report from different perspectives.
+      // If for some reason Controller and Node Plugins report
+      // misaligned volume conditions, CO SHALL assume the worst case
+      // is the truth.
+      // Note that, for alpha, `VolumeCondition` is intended be
+      // informative for humans only, not for automation.
+      VOLUME_CONDITION = 11 [(alpha_enum_value) = true];
+
+      // Indicates the SP supports the ControllerGetVolume RPC.
+      // This enables COs to, for example, fetch per volume
+      // condition after a volume is provisioned.
+      GET_VOLUME = 12 [(alpha_enum_value) = true];
     }
 
     Type type = 1;
@@ -2218,7 +2306,7 @@ The CO MUST implement the specified error recovery behavior when it encounters t
 
 #### `NodeGetVolumeStats`
 
-A Node plugin MUST implement this RPC call if it has GET_VOLUME_STATS node capability.
+A Node plugin MUST implement this RPC call if it has GET_VOLUME_STATS node capability or VOLUME_CONDITION node capability.
 `NodeGetVolumeStats` RPC call returns the volume capacity statistics available for the volume.
 
 If the volume is being used in `BlockVolume` mode then `used` and `available` MAY be omitted from `usage` field of `NodeGetVolumeStatsResponse`.
@@ -2251,6 +2339,11 @@ message NodeGetVolumeStatsRequest {
 message NodeGetVolumeStatsResponse {
   // This field is OPTIONAL.
   repeated VolumeUsage usage = 1;
+  // Information about the current condition of the volume.
+  // This field is OPTIONAL.
+  // This field MUST be specified if the VOLUME_CONDITION node
+  // capability is supported.
+  VolumeCondition volume_condition = 2 [(alpha_field) = true];
 }
 
 message VolumeUsage {
@@ -2273,6 +2366,20 @@ message VolumeUsage {
 
   // Units by which values are measured. This field is REQUIRED.
   Unit unit = 4;
+}
+
+// VolumeCondition represents the current condition of a volume.
+message VolumeCondition {
+  option (alpha_message) = true;
+
+  // Normal volumes are available for use and operating optimally.
+  // An abnormal volume does not meet these criteria.
+  // This field is REQUIRED.
+  bool abnormal = 1;
+
+  // The message describing the condition of the volume.
+  // This field is REQUIRED.
+  string message = 2;
 }
 ```
 
@@ -2315,6 +2422,18 @@ message NodeServiceCapability {
       GET_VOLUME_STATS = 2;
       // See VolumeExpansion for details.
       EXPAND_VOLUME = 3;
+      // Indicates that the Node service can report volume conditions.
+      // An SP MAY implement `VolumeCondition` in only the Node
+      // Plugin, only the Controller Plugin, or both.
+      // If `VolumeCondition` is implemented in both the Node and
+      // Controller Plugins, it SHALL report from different
+      // perspectives.
+      // If for some reason Node and Controller Plugins report
+      // misaligned volume conditions, CO SHALL assume the worst case
+      // is the truth.
+      // Note that, for alpha, `VolumeCondition` is intended to be
+      // informative for humans only, not for automation.
+      VOLUME_CONDITION = 4 [(alpha_enum_value) = true];
     }
 
     Type type = 1;
