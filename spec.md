@@ -1931,13 +1931,14 @@ message NodeStageVolumeRequest {
   // that the path is directory and that the process serving the
   // request has `read` and `write` permission to that directory. The
   // CO SHALL be responsible for creating the directory if it does not
-  // exist.The CO will pass around the staging_target_directory from
-  // NodeStageVolume to NodePublishVolume. SP can stage a volume
-  // however it like inside the staging_target_directory.
-  // For example, SP can stage it directly at the
-  // starging_target_directory or a subdirectory or file underneath.
-  // SP can also store other files/metadata inside the
-  // staging_target_directory if it like.
+  // exist. The CO MUST pass the same staging_target_directory to
+  // NodeStageVolume and NodePublishVolume.
+  // The SP MAY use staging_target_directory in
+  // any way it chooses, including but not limited to:
+  // - as a mount point to stage the volume directly
+  // - as a parent directory for a newly created mount point
+  // - as a parent directory for an attached device
+  // - as a parent directory for metadata files
   // This is a REQUIRED field.
   string staging_target_path = 3;
 
