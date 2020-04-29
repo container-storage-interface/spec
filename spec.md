@@ -859,6 +859,10 @@ message VolumeCapability {
     // to untrusted entities. The total size of this repeated field
     // SHALL NOT exceed 4 KiB.
     repeated string mount_flags = 2;
+
+    // The options passed to the formatting program that creates the
+    // filesystem on the volume. This field is OPTIONAL.
+    repeated string mkfs_options = 3;
   }
 
   // Specify how a volume can be accessed.
