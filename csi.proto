@@ -234,6 +234,7 @@ message PluginCapability {
   oneof type {
     // Service that the plugin supports.
     Service service = 1;
+    // deprecated
     VolumeExpansion volume_expansion = 2;
   }
 }
