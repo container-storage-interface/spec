@@ -595,6 +595,10 @@ message PluginCapability {
     Type type = 1;
   }
 
+  // Deprecated - Ability for a plugin to delcare online and offline
+  // controller expansion capabilities via PluginCapability
+  // is deprecated. A plugin may support either mode of operation
+  // without having to declare them in PluginCapability.
   message VolumeExpansion {
     enum Type {
       UNKNOWN = 0;
@@ -644,8 +648,18 @@ message PluginCapability {
   oneof type {
     // Service that the plugin supports.
     Service service = 1;
-    // deprecated
-    VolumeExpansion volume_expansion = 2;
+    // Deprecated - Ability for a plugin to delcare online and offline
+    // controller expansion capabilities via PluginCapability
+    // is deprecated. A plugin may support either mode of operation
+    // without having to declare them in PluginCapability.
+    //
+    // If set a CO will ignore ONLINE and OFFLINE capabilities
+    // specified in PluginCapability.
+    // If a plugin can not support controller expansion of published
+    // and available volumes on a node -  it may return
+    // FAILED_PRECONDITION error and CO should ensure that volume
+    // is not published before retrying with exponential backoff.
+    VolumeExpansion volume_expansion = 2 [deprecated=true];
   }
 }
 ```
@@ -1931,7 +1945,7 @@ This RPC allows the CO to expand the size of a volume.
 This operation MUST be idempotent.
 If a volume corresponding to the specified volume ID is already larger than or equal to the target capacity of the expansion request, the plugin SHOULD reply 0 OK.
 
-This call MAY be made by the CO during any time in the lifecycle of the volume after creation but an SP may not permit controller expansion of volumes which are controller published or available on a node. In which case - the plugin may return gRPC error code `FAILED_PRECONDITION` (Volume in use) and CO SHOULD ensure that volume is not published and retry with exponential backoff.
+This call MAY be made by the CO during any time in the lifecycle of the volume after creation but an SP may not permit controller expansion of volumes which are controller published or available on a node. In which case - the plugin may return gRPC error code `FAILED_PRECONDITION` (Volume in use) and CO SHOULD ensure that volume is not published before retrying with exponential backoff.
 
 If plugin has `EXPAND_VOLUME` node capability, then `NodeExpandVolume` MUST be called after successful `ControllerExpandVolume` and `node_expansion_required` in `ControllerExpandVolumeResponse` is `true`.
 
