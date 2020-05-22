@@ -2523,13 +2523,15 @@ If plugin has `STAGE_UNSTAGE_VOLUME` node capability then:
 
 Otherwise `NodeExpandVolume` MUST be called after successful `NodePublishVolume`.
 
+A plugin that has `STAGE_UNSTAGE_VOLUME` node capability and supports `NodeExpandVolume` ONLY after `NodeStageVolume` and before `NodePublishVolume` but not after `NodePublishVolume` may return `FAILED_PRECONDITION` error code if `NodeExpandVolume` is called after `NodePublishVolume` - CO MUST NOT retry if volume is node-published.
+
 If a plugin only supports expansion via the `VolumeExpansion.OFFLINE` capability, then the volume MUST first be taken offline and expanded via `ControllerExpandVolume` (see `ControllerExpandVolume` for more details), and then node-staged or node-published before it can be expanded on the node via `NodeExpandVolume`.
 
 The `staging_target_path` field is not required, for backwards compatibility, but the CO SHOULD supply it.
 Plugins can use this field to determine if `volume_path` is where the volume is published or staged,
 and setting this field to non-empty allows plugins to function with less stored state on the node.
 
-If a plugin does not support expansion of `readonly` volumes it can return `Volume in use or readonly` error and CO must not retry.
+If a plugin does not support expansion of `readonly` volumes it may return `FAILED_PRECONDITION` error code and CO MUST NOT retry.
 
 ```protobuf
 message NodeExpandVolumeRequest {
