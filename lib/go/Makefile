@@ -70,6 +70,46 @@ $(PROTOC_GEN_GO):
 
 
 ########################################################################
+##                          GEN-PROTO-GO                              ##
+########################################################################
+
+# This is the recipe for getting and installing the gen-proto pkg
+# This is a dependency of grpc-go and must be installed before
+# installing grpc-go.
+GENPROTO_GO_SRC := github.com/googleapis/go-genproto
+GENPROTO_GO_PKG := google.golang.org/genproto
+GENPROTO_BUILD_GO := genproto-build-go
+$(GENPROTO_BUILD_GO): GENPROTO_VERSION := 24fa4b261c55da65468f2abfdae2b024eef27dfb
+$(GENPROTO_BUILD_GO):
+	mkdir -p $(dir $(GOPATH)/src/$(GENPROTO_GO_PKG))
+	test -d $(GOPATH)/src/$(GENPROTO_GO_PKG)/.git || git clone https://$(GENPROTO_GO_SRC) $(GOPATH)/src/$(GENPROTO_GO_PKG)
+	(cd $(GOPATH)/src/$(GENPROTO_GO_PKG) && \
+			(git fetch && git checkout $(GENPROTO_VERSION)))
+	(cd $(GOPATH)/src/$(GENPROTO_GO_PKG) && go get -v -d $$(go list -f '{{ .ImportPath }}' ./...))
+
+
+
+########################################################################
+##                          GRPC-GO                                   ##
+########################################################################
+
+# This is the recipe for getting and installing the grpc go
+GRPC_GO_SRC := github.com/grpc/grpc-go
+GRPC_GO_PKG := google.golang.org/grpc
+GRPC_BUILD_GO := grpc-build-go
+$(GRPC_BUILD_GO): GRPC_VERSION := v1.26.0
+$(GRPC_BUILD_GO):
+	mkdir -p $(dir $(GOPATH)/src/$(GRPC_GO_PKG))
+	test -d $(GOPATH)/src/$(GRPC_GO_PKG)/.git || git clone https://$(GRPC_GO_SRC) $(GOPATH)/src/$(GRPC_GO_PKG)
+	(cd $(GOPATH)/src/$(GRPC_GO_PKG) && \
+		(test "$$(git describe --tags | head -1)" = "$(GRPC_VERSION)" || \
+			(git fetch && git checkout tags/$(GRPC_VERSION))))
+	(cd $(GOPATH)/src/$(GRPC_GO_PKG) && go get -v -d $$(go list -f '{{ .ImportPath }}' ./...) && \
+		go build -o "$@" $(GRPC_GO_PKG))
+
+
+
+########################################################################
 ##                              PATH                                  ##
 ########################################################################
 
@@ -119,7 +159,7 @@ endif
 #   1. Go get any missing dependencies.
 #   2. Cache the packages.
 #   3. Build the archive file.
-$(CSI_A): $(CSI_GO)
+$(CSI_A): $(CSI_GO) $(GENPROTO_BUILD_GO) $(GRPC_BUILD_GO)
 	go get -v -d ./...
 	go install ./$(CSI_PKG_SUB)
 	go build -o "$@" ./$(CSI_PKG_SUB)
@@ -133,4 +173,4 @@ clean:
 clobber: clean
 	rm -fr "$(PROTOC)" "$(PROTOC_GEN_GO)" "$(CSI_PKG_SUB)"
 
-.PHONY: clean clobber
+.PHONY: clean clobber $(GRPC_BUILD_GO) $(GENPROTO_BUILD_GO)
