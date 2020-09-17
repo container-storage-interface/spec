@@ -164,48 +164,52 @@ capability.
 ### Volume Lifecycle
 
 ```
-   CreateVolume +------------+ DeleteVolume
- +------------->|  CREATED   +--------------+
- |              +---+----^---+              |
- |       Controller |    | Controller       v
-+++         Publish |    | Unpublish       +++
-|X|          Volume |    | Volume          | |
-+-+             +---v----+---+             +-+
-                | NODE_READY |
-                +---+----^---+
-               Node |    | Node
-            Publish |    | Unpublish
-             Volume |    | Volume
-                +---v----+---+
-                | PUBLISHED  |
-                +------------+
+   CreateVolume +------------+          DeleteVolume
+ +------------->|  CREATED   +------------------------+
+ |              |            +<-----------+           |
+ |              +---+----^---+            |           |
+ |       Controller |    | Controller     |           v
++++         Publish |    | Unpublish      |          +++
+|X|          Volume |    | Volume         |          | |
++-+             +---v----+---+            |          +-+
+                | NODE_READY |            |
+                +---+----^---+            | Node
+               Node |    | Node           | Unpublish
+            Publish |    | Unpublish      | Volume
+             Volume |    | Volume         | (forced)
+                +---v----+---+       +----+--------+
+                | PUBLISHED  +------>| QUARANTINED |
+                +------------+       +-------------+
+                   ControllerUnpublishVolume(fenced)
 
 Figure 5: The lifecycle of a dynamically provisioned volume, from
 creation to destruction.
 ```
 
 ```
-   CreateVolume +------------+ DeleteVolume
- +------------->|  CREATED   +--------------+
- |              +---+----^---+              |
- |       Controller |    | Controller       v
-+++         Publish |    | Unpublish       +++
-|X|          Volume |    | Volume          | |
-+-+             +---v----+---+             +-+
-                | NODE_READY |
-                +---+----^---+
-               Node |    | Node
-              Stage |    | Unstage
-             Volume |    | Volume
-                +---v----+---+
-                |  VOL_READY |
-                +---+----^---+
-               Node |    | Node
-            Publish |    | Unpublish
-             Volume |    | Volume
-                +---v----+---+
-                | PUBLISHED  |
-                +------------+
+   CreateVolume +------------+           DeleteVolume
+ +------------->|  CREATED   +--------------------------+
+ |              |            +<-----------+             |
+ |              +---+----^---+            |             |
+ |       Controller |    | Controller     |             v
++++         Publish |    | Unpublish      |            +++
+|X|          Volume |    | Volume         |            | |
++-+             +---v----+---+            |            +-+
+                | NODE_READY |            | Node
+                +---+----^---+            | Unstage
+               Node |    | Node           | Volume
+              Stage |    | Unstage        | (forced)
+             Volume |    | Volume     +--------------+
+                +---v----+---+        | QUARANTINED2 |
+                |  VOL_READY |        +---^----------+
+                +---+----^---+            | Node
+               Node |    | Node           | Unpublish
+            Publish |    | Unpublish      | Volume
+             Volume |    | Volume         | (forced)
+                +---v----+---+       +----+---------+
+                | PUBLISHED  +------>| QUARANTINED3 |
+                +------------+       +--------------+
+                       ControllerUnpublishVolume(fenced)
 
 Figure 6: The lifecycle of a dynamically provisioned volume, from
 creation to destruction, when the Node Plugin advertises the
@@ -1318,9 +1322,14 @@ The CO MUST implement the specified error recovery behavior when it encounters t
 
 Controller Plugin MUST implement this RPC call if it has `PUBLISH_UNPUBLISH_VOLUME` controller capability.
 This RPC is a reverse operation of `ControllerPublishVolume`.
-It MUST be called after all `NodeUnstageVolume` and `NodeUnpublishVolume` on the volume are called and succeed.
+It MUST be called after all `NodeUnstageVolume` and `NodeUnpublishVolume` on the volume are called and succeed unless the plugin has the `UNPUBLISH_FENCE` capability.
 The Plugin SHOULD perform the work that is necessary for making the volume ready to be consumed by a different node.
 The Plugin MUST NOT assume that this RPC will be executed on the node where the volume was previously used.
+
+If the plugin has the `UNPUBLISH_FENCE` capability, the CO MAY specify `fence` as `true`, in which case the SP MUST ensure that the node may no longer access the volume before returning a successful response.
+This results in a transition into one of the `QUARANTINE` states where the node must be cleaned up without being able to access the volume like usual.
+This is intended cut off an unreachable node from accessing volumes so those volumes may be safely published to another node.
+Once in one of the `QUARANTINE` states the volume MAY NOT be published to that node again until appropriate cleanup has happened using `NodeUnpublishVolume` and `NodeUnstageVolume` (if applicable).
 
 This RPC is typically called by the CO when the workload using the volume is being moved to a different node, or all the workload using the volume on a node has finished.
 
@@ -1347,6 +1356,17 @@ message ControllerUnpublishVolumeRequest {
   // This field is OPTIONAL. Refer to the `Secrets Requirements`
   // section on how to use this field.
   map<string, string> secrets = 3 [(csi_secret) = true];
+  
+  // Indicates SP MUST make the volume inacessible to the node or nodes
+  // it is being unpublished from. Any attempt to read or write data
+  // to a volume from a node that has been fenced MUST NOT succeed,
+  // even if the volume remains staged and/or published on the node.
+  // CO MUST NOT set this field to true unless SP has the
+  // UNPUBLISH_FENCE controller capability.
+  // The SP MAY make the volume inaccessible even when this field is
+  // false.
+  // This is an OPTIONAL field.
+  bool fence = 4;
 }
 
 message ControllerUnpublishVolumeResponse {
@@ -2196,8 +2216,12 @@ This RPC is a reverse operation of `NodeStageVolume`.
 This RPC MUST undo the work by the corresponding `NodeStageVolume`.
 This RPC SHALL be called by the CO once for each `staging_target_path` that was successfully setup via `NodeStageVolume`.
 
-If the corresponding Controller Plugin has `PUBLISH_UNPUBLISH_VOLUME` controller capability and the Node Plugin has `STAGE_UNSTAGE_VOLUME` capability, the CO MUST guarantee that this RPC is called and returns success before calling `ControllerUnpublishVolume` for the given node and the given volume.
+If the corresponding Controller Plugin has `PUBLISH_UNPUBLISH_VOLUME` controller capability and the Node Plugin has `STAGE_UNSTAGE_VOLUME` capability, the CO MUST guarantee that this RPC is called and returns success before calling `ControllerUnpublishVolume` for the given node and the given volume, unless the Controller Plugin has `UNPUBLISH_FENCE` capability and the Node Plugin has the `FORCE_UNPUBLISH` capability and the `force` flag is `true`.
 The CO MUST guarantee that this RPC is called after all `NodeUnpublishVolume` have been called and returned success for the given volume on the given node.
+
+If the Node Plugin has the `FORCE_UNPUBLISH` capability, the CO MAY specify `force` as `true` in which case the Node Plugin MUST support unstaging volumes even when access has been revoked with `ControllerUnpublishVolume`.
+Because data loss is inevitable in such circumstances, the `force` flag is an indication that success is desired even it if means losing data.
+It is essential that after a successful call to `NodeUnstageVolume` that there be no buffered data on the node related to the volume which might result in unintetional modification of the volume if it were to be subsequently re-staged to that node.
 
 The Plugin SHALL assume that this RPC will be executed on the node where the volume is being used.
 
@@ -2221,6 +2245,13 @@ message NodeUnstageVolumeRequest {
   // system/filesystem, but, at a minimum, SP MUST accept a max path
   // length of at least 128 bytes.
   string staging_target_path = 2;
+  
+  // Indicates that the SP should prefer to successfully unstage the
+  // volume, even if data loss would occur as a result.
+  // CO MUST NOT set this field to true unless SP has the
+  // FORCE_UNPUBLISH node capability.
+  // This in an OPTIONAL field.
+  bool force = 3;
 }
 
 message NodeUnstageVolumeResponse {
@@ -2376,8 +2407,12 @@ A Node Plugin MUST implement this RPC call.
 This RPC is a reverse operation of `NodePublishVolume`.
 This RPC MUST undo the work by the corresponding `NodePublishVolume`.
 This RPC SHALL be called by the CO at least once for each `target_path` that was successfully setup via `NodePublishVolume`.
-If the corresponding Controller Plugin has `PUBLISH_UNPUBLISH_VOLUME` controller capability, the CO SHOULD issue all `NodeUnpublishVolume` (as specified above) before calling `ControllerUnpublishVolume` for the given node and the given volume.
+If the corresponding Controller Plugin has `PUBLISH_UNPUBLISH_VOLUME` controller capability, the CO SHOULD issue all `NodeUnpublishVolume` (as specified above) before calling `ControllerUnpublishVolume` for the given node and the given volume, unless the Controller Plugin has `UNPUBLISH_FENCE` capability and the Node Plugin has the `FORCE_UNPUBLISH` capability and the `force` flag is `true`.
 The Plugin SHALL assume that this RPC will be executed on the node where the volume is being used.
+
+If the Node Plugin has the `FORCE_UNPUBLISH` capability, the CO MAY specify `force` as `true` in which case the Node Plugin MUST support unpublishing volumes even when access has been revoked with `ControllerUnpublishVolume`.
+Because data loss is inevitable in such circumstances, the `force` flag is an indication that success is desired even it if means losing data.
+It is essential that after a successful call to `NodeUnpublishVolume` that there be no buffered data on the node related to the volume which might result in unintetional modification of the volume if it were to be subsequently re-published to that node.
 
 This RPC is typically called by the CO when the workload using the volume is being moved to a different node, or all the workload using the volume on a node has finished.
 
@@ -2398,6 +2433,13 @@ message NodeUnpublishVolumeRequest {
   // system/filesystem, but, at a minimum, SP MUST accept a max path
   // length of at least 128 bytes.
   string target_path = 2;
+  
+  // Indicates that the SP should prefer to successfully unpublish the
+  // volume, even if data loss would occur as a result.
+  // CO MUST NOT set this field to true unless SP has the
+  // FORCE_UNPUBLISH node capability.
+  // This in an OPTIONAL field.
+  bool force = 3;
 }
 
 message NodeUnpublishVolumeResponse {

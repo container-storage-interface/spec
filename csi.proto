@@ -788,6 +788,17 @@ message ControllerUnpublishVolumeRequest {
   // This field is OPTIONAL. Refer to the `Secrets Requirements`
   // section on how to use this field.
   map<string, string> secrets = 3 [(csi_secret) = true];
+  
+  // Indicates SP MUST make the volume inacessible to the node or nodes
+  // it is being unpublished from. Any attempt to read or write data
+  // to a volume from a node that has been fenced MUST NOT succeed,
+  // even if the volume remains staged and/or published on the node.
+  // CO MUST NOT set this field to true unless SP has the
+  // UNPUBLISH_FENCE controller capability.
+  // The SP MAY make the volume inaccessible even when this field is
+  // false.
+  // This is an OPTIONAL field.
+  bool fence = 4;
 }
 
 message ControllerUnpublishVolumeResponse {
@@ -1316,6 +1327,13 @@ message NodeUnstageVolumeRequest {
   // system/filesystem, but, at a minimum, SP MUST accept a max path
   // length of at least 128 bytes.
   string staging_target_path = 2;
+  
+  // Indicates that the SP should prefer to successfully unstage the
+  // volume, even if data loss would occur as a result.
+  // CO MUST NOT set this field to true unless SP has the
+  // FORCE_UNPUBLISH node capability.
+  // This in an OPTIONAL field.
+  bool force = 3;
 }
 
 message NodeUnstageVolumeResponse {
@@ -1400,6 +1418,13 @@ message NodeUnpublishVolumeRequest {
   // system/filesystem, but, at a minimum, SP MUST accept a max path
   // length of at least 128 bytes.
   string target_path = 2;
+  
+  // Indicates that the SP should prefer to successfully unpublish the
+  // volume, even if data loss would occur as a result.
+  // CO MUST NOT set this field to true unless SP has the
+  // FORCE_UNPUBLISH node capability.
+  // This in an OPTIONAL field.
+  bool force = 3;
 }
 
 message NodeUnpublishVolumeResponse {
