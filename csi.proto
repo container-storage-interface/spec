@@ -1570,6 +1570,12 @@ message NodeExpandVolumeRequest {
   // access_type from given volume_path for the volume and perform
   // node expansion. This is an OPTIONAL field.
   VolumeCapability volume_capability = 5;
+
+  // Secrets required by plugin to complete node expand volume request.
+  // This field is OPTIONAL. Refer to the `Secrets Requirements`
+  // section on how to use this field.
+  map<string, string> secrets = 6 
+    [(csi_secret) = true, (alpha_field) = true];
 }
 
 message NodeExpandVolumeResponse {
