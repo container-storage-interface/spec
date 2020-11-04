@@ -1441,6 +1441,11 @@ message ListVolumesRequest {
   // next page of entries. This field is OPTIONAL.
   // An empty string is equal to an unspecified field value.
   string starting_token = 2;
+
+  // Secrets required by plugin to complete volumes listing request.
+  // This field is OPTIONAL. Refer to the `Secrets Requirements` section
+  // on how to use this field.
+  map<string, string> secrets = 3 [(csi_secret) = true];
 }
 
 message ListVolumesResponse {
