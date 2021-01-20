@@ -395,6 +395,19 @@ message VolumeCapability {
     // to untrusted entities. The total size of this repeated field
     // SHALL NOT exceed 4 KiB.
     repeated string mount_flags = 2;
+
+    // If SP has VOLUME_MOUNT_GROUP node capability and CO provides
+    // this field then SP MUST ensure that the volume_mount_group
+    // parameter is passed as the group identifier to the underlying
+    // operating system mount system call, with the understanding
+    // that the set of available mount call parameters and/or
+    // mount implementations may vary across operating systems.
+    // Additionally, new file and/or directory entries written to
+    // the underlying filesystem SHOULD be permission-labeled in such a
+    // manner, unless otherwise modified by a workload, that they are
+    // both readable and writable by said mount group identifier.
+    // This is an OPTIONAL field.
+    string volume_mount_group = 3 [(alpha_field) = true];
   }
 
   // Specify how a volume can be accessed.
@@ -1498,6 +1511,7 @@ message NodeServiceCapability {
       // Note that, for alpha, `VolumeCondition` is intended to be
       // informative for humans only, not for automation.
       VOLUME_CONDITION = 4 [(alpha_enum_value) = true];
+
       // Indicates the SP supports the SINGLE_NODE_SINGLE_WRITER and/or
       // SINGLE_NODE_MULTI_WRITER access modes.
       // These access modes are intended to replace the
@@ -1508,6 +1522,11 @@ message NodeServiceCapability {
       // SINGLE_NODE_SINGLE_WRITER and/or SINGLE_NODE_MULTI_WRITER are
       // supported, in order to permit older COs to continue working.
       SINGLE_NODE_MULTI_WRITER = 5 [(alpha_enum_value) = true];
+
+      // Indicates that Node service supports mounting volumes
+      // with provided volume group identifier during node stage
+      // or node publish RPC calls.
+      VOLUME_MOUNT_GROUP = 6 [(alpha_enum_value) = true];
     }
 
     Type type = 1;
@@ -1606,7 +1625,7 @@ message NodeExpandVolumeRequest {
   // Secrets required by plugin to complete node expand volume request.
   // This field is OPTIONAL. Refer to the `Secrets Requirements`
   // section on how to use this field.
-  map<string, string> secrets = 6 
+  map<string, string> secrets = 6
     [(csi_secret) = true, (alpha_field) = true];
 }
 
