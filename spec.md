@@ -2073,6 +2073,10 @@ message NodeStageVolumeRequest {
   // CO SHALL be responsible for creating the directory if it does not
   // exist.
   // This is a REQUIRED field.
+  // This field overrides the general CSI size limit.
+  // SP SHOULD support the maximum path length allowed by the operating
+  // system/filesystem, but, at a minimum, SP MUST accept a max path
+  // length of at least 128 bytes.
   string staging_target_path = 3;
 
   // Volume capability describing how the CO intends to use this volume.
@@ -2138,6 +2142,10 @@ message NodeUnstageVolumeRequest {
   // The path at which the volume was staged. It MUST be an absolute
   // path in the root filesystem of the process serving this request.
   // This is a REQUIRED field.
+  // This field overrides the general CSI size limit.
+  // SP SHOULD support the maximum path length allowed by the operating
+  // system/filesystem, but, at a minimum, SP MUST accept a max path
+  // length of at least 128 bytes.
   string staging_target_path = 2;
 }
 
@@ -2205,6 +2213,10 @@ message NodePublishVolumeRequest {
   // It MUST be set if the Node Plugin implements the
   // `STAGE_UNSTAGE_VOLUME` node capability.
   // This is an OPTIONAL field.
+  // This field overrides the general CSI size limit.
+  // SP SHOULD support the maximum path length allowed by the operating
+  // system/filesystem, but, at a minimum, SP MUST accept a max path
+  // length of at least 128 bytes.
   string staging_target_path = 3;
 
   // The path to which the volume will be published. It MUST be an
@@ -2219,6 +2231,10 @@ message NodePublishVolumeRequest {
   // mounted directory at target_path.
   // Creation of target_path is the responsibility of the SP.
   // This is a REQUIRED field.
+  // This field overrides the general CSI size limit.
+  // SP SHOULD support the maximum path length allowed by the operating
+  // system/filesystem, but, at a minimum, SP MUST accept a max path
+  // length of at least 128 bytes.
   string target_path = 4;
 
   // Volume capability describing how the CO intends to use this volume.
@@ -2285,6 +2301,10 @@ message NodeUnpublishVolumeRequest {
   // path in the root filesystem of the process serving this request.
   // The SP MUST delete the file or directory it created at this path.
   // This is a REQUIRED field.
+  // This field overrides the general CSI size limit.
+  // SP SHOULD support the maximum path length allowed by the operating
+  // system/filesystem, but, at a minimum, SP MUST accept a max path
+  // length of at least 128 bytes.
   string target_path = 2;
 }
 
@@ -2326,6 +2346,10 @@ message NodeGetVolumeStatsRequest {
   // It MUST be an absolute path in the root filesystem of
   // the process serving this request.
   // This is a REQUIRED field.
+  // This field overrides the general CSI size limit.
+  // SP SHOULD support the maximum path length allowed by the operating
+  // system/filesystem, but, at a minimum, SP MUST accept a max path
+  // length of at least 128 bytes.
   string volume_path = 2;
 
   // The path where the volume is staged, if the plugin has the
@@ -2333,6 +2357,10 @@ message NodeGetVolumeStatsRequest {
   // If not empty, it MUST be an absolute path in the root
   // filesystem of the process serving this request.
   // This field is OPTIONAL.
+  // This field overrides the general CSI size limit.
+  // SP SHOULD support the maximum path length allowed by the operating
+  // system/filesystem, but, at a minimum, SP MUST accept a max path
+  // length of at least 128 bytes.
   string staging_target_path = 3;
 }
 
@@ -2472,6 +2500,10 @@ message NodeGetInfoResponse {
   // `ControllerPublishVolume`, to refer to this node.
   // The SP is NOT responsible for global uniqueness of node_id across
   // multiple SPs.
+  // This field overrides the general CSI size limit.
+  // The size of this field SHALL NOT exceed 192 bytes. The general
+  // CSI size limit, 128 byte, is RECOMMENDED for best backwards
+  // compatibility.
   string node_id = 1;
 
   // Maximum number of volumes that controller can publish to the node.
@@ -2535,6 +2567,10 @@ message NodeExpandVolumeRequest {
   string volume_id = 1;
 
   // The path on which volume is available. This field is REQUIRED.
+  // This field overrides the general CSI size limit.
+  // SP SHOULD support the maximum path length allowed by the operating
+  // system/filesystem, but, at a minimum, SP MUST accept a max path
+  // length of at least 128 bytes.
   string volume_path = 2;
 
   // This allows CO to specify the capacity requirements of the volume
@@ -2550,6 +2586,10 @@ message NodeExpandVolumeRequest {
   // If not empty, it MUST be an absolute path in the root
   // filesystem of the process serving this request.
   // This field is OPTIONAL.
+  // This field overrides the general CSI size limit.
+  // SP SHOULD support the maximum path length allowed by the operating
+  // system/filesystem, but, at a minimum, SP MUST accept a max path
+  // length of at least 128 bytes.
   string staging_target_path = 4;
 
   // Volume capability describing how the CO intends to use this volume.

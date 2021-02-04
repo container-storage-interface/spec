@@ -3600,6 +3600,10 @@ type NodeStageVolumeRequest struct {
 	// CO SHALL be responsible for creating the directory if it does not
 	// exist.
 	// This is a REQUIRED field.
+	// This field overrides the general CSI size limit.
+	// SP SHOULD support the maximum path length allowed by the operating
+	// system/filesystem, but, at a minimum, SP MUST accept a max path
+	// length of at least 128 bytes.
 	StagingTargetPath string `protobuf:"bytes,3,opt,name=staging_target_path,json=stagingTargetPath,proto3" json:"staging_target_path,omitempty"`
 	// Volume capability describing how the CO intends to use this volume.
 	// SP MUST ensure the CO can use the staged volume as described.
@@ -3724,6 +3728,10 @@ type NodeUnstageVolumeRequest struct {
 	// The path at which the volume was staged. It MUST be an absolute
 	// path in the root filesystem of the process serving this request.
 	// This is a REQUIRED field.
+	// This field overrides the general CSI size limit.
+	// SP SHOULD support the maximum path length allowed by the operating
+	// system/filesystem, but, at a minimum, SP MUST accept a max path
+	// length of at least 128 bytes.
 	StagingTargetPath    string   `protobuf:"bytes,2,opt,name=staging_target_path,json=stagingTargetPath,proto3" json:"staging_target_path,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
@@ -3815,6 +3823,10 @@ type NodePublishVolumeRequest struct {
 	// It MUST be set if the Node Plugin implements the
 	// `STAGE_UNSTAGE_VOLUME` node capability.
 	// This is an OPTIONAL field.
+	// This field overrides the general CSI size limit.
+	// SP SHOULD support the maximum path length allowed by the operating
+	// system/filesystem, but, at a minimum, SP MUST accept a max path
+	// length of at least 128 bytes.
 	StagingTargetPath string `protobuf:"bytes,3,opt,name=staging_target_path,json=stagingTargetPath,proto3" json:"staging_target_path,omitempty"`
 	// The path to which the volume will be published. It MUST be an
 	// absolute path in the root filesystem of the process serving this
@@ -3828,6 +3840,10 @@ type NodePublishVolumeRequest struct {
 	// mounted directory at target_path.
 	// Creation of target_path is the responsibility of the SP.
 	// This is a REQUIRED field.
+	// This field overrides the general CSI size limit.
+	// SP SHOULD support the maximum path length allowed by the operating
+	// system/filesystem, but, at a minimum, SP MUST accept a max path
+	// length of at least 128 bytes.
 	TargetPath string `protobuf:"bytes,4,opt,name=target_path,json=targetPath,proto3" json:"target_path,omitempty"`
 	// Volume capability describing how the CO intends to use this volume.
 	// SP MUST ensure the CO can use the published volume as described.
@@ -3970,6 +3986,10 @@ type NodeUnpublishVolumeRequest struct {
 	// path in the root filesystem of the process serving this request.
 	// The SP MUST delete the file or directory it created at this path.
 	// This is a REQUIRED field.
+	// This field overrides the general CSI size limit.
+	// SP SHOULD support the maximum path length allowed by the operating
+	// system/filesystem, but, at a minimum, SP MUST accept a max path
+	// length of at least 128 bytes.
 	TargetPath           string   `protobuf:"bytes,2,opt,name=target_path,json=targetPath,proto3" json:"target_path,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
@@ -4054,12 +4074,20 @@ type NodeGetVolumeStatsRequest struct {
 	// It MUST be an absolute path in the root filesystem of
 	// the process serving this request.
 	// This is a REQUIRED field.
+	// This field overrides the general CSI size limit.
+	// SP SHOULD support the maximum path length allowed by the operating
+	// system/filesystem, but, at a minimum, SP MUST accept a max path
+	// length of at least 128 bytes.
 	VolumePath string `protobuf:"bytes,2,opt,name=volume_path,json=volumePath,proto3" json:"volume_path,omitempty"`
 	// The path where the volume is staged, if the plugin has the
 	// STAGE_UNSTAGE_VOLUME capability, otherwise empty.
 	// If not empty, it MUST be an absolute path in the root
 	// filesystem of the process serving this request.
 	// This field is OPTIONAL.
+	// This field overrides the general CSI size limit.
+	// SP SHOULD support the maximum path length allowed by the operating
+	// system/filesystem, but, at a minimum, SP MUST accept a max path
+	// length of at least 128 bytes.
 	StagingTargetPath    string   `protobuf:"bytes,3,opt,name=staging_target_path,json=stagingTargetPath,proto3" json:"staging_target_path,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
@@ -4504,6 +4532,10 @@ type NodeGetInfoResponse struct {
 	// `ControllerPublishVolume`, to refer to this node.
 	// The SP is NOT responsible for global uniqueness of node_id across
 	// multiple SPs.
+	// This field overrides the general CSI size limit.
+	// The size of this field SHALL NOT exceed 192 bytes. The general
+	// CSI size limit, 128 byte, is RECOMMENDED for best backwards
+	// compatibility.
 	NodeId string `protobuf:"bytes,1,opt,name=node_id,json=nodeId,proto3" json:"node_id,omitempty"`
 	// Maximum number of volumes that controller can publish to the node.
 	// If value is not set or zero CO SHALL decide how many volumes of
@@ -4584,6 +4616,10 @@ type NodeExpandVolumeRequest struct {
 	// The ID of the volume. This field is REQUIRED.
 	VolumeId string `protobuf:"bytes,1,opt,name=volume_id,json=volumeId,proto3" json:"volume_id,omitempty"`
 	// The path on which volume is available. This field is REQUIRED.
+	// This field overrides the general CSI size limit.
+	// SP SHOULD support the maximum path length allowed by the operating
+	// system/filesystem, but, at a minimum, SP MUST accept a max path
+	// length of at least 128 bytes.
 	VolumePath string `protobuf:"bytes,2,opt,name=volume_path,json=volumePath,proto3" json:"volume_path,omitempty"`
 	// This allows CO to specify the capacity requirements of the volume
 	// after expansion. If capacity_range is omitted then a plugin MAY
@@ -4597,6 +4633,10 @@ type NodeExpandVolumeRequest struct {
 	// If not empty, it MUST be an absolute path in the root
 	// filesystem of the process serving this request.
 	// This field is OPTIONAL.
+	// This field overrides the general CSI size limit.
+	// SP SHOULD support the maximum path length allowed by the operating
+	// system/filesystem, but, at a minimum, SP MUST accept a max path
+	// length of at least 128 bytes.
 	StagingTargetPath string `protobuf:"bytes,4,opt,name=staging_target_path,json=stagingTargetPath,proto3" json:"staging_target_path,omitempty"`
 	// Volume capability describing how the CO intends to use this volume.
 	// This allows SP to determine if volume is being used as a block
