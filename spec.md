@@ -725,13 +725,10 @@ Plugins MAY create 3 types of volumes:
 
 - Empty volumes. When plugin supports `CREATE_DELETE_VOLUME` OPTIONAL capability.
 - From an existing snapshot. When plugin supports `CREATE_DELETE_VOLUME` and `CREATE_DELETE_SNAPSHOT` OPTIONAL capabilities.
-  The Plugin SHOULD create a volume that looks like exact copy of the original snapshotted volume at the time the snapshot was taken.
-  If CO requests a volume that is larger than the original snapshotted volume, the Plugin can either refuse such a call with `OUT_OF_RANGE` error or SHOULD provide a volume that, when presented to a workload by `NodePublish` call, has both the requested (larger) size and contains data from the snapshot.
-  Explicitly, it's responsibility of the Plugin to resize the filesystem of the volume at or before `NodePublish` call, if the volume has `VolumeCapability` `MountVolume` and the filesystem resize is required to have the larger volume usable by the workload.
 - From an existing volume. When plugin supports cloning, and reports the OPTIONAL capabilities `CREATE_DELETE_VOLUME` and `CLONE_VOLUME`.
-  The Plugin SHOULD create a volume that looks like exact copy of the original volume.
-  If CO requests a volume that is larger than the original volume, the Plugin can either refuse such a call with `OUT_OF_RANGE` error or SHOULD provide a volume that, when presented to a workload by `NodePublish` call, has both the requested (larger) size and contains data from the original volume.
-  Explicitly, it's responsibility of the Plugin to resize the filesystem of the volume at or before `NodePublish` call, if the volume has `VolumeCapability` `MountVolume` and the filesystem resize is required to have the larger volume usable by the workload.
+
+If CO requests a volume to be created from existing snapshot or volume and the requested size of the volume is larger than the original snapshotted (or cloned volume), the Plugin can either refuse such a call with `OUT_OF_RANGE` error or MUST provide a volume that, when presented to a workload by `NodePublish` call, has both the requested (larger) size and contains data from the snapshot (or original volume).
+Explicitly, it's the responsibility of the Plugin to resize the filesystem of the newly created volume at (or before) the `NodePublish` call, if the volume has `VolumeCapability` access type `MountVolume` and the filesystem resize is required in order to provision the requested capacity.
 
 ```protobuf
 message CreateVolumeRequest {
