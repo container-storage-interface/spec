@@ -948,23 +948,19 @@ message GetCapacityResponse {
   // The value of this field MUST NOT be negative.
   int64 available_capacity = 1;
 
-  // The largest size that may be used in a CreateVolume call
+  // The supported volume size that may be used in a CreateVolume call
   // to create a volume with the same parameters as those in
-  // GetCapacityRequest.
+  // GetCapacityRequest, given as a lower bound (`required_bytes`)
+  // and an upper bound (`limit_bytes`).
   //
   // If `volume_capabilities` or `parameters` is
   // specified in the request, the Plugin SHALL take those into
-  // consideration when calculating the maximum volume size of the
+  // consideration when calculating the supported volume size of the
   // storage.
   //
   // This field is OPTIONAL. COs MAY use it to make decision about
   // where to create volumes.
-  Capacity maximum_volume_size = 2 [(alpha_field) = true];
-}
-
-message Capacity {
-  // Number of bytes. MUST NOT be negative.
-  int64 value = 1;
+  CapacityRange volume_size = 2 [(alpha_field) = true];
 }
 message ControllerGetCapabilitiesRequest {
   // Intentionally empty.
