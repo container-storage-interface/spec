@@ -727,6 +727,9 @@ Plugins MAY create 3 types of volumes:
 - From an existing snapshot. When plugin supports `CREATE_DELETE_VOLUME` and `CREATE_DELETE_SNAPSHOT` OPTIONAL capabilities.
 - From an existing volume. When plugin supports cloning, and reports the OPTIONAL capabilities `CREATE_DELETE_VOLUME` and `CLONE_VOLUME`.
 
+If CO requests a volume to be created from existing snapshot or volume and the requested size of the volume is larger than the original snapshotted (or cloned volume), the Plugin can either refuse such a call with `OUT_OF_RANGE` error or MUST provide a volume that, when presented to a workload by `NodePublish` call, has both the requested (larger) size and contains data from the snapshot (or original volume).
+Explicitly, it's the responsibility of the Plugin to resize the filesystem of the newly created volume at (or before) the `NodePublish` call, if the volume has `VolumeCapability` access type `MountVolume` and the filesystem resize is required in order to provision the requested capacity.
+
 ```protobuf
 message CreateVolumeRequest {
   // The suggested name for the storage space. This field is REQUIRED.
@@ -1161,7 +1164,7 @@ The CO MUST implement the specified error recovery behavior when it encounters t
 | Source does not exist | 5 NOT_FOUND | Indicates that the specified source does not exist. | Caller MUST verify that the `volume_content_source` is correct, the source is accessible, and has not been deleted before retrying with exponential back off. |
 | Volume already exists but is incompatible | 6 ALREADY_EXISTS | Indicates that a volume corresponding to the specified volume `name` already exists but is incompatible with the specified `capacity_range`, `volume_capabilities`, `parameters`, `accessibility_requirements` or `volume_content_source`. | Caller MUST fix the arguments or use a different `name` before retrying. |
 | Unable to provision in `accessible_topology` | 8 RESOURCE_EXHAUSTED | Indicates that although the `accessible_topology` field is valid, a new volume can not be provisioned with the specified topology constraints. More human-readable information MAY be provided in the gRPC `status.message` field. | Caller MUST ensure that whatever is preventing volumes from being provisioned in the specified location (e.g. quota issues) is addressed before retrying with exponential backoff. |
-| Unsupported `capacity_range` | 11 OUT_OF_RANGE | Indicates that the capacity range is not allowed by the Plugin, for example when trying to create a volume smaller than the source snapshot. More human-readable information MAY be provided in the gRPC `status.message` field. | Caller MUST fix the capacity range before retrying. |
+| Unsupported `capacity_range` | 11 OUT_OF_RANGE | Indicates that the capacity range is not allowed by the Plugin, for example when trying to create a volume smaller than the source snapshot or the Plugin does not support creating volumes larger than the source snapshot or source volume. More human-readable information MAY be provided in the gRPC `status.message` field. | Caller MUST fix the capacity range before retrying. |
 
 
 #### `DeleteVolume`
