@@ -185,6 +185,10 @@ message PluginCapability {
     Type type = 1;
   }
 
+  // Deprecated - Ability for a plugin to delcare online and offline
+  // controller expansion capabilities via PluginCapability
+  // is deprecated. A plugin may support either mode of operation
+  // without having to declare them in PluginCapability.
   message VolumeExpansion {
     enum Type {
       UNKNOWN = 0;
@@ -234,7 +238,18 @@ message PluginCapability {
   oneof type {
     // Service that the plugin supports.
     Service service = 1;
-    VolumeExpansion volume_expansion = 2;
+    // Deprecated - Ability for a plugin to delcare online and offline
+    // controller expansion capabilities via PluginCapability
+    // is deprecated. A plugin may support either mode of operation
+    // without having to declare them in PluginCapability.
+    //
+    // If set a CO will ignore ONLINE and OFFLINE capabilities
+    // specified in PluginCapability.
+    // If a plugin can not support controller expansion of published
+    // and available volumes on a node -  it may return
+    // FAILED_PRECONDITION error and CO should ensure that volume
+    // is not published before retrying with exponential backoff.
+    VolumeExpansion volume_expansion = 2 [deprecated=true];
   }
 }
 message ProbeRequest {

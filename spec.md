@@ -595,6 +595,10 @@ message PluginCapability {
     Type type = 1;
   }
 
+  // Deprecated - Ability for a plugin to delcare online and offline
+  // controller expansion capabilities via PluginCapability
+  // is deprecated. A plugin may support either mode of operation
+  // without having to declare them in PluginCapability.
   message VolumeExpansion {
     enum Type {
       UNKNOWN = 0;
@@ -644,7 +648,18 @@ message PluginCapability {
   oneof type {
     // Service that the plugin supports.
     Service service = 1;
-    VolumeExpansion volume_expansion = 2;
+    // Deprecated - Ability for a plugin to delcare online and offline
+    // controller expansion capabilities via PluginCapability
+    // is deprecated. A plugin may support either mode of operation
+    // without having to declare them in PluginCapability.
+    //
+    // If set a CO will ignore ONLINE and OFFLINE capabilities
+    // specified in PluginCapability.
+    // If a plugin can not support controller expansion of published
+    // and available volumes on a node -  it may return
+    // FAILED_PRECONDITION error and CO should ensure that volume
+    // is not published before retrying with exponential backoff.
+    VolumeExpansion volume_expansion = 2 [deprecated=true];
   }
 }
 ```
@@ -1933,24 +1948,15 @@ This RPC allows the CO to expand the size of a volume.
 This operation MUST be idempotent.
 If a volume corresponding to the specified volume ID is already larger than or equal to the target capacity of the expansion request, the plugin SHOULD reply 0 OK.
 
-This call MAY be made by the CO during any time in the lifecycle of the volume after creation if plugin has `VolumeExpansion.ONLINE` capability.
+This call MAY be made by the CO during any time in the lifecycle of the volume after creation but an SP may not permit controller expansion of volumes which are controller published or available on a node. In which case - the plugin may return gRPC error code `FAILED_PRECONDITION` (Volume in use) and CO SHOULD ensure that volume is not published before retrying with exponential backoff.
+
 If plugin has `EXPAND_VOLUME` node capability, then `NodeExpandVolume` MUST be called after successful `ControllerExpandVolume` and `node_expansion_required` in `ControllerExpandVolumeResponse` is `true`.
 
 If specified, the `volume_capability` in `ControllerExpandVolumeRequest` should be same as what CO would pass in `ControllerPublishVolumeRequest`.
 
-If the plugin has only `VolumeExpansion.OFFLINE` expansion capability and volume is currently published or available on a node then `ControllerExpandVolume` MUST be called ONLY after either:
-- The plugin has controller `PUBLISH_UNPUBLISH_VOLUME` capability and `ControllerUnpublishVolume` has been invoked successfully.
-
-OR ELSE
-
-- The plugin does NOT have controller `PUBLISH_UNPUBLISH_VOLUME` capability, the plugin has node `STAGE_UNSTAGE_VOLUME` capability, and `NodeUnstageVolume` has been completed successfully.
-
-OR ELSE
-
-- The plugin does NOT have controller `PUBLISH_UNPUBLISH_VOLUME` capability, nor node `STAGE_UNSTAGE_VOLUME` capability, and `NodeUnpublishVolume` has completed successfully.
 
 Examples:
-* Offline Volume Expansion:
+* Offline Volume Expansion(SP does not permit controller expansion of controller published volume):
   Given an ElasticSearch process that runs on Azure Disk and needs more space.
   - The administrator takes the Elasticsearch server offline by stopping the workload and CO calls `ControllerUnpublishVolume`.
   - The administrator requests more space for the volume from CO.
@@ -2006,7 +2012,7 @@ message ControllerExpandVolumeResponse {
 |-----------|-----------|-------------|-------------------|
 | Exceeds capabilities | 3 INVALID_ARGUMENT | Indicates that CO has specified capabilities not supported by the volume. | Caller MAY verify volume capabilities by calling ValidateVolumeCapabilities and retry with matching capabilities. |
 | Volume does not exist | 5 NOT FOUND | Indicates that a volume corresponding to the specified volume_id does not exist. | Caller MUST verify that the volume_id is correct and that the volume is accessible and has not been deleted before retrying with exponential back off. |
-| Volume in use | 9 FAILED_PRECONDITION | Indicates that the volume corresponding to the specified `volume_id` could not be expanded because it is currently published on a node but the plugin does not have ONLINE expansion capability. | Caller SHOULD ensure that volume is not published and retry with exponential back off. |
+| Volume in use | 9 FAILED_PRECONDITION | Indicates that the volume corresponding to the specified `volume_id` could not be expanded because it is currently published on a node. | Caller SHOULD ensure that volume is not published and retry with exponential back off. |
 | Unsupported `capacity_range` | 11 OUT_OF_RANGE | Indicates that the capacity range is not allowed by the Plugin. More human-readable information MAY be provided in the gRPC `status.message` field. | Caller MUST fix the capacity range before retrying. |
 
 #### RPC Interactions
@@ -2557,8 +2563,6 @@ If plugin has `STAGE_UNSTAGE_VOLUME` node capability then:
 * `NodeExpandVolume` MAY be called before or after `NodePublishVolume`.
 
 Otherwise `NodeExpandVolume` MUST be called after successful `NodePublishVolume`.
-
-If a plugin only supports expansion via the `VolumeExpansion.OFFLINE` capability, then the volume MUST first be taken offline and expanded via `ControllerExpandVolume` (see `ControllerExpandVolume` for more details), and then node-staged or node-published before it can be expanded on the node via `NodeExpandVolume`.
 
 The `staging_target_path` field is not required, for backwards compatibility, but the CO SHOULD supply it.
 Plugins can use this field to determine if `volume_path` is where the volume is published or staged,
