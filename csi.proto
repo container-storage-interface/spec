@@ -843,7 +843,7 @@ message ListVolumesRequest {
   // Secrets required by plugin to complete volumes listing request.
   // This field is OPTIONAL. Refer to the `Secrets Requirements` section
   // on how to use this field.
-  map<string, string> secrets = 3 [(csi_secret) = true];
+  map<string, string> secrets = 3 [(csi_secret) = true, (alpha_field) = true];
 }
 
 message ListVolumesResponse {
