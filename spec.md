@@ -887,6 +887,18 @@ message VolumeCapability {
       // Can be published as read/write at multiple nodes
       // simultaneously.
       MULTI_NODE_MULTI_WRITER = 5;
+
+      // Can only be published once as read/write at a single workload
+      // on a single node, at any given time. SHOULD be used instead of
+      // SINGLE_NODE_WRITER for COs using the experimental
+      // SINGLE_NODE_MULTI_WRITER capability.
+      SINGLE_NODE_SINGLE_WRITER = 6 [(alpha_enum_value) = true];
+
+      // Can be published as read/write at multiple workloads on a
+      // single node simultaneously. SHOULD be used instead of
+      // SINGLE_NODE_WRITER for COs using the experimental
+      // SINGLE_NODE_MULTI_WRITER capability.
+      SINGLE_NODE_MULTI_WRITER = 7 [(alpha_enum_value) = true];
     }
 
     // This field is REQUIRED.
@@ -1704,6 +1716,16 @@ message ControllerServiceCapability {
       // This enables COs to, for example, fetch per volume
       // condition after a volume is provisioned.
       GET_VOLUME = 12 [(alpha_enum_value) = true];
+
+      // Indicates the SP supports the SINGLE_NODE_SINGLE_WRITER and/or
+      // SINGLE_NODE_MULTI_WRITER access modes.
+      // These access modes are intended to replace the
+      // SINGLE_NODE_WRITER access mode to clarify the number of writers
+      // for a volume on a single node. Plugins MUST accept and allow
+      // use of the SINGLE_NODE_WRITER access mode when either
+      // SINGLE_NODE_SINGLE_WRITER and/or SINGLE_NODE_MULTI_WRITER are
+      // supported, in order to permit older COs to continue working.
+      SINGLE_NODE_MULTI_WRITER = 13 [(alpha_enum_value) = true];
     }
 
     Type type = 1;
@@ -2040,7 +2062,7 @@ message ControllerExpandVolumeResponse {
 
 | Condition | gRPC Code | Description | Recovery Behavior |
 |-----------|-----------|-------------|-------------------|
-| Exceeds capabilities | 3 INVALID_ARGUMENT | Indicates that CO has specified capabilities not supported by the volume. | Caller MAY verify volume capabilities by calling ValidateVolumeCapabilities and retry with matching capabilities. |
+| Exceeds capabilities | 3 INVALID_ARGUMENT | Indicates that the CO has specified capabilities not supported by the volume. | Caller MAY verify volume capabilities by calling ValidateVolumeCapabilities and retry with matching capabilities. |
 | Volume does not exist | 5 NOT FOUND | Indicates that a volume corresponding to the specified volume_id does not exist. | Caller MUST verify that the volume_id is correct and that the volume is accessible and has not been deleted before retrying with exponential back off. |
 | Volume in use | 9 FAILED_PRECONDITION | Indicates that the volume corresponding to the specified `volume_id` could not be expanded because it is currently published on a node but the plugin does not have ONLINE expansion capability. | Caller SHOULD ensure that volume is not published and retry with exponential back off. |
 | Unsupported `capacity_range` | 11 OUT_OF_RANGE | Indicates that the capacity range is not allowed by the Plugin. More human-readable information MAY be provided in the gRPC `status.message` field. | Caller MUST fix the capacity range before retrying. |
@@ -2151,7 +2173,7 @@ The CO MUST implement the specified error recovery behavior when it encounters t
 |-----------|-----------|-------------|-------------------|
 | Volume does not exist | 5 NOT_FOUND | Indicates that a volume corresponding to the specified `volume_id` does not exist. | Caller MUST verify that the `volume_id` is correct and that the volume is accessible and has not been deleted before retrying with exponential back off. |
 | Volume published but is incompatible | 6 ALREADY_EXISTS | Indicates that a volume corresponding to the specified `volume_id` has already been published at the specified `staging_target_path` but is incompatible with the specified `volume_capability` flag. | Caller MUST fix the arguments before retrying. |
-| Exceeds capabilities | 9 FAILED_PRECONDITION | Indicates that the CO has exceeded the volume's capabilities because the volume does not have MULTI_NODE capability. | Caller MAY choose to call `ValidateVolumeCapabilities` to validate the volume capabilities, or wait for the volume to be unpublished on the node. |
+| Exceeds capabilities | 9 FAILED_PRECONDITION | Indicates that the CO has specified capabilities not supported by the volume. | Caller MAY choose to call `ValidateVolumeCapabilities` to validate the volume capabilities, or wait for the volume to be unpublished on the node. |
 
 #### `NodeUnstageVolume`
 
@@ -2224,15 +2246,31 @@ If the volume corresponding to the `volume_id` has already been published at the
 
 If this RPC failed, or the CO does not know if it failed or not, it MAY choose to call `NodePublishVolume` again, or choose to call `NodeUnpublishVolume`.
 
-This RPC MAY be called by the CO multiple times on the same node for the same volume with possibly different `target_path` and/or other arguments if the volume has MULTI_NODE capability (i.e., `access_mode` is either `MULTI_NODE_READER_ONLY`, `MULTI_NODE_SINGLE_WRITER` or `MULTI_NODE_MULTI_WRITER`).
+This RPC MAY be called by the CO multiple times on the same node for the same volume with a possibly different `target_path` and/or other arguments if the volume supports either `MULTI_NODE_...` or `SINGLE_NODE_MULTI_WRITER` access modes (see second table).
+The possible `MULTI_NODE_...` access modes are `MULTI_NODE_READER_ONLY`, `MULTI_NODE_SINGLE_WRITER` or `MULTI_NODE_MULTI_WRITER`.
+COs SHOULD NOT call `NodePublishVolume` a second time with a different `volume_capability`.
+If this happens, the Plugin SHOULD return `FAILED_PRECONDITION`.
+
 The following table shows what the Plugin SHOULD return when receiving a second `NodePublishVolume` on the same volume on the same node:
 
-|                | T1=T2, P1=P2    | T1=T2, P1!=P2  | T1!=T2, P1=P2       | T1!=T2, P1!=P2     |
-|----------------|-----------------|----------------|---------------------|--------------------|
-| MULTI_NODE     | OK (idempotent) | ALREADY_EXISTS | OK                  | OK                 |
-| Non MULTI_NODE | OK (idempotent) | ALREADY_EXISTS | FAILED_PRECONDITION | FAILED_PRECONDITION|
+(**T<sub>n</sub>**: target path of the n<sup>th</sup> `NodePublishVolume`; **P<sub>n</sub>**: other arguments of the n<sup>th</sup> `NodePublishVolume` except `secrets`)
 
-(`Tn`: target path of the n-th `NodePublishVolume`, `Pn`: other arguments of the n-th `NodePublishVolume` except `secrets`)
+|                    | T1=T2, P1=P2    | T1=T2, P1!=P2  | T1!=T2, P1=P2       | T1!=T2, P1!=P2     |
+|--------------------|-----------------|----------------|---------------------|--------------------|
+| MULTI_NODE_...     | OK (idempotent) | ALREADY_EXISTS | OK                  | OK                 |
+| Non MULTI_NODE_... | OK (idempotent) | ALREADY_EXISTS | FAILED_PRECONDITION | FAILED_PRECONDITION|
+
+NOTE: If the Plugin supports the `SINGLE_NODE_MULTI_WRITER` capability, use the following table instead for what the Plugin SHOULD return when receiving a second `NodePublishVolume` on the same volume on the same node:
+
+|                                       | T1=T2, P1=P2    | T1=T2, P1!=P2  | T1!=T2, P1=P2       | T1!=T2, P1!=P2      |
+|---------------------------------------|-----------------|----------------|---------------------|---------------------|
+| SINGLE_NODE_SINGLE_WRITER             | OK (idempotent) | ALREADY_EXISTS | FAILED_PRECONDITION | FAILED_PRECONDITION |
+| SINGLE_NODE_MULTI_WRITER              | OK (idempotent) | ALREADY_EXISTS | OK                  | OK                  |
+| MULTI_NODE_...                        | OK (idempotent) | ALREADY_EXISTS | OK                  | OK                  |
+| Non MULTI_NODE_...                    | OK (idempotent) | ALREADY_EXISTS | FAILED_PRECONDITION | FAILED_PRECONDITION |
+
+The `SINGLE_NODE_SINGLE_WRITER` and `SINGLE_NODE_MULTI_WRITER` access modes are intended to replace the `SINGLE_NODE_WRITER` access mode to clarify the number of writers for a volume on a single node.
+Plugins MUST accept and allow use of the `SINGLE_NODE_WRITER` access mode (subject to the processing rules above), when either `SINGLE_NODE_SINGLE_WRITER` and/or `SINGLE_NODE_MULTI_WRITER` are supported, in order to permit older COs to continue working.
 
 ```protobuf
 message NodePublishVolumeRequest {
@@ -2313,7 +2351,7 @@ The CO MUST implement the specified error recovery behavior when it encounters t
 |-----------|-----------|-------------|-------------------|
 | Volume does not exist | 5 NOT_FOUND | Indicates that a volume corresponding to the specified `volume_id` does not exist. | Caller MUST verify that the `volume_id` is correct and that the volume is accessible and has not been deleted before retrying with exponential back off. |
 | Volume published but is incompatible | 6 ALREADY_EXISTS | Indicates that a volume corresponding to the specified `volume_id` has already been published at the specified `target_path` but is incompatible with the specified `volume_capability` or `readonly` flag. | Caller MUST fix the arguments before retrying. |
-| Exceeds capabilities | 9 FAILED_PRECONDITION | Indicates that the CO has exceeded the volume's capabilities because the volume does not have MULTI_NODE capability. | Caller MAY choose to call `ValidateVolumeCapabilities` to validate the volume capabilities, or wait for the volume to be unpublished on the node. |
+| Exceeds capabilities | 9 FAILED_PRECONDITION | Indicates that the CO has specified capabilities not supported by the volume. | Caller MAY choose to call `ValidateVolumeCapabilities` to validate the volume capabilities, or wait for the volume to be unpublished on the node. |
 | Staging target path not set | 9 FAILED_PRECONDITION | Indicates that `STAGE_UNSTAGE_VOLUME` capability is set but no `staging_target_path` was set. | Caller MUST make sure call to `NodeStageVolume` is made and returns success before retrying with valid `staging_target_path`. |
 
 
@@ -2501,6 +2539,16 @@ message NodeServiceCapability {
       // Note that, for alpha, `VolumeCondition` is intended to be
       // informative for humans only, not for automation.
       VOLUME_CONDITION = 4 [(alpha_enum_value) = true];
+      // Indicates the SP supports the SINGLE_NODE_SINGLE_WRITER and/or
+      // SINGLE_NODE_MULTI_WRITER access modes.
+      // These access modes are intended to replace the
+      // SINGLE_NODE_WRITER access mode to clarify the number of writers
+      // for a volume on a single node. Plugins MUST accept and allow
+      // use of the SINGLE_NODE_WRITER access mode (subject to the
+      // processing rules for NodePublishVolume), when either
+      // SINGLE_NODE_SINGLE_WRITER and/or SINGLE_NODE_MULTI_WRITER are
+      // supported, in order to permit older COs to continue working.
+      SINGLE_NODE_MULTI_WRITER = 5 [(alpha_enum_value) = true];
     }
 
     Type type = 1;
@@ -2659,7 +2707,7 @@ message NodeExpandVolumeResponse {
 
 | Condition             | gRPC code | Description           | Recovery Behavior                 |
 |-----------------------|-----------|-----------------------|-----------------------------------|
-| Exceeds capabilities | 3 INVALID_ARGUMENT | Indicates that CO has specified capabilities not supported by the volume. | Caller MAY verify volume capabilities by calling ValidateVolumeCapabilities and retry with matching capabilities. |
+| Exceeds capabilities | 3 INVALID_ARGUMENT | Indicates that the CO has specified capabilities not supported by the volume. | Caller MAY verify volume capabilities by calling ValidateVolumeCapabilities and retry with matching capabilities. |
 | Volume does not exist | 5 NOT FOUND | Indicates that a volume corresponding to the specified volume_id does not exist. | Caller MUST verify that the volume_id is correct and that the volume is accessible and has not been deleted before retrying with exponential back off. |
 | Volume in use | 9 FAILED_PRECONDITION | Indicates that the volume corresponding to the specified `volume_id` could not be expanded because it is node-published or node-staged and the underlying filesystem does not support expansion of published or staged volumes. | Caller MUST NOT retry. |
 | Unsupported capacity_range | 11 OUT_OF_RANGE | Indicates that the capacity range is not allowed by the Plugin. More human-readable information MAY be provided in the gRPC `status.message` field. | Caller MUST fix the capacity range before retrying. |
