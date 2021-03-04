@@ -1596,6 +1596,42 @@ message GetCapacityResponse {
   // storage. This field is REQUIRED.
   // The value of this field MUST NOT be negative.
   int64 available_capacity = 1;
+
+  // The largest size that may be used in a
+  // CreateVolumeRequest.capacity_range.required_bytes field
+  // to create a volume with the same parameters as those in
+  // GetCapacityRequest.
+  //
+  // If `volume_capabilities` or `parameters` is
+  // specified in the request, the Plugin SHALL take those into
+  // consideration when calculating the minimum volume size of the
+  // storage.
+  //
+  // This field is OPTIONAL. MUST NOT be negative.
+  // The Plugin SHOULD provide a value for this field if it has
+  // a maximum size for individual volumes and leave it unset
+  // otherwise. COs MAY use it to make decision about
+  // where to create volumes.
+  google.protobuf.Int64Value maximum_volume_size = 2
+    [(alpha_field) = true];
+
+  // The smallest size that may be used in a
+  // CreateVolumeRequest.capacity_range.limit_bytes field
+  // to create a volume with the same parameters as those in
+  // GetCapacityRequest.
+  //
+  // If `volume_capabilities` or `parameters` is
+  // specified in the request, the Plugin SHALL take those into
+  // consideration when calculating the maximum volume size of the
+  // storage.
+  //
+  // This field is OPTIONAL. MUST NOT be negative.
+  // The Plugin SHOULD provide a value for this field if it has
+  // a minimum size for individual volumes and leave it unset
+  // otherwise. COs MAY use it to make decision about
+  // where to create volumes.
+  google.protobuf.Int64Value minimum_volume_size = 3
+    [(alpha_field) = true];
 }
 ```
 
