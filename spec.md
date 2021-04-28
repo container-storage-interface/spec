@@ -177,9 +177,9 @@ capability.
                Node |    | Node           | Unpublish
             Publish |    | Unpublish      | Volume
              Volume |    | Volume         | (forced)
-                +---v----+---+       +----+--------+
-                | PUBLISHED  +------>| QUARANTINED |
-                +------------+       +-------------+
+                +---v----+---+       +----+----------+
+                | PUBLISHED  +------>| QUARANTINED_P |
+                +------------+       +---------------+
                    ControllerUnpublishVolume(fenced)
 
 Figure 5: The lifecycle of a dynamically provisioned volume, from
@@ -199,16 +199,16 @@ creation to destruction.
                 +---+----^---+            | Unstage
                Node |    | Node           | Volume
               Stage |    | Unstage        | (forced)
-             Volume |    | Volume     +--------------+
-                +---v----+---+        | QUARANTINED2 |
-                |  VOL_READY |        +---^----------+
+             Volume |    | Volume     +---------------+
+                +---v----+---+        | QUARANTINED_S |
+                |  VOL_READY |        +---^-----------+
                 +---+----^---+            | Node
                Node |    | Node           | Unpublish
             Publish |    | Unpublish      | Volume
              Volume |    | Volume         | (forced)
-                +---v----+---+       +----+---------+
-                | PUBLISHED  +------>| QUARANTINED3 |
-                +------------+       +--------------+
+                +---v----+---+       +----+-----------+
+                | PUBLISHED  +------>| QUARANTINED_SP |
+                +------------+       +----------------+
                        ControllerUnpublishVolume(fenced)
 
 Figure 6: The lifecycle of a dynamically provisioned volume, from
@@ -260,6 +260,12 @@ The above diagrams illustrate a general expectation with respect to how a CO MAY
 Plugins SHOULD expose all RPCs for an interface: Controller plugins SHOULD implement all RPCs for the `Controller` service.
 Unsupported RPCs SHOULD return an appropriate error code that indicates such (e.g. `CALL_NOT_IMPLEMENTED`).
 The full list of plugin capabilities is documented in the `ControllerGetCapabilities` and `NodeGetCapabilities` RPCs.
+
+### A Word on Quarantine States
+
+The purpose of the `QUARANTINE_S`, `QUARANTINE_P`, and `QUARANTINE_SP` states are to enable recovery from node problems.
+Because CSI is designed to be used in distributed systems, it is inevitable that sometimes volumes will become attached to nodes that get stuck or lost, temporarily or permanently.
+Rather than require an administrator to manually clean up such situation, CSI offers a way disconnect a volume from a node "out of order" such that a volume can be disconnected from a problematic node, and safely connected to a different node, and the node can be reliably and safely cleaned up before accessing that volume again, as opposed to the normal path where the node must confirm a volume is disconnected before the controller can unpublish it.  
 
 ## Container Storage Interface
 
@@ -1356,7 +1362,7 @@ message ControllerUnpublishVolumeRequest {
   // This field is OPTIONAL. Refer to the `Secrets Requirements`
   // section on how to use this field.
   map<string, string> secrets = 3 [(csi_secret) = true];
-  
+
   // Indicates SP MUST make the volume inacessible to the node or nodes
   // it is being unpublished from. Any attempt to read or write data
   // to a volume from a node that has been fenced MUST NOT succeed,
@@ -1366,7 +1372,7 @@ message ControllerUnpublishVolumeRequest {
   // The SP MAY make the volume inaccessible even when this field is
   // false.
   // This is an OPTIONAL field.
-  bool fence = 4;
+  bool fence = 4 [(alpha_field) = true];
 }
 
 message ControllerUnpublishVolumeResponse {
@@ -1750,6 +1756,7 @@ message ControllerServiceCapability {
       // condition after a volume is provisioned.
       GET_VOLUME = 12 [(alpha_enum_value) = true];
 
+
       // Indicates the SP supports the SINGLE_NODE_SINGLE_WRITER and/or
       // SINGLE_NODE_MULTI_WRITER access modes.
       // These access modes are intended to replace the
@@ -1759,6 +1766,10 @@ message ControllerServiceCapability {
       // SINGLE_NODE_SINGLE_WRITER and/or SINGLE_NODE_MULTI_WRITER are
       // supported, in order to permit older COs to continue working.
       SINGLE_NODE_MULTI_WRITER = 13 [(alpha_enum_value) = true];
+
+      // Indicates the SP supports ControllerUnpublishVolume.fence
+      // field.
+      UNPUBLISH_FENCE = 14 [(alpha_enum_value) = true];
     }
 
     Type type = 1;
@@ -2245,13 +2256,13 @@ message NodeUnstageVolumeRequest {
   // system/filesystem, but, at a minimum, SP MUST accept a max path
   // length of at least 128 bytes.
   string staging_target_path = 2;
-  
+
   // Indicates that the SP should prefer to successfully unstage the
   // volume, even if data loss would occur as a result.
   // CO MUST NOT set this field to true unless SP has the
   // FORCE_UNPUBLISH node capability.
   // This in an OPTIONAL field.
-  bool force = 3;
+  bool force = 3 [(alpha_field) = true];
 }
 
 message NodeUnstageVolumeResponse {
@@ -2433,13 +2444,13 @@ message NodeUnpublishVolumeRequest {
   // system/filesystem, but, at a minimum, SP MUST accept a max path
   // length of at least 128 bytes.
   string target_path = 2;
-  
+
   // Indicates that the SP should prefer to successfully unpublish the
   // volume, even if data loss would occur as a result.
   // CO MUST NOT set this field to true unless SP has the
   // FORCE_UNPUBLISH node capability.
   // This in an OPTIONAL field.
-  bool force = 3;
+  bool force = 3 [(alpha_field) = true];
 }
 
 message NodeUnpublishVolumeResponse {
@@ -2612,6 +2623,12 @@ message NodeServiceCapability {
       // with provided volume group identifier during node stage
       // or node publish RPC calls.
       VOLUME_MOUNT_GROUP = 6 [(alpha_enum_value) = true];
+
+      // Indicates that the node supports the NodeUnpublishVolume.force
+      // field. Also indicates that the node supports the
+      // NodeUnstageVolume.force field if it also has the
+      // STAGE_UNSTAGE_VOLUME capability.
+      FORCE_UNPUBLISH = 7 [(alpha_enum_value) = true];
     }
 
     Type type = 1;

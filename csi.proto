@@ -788,7 +788,7 @@ message ControllerUnpublishVolumeRequest {
   // This field is OPTIONAL. Refer to the `Secrets Requirements`
   // section on how to use this field.
   map<string, string> secrets = 3 [(csi_secret) = true];
-  
+
   // Indicates SP MUST make the volume inacessible to the node or nodes
   // it is being unpublished from. Any attempt to read or write data
   // to a volume from a node that has been fenced MUST NOT succeed,
@@ -798,7 +798,7 @@ message ControllerUnpublishVolumeRequest {
   // The SP MAY make the volume inaccessible even when this field is
   // false.
   // This is an OPTIONAL field.
-  bool fence = 4;
+  bool fence = 4 [(alpha_field) = true];
 }
 
 message ControllerUnpublishVolumeResponse {
@@ -1081,6 +1081,7 @@ message ControllerServiceCapability {
       // condition after a volume is provisioned.
       GET_VOLUME = 12 [(alpha_enum_value) = true];
 
+
       // Indicates the SP supports the SINGLE_NODE_SINGLE_WRITER and/or
       // SINGLE_NODE_MULTI_WRITER access modes.
       // These access modes are intended to replace the
@@ -1090,6 +1091,10 @@ message ControllerServiceCapability {
       // SINGLE_NODE_SINGLE_WRITER and/or SINGLE_NODE_MULTI_WRITER are
       // supported, in order to permit older COs to continue working.
       SINGLE_NODE_MULTI_WRITER = 13 [(alpha_enum_value) = true];
+
+      // Indicates the SP supports ControllerUnpublishVolume.fence
+      // field.
+      UNPUBLISH_FENCE = 14 [(alpha_enum_value) = true];
     }
 
     Type type = 1;
@@ -1327,13 +1332,13 @@ message NodeUnstageVolumeRequest {
   // system/filesystem, but, at a minimum, SP MUST accept a max path
   // length of at least 128 bytes.
   string staging_target_path = 2;
-  
+
   // Indicates that the SP should prefer to successfully unstage the
   // volume, even if data loss would occur as a result.
   // CO MUST NOT set this field to true unless SP has the
   // FORCE_UNPUBLISH node capability.
   // This in an OPTIONAL field.
-  bool force = 3;
+  bool force = 3 [(alpha_field) = true];
 }
 
 message NodeUnstageVolumeResponse {
@@ -1418,13 +1423,13 @@ message NodeUnpublishVolumeRequest {
   // system/filesystem, but, at a minimum, SP MUST accept a max path
   // length of at least 128 bytes.
   string target_path = 2;
-  
+
   // Indicates that the SP should prefer to successfully unpublish the
   // volume, even if data loss would occur as a result.
   // CO MUST NOT set this field to true unless SP has the
   // FORCE_UNPUBLISH node capability.
   // This in an OPTIONAL field.
-  bool force = 3;
+  bool force = 3 [(alpha_field) = true];
 }
 
 message NodeUnpublishVolumeResponse {
@@ -1552,6 +1557,12 @@ message NodeServiceCapability {
       // with provided volume group identifier during node stage
       // or node publish RPC calls.
       VOLUME_MOUNT_GROUP = 6 [(alpha_enum_value) = true];
+
+      // Indicates that the node supports the NodeUnpublishVolume.force
+      // field. Also indicates that the node supports the
+      // NodeUnstageVolume.force field if it also has the
+      // STAGE_UNSTAGE_VOLUME capability.
+      FORCE_UNPUBLISH = 7 [(alpha_enum_value) = true];
     }
 
     Type type = 1;
