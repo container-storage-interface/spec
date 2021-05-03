@@ -2455,6 +2455,20 @@ message NodeGetVolumeStatsRequest {
   // system/filesystem, but, at a minimum, SP MUST accept a max path
   // length of at least 128 bytes.
   string staging_target_path = 3;
+
+  // Secrets that the plugin can use to request additional statistics
+  // from the backend storage system.
+  // This field is OPTIONAL. Refer to the `Secrets Requirements`
+  // section on how to use this field.
+  map<string, string> secrets = 4
+    [(csi_secret) = true, (alpha_field) = true];
+
+  // Volume context as returned by SP in
+  // CreateVolumeResponse.Volume.volume_context.
+  // This field is OPTIONAL and MUST match the volume_context of the
+  // volume identified by `volume_id`.
+  map<string, string> volume_context = 5
+    [(alpha_field) = true];
 }
 
 message NodeGetVolumeStatsResponse {
