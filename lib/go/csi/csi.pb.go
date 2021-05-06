@@ -4579,7 +4579,7 @@ type NodeGetInfoResponse struct {
 	// The SP is NOT responsible for global uniqueness of node_id across
 	// multiple SPs.
 	// This field overrides the general CSI size limit.
-	// The size of this field SHALL NOT exceed 192 bytes. The general
+	// The size of this field SHALL NOT exceed 256 bytes. The general
 	// CSI size limit, 128 byte, is RECOMMENDED for best backwards
 	// compatibility.
 	NodeId string `protobuf:"bytes,1,opt,name=node_id,json=nodeId,proto3" json:"node_id,omitempty"`
