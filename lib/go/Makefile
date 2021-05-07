@@ -58,7 +58,7 @@ $(PROTOC):
 PROTOC_GEN_GO_PKG := github.com/golang/protobuf/protoc-gen-go
 PROTOC_GEN_GO := protoc-gen-go
 $(PROTOC_GEN_GO): PROTOBUF_PKG := $(dir $(PROTOC_GEN_GO_PKG))
-$(PROTOC_GEN_GO): PROTOBUF_VERSION := v1.3.2
+$(PROTOC_GEN_GO): PROTOBUF_VERSION := v1.5.2
 $(PROTOC_GEN_GO):
 	mkdir -p $(dir $(GOPATH)/src/$(PROTOBUF_PKG))
 	test -d $(GOPATH)/src/$(PROTOBUF_PKG)/.git || git clone https://$(PROTOBUF_PKG) $(GOPATH)/src/$(PROTOBUF_PKG)
@@ -79,7 +79,7 @@ $(PROTOC_GEN_GO):
 GENPROTO_GO_SRC := github.com/googleapis/go-genproto
 GENPROTO_GO_PKG := google.golang.org/genproto
 GENPROTO_BUILD_GO := genproto-build-go
-$(GENPROTO_BUILD_GO): GENPROTO_VERSION := 24fa4b261c55da65468f2abfdae2b024eef27dfb
+$(GENPROTO_BUILD_GO): GENPROTO_VERSION := 4a47615972c2ffa83a28f07c7927305661123d65 
 $(GENPROTO_BUILD_GO):
 	mkdir -p $(dir $(GOPATH)/src/$(GENPROTO_GO_PKG))
 	test -d $(GOPATH)/src/$(GENPROTO_GO_PKG)/.git || git clone https://$(GENPROTO_GO_SRC) $(GOPATH)/src/$(GENPROTO_GO_PKG)
@@ -97,7 +97,7 @@ $(GENPROTO_BUILD_GO):
 GRPC_GO_SRC := github.com/grpc/grpc-go
 GRPC_GO_PKG := google.golang.org/grpc
 GRPC_BUILD_GO := grpc-build-go
-$(GRPC_BUILD_GO): GRPC_VERSION := v1.26.0
+$(GRPC_BUILD_GO): GRPC_VERSION := v1.37.0
 $(GRPC_BUILD_GO):
 	mkdir -p $(dir $(GOPATH)/src/$(GRPC_GO_PKG))
 	test -d $(GOPATH)/src/$(GRPC_GO_PKG)/.git || git clone https://$(GRPC_GO_SRC) $(GOPATH)/src/$(GRPC_GO_PKG)
