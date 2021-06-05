@@ -1363,7 +1363,7 @@ message ControllerUnpublishVolumeRequest {
   // section on how to use this field.
   map<string, string> secrets = 3 [(csi_secret) = true];
 
-  // Indicates SP MUST make the volume inacessible to the node or nodes
+  // Indicates SP MUST make the volume inaccessible to the node or nodes
   // it is being unpublished from. Any attempt to read or write data
   // to a volume from a node that has been fenced MUST NOT succeed,
   // even if the volume remains staged and/or published on the node.
@@ -2231,8 +2231,8 @@ If the corresponding Controller Plugin has `PUBLISH_UNPUBLISH_VOLUME` controller
 The CO MUST guarantee that this RPC is called after all `NodeUnpublishVolume` have been called and returned success for the given volume on the given node.
 
 If the Node Plugin has the `FORCE_UNPUBLISH` capability, the CO MAY specify `force` as `true` in which case the Node Plugin MUST support unstaging volumes even when access has been revoked with `ControllerUnpublishVolume`.
-Because data loss is inevitable in such circumstances, the `force` flag is an indication that success is desired even it if means losing data.
-It is essential that after a successful call to `NodeUnstageVolume` that there be no buffered data on the node related to the volume which might result in unintetional modification of the volume if it were to be subsequently re-staged to that node.
+Because data loss is inevitable in such circumstances, the `force` flag is an indication that success is desired even if it means losing data.
+It is essential that after a successful call to `NodeUnstageVolume` that there will be no buffered data on the node related to the volume which might result in unintentional modification of the volume if it was to be subsequently re-staged to that node.
 
 The Plugin SHALL assume that this RPC will be executed on the node where the volume is being used.
 
@@ -2422,8 +2422,8 @@ If the corresponding Controller Plugin has `PUBLISH_UNPUBLISH_VOLUME` controller
 The Plugin SHALL assume that this RPC will be executed on the node where the volume is being used.
 
 If the Node Plugin has the `FORCE_UNPUBLISH` capability, the CO MAY specify `force` as `true` in which case the Node Plugin MUST support unpublishing volumes even when access has been revoked with `ControllerUnpublishVolume`.
-Because data loss is inevitable in such circumstances, the `force` flag is an indication that success is desired even it if means losing data.
-It is essential that after a successful call to `NodeUnpublishVolume` that there be no buffered data on the node related to the volume which might result in unintetional modification of the volume if it were to be subsequently re-published to that node.
+Because data loss is inevitable in such circumstances, the `force` flag is an indication that success is desired even if it means losing data.
+It is essential that after a successful call to `NodeUnpublishVolume` that there will be no buffered data on the node related to the volume which might result in unintetional modification of the volume if it was to be subsequently re-published to that node.
 
 This RPC is typically called by the CO when the workload using the volume is being moved to a different node, or all the workload using the volume on a node has finished.
 
@@ -2624,10 +2624,10 @@ message NodeServiceCapability {
       // or node publish RPC calls.
       VOLUME_MOUNT_GROUP = 6 [(alpha_enum_value) = true];
 
-      // Indicates that the node supports the NodeUnpublishVolume.force
-      // field. Also indicates that the node supports the
-      // NodeUnstageVolume.force field if it also has the
-      // STAGE_UNSTAGE_VOLUME capability.
+      // Indicates that the Node Plugin supports the 
+      // NodeUnpublishVolume.force field. Also indicates that the
+      // Node Plugin supports the NodeUnstageVolume.force field if
+      // it also has the STAGE_UNSTAGE_VOLUME capability.
       FORCE_UNPUBLISH = 7 [(alpha_enum_value) = true];
     }
 

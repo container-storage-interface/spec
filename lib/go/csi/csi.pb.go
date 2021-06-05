@@ -358,10 +358,10 @@ const (
 	// with provided volume group identifier during node stage
 	// or node publish RPC calls.
 	NodeServiceCapability_RPC_VOLUME_MOUNT_GROUP NodeServiceCapability_RPC_Type = 6
-	// Indicates that the node supports the NodeUnpublishVolume.force
-	// field. Also indicates that the node supports the
-	// NodeUnstageVolume.force field if it also has the
-	// STAGE_UNSTAGE_VOLUME capability.
+	// Indicates that the Node Plugin supports the
+	// NodeUnpublishVolume.force field. Also indicates that the
+	// Node Plugin supports the NodeUnstageVolume.force field if
+	// it also has the STAGE_UNSTAGE_VOLUME capability.
 	NodeServiceCapability_RPC_FORCE_UNPUBLISH NodeServiceCapability_RPC_Type = 7
 )
 
@@ -2083,7 +2083,7 @@ type ControllerUnpublishVolumeRequest struct {
 	// This field is OPTIONAL. Refer to the `Secrets Requirements`
 	// section on how to use this field.
 	Secrets map[string]string `protobuf:"bytes,3,rep,name=secrets,proto3" json:"secrets,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
-	// Indicates SP MUST make the volume inacessible to the node or nodes
+	// Indicates SP MUST make the volume inaccessible to the node or nodes
 	// it is being unpublished from. Any attempt to read or write data
 	// to a volume from a node that has been fenced MUST NOT succeed,
 	// even if the volume remains staged and/or published on the node.
