@@ -265,7 +265,7 @@ The full list of plugin capabilities is documented in the `ControllerGetCapabili
 
 The purpose of the `QUARANTINE_S`, `QUARANTINE_P`, and `QUARANTINE_SP` states are to enable recovery from node problems.
 Because CSI is designed to be used in distributed systems, it is inevitable that sometimes volumes will become attached to nodes that get stuck or lost, temporarily or permanently.
-Rather than require an administrator to manually clean up such situation, CSI offers a way disconnect a volume from a node "out of order" such that a volume can be disconnected from a problematic node, and safely connected to a different node, and the node can be reliably and safely cleaned up before accessing that volume again, as opposed to the normal path where the node must confirm a volume is disconnected before the controller can unpublish it.  
+Rather than require an administrator to manually clean up in such a situation, CSI offers a way to disconnect a volume from a node "out of order" such that a volume can be disconnected from problematic *node A*, and safely connected to a different *node B*, and then *node A* can be reliably and safely cleaned up before accessing that volume again; as opposed to the normal path whereby *node A* must confirm a volume is disconnected before the controller can unpublish it.
 
 ## Container Storage Interface
 
@@ -1328,13 +1328,13 @@ The CO MUST implement the specified error recovery behavior when it encounters t
 
 Controller Plugin MUST implement this RPC call if it has `PUBLISH_UNPUBLISH_VOLUME` controller capability.
 This RPC is a reverse operation of `ControllerPublishVolume`.
-It MUST be called after all `NodeUnstageVolume` and `NodeUnpublishVolume` on the volume are called and succeed unless the plugin has the `UNPUBLISH_FENCE` capability.
+It MUST be called after both `NodeUnstageVolume` and `NodeUnpublishVolume` on the volume are called and succeed unless the plugin has the `UNPUBLISH_FENCE` capability.
 The Plugin SHOULD perform the work that is necessary for making the volume ready to be consumed by a different node.
 The Plugin MUST NOT assume that this RPC will be executed on the node where the volume was previously used.
 
 If the plugin has the `UNPUBLISH_FENCE` capability, the CO MAY specify `fence` as `true`, in which case the SP MUST ensure that the node may no longer access the volume before returning a successful response.
 This results in a transition into one of the `QUARANTINE` states where the node must be cleaned up without being able to access the volume like usual.
-This is intended cut off an unreachable node from accessing volumes so those volumes may be safely published to another node.
+This is intended to cut off an unreachable node from accessing volumes so those volumes may be safely published to another node.
 Once in one of the `QUARANTINE` states the volume MAY NOT be published to that node again until appropriate cleanup has happened using `NodeUnpublishVolume` and `NodeUnstageVolume` (if applicable).
 
 This RPC is typically called by the CO when the workload using the volume is being moved to a different node, or all the workload using the volume on a node has finished.
@@ -1756,7 +1756,6 @@ message ControllerServiceCapability {
       // condition after a volume is provisioned.
       GET_VOLUME = 12 [(alpha_enum_value) = true];
 
-
       // Indicates the SP supports the SINGLE_NODE_SINGLE_WRITER and/or
       // SINGLE_NODE_MULTI_WRITER access modes.
       // These access modes are intended to replace the
@@ -1767,8 +1766,8 @@ message ControllerServiceCapability {
       // supported, in order to permit older COs to continue working.
       SINGLE_NODE_MULTI_WRITER = 13 [(alpha_enum_value) = true];
 
-      // Indicates the SP supports ControllerUnpublishVolume.fence
-      // field.
+      // Indicates the SP supports the
+      // ControllerUnpublishVolume.fence field.
       UNPUBLISH_FENCE = 14 [(alpha_enum_value) = true];
     }
 
@@ -2227,7 +2226,7 @@ This RPC is a reverse operation of `NodeStageVolume`.
 This RPC MUST undo the work by the corresponding `NodeStageVolume`.
 This RPC SHALL be called by the CO once for each `staging_target_path` that was successfully setup via `NodeStageVolume`.
 
-If the corresponding Controller Plugin has `PUBLISH_UNPUBLISH_VOLUME` controller capability and the Node Plugin has `STAGE_UNSTAGE_VOLUME` capability, the CO MUST guarantee that this RPC is called and returns success before calling `ControllerUnpublishVolume` for the given node and the given volume, unless the Controller Plugin has `UNPUBLISH_FENCE` capability and the Node Plugin has the `FORCE_UNPUBLISH` capability and the `force` flag is `true`.
+If the corresponding Controller Plugin has the `PUBLISH_UNPUBLISH_VOLUME` controller capability and the Node Plugin has the `STAGE_UNSTAGE_VOLUME` capability, the CO MUST guarantee that this RPC is called and returns success before calling `ControllerUnpublishVolume` for the given node and the given volume, unless the Controller Plugin has the `UNPUBLISH_FENCE` capability and the Node Plugin has the `FORCE_UNPUBLISH` capability and the `force` flag is `true`.
 The CO MUST guarantee that this RPC is called after all `NodeUnpublishVolume` have been called and returned success for the given volume on the given node.
 
 If the Node Plugin has the `FORCE_UNPUBLISH` capability, the CO MAY specify `force` as `true` in which case the Node Plugin MUST support unstaging volumes even when access has been revoked with `ControllerUnpublishVolume`.
@@ -2418,12 +2417,12 @@ A Node Plugin MUST implement this RPC call.
 This RPC is a reverse operation of `NodePublishVolume`.
 This RPC MUST undo the work by the corresponding `NodePublishVolume`.
 This RPC SHALL be called by the CO at least once for each `target_path` that was successfully setup via `NodePublishVolume`.
-If the corresponding Controller Plugin has `PUBLISH_UNPUBLISH_VOLUME` controller capability, the CO SHOULD issue all `NodeUnpublishVolume` (as specified above) before calling `ControllerUnpublishVolume` for the given node and the given volume, unless the Controller Plugin has `UNPUBLISH_FENCE` capability and the Node Plugin has the `FORCE_UNPUBLISH` capability and the `force` flag is `true`.
+If the corresponding Controller Plugin has the `PUBLISH_UNPUBLISH_VOLUME` controller capability, the CO SHOULD issue `NodeUnpublishVolume` (as specified above) before calling `ControllerUnpublishVolume` for the given node and the given volume, unless the Controller Plugin has the `UNPUBLISH_FENCE` capability and the Node Plugin has the `FORCE_UNPUBLISH` capability and the `force` flag is `true`.
 The Plugin SHALL assume that this RPC will be executed on the node where the volume is being used.
 
 If the Node Plugin has the `FORCE_UNPUBLISH` capability, the CO MAY specify `force` as `true` in which case the Node Plugin MUST support unpublishing volumes even when access has been revoked with `ControllerUnpublishVolume`.
 Because data loss is inevitable in such circumstances, the `force` flag is an indication that success is desired even if it means losing data.
-It is essential that after a successful call to `NodeUnpublishVolume` that there will be no buffered data on the node related to the volume which might result in unintetional modification of the volume if it was to be subsequently re-published to that node.
+It is essential that after a successful call to `NodeUnpublishVolume` that there will be no buffered data on the node related to the volume that might result in unintentional modification of the volume if it was to be subsequently re-published to that node.
 
 This RPC is typically called by the CO when the workload using the volume is being moved to a different node, or all the workload using the volume on a node has finished.
 

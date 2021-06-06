@@ -1081,7 +1081,6 @@ message ControllerServiceCapability {
       // condition after a volume is provisioned.
       GET_VOLUME = 12 [(alpha_enum_value) = true];
 
-
       // Indicates the SP supports the SINGLE_NODE_SINGLE_WRITER and/or
       // SINGLE_NODE_MULTI_WRITER access modes.
       // These access modes are intended to replace the
@@ -1092,8 +1091,8 @@ message ControllerServiceCapability {
       // supported, in order to permit older COs to continue working.
       SINGLE_NODE_MULTI_WRITER = 13 [(alpha_enum_value) = true];
 
-      // Indicates the SP supports ControllerUnpublishVolume.fence
-      // field.
+      // Indicates the SP supports the
+      // ControllerUnpublishVolume.fence field.
       UNPUBLISH_FENCE = 14 [(alpha_enum_value) = true];
     }
 

@@ -244,8 +244,8 @@ const (
 	// SINGLE_NODE_SINGLE_WRITER and/or SINGLE_NODE_MULTI_WRITER are
 	// supported, in order to permit older COs to continue working.
 	ControllerServiceCapability_RPC_SINGLE_NODE_MULTI_WRITER ControllerServiceCapability_RPC_Type = 13
-	// Indicates the SP supports ControllerUnpublishVolume.fence
-	// field.
+	// Indicates the SP supports the
+	// ControllerUnpublishVolume.fence field.
 	ControllerServiceCapability_RPC_UNPUBLISH_FENCE ControllerServiceCapability_RPC_Type = 14
 )
 
