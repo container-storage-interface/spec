@@ -420,6 +420,18 @@ message VolumeCapability {
       // Can be published as read/write at multiple nodes
       // simultaneously.
       MULTI_NODE_MULTI_WRITER = 5;
+
+      // Can only be published once as read/write at a single workload
+      // on a single node, at any given time. SHOULD be used instead of
+      // SINGLE_NODE_WRITER for COs using the experimental
+      // SINGLE_NODE_MULTI_WRITER capability.
+      SINGLE_NODE_SINGLE_WRITER = 6 [(alpha_enum_value) = true];
+
+      // Can be published as read/write at multiple workloads on a
+      // single node simultaneously. SHOULD be used instead of
+      // SINGLE_NODE_WRITER for COs using the experimental
+      // SINGLE_NODE_MULTI_WRITER capability.
+      SINGLE_NODE_MULTI_WRITER = 7 [(alpha_enum_value) = true];
     }
 
     // This field is REQUIRED.
@@ -1044,6 +1056,16 @@ message ControllerServiceCapability {
       // This enables COs to, for example, fetch per volume
       // condition after a volume is provisioned.
       GET_VOLUME = 12 [(alpha_enum_value) = true];
+
+      // Indicates the SP supports the SINGLE_NODE_SINGLE_WRITER and/or
+      // SINGLE_NODE_MULTI_WRITER access modes.
+      // These access modes are intended to replace the
+      // SINGLE_NODE_WRITER access mode to clarify the number of writers
+      // for a volume on a single node. Plugins MUST accept and allow
+      // use of the SINGLE_NODE_WRITER access mode when either
+      // SINGLE_NODE_SINGLE_WRITER and/or SINGLE_NODE_MULTI_WRITER are
+      // supported, in order to permit older COs to continue working.
+      SINGLE_NODE_MULTI_WRITER = 13 [(alpha_enum_value) = true];
     }
 
     Type type = 1;
@@ -1476,6 +1498,16 @@ message NodeServiceCapability {
       // Note that, for alpha, `VolumeCondition` is intended to be
       // informative for humans only, not for automation.
       VOLUME_CONDITION = 4 [(alpha_enum_value) = true];
+      // Indicates the SP supports the SINGLE_NODE_SINGLE_WRITER and/or
+      // SINGLE_NODE_MULTI_WRITER access modes.
+      // These access modes are intended to replace the
+      // SINGLE_NODE_WRITER access mode to clarify the number of writers
+      // for a volume on a single node. Plugins MUST accept and allow
+      // use of the SINGLE_NODE_WRITER access mode (subject to the
+      // processing rules for NodePublishVolume), when either
+      // SINGLE_NODE_SINGLE_WRITER and/or SINGLE_NODE_MULTI_WRITER are
+      // supported, in order to permit older COs to continue working.
+      SINGLE_NODE_MULTI_WRITER = 5 [(alpha_enum_value) = true];
     }
 
     Type type = 1;
