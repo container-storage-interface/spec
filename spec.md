@@ -188,28 +188,30 @@ creation to destruction.
 
 ```
    CreateVolume +------------+           DeleteVolume
- +------------->|  CREATED   +--------------------------+
- |              |            +<-----------+             |
- |              +---+----^---+            |             |
- |       Controller |    | Controller     |             v
-+++         Publish |    | Unpublish      |            +++
-|X|          Volume |    | Volume         |            | |
-+-+             +---v----+---+            |            +-+
-                | NODE_READY |            | Node
-                +---+----^---+            | Unstage
-               Node |    | Node           | Volume
-              Stage |    | Unstage        | (forced)
-             Volume |    | Volume     +---------------+
-                +---v----+---+        | QUARANTINED_S |
-                |  VOL_READY |        +---^-----------+
-                +---+----^---+            | Node
-               Node |    | Node           | Unpublish
-            Publish |    | Unpublish      | Volume
-             Volume |    | Volume         | (forced)
-                +---v----+---+       +----+-----------+
-                | PUBLISHED  +------>| QUARANTINED_SP |
-                +------------+       +----------------+
-                       ControllerUnpublishVolume(fenced)
+ +------------->|  CREATED   +------------------------------------+
+ |              |            +<---------------------+             |
+ |              +---+----^---+                      |             |
+ |       Controller |    | Controller               |             v
++++         Publish |    | Unpublish                |            +++
+|X|          Volume |    | Volume                   |            | |
++-+             +---v----+---+                      |            +-+
+                | NODE_READY |                      | Node
+                +---+----^---+        Controller    | Unstage
+               Node |    | Node       Unpublish     | Volume
+              Stage |    | Unstage    Volume        | (forced)
+             Volume |    | Volume     (fenced)  +---------------+
+                +---v----+---+            +-----> QUARANTINED_S |
+                |  VOL_READY +------------+     +---^-----------+
+                +---+----^---+                      | Node
+               Node |    | Node                     | Unpublish
+            Publish |    | Unpublish                | Volume
+             Volume |    | Volume                   | (forced)
+                +---v----+---+                 +----+-----------+
+                | PUBLISHED  +-----------------> QUARANTINED_SP |
+                +------------+   Controller    +----------------+
+                                 Unpublish
+                                 Volume
+                                 (fenced)
 
 Figure 6: The lifecycle of a dynamically provisioned volume, from
 creation to destruction, when the Node Plugin advertises the
