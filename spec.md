@@ -1553,7 +1553,7 @@ message ControllerGetVolumeResponse {
     // A list of all the `node_id` of nodes that this volume is
     // controller published on.
     // This field is OPTIONAL.
-    // This field MUST be specified if the PUBLISH_UNPUBLISH_VOLUME
+    // This field MUST be specified if the LIST_VOLUMES_PUBLISHED_NODES
     // controller capability is supported.
     // published_node_ids MAY include nodes not published to or
     // reported by the SP. The CO MUST be resilient to that.
@@ -1709,7 +1709,9 @@ message ControllerServiceCapability {
       EXPAND_VOLUME = 9;
 
       // Indicates the SP supports the
-      // ListVolumesResponse.entry.published_nodes field
+      // ListVolumesResponse.entry.published_node_ids field and the
+      // ControllerGetVolumeResponse.published_node_ids field.
+      // The SP MUST also support PUBLISH_UNPUBLISH_VOLUME.
       LIST_VOLUMES_PUBLISHED_NODES = 10;
 
       // Indicates that the Controller service can report volume
