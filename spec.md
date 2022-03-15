@@ -1637,8 +1637,7 @@ message GetCapacityResponse {
   // a maximum size for individual volumes and leave it unset
   // otherwise. COs MAY use it to make decision about
   // where to create volumes.
-  google.protobuf.Int64Value maximum_volume_size = 2
-    [(alpha_field) = true];
+  google.protobuf.Int64Value maximum_volume_size = 2;
 
   // The smallest size that may be used in a
   // CreateVolumeRequest.capacity_range.limit_bytes field
