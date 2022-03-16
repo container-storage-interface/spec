@@ -217,7 +217,9 @@ const (
 	// See VolumeExpansion for details.
 	ControllerServiceCapability_RPC_EXPAND_VOLUME ControllerServiceCapability_RPC_Type = 9
 	// Indicates the SP supports the
-	// ListVolumesResponse.entry.published_nodes field
+	// ListVolumesResponse.entry.published_node_ids field and the
+	// ControllerGetVolumeResponse.published_node_ids field.
+	// The SP MUST also support PUBLISH_UNPUBLISH_VOLUME.
 	ControllerServiceCapability_RPC_LIST_VOLUMES_PUBLISHED_NODES ControllerServiceCapability_RPC_Type = 10
 	// Indicates that the Controller service can report volume
 	// conditions.
@@ -2678,7 +2680,7 @@ type ControllerGetVolumeResponse_VolumeStatus struct {
 	// A list of all the `node_id` of nodes that this volume is
 	// controller published on.
 	// This field is OPTIONAL.
-	// This field MUST be specified if the PUBLISH_UNPUBLISH_VOLUME
+	// This field MUST be specified if the LIST_VOLUMES_PUBLISHED_NODES
 	// controller capability is supported.
 	// published_node_ids MAY include nodes not published to or
 	// reported by the SP. The CO MUST be resilient to that.
