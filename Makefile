@@ -43,7 +43,8 @@ endif
 build_cpp:
 	$(MAKE) -C lib/cxx
 
-$(CSI_GO):
+# The file exists, but could be out-of-date.
+$(CSI_GO): $(CSI_PROTO)
 	$(MAKE) -C lib/go csi/csi.pb.go
 
 $(CSI_A): $(CSI_GO)
