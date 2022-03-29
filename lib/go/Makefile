@@ -106,7 +106,7 @@ $(CSI_GO_TMP): $(CSI_PROTO) | $(PROTOC) $(PROTOC_GEN_GO)
 # versioned. If they are different then it means the language
 # bindings were not updated prior to being committed.
 $(CSI_GO): $(CSI_GO_TMP)
-ifeq (true,$(TRAVIS))
+ifeq (true,$(GITHUB_ACTIONS))
 	diff "$@" "$?"
 else
 	@mkdir -p "$(@D)"
