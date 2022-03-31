@@ -18,5 +18,4 @@ about: Create a report to help us improve this project
 
 **Environment**:
 - CSI Spec version:
-- Kubernetes version (use `kubectl version`):
 - Others:

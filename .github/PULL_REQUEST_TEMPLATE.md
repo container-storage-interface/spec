@@ -1,21 +1,4 @@
-<!--  Thanks for sending a pull request!  Here are some tips for you:
-
-1. If this is your first time, please read our contributor guidelines: https://git.k8s.io/community/contributors/guide#your-first-contribution and developer guide https://git.k8s.io/community/contributors/devel/development.md#development-guide
-2. Follow the instructions for writing a release note: https://git.k8s.io/community/contributors/guide/release-notes.md
-3. If the PR is unfinished, see how to mark it: https://git.k8s.io/community/contributors/guide/pull-requests.md#marking-unfinished-pull-requests
--->
-
 **What type of PR is this?**
-> Uncomment only one ` /kind <>` line, hit enter to put that in a new line, and remove leading whitespaces from that line:
->
-> /kind api-change
-> /kind bug
-> /kind cleanup
-> /kind design
-> /kind documentation
-> /kind failing-test
-> /kind feature
-> /kind flake
 
 **What this PR does / why we need it**:
 
@@ -29,7 +12,7 @@ Fixes #
 
 **Special notes for your reviewer**:
 
-**Does this PR introduce a user-facing change?**:
+**Does this PR introduce an API-breaking change?**:
 <!--
 If no, just write "NONE" in the release-note block below.
 If yes, a release note is required:
