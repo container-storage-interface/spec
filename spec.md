@@ -1796,7 +1796,7 @@ Note that CreateSnapshot no longer blocks after the snapshot is cut.
 A gRPC error code SHALL be returned if an error occurs during any stage of the snapshotting process.
 A CO SHOULD explicitly delete snapshots when an error occurs.
 
-Based on this information, CO can issue repeated (idemponent) calls to CreateSnapshot, monitor the response, and make decisions.
+Based on this information, CO can issue repeated (idempotent) calls to CreateSnapshot, monitor the response, and make decisions.
 Note that CreateSnapshot is a synchronous call and it MUST block until the snapshot is cut.
 
 ```protobuf
