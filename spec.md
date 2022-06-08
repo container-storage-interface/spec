@@ -874,7 +874,7 @@ message VolumeCapability {
     // manner, unless otherwise modified by a workload, that they are
     // both readable and writable by said mount group identifier.
     // This is an OPTIONAL field.
-    string volume_mount_group = 3 [(alpha_field) = true];
+    string volume_mount_group = 3;
   }
 
   // Specify how a volume can be accessed.
@@ -2570,7 +2570,7 @@ message NodeServiceCapability {
       // Indicates that Node service supports mounting volumes
       // with provided volume group identifier during node stage
       // or node publish RPC calls.
-      VOLUME_MOUNT_GROUP = 6 [(alpha_enum_value) = true];
+      VOLUME_MOUNT_GROUP = 6;
     }
 
     Type type = 1;
