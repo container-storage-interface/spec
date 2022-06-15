@@ -210,6 +210,7 @@ creation to destruction.
 Figure 6: The lifecycle of a dynamically provisioned volume, from
 creation to destruction, when the Node Plugin advertises the
 STAGE_UNSTAGE_VOLUME capability.
+NOTE: When using Non-Graceful Node Shutdown feature in Kubernetes, status can be moved from PUBLISHED to CREATED without going through VOL_READY and/or NODE_READY status.
 ```
 
 ```
