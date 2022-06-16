@@ -913,6 +913,11 @@ message ControllerGetVolumeRequest {
   // The ID of the volume to fetch current volume information for.
   // This field is REQUIRED.
   string volume_id = 1;
+
+  // Secrets required by plugin to complete controller get volume
+  // This field is OPTIONAL. Refer to the `Secrets Requirements`
+  // section on how to use this field.
+  map<string, string> secrets = 2 [(csi_secret) = true];
 }
 
 message ControllerGetVolumeResponse {
