@@ -399,10 +399,8 @@ service Node {
   rpc NodeGetVolumeStats (NodeGetVolumeStatsRequest)
     returns (NodeGetVolumeStatsResponse) {}
 
-
   rpc NodeExpandVolume(NodeExpandVolumeRequest)
     returns (NodeExpandVolumeResponse) {}
-
 
   rpc NodeGetCapabilities (NodeGetCapabilitiesRequest)
     returns (NodeGetCapabilitiesResponse) {}
