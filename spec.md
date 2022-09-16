@@ -381,6 +381,11 @@ service Controller {
     returns (ControllerGetVolumeResponse) {
         option (alpha_method) = true;
     }
+
+  rpc ListSnapshotDeltas(ListSnapshotDeltasRequest)
+    returns (ListSnapshotDeltasResponse) {
+      option (alpha_method) = true;
+    }
 }
 
 service Node {
@@ -1740,6 +1745,10 @@ message ControllerServiceCapability {
       // SINGLE_NODE_SINGLE_WRITER and/or SINGLE_NODE_MULTI_WRITER are
       // supported, in order to permit older COs to continue working.
       SINGLE_NODE_MULTI_WRITER = 13 [(alpha_enum_value) = true];
+
+      // Indicates the SP can compute and retrieve the deltas between
+      // two snapshots.
+      LIST_SNAPSHOT_DELTAS = 14 [(alpha_enum_value) = true];
     }
 
     Type type = 1;
@@ -1995,6 +2004,132 @@ The CO MUST implement the specified error recovery behavior when it encounters t
 | Condition | gRPC Code | Description | Recovery Behavior |
 |-----------|-----------|-------------|-------------------|
 | Invalid `starting_token` | 10 ABORTED | Indicates that `starting_token` is not valid. | Caller SHOULD start the `ListSnapshots` operation again with an empty `starting_token`. |
+
+
+#### `ListSnapshotDeltas`
+
+**ALPHA FEATURE**
+
+A Controller Plugin MUST implement this RPC call if it has the
+`LIST_SNAPSHOT_DELTAS` capability. The Plugin SHALL return the
+information about the deltas between the two provided snapshots on the storage
+system within the given parameters regardless of how they were created.
+`ListSnapshotDeltas` SHALL NOT list deltas of snapshots that are being created
+but have not been committed to the storage system. If snapshots are created
+and/or deleted while the CO is concurrently paging through `ListSnapshotDeltas`
+results, then it is possible that the CO MAY either witness duplicate results in
+the list, not witness existing deltas, or both. The CO SHALL NOT expect a
+consistent "view" of all snapshot deltas when paging through the snapshot list
+via multiple calls to `ListSnapshotDeltas`.
+
+```protobuf
+message ListSnapshotDeltasRequest {
+  option (alpha_message) = true;
+
+  // The ID of the base snapshot handle to use for comparison. If
+  // not specified, return all changed blocks up to the target
+  // specified by snapshot_target. This field is OPTIONAL.
+  string snapshot_base_id = 1;
+
+  // The ID of the target snapshot handle to use for comparison. If
+  // not specified, an error is returned. This field is REQUIRED.
+  string snapshot_target_id = 2;
+
+  // Defines the type of storage. Default to "BLOCK". This field is
+  // REQUIRED.
+  enum Mode {
+    option (alpha_enum) = true;
+
+    // BLOCK indicates that the snapshot is of block type.
+    BLOCK = 0 [(alpha_enum_value) = true];
+
+    // FILE indicates that the snapshot is of file type.
+    FILE = 1 [(alpha_enum_value) = true];
+  }
+
+  // If specified (non-zero value), the Plugin MUST NOT return more
+  // entries than this number in the response. If the actual number of
+  // entries is more than this number, the Plugin MUST set `next_token`
+  // in the response which can be used to get the next page of entries
+  // in the subsequent `ListSnapshotDeltas` call. This field is
+  // OPTIONAL. If not specified (zero value), it means there is no
+  // restriction on the number of entries that can be returned.
+  // The value of this field MUST NOT be negative.
+  int32 max_entries = 4;
+
+  // A token to specify where to start paginating. Set this field to
+  // `next_token` returned by a previous `ListSnapshotDeltas` call to
+  // get the next page of entries. This field is OPTIONAL.
+  // An empty string is equal to an unspecified field value.
+  string starting_token = 5;
+}
+
+message ListSnapshotDeltasResponse {
+  option (alpha_message) = true;
+
+  // The volume size in bytes. This field is OPTIONAL.
+  uint64 volume_size_bytes = 1;
+
+  // This token allows you to get the next page of entries for
+  // `ListSnapshotDeltas` request. If the number of entries is larger
+  // than `max_entries`, use the `next_token` as a value for the
+  // `starting_token` field in the next `ListSnapshotDeltas` request.
+  // This field is OPTIONAL.
+  // An empty string is equal to an unspecified field value.
+  string next_token = 2;
+
+  // Changed block deltas between the source and target snapshots. An
+  // empty list means there is no difference between the two. Leave
+  // unspecified if the volume isn't of block type. This field is
+  // OPTIONAL.
+  repeated BlockSnapshotChangedBlock changed_blocks = 3;
+}
+
+message BlockSnapshotChangedBlock {
+  option (alpha_message) = true;
+
+  // The block logical offset on the volume. This field is REQUIRED.
+  uint64 offset = 1;
+
+  // The size of the block in bytes. This field is REQUIRED.
+  uint64 block_size_bytes = 2;
+
+  // The token and other information needed to retrieve the actual
+  // data block at the given offset. If the provider doesn't support
+  // token-based data blocks retrieval, this should be left
+  // unspecified. This field is OPTIONAL.
+  BlockSnapshotChangedBlockToken token = 3;
+}
+
+message BlockSnapshotChangedBlockToken {
+  option (alpha_message) = true;
+
+  // The token to use to retrieve the actual data block at the given
+  // offset. This field is REQUIRED.
+  string token = 1;
+
+  // Timestamp when the token is issued. This field is REQUIRED.
+  .google.protobuf.Timestamp issuance_time = 2;
+
+  // The TTL of the token in seconds. The expiry time is calculated by
+  // adding the time of issuance with this value. This field is
+  // REQUIRED.
+  .google.protobuf.Duration ttl_seconds = 3;
+}
+```
+
+##### ListSnapshotDeltas Errors
+
+If the plugin is unable to complete the `ListSnapshotDeltas` call successfully,
+it MUST return a non-ok gRPC code in the gRPC status. If the conditions defined
+below are encountered, the plugin MUST return the specified gRPC error code. The
+CO MUST implement the specified error recovery behavior when it encounters the
+gRPC error code.
+
+| Condition | gRPC Code | Description | Recovery Behavior |
+|-----------|-----------|-------------|-------------------|
+| Target volume snapshot does not exist | 5 NOT_FOUND | Indicates that the target volume snapshot corresponding to the specified `snapshot_target_id` does not exist. | Caller MUST verify that the `snapshot_target_id` is correct and that the volume snapshot is accessible and has not been deleted before retrying with exponential back off. |
+| Invalid `starting_token` | 10 ABORTED | Indicates that `starting_token` is not valid. | Caller SHOULD start the `ListVolumeGroupSnapshots` operation again with an empty `starting_token`. |
 
 
 #### `ControllerExpandVolume`
