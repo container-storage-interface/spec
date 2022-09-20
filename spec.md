@@ -2022,6 +2022,12 @@ the list, not witness existing deltas, or both. The CO SHALL NOT expect a
 consistent "view" of all snapshot deltas when paging through the snapshot list
 via multiple calls to `ListSnapshotDeltas`.
 
+A Controller Plugin MUST NOT attempt to include any raw data blocks in the RPC
+response to ensure data plane operations remain outside the scope of CSI. The
+response payload MUST contain enough block location metadata for the end users
+to retrieve the raw data blocks. The end users are responsbile for devising
+their own transport and retrieval mechanism to access the raw data blocks.
+
 ```protobuf
 message ListSnapshotDeltasRequest {
   option (alpha_message) = true;
@@ -2029,11 +2035,11 @@ message ListSnapshotDeltasRequest {
   // The ID of the base snapshot handle to use for comparison. If
   // not specified, return all changed blocks up to the target
   // specified by snapshot_target. This field is OPTIONAL.
-  string snapshot_base_id = 1;
+  string from_snapshot_id = 1;
 
   // The ID of the target snapshot handle to use for comparison. If
   // not specified, an error is returned. This field is REQUIRED.
-  string snapshot_target_id = 2;
+  string to_snapshot_id = 2;
 
   // Defines the type of storage. Default to "BLOCK". This field is
   // REQUIRED.
@@ -2114,7 +2120,7 @@ message BlockSnapshotChangedBlockToken {
   // The TTL of the token in seconds. The expiry time is calculated by
   // adding the time of issuance with this value. This field is
   // REQUIRED.
-  .google.protobuf.Duration ttl_seconds = 3;
+  int32 ttl_seconds = 3;
 }
 ```
 
@@ -2128,8 +2134,8 @@ gRPC error code.
 
 | Condition | gRPC Code | Description | Recovery Behavior |
 |-----------|-----------|-------------|-------------------|
-| Target volume snapshot does not exist | 5 NOT_FOUND | Indicates that the target volume snapshot corresponding to the specified `snapshot_target_id` does not exist. | Caller MUST verify that the `snapshot_target_id` is correct and that the volume snapshot is accessible and has not been deleted before retrying with exponential back off. |
-| Invalid `starting_token` | 10 ABORTED | Indicates that `starting_token` is not valid. | Caller SHOULD start the `ListVolumeGroupSnapshots` operation again with an empty `starting_token`. |
+| Target volume snapshot does not exist | 5 NOT_FOUND | Indicates that the target volume snapshot corresponding to the specified `to_snapshot_id` does not exist. | Caller MUST verify that the `to_snapshot_id` is correct and that the volume snapshot is accessible and has not been deleted before retrying with exponential back off. |
+| Invalid `starting_token` | 10 ABORTED | Indicates that `starting_token` is not valid. | Caller SHOULD start the `ListSnapshotDeltas` operation again with an empty `starting_token`. |
 
 
 #### `ControllerExpandVolume`

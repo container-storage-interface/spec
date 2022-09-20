@@ -5,7 +5,6 @@ package csi.v1;
 import "google/protobuf/descriptor.proto";
 import "google/protobuf/timestamp.proto";
 import "google/protobuf/wrappers.proto";
-import "google/protobuf/duration.proto";
 
 option go_package = "csi";
 
@@ -1246,11 +1245,11 @@ message ListSnapshotDeltasRequest {
   // The ID of the base snapshot handle to use for comparison. If
   // not specified, return all changed blocks up to the target
   // specified by snapshot_target. This field is OPTIONAL.
-  string snapshot_base_id = 1;
+  string from_snapshot_id = 1;
 
   // The ID of the target snapshot handle to use for comparison. If
   // not specified, an error is returned. This field is REQUIRED.
-  string snapshot_target_id = 2;
+  string to_snapshot_id = 2;
 
   // Defines the type of storage. Default to "BLOCK". This field is
   // REQUIRED.
@@ -1331,7 +1330,7 @@ message BlockSnapshotChangedBlockToken {
   // The TTL of the token in seconds. The expiry time is calculated by
   // adding the time of issuance with this value. This field is
   // REQUIRED.
-  .google.protobuf.Duration ttl_seconds = 3;
+  int32 ttl_seconds = 3;
 }
 
 message ControllerExpandVolumeRequest {
