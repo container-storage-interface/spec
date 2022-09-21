@@ -2041,6 +2041,12 @@ message ListSnapshotDeltasRequest {
   // not specified, an error is returned. This field is REQUIRED.
   string to_snapshot_id = 2;
 
+  // Secrets required by plugin to complete list snapshot deltas
+  // request.
+  // This field is OPTIONAL. Refer to the `Secrets Requirements`
+  // section on how to use this field.
+  map<string, string> secrets = 3 [(csi_secret) = true];
+
   // If specified (non-zero value), the Plugin MUST NOT return more
   // entries than this number in the response. If the actual number of
   // entries is more than this number, the Plugin MUST set `next_token`
