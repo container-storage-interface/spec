@@ -1251,18 +1251,6 @@ message ListSnapshotDeltasRequest {
   // not specified, an error is returned. This field is REQUIRED.
   string to_snapshot_id = 2;
 
-  // Defines the type of storage. Default to "BLOCK". This field is
-  // REQUIRED.
-  enum Mode {
-    option (alpha_enum) = true;
-
-    // BLOCK indicates that the snapshot is of block type.
-    BLOCK = 0 [(alpha_enum_value) = true];
-
-    // FILE indicates that the snapshot is of file type.
-    FILE = 1 [(alpha_enum_value) = true];
-  }
-
   // If specified (non-zero value), the Plugin MUST NOT return more
   // entries than this number in the response. If the actual number of
   // entries is more than this number, the Plugin MUST set `next_token`
