@@ -26,7 +26,7 @@ An implementation is compliant if it satisfies all the MUST, REQUIRED, and SHALL
 | CO                | Container Orchestration system, communicates with Plugins using CSI service RPCs.                                     |
 | SP                | Storage Provider, the vendor of a CSI plugin implementation.                                                          |
 | RPC               | [Remote Procedure Call](https://en.wikipedia.org/wiki/Remote_procedure_call).                                         |
-| Node              | A host where the user workload will be running, uniquely identifiable from the perspective of a Plugin by a node ID. |
+| Node              | A host where the user workload will be running, uniquely identifiable from the perspective of a Plugin by a node ID.  |
 | Plugin            | Aka “plugin implementation”, a gRPC endpoint that implements the CSI Services.                                        |
 | Plugin Supervisor | Process that governs the lifecycle of a Plugin, MAY be the CO.                                                        |
 | Workload          | The atomic unit of "work" scheduled by a CO. This MAY be a container or a collection of containers.                   |
@@ -2848,10 +2848,10 @@ Supervised plugins MAY be isolated and/or resource-bounded.
 * A Plugin SHOULD NOT assume that it is in the same [Linux namespaces](https://en.wikipedia.org/wiki/Linux_namespaces) as the Plugin Supervisor.
   The CO MUST clearly document the [mount propagation](https://www.kernel.org/doc/Documentation/filesystems/sharedsubtree.txt) requirements for Node Plugins and the Plugin Supervisor SHALL satisfy the CO’s requirements.
 
-##### Cgroup Isolation
+##### Cgroups Isolation
 
 * A Plugin MAY be constrained by cgroups.
-* An operator or Plugin Supervisor MAY configure the devices cgroup subsystem to ensure that a Plugin MAY access requisite devices.
+* An operator or Plugin Supervisor MAY configure the devices cgroups subsystem to ensure that a Plugin MAY access requisite devices.
 * A Plugin Supervisor MAY define resource limits for a Plugin.
 
 ##### Resource Requirements
