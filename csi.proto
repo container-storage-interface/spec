@@ -1298,8 +1298,9 @@ message ListSnapshotDeltasResponse {
 message BlockSnapshotChangedBlock {
   option (alpha_message) = true;
 
-  // The block logical offset on the volume. This field is REQUIRED.
-  uint64 offset = 1;
+  // The block logical offset (in bytes) on the volume. This field is
+  // REQUIRED.
+  uint64 offset_bytes = 1;
 
   // The size of the block in bytes. This field is REQUIRED.
   uint64 block_size_bytes = 2;
