@@ -378,9 +378,7 @@ service Controller {
     returns (ControllerExpandVolumeResponse) {}
 
   rpc ControllerGetVolume (ControllerGetVolumeRequest)
-    returns (ControllerGetVolumeResponse) {
-        option (alpha_method) = true;
-    }
+    returns (ControllerGetVolumeResponse) {}
 }
 
 service Node {
@@ -1489,7 +1487,7 @@ message ListVolumesResponse {
     // This field is OPTIONAL.
     // This field MUST be specified if the
     // VOLUME_CONDITION controller capability is supported.
-    VolumeCondition volume_condition = 2 [(alpha_field) = true];
+    VolumeCondition volume_condition = 2;
   }
 
   message Entry {
@@ -1539,16 +1537,12 @@ If the volume does not exist any more, `ControllerGetVolume` should return gRPC 
 
 ```protobuf
 message ControllerGetVolumeRequest {
-  option (alpha_message) = true;
-
   // The ID of the volume to fetch current volume information for.
   // This field is REQUIRED.
   string volume_id = 1;
 }
 
 message ControllerGetVolumeResponse {
-  option (alpha_message) = true;
-
   message VolumeStatus{
     // A list of all the `node_id` of nodes that this volume is
     // controller published on.
@@ -1722,14 +1716,12 @@ message ControllerServiceCapability {
       // If for some reason Controller and Node Plugins report
       // misaligned volume conditions, CO SHALL assume the worst case
       // is the truth.
-      // Note that, for alpha, `VolumeCondition` is intended be
-      // informative for humans only, not for automation.
-      VOLUME_CONDITION = 11 [(alpha_enum_value) = true];
+      VOLUME_CONDITION = 11;
 
       // Indicates the SP supports the ControllerGetVolume RPC.
       // This enables COs to, for example, fetch per volume
       // condition after a volume is provisioned.
-      GET_VOLUME = 12 [(alpha_enum_value) = true];
+      GET_VOLUME = 12;
 
       // Indicates the SP supports the SINGLE_NODE_SINGLE_WRITER and/or
       // SINGLE_NODE_MULTI_WRITER access modes.
@@ -2464,7 +2456,7 @@ message NodeGetVolumeStatsResponse {
   // This field is OPTIONAL.
   // This field MUST be specified if the VOLUME_CONDITION node
   // capability is supported.
-  VolumeCondition volume_condition = 2 [(alpha_field) = true];
+  VolumeCondition volume_condition = 2;
 }
 
 message VolumeUsage {
@@ -2491,8 +2483,6 @@ message VolumeUsage {
 
 // VolumeCondition represents the current condition of a volume.
 message VolumeCondition {
-  option (alpha_message) = true;
-
   // Normal volumes are available for use and operating optimally.
   // An abnormal volume does not meet these criteria.
   // This field is REQUIRED.
@@ -2552,9 +2542,7 @@ message NodeServiceCapability {
       // If for some reason Node and Controller Plugins report
       // misaligned volume conditions, CO SHALL assume the worst case
       // is the truth.
-      // Note that, for alpha, `VolumeCondition` is intended to be
-      // informative for humans only, not for automation.
-      VOLUME_CONDITION = 4 [(alpha_enum_value) = true];
+      VOLUME_CONDITION = 4;
 
       // Indicates the SP supports the SINGLE_NODE_SINGLE_WRITER and/or
       // SINGLE_NODE_MULTI_WRITER access modes.
