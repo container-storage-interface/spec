@@ -1056,6 +1056,8 @@ message ControllerServiceCapability {
       // If for some reason Controller and Node Plugins report
       // misaligned volume conditions, CO SHALL assume the worst case
       // is the truth.
+      // Note that `VolumeCondition` can be used to generate events and
+      // metrics.
       VOLUME_CONDITION = 11;
 
       // Indicates the SP supports the ControllerGetVolume RPC.
@@ -1499,6 +1501,8 @@ message NodeServiceCapability {
       // If for some reason Node and Controller Plugins report
       // misaligned volume conditions, CO SHALL assume the worst case
       // is the truth.
+      // Note that `VolumeCondition` can be used to generate events and
+      // metrics.
       VOLUME_CONDITION = 4;
 
       // Indicates the SP supports the SINGLE_NODE_SINGLE_WRITER and/or

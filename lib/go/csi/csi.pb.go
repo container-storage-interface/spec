@@ -230,6 +230,8 @@ const (
 	// If for some reason Controller and Node Plugins report
 	// misaligned volume conditions, CO SHALL assume the worst case
 	// is the truth.
+	// Note that `VolumeCondition` can be used to generate events and
+	// metrics.
 	ControllerServiceCapability_RPC_VOLUME_CONDITION ControllerServiceCapability_RPC_Type = 11
 	// Indicates the SP supports the ControllerGetVolume RPC.
 	// This enables COs to, for example, fetch per volume
@@ -336,6 +338,8 @@ const (
 	// If for some reason Node and Controller Plugins report
 	// misaligned volume conditions, CO SHALL assume the worst case
 	// is the truth.
+	// Note that `VolumeCondition` can be used to generate events and
+	// metrics.
 	NodeServiceCapability_RPC_VOLUME_CONDITION NodeServiceCapability_RPC_Type = 4
 	// Indicates the SP supports the SINGLE_NODE_SINGLE_WRITER and/or
 	// SINGLE_NODE_MULTI_WRITER access modes.
