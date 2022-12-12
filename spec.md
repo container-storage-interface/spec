@@ -165,19 +165,20 @@ capability.
 
 ```
    CreateVolume +------------+ DeleteVolume
- +------------->|  CREATED   +--------------+
- |              +---+----^---+              |
- |       Controller |    | Controller       v
-+++         Publish |    | Unpublish       +++
-|X|          Volume |    | Volume          | |
-+-+             +---v----+---+             +-+
-                | NODE_READY |
-                +---+----^---+
-               Node |    | Node
-            Publish |    | Unpublish
-             Volume |    | Volume
-                +---v----+---+
-                | PUBLISHED  |
+ +------------->|  CREATED   +-------------------------+
+ |              |            <---------+               |
+ |              +---+----^---+         |               |
+ |       Controller |    | Controller  |               v
++++         Publish |    | Unpublish   |              +++
+|X|          Volume |    | Volume      |              | |
++-+             +---v----+---+         | Controller   +-+
+                | NODE_READY |         | Unpublish
+                +---+----^---+         | Volume
+               Node |    | Node        | (forced)
+            Publish |    | Unpublish   |
+             Volume |    | Volume      |
+                +---v----+---+         |
+                | PUBLISHED  +---------+
                 +------------+
 
 Figure 5: The lifecycle of a dynamically provisioned volume, from
@@ -186,25 +187,26 @@ creation to destruction.
 
 ```
    CreateVolume +------------+ DeleteVolume
- +------------->|  CREATED   +--------------+
- |              +---+----^---+              |
- |       Controller |    | Controller       v
-+++         Publish |    | Unpublish       +++
-|X|          Volume |    | Volume          | |
-+-+             +---v----+---+             +-+
-                | NODE_READY |
-                +---+----^---+
-               Node |    | Node
-              Stage |    | Unstage
-             Volume |    | Volume
-                +---v----+---+
-                |  VOL_READY |
-                +---+----^---+
-               Node |    | Node
-            Publish |    | Unpublish
-             Volume |    | Volume
-                +---v----+---+
-                | PUBLISHED  |
+ +------------->|  CREATED   +--------------------------+
+ |              |            <--------+                 |
+ |              +---+----^---+        |                 |
+ |       Controller |    | Controller |                 v
++++         Publish |    | Unpublish  |                +++
+|X|          Volume |    | Volume     |                | |
++-+             +---v----+---+        | Controller     +-+
+                | NODE_READY |        | Unpublish
+                +---+----^---+        | Volume
+               Node |    | Node       | (forced)
+              Stage |    | Unstage    |
+             Volume |    | Volume     |
+                +---v----+---+        |
+                |  VOL_READY +--------+
+                +---+----^---+        |
+               Node |    | Node       |
+            Publish |    | Unpublish  |
+             Volume |    | Volume     |
+                +---v----+---+        |
+                | PUBLISHED  +--------+
                 +------------+
 
 Figure 6: The lifecycle of a dynamically provisioned volume, from
@@ -1318,7 +1320,8 @@ The CO MUST implement the specified error recovery behavior when it encounters t
 
 Controller Plugin MUST implement this RPC call if it has `PUBLISH_UNPUBLISH_VOLUME` controller capability.
 This RPC is a reverse operation of `ControllerPublishVolume`.
-It MUST be called after all `NodeUnstageVolume` and `NodeUnpublishVolume` on the volume are called and succeed.
+Basically, it MUST be called after all `NodeUnstageVolume` and `NodeUnpublishVolume` on the volume are called and succeed.
+When control plane retry the `NodeUnstage` / `NodeUnpublish` but it can't reach the node(for example node shut down due to a hardware failure or a software problem), it proceeds on to `ControllerUnpublish`.
 The Plugin SHOULD perform the work that is necessary for making the volume ready to be consumed by a different node.
 The Plugin MUST NOT assume that this RPC will be executed on the node where the volume was previously used.
 
