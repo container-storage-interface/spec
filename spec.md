@@ -2939,6 +2939,7 @@ The CO MUST implement the specified error recovery behavior when it encounters t
 | Condition | gRPC Code | Description | Recovery Behavior |
 |-----------|-----------|-------------|-------------------|
 | Group snapshot already exists but is incompatible | 6 ALREADY_EXISTS | Indicates that a group snapshot corresponding to the specified group snapshot `name` already exists but is incompatible with the specified `volume_id`. | Caller MUST fix the arguments or use a different `name` before retrying. |
+| Cannot snapshot multiple volumes together | 9 FAILED_PRECONDITION | Indicates that the specified volumes cannot be snapshotted together because the volumes are not configured properly based on requirements from the SP. | Caller MUST fix the configuration of the volumes so that they meet the requirements for group snapshotting before retrying. |
 | Not enough space to create group snapshot | 13 RESOURCE_EXHAUSTED | There is not enough space on the storage system to handle the create group snapshot request. | Caller SHOULD fail this request. Future calls to CreateVolumeGroupSnapshot MAY succeed if space is freed up. |
 
 #### `DeleteVolumeGroupSnapshot`
