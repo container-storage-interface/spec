@@ -2837,7 +2837,7 @@ If a group snapshot corresponding to the specified group snapshot `name` is succ
 
 If an error occurs before a group snapshot is cut, `CreateVolumeGroupSnapshot` SHOULD return a corresponding gRPC error code that reflects the error condition.
 
-For plugins that supports snapshot post processing such as uploading, CreateVolumeGroupSnapshot SHOULD return 0 OK and ready_to_use SHOULD be set to false after the group snapshot is cut but still being processed. CO SHOULD then reissue the same CreateVolumeGroupSnapshotRequest periodically until boolean ready_to_use flips to true indicating all the snapshots have been "processed" and are ready to use to create new volumes. If an error occurs during the process for any individual snapshot, CreateVolumeGroupSnapshot SHOULD return a corresponding gRPC error code that reflects the error condition. The ready_to_use field for all individual snapshots SHOULD stay false until all the snapshots have been "processed" and are ready to use to create new volumes.
+For plugins that support snapshot post processing such as uploading, CreateVolumeGroupSnapshot SHOULD return 0 OK and the ready_to_use field SHOULD be set to false after the group snapshot is cut but still being processed. The CO SHOULD issue the CreateVolumeGroupSnapshotRequest RPC with the same arguments again periodically until the ready_to_use field has a value of true indicating all the snapshots have been "processed" and are ready to use to create new volumes. If an error occurs during the process for any individual snapshot, CreateVolumeGroupSnapshot SHOULD return a corresponding gRPC error code that reflects the error condition. The ready_to_use field for each individual snapshot SHOULD have a value of false until the snapshot has been "processed" and is ready to use to create new volumes.
 
 An individual snapshot MAY be used as the source to provision a new volume.
 
@@ -2908,8 +2908,11 @@ message VolumeGroupSnapshot {
   // Indicates if all individual snapshots in the group snapshot
   // are ready to use as a `volume_content_source` in a
   // `CreateVolumeRequest`. The default value is false.
-  // CO MUST wait until all snapshots are ready to use before
-  // setting this field to true.
+  // If any snapshot in the list of snapshots in this message have
+  // ready_to_use set to false, the SP MUST set this field to false.
+  // If all of the snapshots in the list of snapshots in this message
+  // have ready_to_use set to true, the SP SHOULD set this field to
+  // true.
   // This field is REQUIRED.
   bool ready_to_use = 4;
 }

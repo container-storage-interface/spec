@@ -5291,8 +5291,11 @@ type VolumeGroupSnapshot struct {
 	// Indicates if all individual snapshots in the group snapshot
 	// are ready to use as a `volume_content_source` in a
 	// `CreateVolumeRequest`. The default value is false.
-	// CO MUST wait until all snapshots are ready to use before
-	// setting this field to true.
+	// If any snapshot in the list of snapshots in this message have
+	// ready_to_use set to false, the SP MUST set this field to false.
+	// If all of the snapshots in the list of snapshots in this message
+	// have ready_to_use set to true, the SP SHOULD set this field to
+	// true.
 	// This field is REQUIRED.
 	ReadyToUse           bool     `protobuf:"varint,4,opt,name=ready_to_use,json=readyToUse,proto3" json:"ready_to_use,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
