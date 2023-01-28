@@ -2837,9 +2837,7 @@ If a group snapshot corresponding to the specified group snapshot `name` is succ
 
 If an error occurs before a group snapshot is cut, `CreateVolumeGroupSnapshot` SHOULD return a corresponding gRPC error code that reflects the error condition.
 
-`CreateVolumeGroupSnapshot` SHOULD return `0 OK` after all the snapshots are cut regardless of whether post processing such as uploading is complete or not.
-
-CO SHOULD check the `ready_to_use` boolean of individual snapshots that are members of the group snapshot and only treat the group snapshot as ready to use when all snapshots have been "processed" and is ready to use to create new volumes from those snapshots.
+For plugins that supports snapshot post processing such as uploading, CreateVolumeGroupSnapshot SHOULD return 0 OK and ready_to_use SHOULD be set to false after the group snapshot is cut but still being processed. CO SHOULD then reissue the same CreateVolumeGroupSnapshotRequest periodically until boolean ready_to_use flips to true indicating all the snapshots have been "processed" and are ready to use to create new volumes. If an error occurs during the process for any individual snapshot, CreateVolumeGroupSnapshot SHOULD return a corresponding gRPC error code that reflects the error condition. The ready_to_use field for all individual snapshots SHOULD stay false until all the snapshots have been "processed" and are ready to use to create new volumes.
 
 An individual snapshot MAY be used as the source to provision a new volume.
 
@@ -2906,6 +2904,14 @@ message VolumeGroupSnapshot {
   // Timestamp of when the volume group snapshot was taken.
   // This field is REQUIRED.
   .google.protobuf.Timestamp creation_time = 3;
+
+  // Indicates if all individual snapshots in the group snapshot
+  // are ready to use as a `volume_content_source` in a
+  // `CreateVolumeRequest`. The default value is false.
+  // CO MUST wait until all snapshots are ready to use before
+  // setting this field to true.
+  // This field is REQUIRED.
+  bool ready_to_use = 4;
 }
 ```
 

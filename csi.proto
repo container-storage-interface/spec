@@ -1767,6 +1767,14 @@ message VolumeGroupSnapshot {
   // Timestamp of when the volume group snapshot was taken.
   // This field is REQUIRED.
   .google.protobuf.Timestamp creation_time = 3;
+
+  // Indicates if all individual snapshots in the group snapshot
+  // are ready to use as a `volume_content_source` in a
+  // `CreateVolumeRequest`. The default value is false.
+  // CO MUST wait until all snapshots are ready to use before
+  // setting this field to true.
+  // This field is REQUIRED.
+  bool ready_to_use = 4;
 }
 message DeleteVolumeGroupSnapshotRequest {
   option (alpha_message) = true;
