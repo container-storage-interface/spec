@@ -617,10 +617,10 @@ message PluginCapability {
       VOLUME_ACCESSIBILITY_CONSTRAINTS = 2;
 
       // GROUP_CONTROLLER_SERVICE indicates that the Plugin provides
-      // RPCs for the GroupControllerService. Plugins MAY provide this
-      // capability.
+      // RPCs for operating on groups of volumes. Plugins MAY provide
+      // this capability.
       // The presence of this capability determines whether the CO will
-      // attempt to invoke the REQUIRED GroupControllerService RPCs, as
+      // attempt to invoke the REQUIRED GroupController service RPCs, as
       // well as specific RPCs as indicated by
       // GroupControllerGetCapabilities.
       GROUP_CONTROLLER_SERVICE = 3;
@@ -1914,6 +1914,8 @@ message Snapshot {
   // SHOULD provide the ID of the volume group snapshot in this field.
   // If provided, CO MUST use this field to indicate that this snapshot
   // is part of the specified group snapshot.
+  // If not provided, CO SHALL not indicate this snapshot is part of
+  // a group snapshot and allow it to be deleted separately.
   // If this message is inside a VolumeGroupSnapshot message, the value
   // MUST be the same as the group_snapshot_id in that message.
   string group_snapshot_id = 6 [(alpha_field) = true];
@@ -2784,7 +2786,7 @@ message NodeExpandVolumeResponse {
 
 #### `GroupControllerGetCapabilities`
 
-A GroupController Plugin MUST implement this RPC call. This RPC allows the CO to check the supported capabilities of group controller service provided by the Plugin.
+A Plugin that implements GroupController MUST implement this RPC call. This RPC allows the CO to check the supported capabilities of group controller service provided by the Plugin.
 
 ```protobuf
 message GroupControllerGetCapabilitiesRequest {
@@ -2831,7 +2833,7 @@ If the plugin is unable to complete the GroupControllerGetCapabilities call succ
 A Group Controller Plugin MUST implement this RPC call if it has `CREATE_DELETE_GET_VOLUME_GROUP_SNAPSHOT` controller capability.
 This RPC will be called by the CO to create a new volume group snapshot from a list of source volumes on behalf of a user.
 
-The purpose of this call is to request the creation of a multi-volume snapshot. Group snapshots can be created from the existing list of volumes. Note that calls to this function MUST be idempotent - the function may be called multiple times for the same name - the group snapshot must only be created once.
+The purpose of this call is to request the creation of a multi-volume snapshot.This group snapshot SHOULD be crash consistent. Group snapshots can be created from the existing list of volumes. Note that calls to this function MUST be idempotent - the function may be called multiple times for the same name - the group snapshot must only be created once.
 
 If a group snapshot corresponding to the specified group snapshot `name` is successfully created (meaning all snapshots associated with the group are successfully cut), the Plugin MUST reply `0 OK` with the corresponding `CreateVolumeGroupSnapshotResponse`.
 
@@ -2839,11 +2841,11 @@ If an error occurs before a group snapshot is cut, `CreateVolumeGroupSnapshot` S
 
 For plugins that support snapshot post processing such as uploading, CreateVolumeGroupSnapshot SHOULD return 0 OK and the ready_to_use field SHOULD be set to false after the group snapshot is cut but still being processed. The CO SHOULD issue the CreateVolumeGroupSnapshotRequest RPC with the same arguments again periodically until the ready_to_use field has a value of true indicating all the snapshots have been "processed" and are ready to use to create new volumes. If an error occurs during the process for any individual snapshot, CreateVolumeGroupSnapshot SHOULD return a corresponding gRPC error code that reflects the error condition. The ready_to_use field for each individual snapshot SHOULD have a value of false until the snapshot has been "processed" and is ready to use to create new volumes.
 
-An individual snapshot MAY be used as the source to provision a new volume.
+After snapshot creation, any individual snapshot from the group MAY be used as a source to provision a new volume.
 
 In VolumeGroupSnapshot message, both snapshots and group_snapshot_id are required fields.
 
-If an error occurs before all the individual snapshots are created when creating a group snapshot of multiple volumes and a group_snapshot_id is not yet available for CO to do clean up, SP SHOULD do clean up and make sure no snapshots are leaked.
+If an error occurs before all the individual snapshots are cut when creating a group snapshot of multiple volumes and a group_snapshot_id is not yet available for CO to do clean up, SP MUST return an error, and SP SHOULD also do clean up and make sure no snapshots are leaked.
 
 ```protobuf
 message CreateVolumeGroupSnapshotRequest {
@@ -2950,7 +2952,11 @@ message DeleteVolumeGroupSnapshotRequest {
   string group_snapshot_id = 1;
 
   // A list of snapshot IDs that are part of this group snapshot.
+  // If SP does not need to rely on this field to delete the snapshots
+  // in the group, this field MAY be ignored.
   // Some SPs require this list to delete the snapshots in the group.
+  // If SP needs to use this field to delete the snapshots in the
+  // group, it MAY report an error when there is a mismatch.
   // This field is REQUIRED.
   repeated string snapshot_ids = 2;
 
@@ -2988,7 +2994,6 @@ This optional RPC MAY be called by the CO to fetch current information about a v
 
 A Controller Plugin MUST implement this `GetVolumeGroupSnapshot` RPC call if it has `CREATE_DELETE_GET_VOLUME_GROUP_SNAPSHOT` capability.
 
-`GetVolumeGroupSnapshot` SHALL NOT show a group snapshot that is being created but has not been created successfully yet.
 `GetVolumeGroupSnapshotResponse` should contain current information of a volume group snapshot if it exists.
 If the volume group snapshot does not exist any more, `GetVolumeGroupSnapshot` should return gRPC error code `NOT_FOUND`.
 

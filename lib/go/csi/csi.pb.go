@@ -48,10 +48,10 @@ const (
 	// accessible from a given node when scheduling workloads.
 	PluginCapability_Service_VOLUME_ACCESSIBILITY_CONSTRAINTS PluginCapability_Service_Type = 2
 	// GROUP_CONTROLLER_SERVICE indicates that the Plugin provides
-	// RPCs for the GroupControllerService. Plugins MAY provide this
-	// capability.
+	// RPCs for operating on groups of volumes. Plugins MAY provide
+	// this capability.
 	// The presence of this capability determines whether the CO will
-	// attempt to invoke the REQUIRED GroupControllerService RPCs, as
+	// attempt to invoke the REQUIRED GroupController service RPCs, as
 	// well as specific RPCs as indicated by
 	// GroupControllerGetCapabilities.
 	PluginCapability_Service_GROUP_CONTROLLER_SERVICE PluginCapability_Service_Type = 3
@@ -3314,6 +3314,8 @@ type Snapshot struct {
 	// SHOULD provide the ID of the volume group snapshot in this field.
 	// If provided, CO MUST use this field to indicate that this snapshot
 	// is part of the specified group snapshot.
+	// If not provided, CO SHALL not indicate this snapshot is part of
+	// a group snapshot and allow it to be deleted separately.
 	// If this message is inside a VolumeGroupSnapshot message, the value
 	// MUST be the same as the group_snapshot_id in that message.
 	GroupSnapshotId      string   `protobuf:"bytes,6,opt,name=group_snapshot_id,json=groupSnapshotId,proto3" json:"group_snapshot_id,omitempty"`
@@ -5361,7 +5363,11 @@ type DeleteVolumeGroupSnapshotRequest struct {
 	// This field is REQUIRED.
 	GroupSnapshotId string `protobuf:"bytes,1,opt,name=group_snapshot_id,json=groupSnapshotId,proto3" json:"group_snapshot_id,omitempty"`
 	// A list of snapshot IDs that are part of this group snapshot.
+	// If SP does not need to rely on this field to delete the snapshots
+	// in the group, this field MAY be ignored.
 	// Some SPs require this list to delete the snapshots in the group.
+	// If SP needs to use this field to delete the snapshots in the
+	// group, it MAY report an error when there is a mismatch.
 	// This field is REQUIRED.
 	SnapshotIds []string `protobuf:"bytes,2,rep,name=snapshot_ids,json=snapshotIds,proto3" json:"snapshot_ids,omitempty"`
 	// Secrets required by plugin to complete group snapshot deletion

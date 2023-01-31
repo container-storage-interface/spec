@@ -207,10 +207,10 @@ message PluginCapability {
       VOLUME_ACCESSIBILITY_CONSTRAINTS = 2;
 
       // GROUP_CONTROLLER_SERVICE indicates that the Plugin provides
-      // RPCs for the GroupControllerService. Plugins MAY provide this
-      // capability.
+      // RPCs for operating on groups of volumes. Plugins MAY provide
+      // this capability.
       // The presence of this capability determines whether the CO will
-      // attempt to invoke the REQUIRED GroupControllerService RPCs, as
+      // attempt to invoke the REQUIRED GroupController service RPCs, as
       // well as specific RPCs as indicated by
       // GroupControllerGetCapabilities.
       GROUP_CONTROLLER_SERVICE = 3;
@@ -1204,6 +1204,8 @@ message Snapshot {
   // SHOULD provide the ID of the volume group snapshot in this field.
   // If provided, CO MUST use this field to indicate that this snapshot
   // is part of the specified group snapshot.
+  // If not provided, CO SHALL not indicate this snapshot is part of
+  // a group snapshot and allow it to be deleted separately.
   // If this message is inside a VolumeGroupSnapshot message, the value
   // MUST be the same as the group_snapshot_id in that message.
   string group_snapshot_id = 6 [(alpha_field) = true];
@@ -1787,7 +1789,11 @@ message DeleteVolumeGroupSnapshotRequest {
   string group_snapshot_id = 1;
 
   // A list of snapshot IDs that are part of this group snapshot.
+  // If SP does not need to rely on this field to delete the snapshots
+  // in the group, this field MAY be ignored.
   // Some SPs require this list to delete the snapshots in the group.
+  // If SP needs to use this field to delete the snapshots in the
+  // group, it MAY report an error when there is a mismatch.
   // This field is REQUIRED.
   repeated string snapshot_ids = 2;
 
