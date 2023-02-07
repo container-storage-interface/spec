@@ -1911,13 +1911,13 @@ message Snapshot {
   // It uniquely identifies the group snapshot on the storage system.
   // This field is OPTIONAL.
   // If this snapshot is a member of a volume group snapshot, and it
-  // CAN NOT be deleted as a stand alone snapshot, then the SP
+  // MUST NOT be deleted as a stand alone snapshot, then the SP
   // MUST provide the ID of the volume group snapshot in this field.
   // If provided, CO MUST use this field in subsequent snapshot volume
   // group operations to indicate that this snapshot is part of the
   // specified group snapshot.
-  // If not provided, CO SHALL not indicate this snapshot is part of
-  // a group snapshot and allow it to be deleted separately.
+  // If not provided, CO SHALL treat the snapshot as independent,
+  // and SP SHALL allow it to be deleted separately.
   // If this message is inside a VolumeGroupSnapshot message, the value
   // MUST be the same as the group_snapshot_id in that message.
   string group_snapshot_id = 6 [(alpha_field) = true];
@@ -1945,7 +1945,13 @@ This RPC will be called by the CO to delete a snapshot.
 This operation MUST be idempotent.
 If a snapshot corresponding to the specified `snapshot_id` does not exist or the artifacts associated with the snapshot do not exist anymore, the Plugin MUST reply `0 OK`.
 
-Snapshots that are members of a group snapshot will be deleted when the group snapshot is deleted. The CO SHOULD NOT call this RPC with a snapshot_id for a snapshot that was created as part of a group snapshot, i.e. if the snapshot had a non-empty group_snapshot_id field at creation time. The SP MAY refuse to delete such snapshots with this RPC call and return an error instead.
+The CO SHALL NOT call this RPC with a snapshot for which SP
+provided a non-empty group_snapshot_id field at creation time.
+A snapshot for which SP provided a non-empty group_snapshot_id
+indicates a snapshot that CAN NOT be deleted stand alone.
+The SP MAY refuse to delete such snapshots with this RPC call and return an error instead.
+For such snapshots SP MUST delete the entire snapshot group via a
+DeleteVolumeGroupSnapshotRequest call.
 
 ```protobuf
 message DeleteSnapshotRequest {
@@ -1970,7 +1976,7 @@ The CO MUST implement the specified error recovery behavior when it encounters t
 
 | Condition | gRPC Code | Description | Recovery Behavior |
 |-----------|-----------|-------------|-------------------|
-| Snapshot in use | 9 FAILED_PRECONDITION | Indicates that the snapshot corresponding to the specified `snapshot_id` could not be deleted because it is in use by another resource or it is part of a group snapshot. | Caller SHOULD ensure that there are no other resources using the snapshot, and then retry with exponential back off. |
+| Snapshot in use | 9 FAILED_PRECONDITION | Indicates that the snapshot corresponding to the specified `snapshot_id` could not be deleted because it is in use by another resource or it is part of a group snapshot and CAN NOT be deleted stand alone. | Caller SHOULD ensure that there are no other resources using the snapshot, and then retry with exponential back off. |
 | Operation pending for snapshot | 10 ABORTED | Indicates that there is already an operation pending for the specified snapshot. In general the Cluster Orchestrator (CO) is responsible for ensuring that there is no more than one call "in-flight" per snapshot at a given time. However, in some circumstances, the CO MAY lose state (for example when the CO crashes and restarts), and MAY issue multiple calls simultaneously for the same snapshot. The Plugin, SHOULD handle this as gracefully as possible, and MAY return this error code to reject secondary calls. | Caller SHOULD ensure that there are no other calls pending for the specified snapshot, and then retry with exponential back off. |
 
 

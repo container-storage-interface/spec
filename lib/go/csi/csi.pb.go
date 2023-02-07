@@ -3311,13 +3311,13 @@ type Snapshot struct {
 	// It uniquely identifies the group snapshot on the storage system.
 	// This field is OPTIONAL.
 	// If this snapshot is a member of a volume group snapshot, and it
-	// CAN NOT be deleted as a stand alone snapshot, then the SP
+	// MUST NOT be deleted as a stand alone snapshot, then the SP
 	// MUST provide the ID of the volume group snapshot in this field.
 	// If provided, CO MUST use this field in subsequent snapshot volume
 	// group operations to indicate that this snapshot is part of the
 	// specified group snapshot.
-	// If not provided, CO SHALL not indicate this snapshot is part of
-	// a group snapshot and allow it to be deleted separately.
+	// If not provided, CO SHALL treat the snapshot as independent,
+	// and SP SHALL allow it to be deleted separately.
 	// If this message is inside a VolumeGroupSnapshot message, the value
 	// MUST be the same as the group_snapshot_id in that message.
 	GroupSnapshotId      string   `protobuf:"bytes,6,opt,name=group_snapshot_id,json=groupSnapshotId,proto3" json:"group_snapshot_id,omitempty"`
