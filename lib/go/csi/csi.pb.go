@@ -3313,8 +3313,8 @@ type Snapshot struct {
 	// If this snapshot is a member of a volume group snapshot, and it
 	// MUST NOT be deleted as a stand alone snapshot, then the SP
 	// MUST provide the ID of the volume group snapshot in this field.
-	// If provided, CO MUST use this field in subsequent snapshot volume
-	// group operations to indicate that this snapshot is part of the
+	// If provided, CO MUST use this field in subsequent volume group
+	// snapshot operations to indicate that this snapshot is part of the
 	// specified group snapshot.
 	// If not provided, CO SHALL treat the snapshot as independent,
 	// and SP SHALL allow it to be deleted separately.
@@ -5378,8 +5378,6 @@ type DeleteVolumeGroupSnapshotRequest struct {
 	// section on how to use this field.
 	// The secrets provided in this field SHOULD be the same for
 	// all group snapshot operations on the same group snapshot.
-	// The secrets provided in the field SHOULD be passed to both
-	// the group snapshot and the individual snapshot members if needed.
 	Secrets              map[string]string `protobuf:"bytes,3,rep,name=secrets,proto3" json:"secrets,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
 	XXX_NoUnkeyedLiteral struct{}          `json:"-"`
 	XXX_unrecognized     []byte            `json:"-"`

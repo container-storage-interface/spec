@@ -1203,8 +1203,8 @@ message Snapshot {
   // If this snapshot is a member of a volume group snapshot, and it
   // MUST NOT be deleted as a stand alone snapshot, then the SP
   // MUST provide the ID of the volume group snapshot in this field.
-  // If provided, CO MUST use this field in subsequent snapshot volume
-  // group operations to indicate that this snapshot is part of the
+  // If provided, CO MUST use this field in subsequent volume group
+  // snapshot operations to indicate that this snapshot is part of the
   // specified group snapshot.
   // If not provided, CO SHALL treat the snapshot as independent,
   // and SP SHALL allow it to be deleted separately.
@@ -1805,8 +1805,6 @@ message DeleteVolumeGroupSnapshotRequest {
   // section on how to use this field.
   // The secrets provided in this field SHOULD be the same for
   // all group snapshot operations on the same group snapshot.
-  // The secrets provided in the field SHOULD be passed to both
-  // the group snapshot and the individual snapshot members if needed.
   map<string, string> secrets = 3 [(csi_secret) = true];
 }
 
