@@ -5366,10 +5366,12 @@ type DeleteVolumeGroupSnapshotRequest struct {
 	GroupSnapshotId string `protobuf:"bytes,1,opt,name=group_snapshot_id,json=groupSnapshotId,proto3" json:"group_snapshot_id,omitempty"`
 	// A list of snapshot IDs that are part of this group snapshot.
 	// If SP does not need to rely on this field to delete the snapshots
-	// in the group, this field MAY be ignored.
+	// in the group, it SHOULD check this field and report an error
+	// if it has the ability to detect a mismatch.
 	// Some SPs require this list to delete the snapshots in the group.
 	// If SP needs to use this field to delete the snapshots in the
-	// group, it MAY report an error when there is a mismatch.
+	// group, it MUST report an error if it has the ability to detect
+	// a mismatch.
 	// This field is REQUIRED.
 	SnapshotIds []string `protobuf:"bytes,2,rep,name=snapshot_ids,json=snapshotIds,proto3" json:"snapshot_ids,omitempty"`
 	// Secrets required by plugin to complete group snapshot deletion

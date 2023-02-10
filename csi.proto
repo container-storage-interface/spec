@@ -1792,10 +1792,12 @@ message DeleteVolumeGroupSnapshotRequest {
 
   // A list of snapshot IDs that are part of this group snapshot.
   // If SP does not need to rely on this field to delete the snapshots
-  // in the group, this field MAY be ignored.
+  // in the group, it SHOULD check this field and report an error
+  // if it has the ability to detect a mismatch.
   // Some SPs require this list to delete the snapshots in the group.
   // If SP needs to use this field to delete the snapshots in the
-  // group, it MAY report an error when there is a mismatch.
+  // group, it MUST report an error if it has the ability to detect
+  // a mismatch.
   // This field is REQUIRED.
   repeated string snapshot_ids = 2;
 

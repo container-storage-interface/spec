@@ -2965,10 +2965,12 @@ message DeleteVolumeGroupSnapshotRequest {
 
   // A list of snapshot IDs that are part of this group snapshot.
   // If SP does not need to rely on this field to delete the snapshots
-  // in the group, this field MAY be ignored.
+  // in the group, it SHOULD check this field and report an error
+  // if it has the ability to detect a mismatch.
   // Some SPs require this list to delete the snapshots in the group.
   // If SP needs to use this field to delete the snapshots in the
-  // group, it MAY report an error when there is a mismatch.
+  // group, it MUST report an error if it has the ability to detect
+  // a mismatch.
   // This field is REQUIRED.
   repeated string snapshot_ids = 2;
 
@@ -2994,6 +2996,7 @@ The CO MUST implement the specified error recovery behavior when it encounters t
 
 | Condition | gRPC Code | Description | Recovery Behavior |
 |-----------|-----------|-------------|-------------------|
+| Snapshot list mismatch | 3 INVALID_ARGUMENT | Besides the general cases, this code SHOULD also be used to indicate when plugin supporting CREATE_DELETE_GET_VOLUME_GROUP_SNAPSHOT detects a mismatch in the `snapshot_ids`. | If a mismatch is detected in the `snapshot_ids`, caller SHOULD use different `snapshot_ids`. |
 | Volume group snapshot in use | 9 FAILED_PRECONDITION | Indicates that the volume group snapshot corresponding to the specified `group_snapshot_id` could not be deleted because it is in use by another resource. | Caller SHOULD ensure that there are no other resources using the volume group snapshot, and then retry with exponential back off. |
 
 #### `GetVolumeGroupSnapshot`
