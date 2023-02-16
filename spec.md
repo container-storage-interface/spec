@@ -3019,13 +3019,24 @@ message GetVolumeGroupSnapshotRequest {
   // This field is REQUIRED.
   string group_snapshot_id = 1;
 
+  // A list of snapshot IDs that are part of this group snapshot.
+  // If SP does not need to rely on this field to get the snapshots
+  // in the group, it SHOULD check this field and report an error
+  // if it has the ability to detect a mismatch.
+  // Some SPs require this list to get the snapshots in the group.
+  // If SP needs to use this field to get the snapshots in the
+  // group, it MUST report an error if it has the ability to detect
+  // a mismatch.
+  // This field is REQUIRED.
+  repeated string snapshot_ids = 2;
+
   // Secrets required by plugin to complete
   // GetVolumeGroupSnapshot request.
   // This field is OPTIONAL. Refer to the `Secrets Requirements`
   // section on how to use this field.
   // The secrets provided in this field SHOULD be the same for
   // all group snapshot operations on the same group snapshot.
-  map<string, string> secrets = 2 [(csi_secret) = true];
+  map<string, string> secrets = 3 [(csi_secret) = true];
 }
 
 message GetVolumeGroupSnapshotResponse {
@@ -3044,6 +3055,7 @@ The CO MUST implement the specified error recovery behavior when it encounters t
 
 | Condition | gRPC Code | Description | Recovery Behavior |
 |-----------|-----------|-------------|-------------------|
+| Snapshot list mismatch | 3 INVALID_ARGUMENT | Besides the general cases, this code SHOULD also be used to indicate when plugin supporting CREATE_DELETE_GET_VOLUME_GROUP_SNAPSHOT detects a mismatch in the `snapshot_ids`. | If a mismatch is detected in the `snapshot_ids`, caller SHOULD use different `snapshot_ids`. |
 | Volume group snapshot does not exist | 5 NOT_FOUND | Indicates that a volume group snapshot corresponding to the specified `group_snapshot_id` does not exist. | Caller MUST verify that the `group_snapshot_id` is correct and that the volume group snapshot is accessible and has not been deleted before retrying with exponential back off. |
 
 ## Protocol
