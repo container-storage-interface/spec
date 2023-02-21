@@ -1973,7 +1973,8 @@ The CO MUST implement the specified error recovery behavior when it encounters t
 
 | Condition | gRPC Code | Description | Recovery Behavior |
 |-----------|-----------|-------------|-------------------|
-| Snapshot in use | 9 FAILED_PRECONDITION | Indicates that the snapshot corresponding to the specified `snapshot_id` could not be deleted because it is in use by another resource or it is part of a group snapshot and CAN NOT be deleted stand alone. | Caller SHOULD ensure that there are no other resources using the snapshot, and then retry with exponential back off. |
+| Snapshot is part of a group | 3 INVALID_ARGUMENT | Indicates that the snapshot corresponding to the specified `snapshot_id` could not be deleted because it is part of a group snapshot and CAN NOT be deleted stand alone. | Caller SHOULD stop calling DeleteSnapshot and call DeleteVolumeGroupSnapshot instead. |
+| Snapshot in use | 9 FAILED_PRECONDITION | Indicates that the snapshot corresponding to the specified `snapshot_id` could not be deleted because it is in use by another resource. | Caller SHOULD ensure that there are no other resources using the snapshot, and then retry with exponential back off. |
 | Operation pending for snapshot | 10 ABORTED | Indicates that there is already an operation pending for the specified snapshot. In general the Cluster Orchestrator (CO) is responsible for ensuring that there is no more than one call "in-flight" per snapshot at a given time. However, in some circumstances, the CO MAY lose state (for example when the CO crashes and restarts), and MAY issue multiple calls simultaneously for the same snapshot. The Plugin, SHOULD handle this as gracefully as possible, and MAY return this error code to reject secondary calls. | Caller SHOULD ensure that there are no other calls pending for the specified snapshot, and then retry with exponential back off. |
 
 
@@ -2985,6 +2986,7 @@ message DeleteVolumeGroupSnapshotRequest {
 
 message DeleteVolumeGroupSnapshotResponse {
   // Intentionally empty.
+  option (alpha_message) = true;
 }
 ```
 

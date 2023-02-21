@@ -1812,6 +1812,7 @@ message DeleteVolumeGroupSnapshotRequest {
 
 message DeleteVolumeGroupSnapshotResponse {
   // Intentionally empty.
+  option (alpha_message) = true;
 }
 message GetVolumeGroupSnapshotRequest {
   option (alpha_message) = true;
