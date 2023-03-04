@@ -623,7 +623,7 @@ message PluginCapability {
       // attempt to invoke the REQUIRED GroupController service RPCs, as
       // well as specific RPCs as indicated by
       // GroupControllerGetCapabilities.
-      GROUP_CONTROLLER_SERVICE = 3;
+      GROUP_CONTROLLER_SERVICE = 3 [(alpha_enum_value) = true];
     }
     Type type = 1;
   }
@@ -2797,10 +2797,14 @@ This RPC allows the CO to check the supported capabilities of group controller s
 
 ```protobuf
 message GroupControllerGetCapabilitiesRequest {
+  option (alpha_message) = true;
+
   // Intentionally empty.
 }
 
 message GroupControllerGetCapabilitiesResponse {
+  option (alpha_message) = true;
+
   // All the capabilities that the group controller service supports.
   // This field is OPTIONAL.
   repeated GroupControllerServiceCapability capabilities = 1;
@@ -2808,6 +2812,8 @@ message GroupControllerGetCapabilitiesResponse {
 
 // Specifies a capability of the group controller service.
 message GroupControllerServiceCapability {
+  option (alpha_message) = true;
+
   message RPC {
     enum Type {
       UNKNOWN = 0;
