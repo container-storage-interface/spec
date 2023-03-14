@@ -2718,11 +2718,15 @@ If plugin has `STAGE_UNSTAGE_VOLUME` node capability then:
 
 Otherwise `NodeExpandVolume` MUST be called after successful `NodePublishVolume`.
 
+A plugin that has `STAGE_UNSTAGE_VOLUME` node capability and supports `NodeExpandVolume` ONLY after `NodeStageVolume` and before `NodePublishVolume` but not after `NodePublishVolume` may return `FAILED_PRECONDITION` error code if `NodeExpandVolume` is called after `NodePublishVolume` - CO MUST NOT retry if volume is node-published.
+
 If a plugin only supports expansion via the `VolumeExpansion.OFFLINE` capability, then the volume MUST first be taken offline and expanded via `ControllerExpandVolume` (see `ControllerExpandVolume` for more details), and then node-staged or node-published before it can be expanded on the node via `NodeExpandVolume`.
 
 The `staging_target_path` field is not required, for backwards compatibility, but the CO SHOULD supply it.
 Plugins can use this field to determine if `volume_path` is where the volume is published or staged,
 and setting this field to non-empty allows plugins to function with less stored state on the node.
+
+If a plugin does not support expansion of `readonly` volumes it may return `FAILED_PRECONDITION` error code and CO MUST NOT retry.
 
 ```protobuf
 message NodeExpandVolumeRequest {
@@ -2785,7 +2789,7 @@ message NodeExpandVolumeResponse {
 |-----------------------|-----------|-----------------------|-----------------------------------|
 | Exceeds capabilities | 3 INVALID_ARGUMENT | Indicates that the CO has specified capabilities not supported by the volume. | Caller MAY verify volume capabilities by calling ValidateVolumeCapabilities and retry with matching capabilities. |
 | Volume does not exist | 5 NOT FOUND | Indicates that a volume corresponding to the specified volume_id does not exist. | Caller MUST verify that the volume_id is correct and that the volume is accessible and has not been deleted before retrying with exponential back off. |
-| Volume in use | 9 FAILED_PRECONDITION | Indicates that the volume corresponding to the specified `volume_id` could not be expanded because it is node-published or node-staged and the underlying filesystem does not support expansion of published or staged volumes. | Caller MUST NOT retry. |
+| Volume in use or readonly | 9 FAILED_PRECONDITION | Indicates that the volume corresponding to the specified `volume_id` could not be expanded because it is node-published or node-staged or readonly and the storage provider does not support expansion of published or staged or readonly volumes. | Caller MUST NOT retry. |
 | Unsupported capacity_range | 11 OUT_OF_RANGE | Indicates that the capacity range is not allowed by the Plugin. More human-readable information MAY be provided in the gRPC `status.message` field. | Caller MUST fix the capacity range before retrying. |
 
 ### Group Controller Service RPCs
