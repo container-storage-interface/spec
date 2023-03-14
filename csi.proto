@@ -248,7 +248,7 @@ message PluginCapability {
       ONLINE = 1;
 
       // OFFLINE indicates that volumes currently published and
-      // available on a node SHALL NOT be expanded via
+      // available on a node SHOULD NOT be expanded via
       // ControllerExpandVolume. When a plugin supports OFFLINE volume
       // expansion it MUST implement either the EXPAND_VOLUME controller
       // capability or both the EXPAND_VOLUME controller capability and
