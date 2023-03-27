@@ -381,6 +381,11 @@ service Controller {
     returns (ControllerGetVolumeResponse) {
         option (alpha_method) = true;
     }
+
+  rpc ControllerModifyVolume (ControllerModifyVolumeRequest)
+    returns (ControllerModifyVolumeResponse) {
+        option (alpha_method) = true;
+    }
 }
 
 service GroupController {
@@ -752,7 +757,11 @@ A Controller Plugin MUST implement this RPC call if it has `CREATE_DELETE_VOLUME
 This RPC will be called by the CO to provision a new volume on behalf of a user (to be consumed as either a block device or a mounted filesystem).
 
 This operation MUST be idempotent.
-If a volume corresponding to the specified volume `name` already exists, is accessible from `accessibility_requirements`, and is compatible with the specified `capacity_range`, `volume_capabilities` and `parameters` in the `CreateVolumeRequest`, the Plugin MUST reply `0 OK` with the corresponding `CreateVolumeResponse`.
+If a volume corresponding to the specified volume `name` already exists, is accessible from `accessibility_requirements`, and is compatible with the specified `capacity_range`, `volume_capabilities`, `parameters` and `mutable_parameters` in the `CreateVolumeRequest`, the Plugin MUST reply `0 OK` with the corresponding `CreateVolumeResponse`.
+
+The `parameters` field SHALL contain opaque volume attributes to be specified at creation time. 
+The `mutable_parameters` field SHALL contain opaque volume attributes that are defined at creation time but MAY also be changed during the lifetime of the volume via a subsequent `ControllerModifyVolume` RPC. 
+Values specified in `mutable_parameters` MUST take precedence over the values from `parameters`.
 
 Plugins MAY create 3 types of volumes:
 
@@ -817,9 +826,10 @@ message CreateVolumeRequest {
   // This field is REQUIRED.
   repeated VolumeCapability volume_capabilities = 3;
 
-  // Plugin specific parameters passed in as opaque key-value pairs.
-  // This field is OPTIONAL. The Plugin is responsible for parsing and
-  // validating these parameters. COs will treat these as opaque.
+  // Plugin specific creation-time parameters passed in as opaque 
+  // key-value pairs. This field is OPTIONAL. The Plugin is responsible 
+  // for parsing and validating these parameters. COs will treat 
+  // these as opaque.
   map<string, string> parameters = 4;
 
   // Secrets required by plugin to complete volume creation request.
@@ -843,6 +853,15 @@ message CreateVolumeRequest {
   // VOLUME_ACCESSIBILITY_CONSTRAINTS plugin capability, the SP MAY
   // choose where the provisioned volume is accessible from.
   TopologyRequirement accessibility_requirements = 7;
+
+  // Plugin specific mutable parameters passed in as opaque key-value
+  // pairs. This field is OPTIONAL. The Plugin is responsible for 
+  // parsing and validating these parameters. COs will treat these 
+  // as opaque. Plugins MUST treat these as if they take precedence 
+  // over the parameters field.
+  // COs SHALL NOT provide any values in mutable_parameters if the
+  // capability is not enabled.
+  map<string, string> mutable_parameters = 8 [(alpha_field) = true];
 }
 
 // Specifies what source the volume will be created from. One of the
@@ -1433,6 +1452,10 @@ message ValidateVolumeCapabilitiesRequest {
   // This field is OPTIONAL. Refer to the `Secrets Requirements`
   // section on how to use this field.
   map<string, string> secrets = 5 [(csi_secret) = true];
+
+  // See CreateVolumeRequest.mutable_parameters.
+  // This field is OPTIONAL.
+  map<string, string> mutable_parameters = 6 [(alpha_field) = true];
 }
 
 message ValidateVolumeCapabilitiesResponse {
@@ -1448,6 +1471,10 @@ message ValidateVolumeCapabilitiesResponse {
     // The volume creation parameters validated by the plugin.
     // This field is OPTIONAL.
     map<string, string> parameters = 3;
+
+    // The volume creation mutable_parameters validated by the plugin.
+    // This field is OPTIONAL.
+    map<string, string> mutable_parameters = 4 [(alpha_field) = true];
   }
 
   // Confirmed indicates to the CO the set of capabilities that the
@@ -1617,6 +1644,53 @@ The CO MUST implement the specified error recovery behavior when it encounters t
 |-----------|-----------|-------------|-------------------|
 | Volume does not exist | 5 NOT_FOUND | Indicates that a volume corresponding to the specified `volume_id` does not exist. | Caller MUST verify that the `volume_id` is correct and that the volume is accessible and has not been deleted before retrying with exponential back off. |
 
+
+#### `ControllerModifyVolume`
+
+A Controller plugin MUST implement this RPC call if plugin has MODIFY_VOLUME controller capability.
+This RPC allows the CO to change mutable key attributes of a volume. 
+
+This operation MUST be idempotent. 
+The new mutable parameters in ControllerModifyVolume can be different from the existing mutable parameters. 
+
+
+```protobuf
+message ControllerModifyVolumeRequest {
+  option (alpha_message) = true;
+
+  // Contains identity information for the existing volume.
+  // This field is REQUIRED.
+  string volume_id = 1;
+
+  // Secrets required by plugin to complete modify volume request.
+  // This field is OPTIONAL. Refer to the `Secrets Requirements`
+  // section on how to use this field.
+  map<string, string> secrets = 2 [(csi_secret) = true];
+
+  // Plugin specific parameters to apply, passed in as opaque key-value
+  // pairs. This field is OPTIONAL. The Plugin is responsible for
+  // parsing and validating these parameters. COs will treat these
+  // as opaque. COs MUST specify the intended value of every mutable
+  // parameter. Absent keys that were previously assigned a value MUST
+  // be interpreted as a deletion of the key from the set of mutable
+  // parameters.
+  map<string, string> mutable_parameters = 3;
+}
+
+message ControllerModifyVolumeResponse {
+  option (alpha_message) = true;
+}
+
+```
+
+##### ControllerModifyVolume Errors
+
+| Condition | gRPC Code | Description | Recovery Behavior |
+|-----------|-----------|-------------|-------------------|
+| Parameters not supported | 3 INVALID_ARGUMENT | Indicates that the CO has specified mutable parameters not supported by the volume. | Caller MAY verify mutable parameters. |
+| Exceeds capabilities | 3 INVALID_ARGUMENT | Indicates that the CO has specified capabilities not supported by the volume. | Caller MAY verify volume capabilities by calling ValidateVolumeCapabilities and retry with matching capabilities. |
+| Volume does not exist | 5 NOT FOUND | Indicates that a volume corresponding to the specified volume_id does not exist. | Caller MUST verify that the volume_id is correct and that the volume is accessible and has not been deleted before retrying with exponential back off. |
+
 #### `GetCapacity`
 
 A Controller Plugin MUST implement this RPC call if it has `GET_CAPACITY` controller capability.
@@ -1773,6 +1847,10 @@ message ControllerServiceCapability {
       // SINGLE_NODE_SINGLE_WRITER and/or SINGLE_NODE_MULTI_WRITER are
       // supported, in order to permit older COs to continue working.
       SINGLE_NODE_MULTI_WRITER = 13 [(alpha_enum_value) = true];
+
+      // Indicates the SP supports modifying volume with mutable
+      // parameters. See ControllerModifyVolume for details.
+      MODIFY_VOLUME = 14 [(alpha_enum_value) = true];
     }
 
     Type type = 1;

@@ -100,6 +100,11 @@ service Controller {
     returns (ControllerGetVolumeResponse) {
         option (alpha_method) = true;
     }
+
+  rpc ControllerModifyVolume (ControllerModifyVolumeRequest)
+    returns (ControllerModifyVolumeResponse) {
+        option (alpha_method) = true;
+    }
 }
 
 service GroupController {
@@ -350,9 +355,10 @@ message CreateVolumeRequest {
   // This field is REQUIRED.
   repeated VolumeCapability volume_capabilities = 3;
 
-  // Plugin specific parameters passed in as opaque key-value pairs.
-  // This field is OPTIONAL. The Plugin is responsible for parsing and
-  // validating these parameters. COs will treat these as opaque.
+  // Plugin specific creation-time parameters passed in as opaque 
+  // key-value pairs. This field is OPTIONAL. The Plugin is responsible 
+  // for parsing and validating these parameters. COs will treat 
+  // these as opaque.
   map<string, string> parameters = 4;
 
   // Secrets required by plugin to complete volume creation request.
@@ -376,6 +382,15 @@ message CreateVolumeRequest {
   // VOLUME_ACCESSIBILITY_CONSTRAINTS plugin capability, the SP MAY
   // choose where the provisioned volume is accessible from.
   TopologyRequirement accessibility_requirements = 7;
+
+  // Plugin specific mutable parameters passed in as opaque key-value
+  // pairs. This field is OPTIONAL. The Plugin is responsible for 
+  // parsing and validating these parameters. COs will treat these 
+  // as opaque. Plugins MUST treat these as if they take precedence 
+  // over the parameters field.
+  // COs SHALL NOT provide any values in mutable_parameters if the
+  // capability is not enabled.
+  map<string, string> mutable_parameters = 8 [(alpha_field) = true];
 }
 
 // Specifies what source the volume will be created from. One of the
@@ -849,6 +864,10 @@ message ValidateVolumeCapabilitiesRequest {
   // This field is OPTIONAL. Refer to the `Secrets Requirements`
   // section on how to use this field.
   map<string, string> secrets = 5 [(csi_secret) = true];
+
+  // See CreateVolumeRequest.mutable_parameters.
+  // This field is OPTIONAL.
+  map<string, string> mutable_parameters = 6 [(alpha_field) = true];
 }
 
 message ValidateVolumeCapabilitiesResponse {
@@ -864,6 +883,10 @@ message ValidateVolumeCapabilitiesResponse {
     // The volume creation parameters validated by the plugin.
     // This field is OPTIONAL.
     map<string, string> parameters = 3;
+
+    // The volume creation mutable_parameters validated by the plugin.
+    // This field is OPTIONAL.
+    map<string, string> mutable_parameters = 4 [(alpha_field) = true];
   }
 
   // Confirmed indicates to the CO the set of capabilities that the
@@ -974,6 +997,32 @@ message ControllerGetVolumeResponse {
   // This field is REQUIRED.
   VolumeStatus status = 2;
 }
+message ControllerModifyVolumeRequest {
+  option (alpha_message) = true;
+
+  // Contains identity information for the existing volume.
+  // This field is REQUIRED.
+  string volume_id = 1;
+
+  // Secrets required by plugin to complete modify volume request.
+  // This field is OPTIONAL. Refer to the `Secrets Requirements`
+  // section on how to use this field.
+  map<string, string> secrets = 2 [(csi_secret) = true];
+
+  // Plugin specific parameters to apply, passed in as opaque key-value
+  // pairs. This field is OPTIONAL. The Plugin is responsible for
+  // parsing and validating these parameters. COs will treat these
+  // as opaque. COs MUST specify the intended value of every mutable
+  // parameter. Absent keys that were previously assigned a value MUST
+  // be interpreted as a deletion of the key from the set of mutable
+  // parameters.
+  map<string, string> mutable_parameters = 3;
+}
+
+message ControllerModifyVolumeResponse {
+  option (alpha_message) = true;
+}
+
 message GetCapacityRequest {
   // If specified, the Plugin SHALL report the capacity of the storage
   // that can be used to provision volumes that satisfy ALL of the
@@ -1113,6 +1162,10 @@ message ControllerServiceCapability {
       // SINGLE_NODE_SINGLE_WRITER and/or SINGLE_NODE_MULTI_WRITER are
       // supported, in order to permit older COs to continue working.
       SINGLE_NODE_MULTI_WRITER = 13 [(alpha_enum_value) = true];
+
+      // Indicates the SP supports modifying volume with mutable
+      // parameters. See ControllerModifyVolume for details.
+      MODIFY_VOLUME = 14 [(alpha_enum_value) = true];
     }
 
     Type type = 1;
