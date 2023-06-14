@@ -80,85 +80,97 @@ A CO SHOULD be equipped to handle both centralized and headless plugins, as well
 Several of these possibilities are illustrated in the following figures.
 
 ```
-                             CO "Master" Host
-+-------------------------------------------+
-|                                           |
-|  +------------+           +------------+  |
-|  |     CO     |   gRPC    | Controller |  |
-|  |            +----------->   Plugin   |  |
-|  +------------+           +------------+  |
-|                                           |
-+-------------------------------------------+
+                                   CO "Master" Host
++-------------------------------------------------+
+|                                                 |
+|  +------------+           +------------------+  |
+|  |     CO     |   gRPC    |   Controller     |  |
+|  |            +--+-------->     Plugin       |  |
+|  +------------+  |        +------------------+  |
+|                  |                              |
+|                  |        +------------------+  |
+|                  |        | Group Controller |  |
+|                  +-------->     Plugin       |  |
+|                           +------------------+  |
+|                                                 |
++-------------------------------------------------+
 
-                            CO "Node" Host(s)
-+-------------------------------------------+
-|                                           |
-|  +------------+           +------------+  |
-|  |     CO     |   gRPC    |    Node    |  |
-|  |            +----------->   Plugin   |  |
-|  +------------+           +------------+  |
-|                                           |
-+-------------------------------------------+
+                                  CO "Node" Host(s)
++-------------------------------------------------+
+|                                                 |
+|  +------------+           +------------------+  |
+|  |     CO     |   gRPC    |       Node       |  |
+|  |            +----------->      Plugin      |  |
+|  +------------+           +------------------+  |
+|                                                 |
++-------------------------------------------------+
 
 Figure 1: The Plugin runs on all nodes in the cluster: a centralized
-Controller Plugin is available on the CO master host and the Node
-Plugin is available on all of the CO Nodes.
+Controller Plugin (optional) and Group Controller Plugin (alpha) are available
+on the CO master host and the Node Plugin is available on all of the 
+CO Nodes.
 ```
 
 ```
-                            CO "Node" Host(s)
-+-------------------------------------------+
-|                                           |
-|  +------------+           +------------+  |
-|  |     CO     |   gRPC    | Controller |  |
-|  |            +--+-------->   Plugin   |  |
-|  +------------+  |        +------------+  |
-|                  |                        |
-|                  |                        |
-|                  |        +------------+  |
-|                  |        |    Node    |  |
-|                  +-------->   Plugin   |  |
-|                           +------------+  |
-|                                           |
-+-------------------------------------------+
+                                  CO "Node" Host(s)
++-------------------------------------------------+
+|                                                 |
+|                           +------------------+  |
+|                           |      Node        |  |
+|                  +-------->     Plugin       |  |
+|                  |        +------------------+  |
+|                  |                              |
+|  +------------+  |        +------------------+  |
+|  |     CO     |  |gRPC    |   Controller     |  |
+|  |            +----------->     Plugin       |  |
+|  +------------+  |        +------------------+  |
+|                  |                              |
+|                  |        +------------------+  |
+|                  |        | Group Controller |  |
+|                  +-------->     Plugin       |  |
+|                           +------------------+  |
+|                                                 |
++-------------------------------------------------+
 
 Figure 2: Headless Plugin deployment, only the CO Node hosts run
-Plugins. Separate, split-component Plugins supply the Controller
-Service and the Node Service respectively.
+Plugins. Separate, split-component Plugins supply the Node Service,
+the Controller Service (optional) and the Group Controller Service (alpha)
+respectively.
 ```
 
 ```
-                            CO "Node" Host(s)
-+-------------------------------------------+
-|                                           |
-|  +------------+           +------------+  |
-|  |     CO     |   gRPC    | Controller |  |
-|  |            +----------->    Node    |  |
-|  +------------+           |   Plugin   |  |
-|                           +------------+  |
-|                                           |
-+-------------------------------------------+
+                                  CO "Node" Host(s)
++-------------------------------------------------+
+|                                                 |
+|                           +------------------+  |
+|  +------------+           |      Node        |  |
+|  |     CO     |   gRPC    |   Controller     |  |
+|  |            +-----------> Group Controller |  |
+|  +------------+           |     Plugin       |  |
+|                           +------------------+  |
+|                                                 |
++-------------------------------------------------+
 
 Figure 3: Headless Plugin deployment, only the CO Node hosts run
-Plugins. A unified Plugin component supplies both the Controller
-Service and Node Service.
+Plugins. A unified Plugin component supplies both the Node Service,
+the Controller Service (optional) and the Group Controller Service (alpha).
 ```
 
 ```
-                            CO "Node" Host(s)
-+-------------------------------------------+
-|                                           |
-|  +------------+           +------------+  |
-|  |     CO     |   gRPC    |    Node    |  |
-|  |            +----------->   Plugin   |  |
-|  +------------+           +------------+  |
-|                                           |
-+-------------------------------------------+
+                                  CO "Node" Host(s)
++-------------------------------------------------+
+|                                                 |
+|  +------------+           +------------------+  |
+|  |     CO     |   gRPC    |       Node       |  |
+|  |            +----------->      Plugin      |  |
+|  +------------+           +------------------+  |
+|                                                 |
++-------------------------------------------------+
 
 Figure 4: Headless Plugin deployment, only the CO Node hosts run
 Plugins. A Node-only Plugin component supplies only the Node Service.
-Its GetPluginCapabilities RPC does not report the CONTROLLER_SERVICE
-capability.
+Its GetPluginCapabilities RPC does not report either the CONTROLLER_SERVICE
+capability or the GROUP_CONTROLLER_SERVICE capability.
 ```
 
 ### Volume Lifecycle
@@ -264,11 +276,17 @@ This section describes the interface between COs and Plugins.
 ### RPC Interface
 
 A CO interacts with an Plugin through RPCs.
+
 Each SP MUST provide:
 
 * **Node Plugin**: A gRPC endpoint serving CSI RPCs that MUST be run on the Node whereupon an SP-provisioned volume will be published.
+
+Each SP MAY provide:
+
 * **Controller Plugin**: A gRPC endpoint serving CSI RPCs that MAY be run anywhere.
-* In some circumstances a single gRPC endpoint MAY serve all CSI RPCs (see Figure 3 in [Architecture](#architecture)).
+* **Group Controller Plugin**: A gRPC endpoint serving CSI RPCs that MAY be run anywhere.
+
+In some circumstances a single gRPC endpoint MAY serve all CSI RPCs (see Figure 3 in [Architecture](#architecture)).
 
 ```protobuf
 syntax = "proto3";
@@ -322,10 +340,11 @@ extend google.protobuf.ServiceOptions {
 }
 ```
 
-There are three sets of RPCs:
+There are four sets of RPCs:
 
-* **Identity Service**: Both the Node Plugin and the Controller Plugin MUST implement this sets of RPCs.
+* **Identity Service**: Every Controller Plugin, Group Controller Plugin and Node Plugin MUST implement this sets of RPCs.
 * **Controller Service**: The Controller Plugin MUST implement this sets of RPCs.
+* **Group Controller Service**: The GroupController Plugin MUST implement this sets of RPCs.
 * **Node Service**: The Node Plugin MUST implement this sets of RPCs.
 
 ```protobuf
@@ -3065,6 +3084,20 @@ The CO MUST implement the specified error recovery behavior when it encounters t
 |-----------|-----------|-------------|-------------------|
 | Snapshot list mismatch | 3 INVALID_ARGUMENT | Besides the general cases, this code SHOULD also be used to indicate when plugin supporting CREATE_DELETE_GET_VOLUME_GROUP_SNAPSHOT detects a mismatch in the `snapshot_ids`. | If a mismatch is detected in the `snapshot_ids`, caller SHOULD use different `snapshot_ids`. |
 | Volume group snapshot does not exist | 5 NOT_FOUND | Indicates that a volume group snapshot corresponding to the specified `group_snapshot_id` does not exist. | Caller MUST verify that the `group_snapshot_id` is correct and that the volume group snapshot is accessible and has not been deleted before retrying with exponential back off. |
+
+#### RPC Interactions
+
+##### `CreateVolumeGroupSnapshot`, `DeleteVolumeGroupSnapshot`, `GetVolumeGroupSnapshot`
+
+The plugin-generated `group_snapshot_id` and `snapshot_ids` are a REQUIRED field for both the `DeleteVolumeGroupSnapshot` RPC and the `GetVolumeGroupSnapshot` PRC.
+
+A `CreateVolumeGroupSnapshot` operation SHOULD return with a `group_snapshot_id` when the group snapshot is cut successfully. If a `CreateVolumeGroupSnapshot` operation times out before the group snapshot is cut, leaving the CO without an ID with which to reference a group snapshot, and the CO also decides that it no longer needs/wants the group snapshot in question then the CO MAY choose one of the following paths:
+
+1. Retry the `CreateVolumeGroupSnapshot` RPC to possibly obtain a group snapshot ID that may be used to execute a `DeleteVolumeGroupSnapshot` RPC; upon success execute `DeleteVolumeGroupSnapshot`.
+
+2. The CO takes no further action regarding the timed out RPC, a group snapshot is possibly leaked and the operator/user is expected to clean up.
+
+For plugins that support snapshot post processing such as uploading, a `GetVolumeGroupSnapshot` operation SHALL return current information of the group snapshot with the given `group_snapshot_id`. When processing is complete, the `ready_to_use` parameter of the group snapshot from `GetVolumeGroupSnapshot` SHALL become `true`.
 
 ## Protocol
 
