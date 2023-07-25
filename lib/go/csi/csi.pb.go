@@ -924,13 +924,13 @@ type CreateVolumeRequest struct {
 	// VOLUME_ACCESSIBILITY_CONSTRAINTS plugin capability, the SP MAY
 	// choose where the provisioned volume is accessible from.
 	AccessibilityRequirements *TopologyRequirement `protobuf:"bytes,7,opt,name=accessibility_requirements,json=accessibilityRequirements,proto3" json:"accessibility_requirements,omitempty"`
-	// Plugin specific mutable parameters passed in as opaque key-value
-	// pairs. This field is OPTIONAL. The Plugin is responsible for
-	// parsing and validating these parameters. COs will treat these
-	// as opaque. Plugins MUST treat these as if they take precedence
-	// over the parameters field.
-	// COs SHALL NOT provide any values in mutable_parameters if the
-	// capability is not enabled.
+	// Plugin specific parameters to apply, passed in as opaque
+	// key-value pairs. This field is OPTIONAL. The Plugin is
+	// responsible for  parsing and validating these parameters.
+	// COs will treat these as opaque. Plugins MUST treat these
+	// as if they take precedence over the parameters field.
+	// This field SHALL NOT be specified unless the SP has the
+	// MODIFY_VOLUME plugin capability.
 	MutableParameters    map[string]string `protobuf:"bytes,8,rep,name=mutable_parameters,json=mutableParameters,proto3" json:"mutable_parameters,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
 	XXX_NoUnkeyedLiteral struct{}          `json:"-"`
 	XXX_unrecognized     []byte            `json:"-"`
@@ -2861,12 +2861,12 @@ type ControllerModifyVolumeRequest struct {
 	// section on how to use this field.
 	Secrets map[string]string `protobuf:"bytes,2,rep,name=secrets,proto3" json:"secrets,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
 	// Plugin specific parameters to apply, passed in as opaque key-value
-	// pairs. This field is OPTIONAL. The Plugin is responsible for
+	// pairs. This field is REQUIRED. The Plugin is responsible for
 	// parsing and validating these parameters. COs will treat these
-	// as opaque. COs MUST specify the intended value of every mutable
-	// parameter. Absent keys that were previously assigned a value MUST
-	// be interpreted as a deletion of the key from the set of mutable
-	// parameters.
+	// as opaque. The CO SHOULD specify the intended values of all mutable
+	// parameters it intends to modify. SPs MUST NOT modify volumes based
+	// on the absence of keys, only keys that are specified should result
+	// in modifications to the volume.
 	MutableParameters    map[string]string `protobuf:"bytes,3,rep,name=mutable_parameters,json=mutableParameters,proto3" json:"mutable_parameters,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
 	XXX_NoUnkeyedLiteral struct{}          `json:"-"`
 	XXX_unrecognized     []byte            `json:"-"`
