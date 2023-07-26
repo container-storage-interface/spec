@@ -385,7 +385,7 @@ message CreateVolumeRequest {
 
   // Plugin specific parameters to apply, passed in as opaque
   // key-value pairs. This field is OPTIONAL. The Plugin is
-  // responsible for  parsing and validating these parameters. 
+  // responsible for parsing and validating these parameters. 
   // COs will treat these as opaque. Plugins MUST treat these 
   // as if they take precedence over the parameters field.
   // This field SHALL NOT be specified unless the SP has the
