@@ -924,10 +924,7 @@ type CreateVolumeRequest struct {
 	// VOLUME_ACCESSIBILITY_CONSTRAINTS plugin capability, the SP MAY
 	// choose where the provisioned volume is accessible from.
 	AccessibilityRequirements *TopologyRequirement `protobuf:"bytes,7,opt,name=accessibility_requirements,json=accessibilityRequirements,proto3" json:"accessibility_requirements,omitempty"`
-	// Plugin specific parameters to apply, passed in as opaque
-	// key-value pairs. This field is OPTIONAL. The Plugin is
-	// responsible for parsing and validating these parameters.
-	// COs will treat these as opaque. Plugins MUST treat these
+	// Plugins MUST treat these
 	// as if they take precedence over the parameters field.
 	// This field SHALL NOT be specified unless the SP has the
 	// MODIFY_VOLUME plugin capability.
@@ -2860,8 +2857,9 @@ type ControllerModifyVolumeRequest struct {
 	// This field is OPTIONAL. Refer to the `Secrets Requirements`
 	// section on how to use this field.
 	Secrets map[string]string `protobuf:"bytes,2,rep,name=secrets,proto3" json:"secrets,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
-	// Plugin specific parameters to apply, passed in as opaque key-value
-	// pairs. This field is REQUIRED. The Plugin is responsible for
+	// Plugin specific volume attributes to mutate, passed in as
+	// opaque key-value pairs.
+	// This field is REQUIRED. The Plugin is responsible for
 	// parsing and validating these parameters. COs will treat these
 	// as opaque. The CO SHOULD specify the intended values of all mutable
 	// parameters it intends to modify. SPs MUST NOT modify volumes based
