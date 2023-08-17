@@ -957,6 +957,187 @@ var GroupController_ServiceDesc = grpc.ServiceDesc{
 }
 
 const (
+	SnapshotMetadata_GetMetadataAllocated_FullMethodName = "/csi.v1.SnapshotMetadata/GetMetadataAllocated"
+	SnapshotMetadata_GetMetadataDelta_FullMethodName     = "/csi.v1.SnapshotMetadata/GetMetadataDelta"
+)
+
+// SnapshotMetadataClient is the client API for SnapshotMetadata service.
+//
+// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
+type SnapshotMetadataClient interface {
+	GetMetadataAllocated(ctx context.Context, in *GetMetadataAllocatedRequest, opts ...grpc.CallOption) (SnapshotMetadata_GetMetadataAllocatedClient, error)
+	GetMetadataDelta(ctx context.Context, in *GetMetadataDeltaRequest, opts ...grpc.CallOption) (SnapshotMetadata_GetMetadataDeltaClient, error)
+}
+
+type snapshotMetadataClient struct {
+	cc grpc.ClientConnInterface
+}
+
+func NewSnapshotMetadataClient(cc grpc.ClientConnInterface) SnapshotMetadataClient {
+	return &snapshotMetadataClient{cc}
+}
+
+func (c *snapshotMetadataClient) GetMetadataAllocated(ctx context.Context, in *GetMetadataAllocatedRequest, opts ...grpc.CallOption) (SnapshotMetadata_GetMetadataAllocatedClient, error) {
+	stream, err := c.cc.NewStream(ctx, &SnapshotMetadata_ServiceDesc.Streams[0], SnapshotMetadata_GetMetadataAllocated_FullMethodName, opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &snapshotMetadataGetMetadataAllocatedClient{stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+type SnapshotMetadata_GetMetadataAllocatedClient interface {
+	Recv() (*GetMetadataAllocatedResponse, error)
+	grpc.ClientStream
+}
+
+type snapshotMetadataGetMetadataAllocatedClient struct {
+	grpc.ClientStream
+}
+
+func (x *snapshotMetadataGetMetadataAllocatedClient) Recv() (*GetMetadataAllocatedResponse, error) {
+	m := new(GetMetadataAllocatedResponse)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
+func (c *snapshotMetadataClient) GetMetadataDelta(ctx context.Context, in *GetMetadataDeltaRequest, opts ...grpc.CallOption) (SnapshotMetadata_GetMetadataDeltaClient, error) {
+	stream, err := c.cc.NewStream(ctx, &SnapshotMetadata_ServiceDesc.Streams[1], SnapshotMetadata_GetMetadataDelta_FullMethodName, opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &snapshotMetadataGetMetadataDeltaClient{stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+type SnapshotMetadata_GetMetadataDeltaClient interface {
+	Recv() (*GetMetadataDeltaResponse, error)
+	grpc.ClientStream
+}
+
+type snapshotMetadataGetMetadataDeltaClient struct {
+	grpc.ClientStream
+}
+
+func (x *snapshotMetadataGetMetadataDeltaClient) Recv() (*GetMetadataDeltaResponse, error) {
+	m := new(GetMetadataDeltaResponse)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
+// SnapshotMetadataServer is the server API for SnapshotMetadata service.
+// All implementations must embed UnimplementedSnapshotMetadataServer
+// for forward compatibility
+type SnapshotMetadataServer interface {
+	GetMetadataAllocated(*GetMetadataAllocatedRequest, SnapshotMetadata_GetMetadataAllocatedServer) error
+	GetMetadataDelta(*GetMetadataDeltaRequest, SnapshotMetadata_GetMetadataDeltaServer) error
+	mustEmbedUnimplementedSnapshotMetadataServer()
+}
+
+// UnimplementedSnapshotMetadataServer must be embedded to have forward compatible implementations.
+type UnimplementedSnapshotMetadataServer struct {
+}
+
+func (UnimplementedSnapshotMetadataServer) GetMetadataAllocated(*GetMetadataAllocatedRequest, SnapshotMetadata_GetMetadataAllocatedServer) error {
+	return status.Errorf(codes.Unimplemented, "method GetMetadataAllocated not implemented")
+}
+func (UnimplementedSnapshotMetadataServer) GetMetadataDelta(*GetMetadataDeltaRequest, SnapshotMetadata_GetMetadataDeltaServer) error {
+	return status.Errorf(codes.Unimplemented, "method GetMetadataDelta not implemented")
+}
+func (UnimplementedSnapshotMetadataServer) mustEmbedUnimplementedSnapshotMetadataServer() {}
+
+// UnsafeSnapshotMetadataServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to SnapshotMetadataServer will
+// result in compilation errors.
+type UnsafeSnapshotMetadataServer interface {
+	mustEmbedUnimplementedSnapshotMetadataServer()
+}
+
+func RegisterSnapshotMetadataServer(s grpc.ServiceRegistrar, srv SnapshotMetadataServer) {
+	s.RegisterService(&SnapshotMetadata_ServiceDesc, srv)
+}
+
+func _SnapshotMetadata_GetMetadataAllocated_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(GetMetadataAllocatedRequest)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(SnapshotMetadataServer).GetMetadataAllocated(m, &snapshotMetadataGetMetadataAllocatedServer{stream})
+}
+
+type SnapshotMetadata_GetMetadataAllocatedServer interface {
+	Send(*GetMetadataAllocatedResponse) error
+	grpc.ServerStream
+}
+
+type snapshotMetadataGetMetadataAllocatedServer struct {
+	grpc.ServerStream
+}
+
+func (x *snapshotMetadataGetMetadataAllocatedServer) Send(m *GetMetadataAllocatedResponse) error {
+	return x.ServerStream.SendMsg(m)
+}
+
+func _SnapshotMetadata_GetMetadataDelta_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(GetMetadataDeltaRequest)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(SnapshotMetadataServer).GetMetadataDelta(m, &snapshotMetadataGetMetadataDeltaServer{stream})
+}
+
+type SnapshotMetadata_GetMetadataDeltaServer interface {
+	Send(*GetMetadataDeltaResponse) error
+	grpc.ServerStream
+}
+
+type snapshotMetadataGetMetadataDeltaServer struct {
+	grpc.ServerStream
+}
+
+func (x *snapshotMetadataGetMetadataDeltaServer) Send(m *GetMetadataDeltaResponse) error {
+	return x.ServerStream.SendMsg(m)
+}
+
+// SnapshotMetadata_ServiceDesc is the grpc.ServiceDesc for SnapshotMetadata service.
+// It's only intended for direct use with grpc.RegisterService,
+// and not to be introspected or modified (even as a copy)
+var SnapshotMetadata_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "csi.v1.SnapshotMetadata",
+	HandlerType: (*SnapshotMetadataServer)(nil),
+	Methods:     []grpc.MethodDesc{},
+	Streams: []grpc.StreamDesc{
+		{
+			StreamName:    "GetMetadataAllocated",
+			Handler:       _SnapshotMetadata_GetMetadataAllocated_Handler,
+			ServerStreams: true,
+		},
+		{
+			StreamName:    "GetMetadataDelta",
+			Handler:       _SnapshotMetadata_GetMetadataDelta_Handler,
+			ServerStreams: true,
+		},
+	},
+	Metadata: "csi.proto",
+}
+
+const (
 	Node_NodeStageVolume_FullMethodName     = "/csi.v1.Node/NodeStageVolume"
 	Node_NodeUnstageVolume_FullMethodName   = "/csi.v1.Node/NodeUnstageVolume"
 	Node_NodePublishVolume_FullMethodName   = "/csi.v1.Node/NodePublishVolume"
