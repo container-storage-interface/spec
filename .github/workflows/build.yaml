@@ -22,7 +22,5 @@ jobs:
 
     - name: Build Test
       run: |
+        touch spec.md  # Ensure its timestamp is newer than any generated files
         make
-        make -C lib/go protoc
-        make -C lib/go protoc-gen-go
-        make build_go

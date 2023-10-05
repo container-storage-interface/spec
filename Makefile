@@ -28,17 +28,10 @@ $(CSI_PROTO): $(CSI_PROTO).tmp
 ifeq (true,$(GITHUB_ACTIONS))
 	diff "$@" "$?"
 else
-	diff "$@" "$?" > /dev/null 2>&1 || cp -f "$?" "$@"
+	cp -f "$?" "$@"
 endif
 
-build: check
-
-# If this is not running on GitHub Actions then for sake of convenience
-# go ahead and update the language bindings as well.
-ifneq (true,$(GITHUB_ACTIONS))
-build: build_cpp build_go
-endif
-
+build: check build_cpp build_go
 
 build_cpp:
 	$(MAKE) -C lib/cxx
@@ -66,4 +59,4 @@ clobber: clean
 check: $(CSI_PROTO)
 	awk '{ if (length > 72) print NR, $$0 }' $? | diff - /dev/null
 
-.PHONY: clean clobber check
+.PHONY: clean clobber check build_go build_cpp
