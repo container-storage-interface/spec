@@ -279,6 +279,7 @@ import "google/protobuf/timestamp.proto";
 import "google/protobuf/wrappers.proto";
 
 option go_package = "csi";
+option csharp_namespace = "csi";
 
 extend google.protobuf.EnumOptions {
   // Indicates that this enum is OPTIONAL and part of an experimental
