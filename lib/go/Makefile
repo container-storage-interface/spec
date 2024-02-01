@@ -84,8 +84,8 @@ $(CSI_GO_TMP) $(CSI_GRPC_TMP): INCLUDE := -I../.. -I$(PROTOC_TMP_DIR)/include
 $(CSI_GO_TMP) $(CSI_GRPC_TMP): $(CSI_PROTO) | $(PROTOC)
 	@mkdir -p "$(@D)"
 	$(PROTOC) $(INCLUDE) --go-grpc_out=$(CSI_BUILD) --go_out=$(CSI_BUILD) \
-		--go_opt=Mgoogle/protobuf/descriptor.proto=github.com/golang/protobuf/protoc-gen-go/descriptor \
-		--go_opt=Mgoogle/protobuf/wrappers.proto=github.com/golang/protobuf/ptypes/wrappers \
+		--go_opt=Mgoogle/protobuf/descriptor.proto=google.golang.org/protobuf/types/descriptorpb \
+		--go_opt=Mgoogle/protobuf/wrappers.proto=google.golang.org/protobuf/types/known/wrapperspb \
 		"$(<F)"
 
 # The temp language bindings are compared to the ones that are

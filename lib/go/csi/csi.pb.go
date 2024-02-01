@@ -9,11 +9,11 @@
 package csi
 
 import (
-	descriptor "github.com/golang/protobuf/protoc-gen-go/descriptor"
-	wrappers "github.com/golang/protobuf/ptypes/wrappers"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
+	descriptorpb "google.golang.org/protobuf/types/descriptorpb"
 	timestamppb "google.golang.org/protobuf/types/known/timestamppb"
+	wrapperspb "google.golang.org/protobuf/types/known/wrapperspb"
 	reflect "reflect"
 	sync "sync"
 )
@@ -920,7 +920,7 @@ type ProbeResponse struct {
 	// that the plugin is in a ready state and is accepting calls to its
 	// Controller and/or Node services (according to the plugin's reported
 	// capabilities).
-	Ready *wrappers.BoolValue `protobuf:"bytes,1,opt,name=ready,proto3" json:"ready,omitempty"`
+	Ready *wrapperspb.BoolValue `protobuf:"bytes,1,opt,name=ready,proto3" json:"ready,omitempty"`
 }
 
 func (x *ProbeResponse) Reset() {
@@ -955,7 +955,7 @@ func (*ProbeResponse) Descriptor() ([]byte, []int) {
 	return file_csi_proto_rawDescGZIP(), []int{6}
 }
 
-func (x *ProbeResponse) GetReady() *wrappers.BoolValue {
+func (x *ProbeResponse) GetReady() *wrapperspb.BoolValue {
 	if x != nil {
 		return x.Ready
 	}
@@ -2844,7 +2844,7 @@ type GetCapacityResponse struct {
 	// a maximum size for individual volumes and leave it unset
 	// otherwise. COs MAY use it to make decision about
 	// where to create volumes.
-	MaximumVolumeSize *wrappers.Int64Value `protobuf:"bytes,2,opt,name=maximum_volume_size,json=maximumVolumeSize,proto3" json:"maximum_volume_size,omitempty"`
+	MaximumVolumeSize *wrapperspb.Int64Value `protobuf:"bytes,2,opt,name=maximum_volume_size,json=maximumVolumeSize,proto3" json:"maximum_volume_size,omitempty"`
 	// The smallest size that may be used in a
 	// CreateVolumeRequest.capacity_range.limit_bytes field
 	// to create a volume with the same parameters as those in
@@ -2860,7 +2860,7 @@ type GetCapacityResponse struct {
 	// a minimum size for individual volumes and leave it unset
 	// otherwise. COs MAY use it to make decision about
 	// where to create volumes.
-	MinimumVolumeSize *wrappers.Int64Value `protobuf:"bytes,3,opt,name=minimum_volume_size,json=minimumVolumeSize,proto3" json:"minimum_volume_size,omitempty"`
+	MinimumVolumeSize *wrapperspb.Int64Value `protobuf:"bytes,3,opt,name=minimum_volume_size,json=minimumVolumeSize,proto3" json:"minimum_volume_size,omitempty"`
 }
 
 func (x *GetCapacityResponse) Reset() {
@@ -2902,14 +2902,14 @@ func (x *GetCapacityResponse) GetAvailableCapacity() int64 {
 	return 0
 }
 
-func (x *GetCapacityResponse) GetMaximumVolumeSize() *wrappers.Int64Value {
+func (x *GetCapacityResponse) GetMaximumVolumeSize() *wrapperspb.Int64Value {
 	if x != nil {
 		return x.MaximumVolumeSize
 	}
 	return nil
 }
 
-func (x *GetCapacityResponse) GetMinimumVolumeSize() *wrappers.Int64Value {
+func (x *GetCapacityResponse) GetMinimumVolumeSize() *wrapperspb.Int64Value {
 	if x != nil {
 		return x.MinimumVolumeSize
 	}
@@ -6490,7 +6490,7 @@ func (x *GroupControllerServiceCapability_RPC) GetType() GroupControllerServiceC
 
 var file_csi_proto_extTypes = []protoimpl.ExtensionInfo{
 	{
-		ExtendedType:  (*descriptor.EnumOptions)(nil),
+		ExtendedType:  (*descriptorpb.EnumOptions)(nil),
 		ExtensionType: (*bool)(nil),
 		Field:         1060,
 		Name:          "csi.v1.alpha_enum",
@@ -6498,7 +6498,7 @@ var file_csi_proto_extTypes = []protoimpl.ExtensionInfo{
 		Filename:      "csi.proto",
 	},
 	{
-		ExtendedType:  (*descriptor.EnumValueOptions)(nil),
+		ExtendedType:  (*descriptorpb.EnumValueOptions)(nil),
 		ExtensionType: (*bool)(nil),
 		Field:         1060,
 		Name:          "csi.v1.alpha_enum_value",
@@ -6506,7 +6506,7 @@ var file_csi_proto_extTypes = []protoimpl.ExtensionInfo{
 		Filename:      "csi.proto",
 	},
 	{
-		ExtendedType:  (*descriptor.FieldOptions)(nil),
+		ExtendedType:  (*descriptorpb.FieldOptions)(nil),
 		ExtensionType: (*bool)(nil),
 		Field:         1059,
 		Name:          "csi.v1.csi_secret",
@@ -6514,7 +6514,7 @@ var file_csi_proto_extTypes = []protoimpl.ExtensionInfo{
 		Filename:      "csi.proto",
 	},
 	{
-		ExtendedType:  (*descriptor.FieldOptions)(nil),
+		ExtendedType:  (*descriptorpb.FieldOptions)(nil),
 		ExtensionType: (*bool)(nil),
 		Field:         1060,
 		Name:          "csi.v1.alpha_field",
@@ -6522,7 +6522,7 @@ var file_csi_proto_extTypes = []protoimpl.ExtensionInfo{
 		Filename:      "csi.proto",
 	},
 	{
-		ExtendedType:  (*descriptor.MessageOptions)(nil),
+		ExtendedType:  (*descriptorpb.MessageOptions)(nil),
 		ExtensionType: (*bool)(nil),
 		Field:         1060,
 		Name:          "csi.v1.alpha_message",
@@ -6530,7 +6530,7 @@ var file_csi_proto_extTypes = []protoimpl.ExtensionInfo{
 		Filename:      "csi.proto",
 	},
 	{
-		ExtendedType:  (*descriptor.MethodOptions)(nil),
+		ExtendedType:  (*descriptorpb.MethodOptions)(nil),
 		ExtensionType: (*bool)(nil),
 		Field:         1060,
 		Name:          "csi.v1.alpha_method",
@@ -6538,7 +6538,7 @@ var file_csi_proto_extTypes = []protoimpl.ExtensionInfo{
 		Filename:      "csi.proto",
 	},
 	{
-		ExtendedType:  (*descriptor.ServiceOptions)(nil),
+		ExtendedType:  (*descriptorpb.ServiceOptions)(nil),
 		ExtensionType: (*bool)(nil),
 		Field:         1060,
 		Name:          "csi.v1.alpha_service",
@@ -6547,7 +6547,7 @@ var file_csi_proto_extTypes = []protoimpl.ExtensionInfo{
 	},
 }
 
-// Extension fields to descriptor.EnumOptions.
+// Extension fields to descriptorpb.EnumOptions.
 var (
 	// Indicates that this enum is OPTIONAL and part of an experimental
 	// API that may be deprecated and eventually removed between minor
@@ -6557,7 +6557,7 @@ var (
 	E_AlphaEnum = &file_csi_proto_extTypes[0]
 )
 
-// Extension fields to descriptor.EnumValueOptions.
+// Extension fields to descriptorpb.EnumValueOptions.
 var (
 	// Indicates that this enum value is OPTIONAL and part of an
 	// experimental API that may be deprecated and eventually removed
@@ -6567,7 +6567,7 @@ var (
 	E_AlphaEnumValue = &file_csi_proto_extTypes[1]
 )
 
-// Extension fields to descriptor.FieldOptions.
+// Extension fields to descriptorpb.FieldOptions.
 var (
 	// Indicates that a field MAY contain information that is sensitive
 	// and MUST be treated as such (e.g. not logged).
@@ -6582,7 +6582,7 @@ var (
 	E_AlphaField = &file_csi_proto_extTypes[3]
 )
 
-// Extension fields to descriptor.MessageOptions.
+// Extension fields to descriptorpb.MessageOptions.
 var (
 	// Indicates that this message is OPTIONAL and part of an experimental
 	// API that may be deprecated and eventually removed between minor
@@ -6592,7 +6592,7 @@ var (
 	E_AlphaMessage = &file_csi_proto_extTypes[4]
 )
 
-// Extension fields to descriptor.MethodOptions.
+// Extension fields to descriptorpb.MethodOptions.
 var (
 	// Indicates that this method is OPTIONAL and part of an experimental
 	// API that may be deprecated and eventually removed between minor
@@ -6602,7 +6602,7 @@ var (
 	E_AlphaMethod = &file_csi_proto_extTypes[5]
 )
 
-// Extension fields to descriptor.ServiceOptions.
+// Extension fields to descriptorpb.ServiceOptions.
 var (
 	// Indicates that this service is OPTIONAL and part of an experimental
 	// API that may be deprecated and eventually removed between minor
@@ -7959,19 +7959,19 @@ var file_csi_proto_goTypes = []interface{}{
 	(*NodeServiceCapability_RPC)(nil),       // 124: csi.v1.NodeServiceCapability.RPC
 	nil,                                     // 125: csi.v1.NodeExpandVolumeRequest.SecretsEntry
 	(*GroupControllerServiceCapability_RPC)(nil), // 126: csi.v1.GroupControllerServiceCapability.RPC
-	nil,                                 // 127: csi.v1.CreateVolumeGroupSnapshotRequest.SecretsEntry
-	nil,                                 // 128: csi.v1.CreateVolumeGroupSnapshotRequest.ParametersEntry
-	nil,                                 // 129: csi.v1.DeleteVolumeGroupSnapshotRequest.SecretsEntry
-	nil,                                 // 130: csi.v1.GetVolumeGroupSnapshotRequest.SecretsEntry
-	(*wrappers.BoolValue)(nil),          // 131: google.protobuf.BoolValue
-	(*wrappers.Int64Value)(nil),         // 132: google.protobuf.Int64Value
-	(*timestamppb.Timestamp)(nil),       // 133: google.protobuf.Timestamp
-	(*descriptor.EnumOptions)(nil),      // 134: google.protobuf.EnumOptions
-	(*descriptor.EnumValueOptions)(nil), // 135: google.protobuf.EnumValueOptions
-	(*descriptor.FieldOptions)(nil),     // 136: google.protobuf.FieldOptions
-	(*descriptor.MessageOptions)(nil),   // 137: google.protobuf.MessageOptions
-	(*descriptor.MethodOptions)(nil),    // 138: google.protobuf.MethodOptions
-	(*descriptor.ServiceOptions)(nil),   // 139: google.protobuf.ServiceOptions
+	nil,                                   // 127: csi.v1.CreateVolumeGroupSnapshotRequest.SecretsEntry
+	nil,                                   // 128: csi.v1.CreateVolumeGroupSnapshotRequest.ParametersEntry
+	nil,                                   // 129: csi.v1.DeleteVolumeGroupSnapshotRequest.SecretsEntry
+	nil,                                   // 130: csi.v1.GetVolumeGroupSnapshotRequest.SecretsEntry
+	(*wrapperspb.BoolValue)(nil),          // 131: google.protobuf.BoolValue
+	(*wrapperspb.Int64Value)(nil),         // 132: google.protobuf.Int64Value
+	(*timestamppb.Timestamp)(nil),         // 133: google.protobuf.Timestamp
+	(*descriptorpb.EnumOptions)(nil),      // 134: google.protobuf.EnumOptions
+	(*descriptorpb.EnumValueOptions)(nil), // 135: google.protobuf.EnumValueOptions
+	(*descriptorpb.FieldOptions)(nil),     // 136: google.protobuf.FieldOptions
+	(*descriptorpb.MessageOptions)(nil),   // 137: google.protobuf.MessageOptions
+	(*descriptorpb.MethodOptions)(nil),    // 138: google.protobuf.MethodOptions
+	(*descriptorpb.ServiceOptions)(nil),   // 139: google.protobuf.ServiceOptions
 }
 var file_csi_proto_depIdxs = []int32{
 	79,  // 0: csi.v1.GetPluginInfoResponse.manifest:type_name -> csi.v1.GetPluginInfoResponse.ManifestEntry
