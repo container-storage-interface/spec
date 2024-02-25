@@ -24,3 +24,4 @@ jobs:
       run: |
         touch spec.md  # Ensure its timestamp is newer than any generated files
         make
+        git diff --exit-code || (echo "Generated files are out of date. Please run 'make' and commit the changes." && exit 1)
