@@ -6,7 +6,8 @@ import "google/protobuf/descriptor.proto";
 import "google/protobuf/timestamp.proto";
 import "google/protobuf/wrappers.proto";
 
-option go_package = "csi";
+option go_package = 
+  "github.com/container-storage-interface/spec/lib/go/csi";
 
 extend google.protobuf.EnumOptions {
   // Indicates that this enum is OPTIONAL and part of an experimental
