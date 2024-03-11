@@ -1476,6 +1476,11 @@ type Volume struct {
 	// COs MAY use this information along with the topology information
 	// returned by NodeGetInfo to ensure that a given volume is accessible
 	// from a given node when scheduling workloads.
+	// The volume is accessible from all locations in the specified
+	// topology.
+	// The volume is accessible from a node if the union of volume's
+	// accessible_topology is a superset of the node's
+	// accessible_topology.
 	// This field is OPTIONAL. If it is not specified, the CO MAY assume
 	// the volume is equally accessible from all nodes in the cluster and
 	// MAY schedule workloads referencing the volume on any available
@@ -4793,6 +4798,10 @@ type NodeGetInfoResponse struct {
 	// COs MAY use this information along with the topology information
 	// returned in CreateVolumeResponse to ensure that a given volume is
 	// accessible from a given node when scheduling workloads.
+	// The node can access some of the locations in the specified
+	// topology.
+	// The node can access a volume if the node's accessible_topology
+	// is a subset of the union of volume's accessible_topology.
 	// This field is OPTIONAL. If it is not specified, the CO MAY assume
 	// the node is not subject to any topological constraint, and MAY
 	// schedule workloads that reference any volume V, such that there are
@@ -4804,7 +4813,15 @@ type NodeGetInfoResponse struct {
 	//	  {"region": "R1", "zone": "Z2"}
 	//
 	// Indicates the node exists within the "region" "R1" and the "zone"
-	// "Z2".
+	// "Z2". And it can access the following volumes:
+	//
+	//	Volume 1: accessible_topology = {"region": "R1", "zone": "Z2"}
+	//	Volume 2: accessible_topology = {"region": "R1"}
+	//
+	// But can not access the following volume:
+	//
+	//	Volume 3: accessible_topology =
+	//	  {"region": "R1", "zone": "Z2", "rack": "R3"}
 	AccessibleTopology *Topology `protobuf:"bytes,3,opt,name=accessible_topology,json=accessibleTopology,proto3" json:"accessible_topology,omitempty"`
 }
 
