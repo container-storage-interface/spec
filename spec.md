@@ -413,6 +413,16 @@ service GroupController {
     }
 }
 
+service SnapshotMetadata {
+  option (alpha_service) = true;
+
+  rpc GetMetadataAllocated(GetMetadataAllocatedRequest)
+    returns (stream GetMetadataAllocatedResponse) {}
+
+  rpc GetMetadataDelta(GetMetadataDeltaRequest)
+    returns (stream GetMetadataDeltaResponse) {}
+}
+
 service Node {
   rpc NodeStageVolume (NodeStageVolumeRequest)
     returns (NodeStageVolumeResponse) {}
@@ -630,6 +640,14 @@ message PluginCapability {
       // well as specific RPCs as indicated by
       // GroupControllerGetCapabilities.
       GROUP_CONTROLLER_SERVICE = 3 [(alpha_enum_value) = true];
+
+      // SNAPSHOT_METADATA_SERVICE indicates that the Plugin provides
+      // RPCs to retrieve metadata on the allocated blocks of a single
+      // snapshot, or the changed blocks between a pair of snapshots of
+      // the same block volume.
+      // The presence of this capability determines whether the CO will
+      // attempt to invoke the OPTIONAL SnapshotMetadata service RPCs.
+      SNAPSHOT_METADATA_SERVICE = 4 [(alpha_enum_value) = true];
     }
     Type type = 1;
   }
@@ -3149,6 +3167,257 @@ The CO MUST implement the specified error recovery behavior when it encounters t
 |-----------|-----------|-------------|-------------------|
 | Snapshot list mismatch | 3 INVALID_ARGUMENT | Besides the general cases, this code SHOULD also be used to indicate when plugin supporting CREATE_DELETE_GET_VOLUME_GROUP_SNAPSHOT detects a mismatch in the `snapshot_ids`. | If a mismatch is detected in the `snapshot_ids`, caller SHOULD use different `snapshot_ids`. |
 | Volume group snapshot does not exist | 5 NOT_FOUND | Indicates that a volume group snapshot corresponding to the specified `group_snapshot_id` does not exist. | Caller MUST verify that the `group_snapshot_id` is correct and that the volume group snapshot is accessible and has not been deleted before retrying with exponential back off. |
+
+### Snapshot Metadata Service RPCs
+
+**ALPHA FEATURE**
+
+The Snapshot Metadata service is an optional service that is used to retrieve metadata on the allocated blocks of a single snapshot, or the changed blocks between a pair of snapshots of the same block volume.
+Retrieval of the data blocks of a snapshot is not addressed by this service and it is assumed that existing mechanisms to read snapshot data will suffice.
+
+#### Metadata Format
+
+Block volume data ranges are specified by a sequence of `BlockMetadata` tuples.
+Tuples in a sequence are in ascending order of `byte_offset`, with no overlap between adjacent tuples.
+
+```protobuf
+// BlockMetadata specifies a data range.
+message BlockMetadata {
+  // This is the zero based byte position in the volume or snapshot,
+  // measured from the start of the object.
+  // This field is REQUIRED.
+  int64 byte_offset = 1;
+
+  // This is the size of the data range.
+  // size_bytes MUST be greater than zero.
+  // This field is REQUIRED.
+  int64 size_bytes = 2;
+}
+```
+
+The `BlockMetadataType` enumerated type describes how the `size_bytes` fields of `BlockMetadata` tuples may vary in a sequence.
+There are two prevalent styles in which data ranges are described:
+
+- The **FIXED_LENGTH** style requires a fixed value for the `size_bytes` field in all tuples in a given sequence.
+- The **VARIABLE_LENGTH** style does not constrain the value of the `size_bytes` field in a sequence.
+
+The Snapshot Metadata service permits either style at the discretion of the plugin as long as the style does not change mid-stream in any given RPC.
+The style is represented by the following data type:
+
+```protobuf
+enum BlockMetadataType {
+  UNKNOWN = 0;
+
+  // The FIXED_LENGTH value indicates that data ranges are
+  // returned in fixed size blocks.
+  FIXED_LENGTH = 1;
+
+  // The VARIABLE_LENGTH value indicates that data ranges
+  // are returned in potentially variable sized extents.
+  VARIABLE_LENGTH = 2;
+}
+```
+
+### Special considerations for processing a snapshot metadata gRPC stream
+
+The remote procedure calls of this service return snapshot metadata within a gRPC stream of response messages.
+There are some important things for the SP and CO to consider here:
+
+- In normal operation an SP MUST terminate the stream only after ALL metadata is transmitted, using the language specific idiom for terminating a gRPC stream source.
+  This results in the CO receiving its language specific notification idiom for the end of a gRPC stream, which provides a **definitive indication that all available metadata has been received**.
+
+- If the SP encounters an error while recovering the metadata it MUST abort transmission of the stream with its language specific error idiom.
+  This results in the CO receiving the error in its language specific idiom, which will be different from the language specific idiom for the end of a gRPC stream.
+
+- It is possible that the gRPC stream gets interrupted for arbitrary reasons beyond the control of either the SP or the CO.
+  The SP will get an error when writing to the stream and MUST abort its transmission.
+  The CO will receive an error in its language specific idiom, which will be different from the language specific idiom for the end of a gRPC stream.
+
+- In all circumstances where the CO receives an error when reading from the gRPC stream it MAY attempt to **continue** the operation by re-sending its request message but with a `starting_offset` adjusted to the NEXT byte position beyond that of any metadata already received.
+  The SP MUST always ensure that the `starting_offset` requested be considered in the computation of the data range for the first message in the returned gRPC stream, though the data range of the first message is not required to actually include the `starting_offset` if there is no applicable data between the `starting_offset` and the start of the data range returned by the first message.
+
+#### `GetMetadataAllocated`
+
+The plugin must implement this RPC if it provides the SnapshotMetadata service.
+
+```protobuf
+// The GetMetadataAllocatedRequest message is used to solicit metadata
+// on the allocated blocks of a snapshot: i.e. this identifies the
+// data ranges that have valid data as they were the target of some
+// previous write operation on the volume.
+message GetMetadataAllocatedRequest {
+  // This is the identifier of the snapshot.
+  // This field is REQUIRED.
+  string snapshot_id = 1;
+
+  // This indicates the zero based starting byte position in the volume
+  // snapshot from which the result should be computed.
+  // It is intended to be used to continue a previously interrupted
+  // call.
+  // The CO SHOULD specify this value to be the offset of the byte
+  // position immediately after the last byte of the last data range
+  // received, if continuing an interrupted operation, or zero if not.
+  // The SP MUST ensure that the returned response stream does not
+  // contain BlockMetadata tuples that end before the requested
+  // starting_offset: i.e. if S is the requested starting_offset, and
+  // B0 is block_metadata[0] of the first message in the response
+  // stream, then (S < B0.byte_offset + B0.size_bytes) must be true.
+  // This field is REQUIRED.
+  int64 starting_offset = 2;
+
+  // This is an optional parameter, and if non-zero it specifies the
+  // maximum number of tuples to be returned in each
+  // GetMetadataAllocatedResponse message returned by the RPC stream.
+  // The plugin will determine an appropriate value if 0, and is
+  // always free to send less than the requested value.
+  // This field is OPTIONAL.
+  int32 max_results = 3;
+
+  // Secrets required by plugin to complete the request.
+  // This field is OPTIONAL. Refer to the `Secrets Requirements`
+  // section on how to use this field.
+  map<string, string> secrets = 4 [(csi_secret) = true];
+}
+
+// GetMetadataAllocatedResponse messages are returned in a gRPC stream.
+// Cumulatively, they provide information on the allocated data
+// ranges in the snapshot.
+message GetMetadataAllocatedResponse {
+  // This specifies the style used in the BlockMetadata sequence.
+  // This value must be the same in all such messages returned by
+  // the stream.
+  // If block_metadata_type is FIXED_LENGTH, then the size_bytes field
+  // of each message in the block_metadata list MUST be constant.
+  // This field is REQUIRED.
+  BlockMetadataType block_metadata_type = 1;
+
+  // This returns the capacity of the underlying volume in bytes.
+  // This value must be the same in all such messages returned by
+  // the stream.
+  // This field is REQUIRED.
+  int64 volume_capacity_bytes = 2;
+
+  // This is a list of data range tuples.
+  // If the value of max_results in the GetMetadataAllocatedRequest
+  // message is greater than zero, then the number of entries in this
+  // list MUST be less than or equal to that value.
+  // The SP MUST respect the value of starting_offset in the request.
+  // The byte_offset fields of adjacent BlockMetadata messages
+  // MUST be strictly increasing and messages MUST NOT overlap:
+  // i.e. for any two BlockMetadata messages, A and B, if A is returned
+  // before B, then (A.byte_offset + A.size_bytes <= B.byte_offset)
+  // MUST be true.
+  // This MUST also be true if A and B are from block_metadata lists in
+  // different GetMetadataAllocatedResponse messages in the gRPC stream.
+  // This field is OPTIONAL.
+  repeated BlockMetadata block_metadata = 3;
+}
+```
+
+##### GetMetadataAllocated Errors
+If the plugin is unable to complete the `GetMetadataAllocated` call successfully it must return a non-OK gRPC code in the gRPC status.
+
+The following conditions are well defined:
+
+| Condition | gRPC Code | Description | Recovery Behavior |
+|-----------|-----------|-------------|-------------------|
+| Missing or otherwise invalid argument | 3 INVALID_ARGUMENT | Indicates that a required argument field was not specified or an argument value is invalid | The caller should correct the error and resubmit the call. |
+| Invalid `snapshot_id` | 5 NOT_FOUND | Indicates that the snapshot specified was not found. | The caller should re-check that this object exists. |
+| Invalid `starting_offset` | 11 OUT_OF_RANGE | The starting offset is negative or exceeds the volume size. | The caller should specify a valid offset. |
+
+#### `GetMetadataDelta`
+
+The plugin must implement this RPC if it provides the SnapshotMetadata service.
+
+```protobuf
+// The GetMetadataDeltaRequest message is used to solicit metadata on
+// the data ranges that have changed between two snapshots.
+message GetMetadataDeltaRequest {
+  // This is the identifier of the snapshot against which changes
+  // are to be computed.
+  // This field is REQUIRED.
+  string base_snapshot_id = 1;
+
+  // This is the identifier of a second snapshot in the same volume,
+  // created after the base snapshot.
+  // This field is REQUIRED.
+  string target_snapshot_id = 2;
+
+  // This indicates the zero based starting byte position in the volume
+  // snapshot from which the result should be computed.
+  // It is intended to be used to continue a previously interrupted
+  // call.
+  // The CO SHOULD specify this value to be the offset of the byte
+  // position immediately after the last byte of the last data range
+  // received, if continuing an interrupted operation, or zero if not.
+  // The SP MUST ensure that the returned response stream does not
+  // contain BlockMetadata tuples that end before the requested
+  // starting_offset: i.e. if S is the requested starting_offset, and
+  // B0 is block_metadata[0] of the first message in the response
+  // stream, then (S < B0.byte_offset + B0.size_bytes) must be true.
+  // This field is REQUIRED.
+  int64 starting_offset = 3;
+
+  // This is an optional parameter, and if non-zero it specifies the
+  // maximum number of tuples to be returned in each
+  // GetMetadataDeltaResponse message returned by the RPC stream.
+  // The plugin will determine an appropriate value if 0, and is
+  // always free to send less than the requested value.
+  // This field is OPTIONAL.
+  int32 max_results = 4;
+
+  // Secrets required by plugin to complete the request.
+  // This field is OPTIONAL. Refer to the `Secrets Requirements`
+  // section on how to use this field.
+  map<string, string> secrets = 5 [(csi_secret) = true];
+}
+
+// GetMetadataDeltaResponse messages are returned in a gRPC stream.
+// Cumulatively, they provide information on the data ranges that
+// have changed between the base and target snapshots specified
+// in the GetMetadataDeltaRequest message.
+message GetMetadataDeltaResponse {
+  // This specifies the style used in the BlockMetadata sequence.
+  // This value must be the same in all such messages returned by
+  // the stream.
+  // If block_metadata_type is FIXED_LENGTH, then the size_bytes field
+  // of each message in the block_metadata list MUST be constant.
+  // This field is REQUIRED.
+  BlockMetadataType block_metadata_type = 1;
+
+  // This returns the capacity of the underlying volume in bytes.
+  // This value must be the same in all such messages returned by
+  // the stream.
+  // This field is REQUIRED.
+  int64 volume_capacity_bytes = 2;
+
+  // This is a list of data range tuples.
+  // If the value of max_results in the GetMetadataDeltaRequest message
+  // is greater than zero, then the number of entries in this list MUST
+  // be less than or equal to that value.
+  // The SP MUST respect the value of starting_offset in the request.
+  // The byte_offset fields of adjacent BlockMetadata messages
+  // MUST be strictly increasing and messages MUST NOT overlap:
+  // i.e. for any two BlockMetadata messages, A and B, if A is returned
+  // before B, then (A.byte_offset + A.size_bytes <= B.byte_offset)
+  // MUST be true.
+  // This MUST also be true if A and B are from block_metadata lists in
+  // different GetMetadataDeltaResponse messages in the gRPC stream.
+  // This field is OPTIONAL.
+  repeated BlockMetadata block_metadata = 3;
+}
+```
+
+##### GetMetadataDelta Errors
+If the plugin is unable to complete the `GetMetadataDelta` call successfully it must return a non-OK gRPC code in the gRPC status.
+
+The following conditions are well defined:
+
+| Condition | gRPC Code | Description | Recovery Behavior |
+|-----------|-----------|-------------|-------------------|
+| Missing or otherwise invalid argument | 3 INVALID_ARGUMENT | Indicates that a required argument field was not specified or an argument value is invalid | The caller should correct the error and resubmit the call. |
+| Invalid `base_snapshot_id` or `target_snapshot_id` | 5 NOT_FOUND | Indicates that the snapshots specified were not found. | The caller should re-check that these objects exist. |
+| Invalid `starting_offset` | 11 OUT_OF_RANGE | The starting offset is negative or exceeds the volume size. | The caller should specify a valid offset. |
 
 ## Protocol
 
