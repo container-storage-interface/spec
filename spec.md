@@ -789,7 +789,7 @@ Plugins MAY create 3 types of volumes:
 - From an existing volume. When plugin supports cloning, and reports the OPTIONAL capabilities `CREATE_DELETE_VOLUME` and `CLONE_VOLUME`.
 
 If CO requests a volume to be created from existing snapshot or volume and the requested size of the volume is larger than the original snapshotted (or cloned volume), the Plugin can either refuse such a call with `OUT_OF_RANGE` error or MUST provide a volume that, when presented to a workload by `NodePublish` call, has both the requested (larger) size and contains data from the snapshot (or original volume).
-Explicitly, it's the responsibility of the Plugin to resize the filesystem of the newly created volume at (or before) the `NodePublish` call, if the volume has `VolumeCapability` access type `MountVolume` and the filesystem resize is required in order to provision the requested capacity.  Likewise, if an empty volume is created, the Plugin must ensure that an access type `BlockVolume` exposes all bytes to initially read as zero, while an access type `MountVolume` exposes a filesystem with no files pre-populated.
+Explicitly, it's the responsibility of the Plugin to resize the filesystem of the newly created volume at (or before) the `NodePublish` call, if the volume has `VolumeCapability` access type `MountVolume` and the filesystem resize is required in order to provision the requested capacity.  Likewise, if an empty volume is created, the Plugin must ensure that an access type `BlockVolume` exposes all bytes to initially read as zero (unless the wipe_mode was `UNINITIALIZED`), while an access type `MountVolume` exposes a filesystem with no files pre-populated.
 
 ```protobuf
 message CreateVolumeRequest {
@@ -922,7 +922,23 @@ message CreateVolumeResponse {
 message VolumeCapability {
   // Indicate that the volume will be accessed via the block device API.
   message BlockVolume {
-    // Intentionally empty, for now.
+    enum WipeMode {
+      // The Plugin MUST ensure that all bytes of the volume initially
+      // read as zero.
+      ALL_ZEROES = 0;
+
+      // Bytes in the volume may initially have unspecified contents; a CO
+      // that uses this mode for potentially faster creation times MUST
+      // ensure that the end use of the storage will not be confused by
+      // reading uninitialized data (do not use this option in a scenario
+      // where reading prior contents can constitue a security leak).
+      UNINITIALIZED = 1;
+    }
+
+    // This field is OPTIONAL; providing it with a non-zero value in order
+    // to potentially speed up volume creation should only be attempted when
+    // the security risks have been analyzed.
+    WipeMode wipe_mode = 1;
   }
 
   // Indicate that the volume will be accessed via the filesystem API.
