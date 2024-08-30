@@ -47,7 +47,8 @@ PROTOC_TMP_DIR := .protoc
 PROTOC := $(PROTOC_TMP_DIR)/bin/protoc
 
 $(GOBIN)/protoc-gen-go: ../../go.mod
-	go install google.golang.org/protobuf/cmd/protoc-gen-go
+	go install github.com/golang/protobuf/protoc-gen-go@v1.3.5
+
 $(GOBIN)/protoc-gen-go-grpc:
 	go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.3.0
 
