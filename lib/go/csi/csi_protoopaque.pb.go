@@ -6,7 +6,7 @@
 // 	protoc        v5.29.2
 // source: csi.proto
 
-//go:build !protoopaque
+//go:build protoopaque
 
 package csi
 
@@ -601,7 +601,7 @@ func (x GroupControllerServiceCapability_RPC_Type) Number() protoreflect.EnumNum
 }
 
 type GetPluginInfoRequest struct {
-	state         protoimpl.MessageState `protogen:"hybrid.v1"`
+	state         protoimpl.MessageState `protogen:"opaque.v1"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -644,21 +644,12 @@ func (b0 GetPluginInfoRequest_builder) Build() *GetPluginInfoRequest {
 }
 
 type GetPluginInfoResponse struct {
-	state protoimpl.MessageState `protogen:"hybrid.v1"`
-	// The name MUST follow domain name notation format
-	// (https://tools.ietf.org/html/rfc1035#section-2.3.1). It SHOULD
-	// include the plugin's host company name and the plugin name,
-	// to minimize the possibility of collisions. It MUST be 63
-	// characters or less, beginning and ending with an alphanumeric
-	// character ([a-z0-9A-Z]) with dashes (-), dots (.), and
-	// alphanumerics between. This field is REQUIRED.
-	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
-	// This field is REQUIRED. Value of this field is opaque to the CO.
-	VendorVersion string `protobuf:"bytes,2,opt,name=vendor_version,json=vendorVersion,proto3" json:"vendor_version,omitempty"`
-	// This field is OPTIONAL. Values are opaque to the CO.
-	Manifest      map[string]string `protobuf:"bytes,3,rep,name=manifest,proto3" json:"manifest,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state                    protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	xxx_hidden_VendorVersion string                 `protobuf:"bytes,2,opt,name=vendor_version,json=vendorVersion,proto3" json:"vendor_version,omitempty"`
+	xxx_hidden_Manifest      map[string]string      `protobuf:"bytes,3,rep,name=manifest,proto3" json:"manifest,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	unknownFields            protoimpl.UnknownFields
+	sizeCache                protoimpl.SizeCache
 }
 
 func (x *GetPluginInfoResponse) Reset() {
@@ -688,35 +679,35 @@ func (x *GetPluginInfoResponse) ProtoReflect() protoreflect.Message {
 
 func (x *GetPluginInfoResponse) GetName() string {
 	if x != nil {
-		return x.Name
+		return x.xxx_hidden_Name
 	}
 	return ""
 }
 
 func (x *GetPluginInfoResponse) GetVendorVersion() string {
 	if x != nil {
-		return x.VendorVersion
+		return x.xxx_hidden_VendorVersion
 	}
 	return ""
 }
 
 func (x *GetPluginInfoResponse) GetManifest() map[string]string {
 	if x != nil {
-		return x.Manifest
+		return x.xxx_hidden_Manifest
 	}
 	return nil
 }
 
 func (x *GetPluginInfoResponse) SetName(v string) {
-	x.Name = v
+	x.xxx_hidden_Name = v
 }
 
 func (x *GetPluginInfoResponse) SetVendorVersion(v string) {
-	x.VendorVersion = v
+	x.xxx_hidden_VendorVersion = v
 }
 
 func (x *GetPluginInfoResponse) SetManifest(v map[string]string) {
-	x.Manifest = v
+	x.xxx_hidden_Manifest = v
 }
 
 type GetPluginInfoResponse_builder struct {
@@ -740,14 +731,14 @@ func (b0 GetPluginInfoResponse_builder) Build() *GetPluginInfoResponse {
 	m0 := &GetPluginInfoResponse{}
 	b, x := &b0, m0
 	_, _ = b, x
-	x.Name = b.Name
-	x.VendorVersion = b.VendorVersion
-	x.Manifest = b.Manifest
+	x.xxx_hidden_Name = b.Name
+	x.xxx_hidden_VendorVersion = b.VendorVersion
+	x.xxx_hidden_Manifest = b.Manifest
 	return m0
 }
 
 type GetPluginCapabilitiesRequest struct {
-	state         protoimpl.MessageState `protogen:"hybrid.v1"`
+	state         protoimpl.MessageState `protogen:"opaque.v1"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -790,12 +781,10 @@ func (b0 GetPluginCapabilitiesRequest_builder) Build() *GetPluginCapabilitiesReq
 }
 
 type GetPluginCapabilitiesResponse struct {
-	state protoimpl.MessageState `protogen:"hybrid.v1"`
-	// All the capabilities that the controller service supports. This
-	// field is OPTIONAL.
-	Capabilities  []*PluginCapability `protobuf:"bytes,1,rep,name=capabilities,proto3" json:"capabilities,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state                   protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Capabilities *[]*PluginCapability   `protobuf:"bytes,1,rep,name=capabilities,proto3" json:"capabilities,omitempty"`
+	unknownFields           protoimpl.UnknownFields
+	sizeCache               protoimpl.SizeCache
 }
 
 func (x *GetPluginCapabilitiesResponse) Reset() {
@@ -825,13 +814,15 @@ func (x *GetPluginCapabilitiesResponse) ProtoReflect() protoreflect.Message {
 
 func (x *GetPluginCapabilitiesResponse) GetCapabilities() []*PluginCapability {
 	if x != nil {
-		return x.Capabilities
+		if x.xxx_hidden_Capabilities != nil {
+			return *x.xxx_hidden_Capabilities
+		}
 	}
 	return nil
 }
 
 func (x *GetPluginCapabilitiesResponse) SetCapabilities(v []*PluginCapability) {
-	x.Capabilities = v
+	x.xxx_hidden_Capabilities = &v
 }
 
 type GetPluginCapabilitiesResponse_builder struct {
@@ -846,20 +837,16 @@ func (b0 GetPluginCapabilitiesResponse_builder) Build() *GetPluginCapabilitiesRe
 	m0 := &GetPluginCapabilitiesResponse{}
 	b, x := &b0, m0
 	_, _ = b, x
-	x.Capabilities = b.Capabilities
+	x.xxx_hidden_Capabilities = &b.Capabilities
 	return m0
 }
 
 // Specifies a capability of the plugin.
 type PluginCapability struct {
-	state protoimpl.MessageState `protogen:"hybrid.v1"`
-	// Types that are valid to be assigned to Type:
-	//
-	//	*PluginCapability_Service_
-	//	*PluginCapability_VolumeExpansion_
-	Type          isPluginCapability_Type `protobuf_oneof:"type"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state           protoimpl.MessageState  `protogen:"opaque.v1"`
+	xxx_hidden_Type isPluginCapability_Type `protobuf_oneof:"type"`
+	unknownFields   protoimpl.UnknownFields
+	sizeCache       protoimpl.SizeCache
 }
 
 func (x *PluginCapability) Reset() {
@@ -887,16 +874,9 @@ func (x *PluginCapability) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-func (x *PluginCapability) GetType() isPluginCapability_Type {
-	if x != nil {
-		return x.Type
-	}
-	return nil
-}
-
 func (x *PluginCapability) GetService() *PluginCapability_Service {
 	if x != nil {
-		if x, ok := x.Type.(*PluginCapability_Service_); ok {
+		if x, ok := x.xxx_hidden_Type.(*pluginCapability_Service_); ok {
 			return x.Service
 		}
 	}
@@ -905,7 +885,7 @@ func (x *PluginCapability) GetService() *PluginCapability_Service {
 
 func (x *PluginCapability) GetVolumeExpansion() *PluginCapability_VolumeExpansion {
 	if x != nil {
-		if x, ok := x.Type.(*PluginCapability_VolumeExpansion_); ok {
+		if x, ok := x.xxx_hidden_Type.(*pluginCapability_VolumeExpansion_); ok {
 			return x.VolumeExpansion
 		}
 	}
@@ -914,32 +894,32 @@ func (x *PluginCapability) GetVolumeExpansion() *PluginCapability_VolumeExpansio
 
 func (x *PluginCapability) SetService(v *PluginCapability_Service) {
 	if v == nil {
-		x.Type = nil
+		x.xxx_hidden_Type = nil
 		return
 	}
-	x.Type = &PluginCapability_Service_{v}
+	x.xxx_hidden_Type = &pluginCapability_Service_{v}
 }
 
 func (x *PluginCapability) SetVolumeExpansion(v *PluginCapability_VolumeExpansion) {
 	if v == nil {
-		x.Type = nil
+		x.xxx_hidden_Type = nil
 		return
 	}
-	x.Type = &PluginCapability_VolumeExpansion_{v}
+	x.xxx_hidden_Type = &pluginCapability_VolumeExpansion_{v}
 }
 
 func (x *PluginCapability) HasType() bool {
 	if x == nil {
 		return false
 	}
-	return x.Type != nil
+	return x.xxx_hidden_Type != nil
 }
 
 func (x *PluginCapability) HasService() bool {
 	if x == nil {
 		return false
 	}
-	_, ok := x.Type.(*PluginCapability_Service_)
+	_, ok := x.xxx_hidden_Type.(*pluginCapability_Service_)
 	return ok
 }
 
@@ -947,23 +927,23 @@ func (x *PluginCapability) HasVolumeExpansion() bool {
 	if x == nil {
 		return false
 	}
-	_, ok := x.Type.(*PluginCapability_VolumeExpansion_)
+	_, ok := x.xxx_hidden_Type.(*pluginCapability_VolumeExpansion_)
 	return ok
 }
 
 func (x *PluginCapability) ClearType() {
-	x.Type = nil
+	x.xxx_hidden_Type = nil
 }
 
 func (x *PluginCapability) ClearService() {
-	if _, ok := x.Type.(*PluginCapability_Service_); ok {
-		x.Type = nil
+	if _, ok := x.xxx_hidden_Type.(*pluginCapability_Service_); ok {
+		x.xxx_hidden_Type = nil
 	}
 }
 
 func (x *PluginCapability) ClearVolumeExpansion() {
-	if _, ok := x.Type.(*PluginCapability_VolumeExpansion_); ok {
-		x.Type = nil
+	if _, ok := x.xxx_hidden_Type.(*pluginCapability_VolumeExpansion_); ok {
+		x.xxx_hidden_Type = nil
 	}
 }
 
@@ -975,10 +955,10 @@ func (x *PluginCapability) WhichType() case_PluginCapability_Type {
 	if x == nil {
 		return PluginCapability_Type_not_set_case
 	}
-	switch x.Type.(type) {
-	case *PluginCapability_Service_:
+	switch x.xxx_hidden_Type.(type) {
+	case *pluginCapability_Service_:
 		return PluginCapability_Service_case
-	case *PluginCapability_VolumeExpansion_:
+	case *pluginCapability_VolumeExpansion_:
 		return PluginCapability_VolumeExpansion_case
 	default:
 		return PluginCapability_Type_not_set_case
@@ -988,11 +968,11 @@ func (x *PluginCapability) WhichType() case_PluginCapability_Type {
 type PluginCapability_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
-	// Fields of oneof Type:
+	// Fields of oneof xxx_hidden_Type:
 	// Service that the plugin supports.
 	Service         *PluginCapability_Service
 	VolumeExpansion *PluginCapability_VolumeExpansion
-	// -- end of Type
+	// -- end of xxx_hidden_Type
 }
 
 func (b0 PluginCapability_builder) Build() *PluginCapability {
@@ -1000,10 +980,10 @@ func (b0 PluginCapability_builder) Build() *PluginCapability {
 	b, x := &b0, m0
 	_, _ = b, x
 	if b.Service != nil {
-		x.Type = &PluginCapability_Service_{b.Service}
+		x.xxx_hidden_Type = &pluginCapability_Service_{b.Service}
 	}
 	if b.VolumeExpansion != nil {
-		x.Type = &PluginCapability_VolumeExpansion_{b.VolumeExpansion}
+		x.xxx_hidden_Type = &pluginCapability_VolumeExpansion_{b.VolumeExpansion}
 	}
 	return m0
 }
@@ -1022,21 +1002,21 @@ type isPluginCapability_Type interface {
 	isPluginCapability_Type()
 }
 
-type PluginCapability_Service_ struct {
+type pluginCapability_Service_ struct {
 	// Service that the plugin supports.
 	Service *PluginCapability_Service `protobuf:"bytes,1,opt,name=service,proto3,oneof"`
 }
 
-type PluginCapability_VolumeExpansion_ struct {
+type pluginCapability_VolumeExpansion_ struct {
 	VolumeExpansion *PluginCapability_VolumeExpansion `protobuf:"bytes,2,opt,name=volume_expansion,json=volumeExpansion,proto3,oneof"`
 }
 
-func (*PluginCapability_Service_) isPluginCapability_Type() {}
+func (*pluginCapability_Service_) isPluginCapability_Type() {}
 
-func (*PluginCapability_VolumeExpansion_) isPluginCapability_Type() {}
+func (*pluginCapability_VolumeExpansion_) isPluginCapability_Type() {}
 
 type ProbeRequest struct {
-	state         protoimpl.MessageState `protogen:"hybrid.v1"`
+	state         protoimpl.MessageState `protogen:"opaque.v1"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1079,30 +1059,10 @@ func (b0 ProbeRequest_builder) Build() *ProbeRequest {
 }
 
 type ProbeResponse struct {
-	state protoimpl.MessageState `protogen:"hybrid.v1"`
-	// Readiness allows a plugin to report its initialization status back
-	// to the CO. Initialization for some plugins MAY be time consuming
-	// and it is important for a CO to distinguish between the following
-	// cases:
-	//
-	//  1. The plugin is in an unhealthy state and MAY need restarting. In
-	//     this case a gRPC error code SHALL be returned.
-	//  2. The plugin is still initializing, but is otherwise perfectly
-	//     healthy. In this case a successful response SHALL be returned
-	//     with a readiness value of `false`. Calls to the plugin's
-	//     Controller and/or Node services MAY fail due to an incomplete
-	//     initialization state.
-	//  3. The plugin has finished initializing and is ready to service
-	//     calls to its Controller and/or Node services. A successful
-	//     response is returned with a readiness value of `true`.
-	//
-	// This field is OPTIONAL. If not present, the caller SHALL assume
-	// that the plugin is in a ready state and is accepting calls to its
-	// Controller and/or Node services (according to the plugin's reported
-	// capabilities).
-	Ready         *wrapperspb.BoolValue `protobuf:"bytes,1,opt,name=ready,proto3" json:"ready,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state            protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Ready *wrapperspb.BoolValue  `protobuf:"bytes,1,opt,name=ready,proto3" json:"ready,omitempty"`
+	unknownFields    protoimpl.UnknownFields
+	sizeCache        protoimpl.SizeCache
 }
 
 func (x *ProbeResponse) Reset() {
@@ -1132,24 +1092,24 @@ func (x *ProbeResponse) ProtoReflect() protoreflect.Message {
 
 func (x *ProbeResponse) GetReady() *wrapperspb.BoolValue {
 	if x != nil {
-		return x.Ready
+		return x.xxx_hidden_Ready
 	}
 	return nil
 }
 
 func (x *ProbeResponse) SetReady(v *wrapperspb.BoolValue) {
-	x.Ready = v
+	x.xxx_hidden_Ready = v
 }
 
 func (x *ProbeResponse) HasReady() bool {
 	if x == nil {
 		return false
 	}
-	return x.Ready != nil
+	return x.xxx_hidden_Ready != nil
 }
 
 func (x *ProbeResponse) ClearReady() {
-	x.Ready = nil
+	x.xxx_hidden_Ready = nil
 }
 
 type ProbeResponse_builder struct {
@@ -1182,93 +1142,22 @@ func (b0 ProbeResponse_builder) Build() *ProbeResponse {
 	m0 := &ProbeResponse{}
 	b, x := &b0, m0
 	_, _ = b, x
-	x.Ready = b.Ready
+	x.xxx_hidden_Ready = b.Ready
 	return m0
 }
 
 type CreateVolumeRequest struct {
-	state protoimpl.MessageState `protogen:"hybrid.v1"`
-	// The suggested name for the storage space. This field is REQUIRED.
-	// It serves two purposes:
-	//  1. Idempotency - This name is generated by the CO to achieve
-	//     idempotency.  The Plugin SHOULD ensure that multiple
-	//     `CreateVolume` calls for the same name do not result in more
-	//     than one piece of storage provisioned corresponding to that
-	//     name. If a Plugin is unable to enforce idempotency, the CO's
-	//     error recovery logic could result in multiple (unused) volumes
-	//     being provisioned.
-	//     In the case of error, the CO MUST handle the gRPC error codes
-	//     per the recovery behavior defined in the "CreateVolume Errors"
-	//     section below.
-	//     The CO is responsible for cleaning up volumes it provisioned
-	//     that it no longer needs. If the CO is uncertain whether a volume
-	//     was provisioned or not when a `CreateVolume` call fails, the CO
-	//     MAY call `CreateVolume` again, with the same name, to ensure the
-	//     volume exists and to retrieve the volume's `volume_id` (unless
-	//     otherwise prohibited by "CreateVolume Errors").
-	//  2. Suggested name - Some storage systems allow callers to specify
-	//     an identifier by which to refer to the newly provisioned
-	//     storage. If a storage system supports this, it can optionally
-	//     use this name as the identifier for the new volume.
-	//
-	// Any Unicode string that conforms to the length limit is allowed
-	// except those containing the following banned characters:
-	// U+0000-U+0008, U+000B, U+000C, U+000E-U+001F, U+007F-U+009F.
-	// (These are control characters other than commonly used whitespace.)
-	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
-	// This field is OPTIONAL. This allows the CO to specify the capacity
-	// requirement of the volume to be provisioned. If not specified, the
-	// Plugin MAY choose an implementation-defined capacity range. If
-	// specified it MUST always be honored, even when creating volumes
-	// from a source; which MAY force some backends to internally extend
-	// the volume after creating it.
-	CapacityRange *CapacityRange `protobuf:"bytes,2,opt,name=capacity_range,json=capacityRange,proto3" json:"capacity_range,omitempty"`
-	// The capabilities that the provisioned volume MUST have. SP MUST
-	// provision a volume that will satisfy ALL of the capabilities
-	// specified in this list. Otherwise SP MUST return the appropriate
-	// gRPC error code.
-	// The Plugin MUST assume that the CO MAY use the provisioned volume
-	// with ANY of the capabilities specified in this list.
-	// For example, a CO MAY specify two volume capabilities: one with
-	// access mode SINGLE_NODE_WRITER and another with access mode
-	// MULTI_NODE_READER_ONLY. In this case, the SP MUST verify that the
-	// provisioned volume can be used in either mode.
-	// This also enables the CO to do early validation: If ANY of the
-	// specified volume capabilities are not supported by the SP, the call
-	// MUST return the appropriate gRPC error code.
-	// This field is REQUIRED.
-	VolumeCapabilities []*VolumeCapability `protobuf:"bytes,3,rep,name=volume_capabilities,json=volumeCapabilities,proto3" json:"volume_capabilities,omitempty"`
-	// Plugin specific creation-time parameters passed in as opaque
-	// key-value pairs. This field is OPTIONAL. The Plugin is responsible
-	// for parsing and validating these parameters. COs will treat
-	// these as opaque.
-	Parameters map[string]string `protobuf:"bytes,4,rep,name=parameters,proto3" json:"parameters,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
-	// Secrets required by plugin to complete volume creation request.
-	// This field is OPTIONAL. Refer to the `Secrets Requirements`
-	// section on how to use this field.
-	Secrets map[string]string `protobuf:"bytes,5,rep,name=secrets,proto3" json:"secrets,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
-	// If specified, the new volume will be pre-populated with data from
-	// this source. This field is OPTIONAL.
-	VolumeContentSource *VolumeContentSource `protobuf:"bytes,6,opt,name=volume_content_source,json=volumeContentSource,proto3" json:"volume_content_source,omitempty"`
-	// Specifies where (regions, zones, racks, etc.) the provisioned
-	// volume MUST be accessible from.
-	// An SP SHALL advertise the requirements for topological
-	// accessibility information in documentation. COs SHALL only specify
-	// topological accessibility information supported by the SP.
-	// This field is OPTIONAL.
-	// This field SHALL NOT be specified unless the SP has the
-	// VOLUME_ACCESSIBILITY_CONSTRAINTS plugin capability.
-	// If this field is not specified and the SP has the
-	// VOLUME_ACCESSIBILITY_CONSTRAINTS plugin capability, the SP MAY
-	// choose where the provisioned volume is accessible from.
-	AccessibilityRequirements *TopologyRequirement `protobuf:"bytes,7,opt,name=accessibility_requirements,json=accessibilityRequirements,proto3" json:"accessibility_requirements,omitempty"`
-	// Plugins MUST treat these
-	// as if they take precedence over the parameters field.
-	// This field SHALL NOT be specified unless the SP has the
-	// MODIFY_VOLUME plugin capability.
-	MutableParameters map[string]string `protobuf:"bytes,8,rep,name=mutable_parameters,json=mutableParameters,proto3" json:"mutable_parameters,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
-	unknownFields     protoimpl.UnknownFields
-	sizeCache         protoimpl.SizeCache
+	state                                protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Name                      string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	xxx_hidden_CapacityRange             *CapacityRange         `protobuf:"bytes,2,opt,name=capacity_range,json=capacityRange,proto3" json:"capacity_range,omitempty"`
+	xxx_hidden_VolumeCapabilities        *[]*VolumeCapability   `protobuf:"bytes,3,rep,name=volume_capabilities,json=volumeCapabilities,proto3" json:"volume_capabilities,omitempty"`
+	xxx_hidden_Parameters                map[string]string      `protobuf:"bytes,4,rep,name=parameters,proto3" json:"parameters,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	xxx_hidden_Secrets                   map[string]string      `protobuf:"bytes,5,rep,name=secrets,proto3" json:"secrets,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	xxx_hidden_VolumeContentSource       *VolumeContentSource   `protobuf:"bytes,6,opt,name=volume_content_source,json=volumeContentSource,proto3" json:"volume_content_source,omitempty"`
+	xxx_hidden_AccessibilityRequirements *TopologyRequirement   `protobuf:"bytes,7,opt,name=accessibility_requirements,json=accessibilityRequirements,proto3" json:"accessibility_requirements,omitempty"`
+	xxx_hidden_MutableParameters         map[string]string      `protobuf:"bytes,8,rep,name=mutable_parameters,json=mutableParameters,proto3" json:"mutable_parameters,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	unknownFields                        protoimpl.UnknownFields
+	sizeCache                            protoimpl.SizeCache
 }
 
 func (x *CreateVolumeRequest) Reset() {
@@ -1298,123 +1187,125 @@ func (x *CreateVolumeRequest) ProtoReflect() protoreflect.Message {
 
 func (x *CreateVolumeRequest) GetName() string {
 	if x != nil {
-		return x.Name
+		return x.xxx_hidden_Name
 	}
 	return ""
 }
 
 func (x *CreateVolumeRequest) GetCapacityRange() *CapacityRange {
 	if x != nil {
-		return x.CapacityRange
+		return x.xxx_hidden_CapacityRange
 	}
 	return nil
 }
 
 func (x *CreateVolumeRequest) GetVolumeCapabilities() []*VolumeCapability {
 	if x != nil {
-		return x.VolumeCapabilities
+		if x.xxx_hidden_VolumeCapabilities != nil {
+			return *x.xxx_hidden_VolumeCapabilities
+		}
 	}
 	return nil
 }
 
 func (x *CreateVolumeRequest) GetParameters() map[string]string {
 	if x != nil {
-		return x.Parameters
+		return x.xxx_hidden_Parameters
 	}
 	return nil
 }
 
 func (x *CreateVolumeRequest) GetSecrets() map[string]string {
 	if x != nil {
-		return x.Secrets
+		return x.xxx_hidden_Secrets
 	}
 	return nil
 }
 
 func (x *CreateVolumeRequest) GetVolumeContentSource() *VolumeContentSource {
 	if x != nil {
-		return x.VolumeContentSource
+		return x.xxx_hidden_VolumeContentSource
 	}
 	return nil
 }
 
 func (x *CreateVolumeRequest) GetAccessibilityRequirements() *TopologyRequirement {
 	if x != nil {
-		return x.AccessibilityRequirements
+		return x.xxx_hidden_AccessibilityRequirements
 	}
 	return nil
 }
 
 func (x *CreateVolumeRequest) GetMutableParameters() map[string]string {
 	if x != nil {
-		return x.MutableParameters
+		return x.xxx_hidden_MutableParameters
 	}
 	return nil
 }
 
 func (x *CreateVolumeRequest) SetName(v string) {
-	x.Name = v
+	x.xxx_hidden_Name = v
 }
 
 func (x *CreateVolumeRequest) SetCapacityRange(v *CapacityRange) {
-	x.CapacityRange = v
+	x.xxx_hidden_CapacityRange = v
 }
 
 func (x *CreateVolumeRequest) SetVolumeCapabilities(v []*VolumeCapability) {
-	x.VolumeCapabilities = v
+	x.xxx_hidden_VolumeCapabilities = &v
 }
 
 func (x *CreateVolumeRequest) SetParameters(v map[string]string) {
-	x.Parameters = v
+	x.xxx_hidden_Parameters = v
 }
 
 func (x *CreateVolumeRequest) SetSecrets(v map[string]string) {
-	x.Secrets = v
+	x.xxx_hidden_Secrets = v
 }
 
 func (x *CreateVolumeRequest) SetVolumeContentSource(v *VolumeContentSource) {
-	x.VolumeContentSource = v
+	x.xxx_hidden_VolumeContentSource = v
 }
 
 func (x *CreateVolumeRequest) SetAccessibilityRequirements(v *TopologyRequirement) {
-	x.AccessibilityRequirements = v
+	x.xxx_hidden_AccessibilityRequirements = v
 }
 
 func (x *CreateVolumeRequest) SetMutableParameters(v map[string]string) {
-	x.MutableParameters = v
+	x.xxx_hidden_MutableParameters = v
 }
 
 func (x *CreateVolumeRequest) HasCapacityRange() bool {
 	if x == nil {
 		return false
 	}
-	return x.CapacityRange != nil
+	return x.xxx_hidden_CapacityRange != nil
 }
 
 func (x *CreateVolumeRequest) HasVolumeContentSource() bool {
 	if x == nil {
 		return false
 	}
-	return x.VolumeContentSource != nil
+	return x.xxx_hidden_VolumeContentSource != nil
 }
 
 func (x *CreateVolumeRequest) HasAccessibilityRequirements() bool {
 	if x == nil {
 		return false
 	}
-	return x.AccessibilityRequirements != nil
+	return x.xxx_hidden_AccessibilityRequirements != nil
 }
 
 func (x *CreateVolumeRequest) ClearCapacityRange() {
-	x.CapacityRange = nil
+	x.xxx_hidden_CapacityRange = nil
 }
 
 func (x *CreateVolumeRequest) ClearVolumeContentSource() {
-	x.VolumeContentSource = nil
+	x.xxx_hidden_VolumeContentSource = nil
 }
 
 func (x *CreateVolumeRequest) ClearAccessibilityRequirements() {
-	x.AccessibilityRequirements = nil
+	x.xxx_hidden_AccessibilityRequirements = nil
 }
 
 type CreateVolumeRequest_builder struct {
@@ -1505,28 +1396,24 @@ func (b0 CreateVolumeRequest_builder) Build() *CreateVolumeRequest {
 	m0 := &CreateVolumeRequest{}
 	b, x := &b0, m0
 	_, _ = b, x
-	x.Name = b.Name
-	x.CapacityRange = b.CapacityRange
-	x.VolumeCapabilities = b.VolumeCapabilities
-	x.Parameters = b.Parameters
-	x.Secrets = b.Secrets
-	x.VolumeContentSource = b.VolumeContentSource
-	x.AccessibilityRequirements = b.AccessibilityRequirements
-	x.MutableParameters = b.MutableParameters
+	x.xxx_hidden_Name = b.Name
+	x.xxx_hidden_CapacityRange = b.CapacityRange
+	x.xxx_hidden_VolumeCapabilities = &b.VolumeCapabilities
+	x.xxx_hidden_Parameters = b.Parameters
+	x.xxx_hidden_Secrets = b.Secrets
+	x.xxx_hidden_VolumeContentSource = b.VolumeContentSource
+	x.xxx_hidden_AccessibilityRequirements = b.AccessibilityRequirements
+	x.xxx_hidden_MutableParameters = b.MutableParameters
 	return m0
 }
 
 // Specifies what source the volume will be created from. One of the
 // type fields MUST be specified.
 type VolumeContentSource struct {
-	state protoimpl.MessageState `protogen:"hybrid.v1"`
-	// Types that are valid to be assigned to Type:
-	//
-	//	*VolumeContentSource_Snapshot
-	//	*VolumeContentSource_Volume
-	Type          isVolumeContentSource_Type `protobuf_oneof:"type"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state           protoimpl.MessageState     `protogen:"opaque.v1"`
+	xxx_hidden_Type isVolumeContentSource_Type `protobuf_oneof:"type"`
+	unknownFields   protoimpl.UnknownFields
+	sizeCache       protoimpl.SizeCache
 }
 
 func (x *VolumeContentSource) Reset() {
@@ -1554,16 +1441,9 @@ func (x *VolumeContentSource) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-func (x *VolumeContentSource) GetType() isVolumeContentSource_Type {
-	if x != nil {
-		return x.Type
-	}
-	return nil
-}
-
 func (x *VolumeContentSource) GetSnapshot() *VolumeContentSource_SnapshotSource {
 	if x != nil {
-		if x, ok := x.Type.(*VolumeContentSource_Snapshot); ok {
+		if x, ok := x.xxx_hidden_Type.(*volumeContentSource_Snapshot); ok {
 			return x.Snapshot
 		}
 	}
@@ -1572,7 +1452,7 @@ func (x *VolumeContentSource) GetSnapshot() *VolumeContentSource_SnapshotSource 
 
 func (x *VolumeContentSource) GetVolume() *VolumeContentSource_VolumeSource {
 	if x != nil {
-		if x, ok := x.Type.(*VolumeContentSource_Volume); ok {
+		if x, ok := x.xxx_hidden_Type.(*volumeContentSource_Volume); ok {
 			return x.Volume
 		}
 	}
@@ -1581,32 +1461,32 @@ func (x *VolumeContentSource) GetVolume() *VolumeContentSource_VolumeSource {
 
 func (x *VolumeContentSource) SetSnapshot(v *VolumeContentSource_SnapshotSource) {
 	if v == nil {
-		x.Type = nil
+		x.xxx_hidden_Type = nil
 		return
 	}
-	x.Type = &VolumeContentSource_Snapshot{v}
+	x.xxx_hidden_Type = &volumeContentSource_Snapshot{v}
 }
 
 func (x *VolumeContentSource) SetVolume(v *VolumeContentSource_VolumeSource) {
 	if v == nil {
-		x.Type = nil
+		x.xxx_hidden_Type = nil
 		return
 	}
-	x.Type = &VolumeContentSource_Volume{v}
+	x.xxx_hidden_Type = &volumeContentSource_Volume{v}
 }
 
 func (x *VolumeContentSource) HasType() bool {
 	if x == nil {
 		return false
 	}
-	return x.Type != nil
+	return x.xxx_hidden_Type != nil
 }
 
 func (x *VolumeContentSource) HasSnapshot() bool {
 	if x == nil {
 		return false
 	}
-	_, ok := x.Type.(*VolumeContentSource_Snapshot)
+	_, ok := x.xxx_hidden_Type.(*volumeContentSource_Snapshot)
 	return ok
 }
 
@@ -1614,23 +1494,23 @@ func (x *VolumeContentSource) HasVolume() bool {
 	if x == nil {
 		return false
 	}
-	_, ok := x.Type.(*VolumeContentSource_Volume)
+	_, ok := x.xxx_hidden_Type.(*volumeContentSource_Volume)
 	return ok
 }
 
 func (x *VolumeContentSource) ClearType() {
-	x.Type = nil
+	x.xxx_hidden_Type = nil
 }
 
 func (x *VolumeContentSource) ClearSnapshot() {
-	if _, ok := x.Type.(*VolumeContentSource_Snapshot); ok {
-		x.Type = nil
+	if _, ok := x.xxx_hidden_Type.(*volumeContentSource_Snapshot); ok {
+		x.xxx_hidden_Type = nil
 	}
 }
 
 func (x *VolumeContentSource) ClearVolume() {
-	if _, ok := x.Type.(*VolumeContentSource_Volume); ok {
-		x.Type = nil
+	if _, ok := x.xxx_hidden_Type.(*volumeContentSource_Volume); ok {
+		x.xxx_hidden_Type = nil
 	}
 }
 
@@ -1642,10 +1522,10 @@ func (x *VolumeContentSource) WhichType() case_VolumeContentSource_Type {
 	if x == nil {
 		return VolumeContentSource_Type_not_set_case
 	}
-	switch x.Type.(type) {
-	case *VolumeContentSource_Snapshot:
+	switch x.xxx_hidden_Type.(type) {
+	case *volumeContentSource_Snapshot:
 		return VolumeContentSource_Snapshot_case
-	case *VolumeContentSource_Volume:
+	case *volumeContentSource_Volume:
 		return VolumeContentSource_Volume_case
 	default:
 		return VolumeContentSource_Type_not_set_case
@@ -1655,10 +1535,10 @@ func (x *VolumeContentSource) WhichType() case_VolumeContentSource_Type {
 type VolumeContentSource_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
-	// Fields of oneof Type:
+	// Fields of oneof xxx_hidden_Type:
 	Snapshot *VolumeContentSource_SnapshotSource
 	Volume   *VolumeContentSource_VolumeSource
-	// -- end of Type
+	// -- end of xxx_hidden_Type
 }
 
 func (b0 VolumeContentSource_builder) Build() *VolumeContentSource {
@@ -1666,10 +1546,10 @@ func (b0 VolumeContentSource_builder) Build() *VolumeContentSource {
 	b, x := &b0, m0
 	_, _ = b, x
 	if b.Snapshot != nil {
-		x.Type = &VolumeContentSource_Snapshot{b.Snapshot}
+		x.xxx_hidden_Type = &volumeContentSource_Snapshot{b.Snapshot}
 	}
 	if b.Volume != nil {
-		x.Type = &VolumeContentSource_Volume{b.Volume}
+		x.xxx_hidden_Type = &volumeContentSource_Volume{b.Volume}
 	}
 	return m0
 }
@@ -1688,26 +1568,23 @@ type isVolumeContentSource_Type interface {
 	isVolumeContentSource_Type()
 }
 
-type VolumeContentSource_Snapshot struct {
+type volumeContentSource_Snapshot struct {
 	Snapshot *VolumeContentSource_SnapshotSource `protobuf:"bytes,1,opt,name=snapshot,proto3,oneof"`
 }
 
-type VolumeContentSource_Volume struct {
+type volumeContentSource_Volume struct {
 	Volume *VolumeContentSource_VolumeSource `protobuf:"bytes,2,opt,name=volume,proto3,oneof"`
 }
 
-func (*VolumeContentSource_Snapshot) isVolumeContentSource_Type() {}
+func (*volumeContentSource_Snapshot) isVolumeContentSource_Type() {}
 
-func (*VolumeContentSource_Volume) isVolumeContentSource_Type() {}
+func (*volumeContentSource_Volume) isVolumeContentSource_Type() {}
 
 type CreateVolumeResponse struct {
-	state protoimpl.MessageState `protogen:"hybrid.v1"`
-	// Contains all attributes of the newly created volume that are
-	// relevant to the CO along with information required by the Plugin
-	// to uniquely identify the volume. This field is REQUIRED.
-	Volume        *Volume `protobuf:"bytes,1,opt,name=volume,proto3" json:"volume,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state             protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Volume *Volume                `protobuf:"bytes,1,opt,name=volume,proto3" json:"volume,omitempty"`
+	unknownFields     protoimpl.UnknownFields
+	sizeCache         protoimpl.SizeCache
 }
 
 func (x *CreateVolumeResponse) Reset() {
@@ -1737,24 +1614,24 @@ func (x *CreateVolumeResponse) ProtoReflect() protoreflect.Message {
 
 func (x *CreateVolumeResponse) GetVolume() *Volume {
 	if x != nil {
-		return x.Volume
+		return x.xxx_hidden_Volume
 	}
 	return nil
 }
 
 func (x *CreateVolumeResponse) SetVolume(v *Volume) {
-	x.Volume = v
+	x.xxx_hidden_Volume = v
 }
 
 func (x *CreateVolumeResponse) HasVolume() bool {
 	if x == nil {
 		return false
 	}
-	return x.Volume != nil
+	return x.xxx_hidden_Volume != nil
 }
 
 func (x *CreateVolumeResponse) ClearVolume() {
-	x.Volume = nil
+	x.xxx_hidden_Volume = nil
 }
 
 type CreateVolumeResponse_builder struct {
@@ -1770,25 +1647,17 @@ func (b0 CreateVolumeResponse_builder) Build() *CreateVolumeResponse {
 	m0 := &CreateVolumeResponse{}
 	b, x := &b0, m0
 	_, _ = b, x
-	x.Volume = b.Volume
+	x.xxx_hidden_Volume = b.Volume
 	return m0
 }
 
 // Specify a capability of a volume.
 type VolumeCapability struct {
-	state protoimpl.MessageState `protogen:"hybrid.v1"`
-	// Specifies what API the volume will be accessed using. One of the
-	// following fields MUST be specified.
-	//
-	// Types that are valid to be assigned to AccessType:
-	//
-	//	*VolumeCapability_Block
-	//	*VolumeCapability_Mount
-	AccessType isVolumeCapability_AccessType `protobuf_oneof:"access_type"`
-	// This is a REQUIRED field.
-	AccessMode    *VolumeCapability_AccessMode `protobuf:"bytes,3,opt,name=access_mode,json=accessMode,proto3" json:"access_mode,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state                 protoimpl.MessageState        `protogen:"opaque.v1"`
+	xxx_hidden_AccessType isVolumeCapability_AccessType `protobuf_oneof:"access_type"`
+	xxx_hidden_AccessMode *VolumeCapability_AccessMode  `protobuf:"bytes,3,opt,name=access_mode,json=accessMode,proto3" json:"access_mode,omitempty"`
+	unknownFields         protoimpl.UnknownFields
+	sizeCache             protoimpl.SizeCache
 }
 
 func (x *VolumeCapability) Reset() {
@@ -1816,16 +1685,9 @@ func (x *VolumeCapability) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-func (x *VolumeCapability) GetAccessType() isVolumeCapability_AccessType {
-	if x != nil {
-		return x.AccessType
-	}
-	return nil
-}
-
 func (x *VolumeCapability) GetBlock() *VolumeCapability_BlockVolume {
 	if x != nil {
-		if x, ok := x.AccessType.(*VolumeCapability_Block); ok {
+		if x, ok := x.xxx_hidden_AccessType.(*volumeCapability_Block); ok {
 			return x.Block
 		}
 	}
@@ -1834,7 +1696,7 @@ func (x *VolumeCapability) GetBlock() *VolumeCapability_BlockVolume {
 
 func (x *VolumeCapability) GetMount() *VolumeCapability_MountVolume {
 	if x != nil {
-		if x, ok := x.AccessType.(*VolumeCapability_Mount); ok {
+		if x, ok := x.xxx_hidden_AccessType.(*volumeCapability_Mount); ok {
 			return x.Mount
 		}
 	}
@@ -1843,43 +1705,43 @@ func (x *VolumeCapability) GetMount() *VolumeCapability_MountVolume {
 
 func (x *VolumeCapability) GetAccessMode() *VolumeCapability_AccessMode {
 	if x != nil {
-		return x.AccessMode
+		return x.xxx_hidden_AccessMode
 	}
 	return nil
 }
 
 func (x *VolumeCapability) SetBlock(v *VolumeCapability_BlockVolume) {
 	if v == nil {
-		x.AccessType = nil
+		x.xxx_hidden_AccessType = nil
 		return
 	}
-	x.AccessType = &VolumeCapability_Block{v}
+	x.xxx_hidden_AccessType = &volumeCapability_Block{v}
 }
 
 func (x *VolumeCapability) SetMount(v *VolumeCapability_MountVolume) {
 	if v == nil {
-		x.AccessType = nil
+		x.xxx_hidden_AccessType = nil
 		return
 	}
-	x.AccessType = &VolumeCapability_Mount{v}
+	x.xxx_hidden_AccessType = &volumeCapability_Mount{v}
 }
 
 func (x *VolumeCapability) SetAccessMode(v *VolumeCapability_AccessMode) {
-	x.AccessMode = v
+	x.xxx_hidden_AccessMode = v
 }
 
 func (x *VolumeCapability) HasAccessType() bool {
 	if x == nil {
 		return false
 	}
-	return x.AccessType != nil
+	return x.xxx_hidden_AccessType != nil
 }
 
 func (x *VolumeCapability) HasBlock() bool {
 	if x == nil {
 		return false
 	}
-	_, ok := x.AccessType.(*VolumeCapability_Block)
+	_, ok := x.xxx_hidden_AccessType.(*volumeCapability_Block)
 	return ok
 }
 
@@ -1887,7 +1749,7 @@ func (x *VolumeCapability) HasMount() bool {
 	if x == nil {
 		return false
 	}
-	_, ok := x.AccessType.(*VolumeCapability_Mount)
+	_, ok := x.xxx_hidden_AccessType.(*volumeCapability_Mount)
 	return ok
 }
 
@@ -1895,27 +1757,27 @@ func (x *VolumeCapability) HasAccessMode() bool {
 	if x == nil {
 		return false
 	}
-	return x.AccessMode != nil
+	return x.xxx_hidden_AccessMode != nil
 }
 
 func (x *VolumeCapability) ClearAccessType() {
-	x.AccessType = nil
+	x.xxx_hidden_AccessType = nil
 }
 
 func (x *VolumeCapability) ClearBlock() {
-	if _, ok := x.AccessType.(*VolumeCapability_Block); ok {
-		x.AccessType = nil
+	if _, ok := x.xxx_hidden_AccessType.(*volumeCapability_Block); ok {
+		x.xxx_hidden_AccessType = nil
 	}
 }
 
 func (x *VolumeCapability) ClearMount() {
-	if _, ok := x.AccessType.(*VolumeCapability_Mount); ok {
-		x.AccessType = nil
+	if _, ok := x.xxx_hidden_AccessType.(*volumeCapability_Mount); ok {
+		x.xxx_hidden_AccessType = nil
 	}
 }
 
 func (x *VolumeCapability) ClearAccessMode() {
-	x.AccessMode = nil
+	x.xxx_hidden_AccessMode = nil
 }
 
 const VolumeCapability_AccessType_not_set_case case_VolumeCapability_AccessType = 0
@@ -1926,10 +1788,10 @@ func (x *VolumeCapability) WhichAccessType() case_VolumeCapability_AccessType {
 	if x == nil {
 		return VolumeCapability_AccessType_not_set_case
 	}
-	switch x.AccessType.(type) {
-	case *VolumeCapability_Block:
+	switch x.xxx_hidden_AccessType.(type) {
+	case *volumeCapability_Block:
 		return VolumeCapability_Block_case
-	case *VolumeCapability_Mount:
+	case *volumeCapability_Mount:
 		return VolumeCapability_Mount_case
 	default:
 		return VolumeCapability_AccessType_not_set_case
@@ -1942,10 +1804,10 @@ type VolumeCapability_builder struct {
 	// Specifies what API the volume will be accessed using. One of the
 	// following fields MUST be specified.
 
-	// Fields of oneof AccessType:
+	// Fields of oneof xxx_hidden_AccessType:
 	Block *VolumeCapability_BlockVolume
 	Mount *VolumeCapability_MountVolume
-	// -- end of AccessType
+	// -- end of xxx_hidden_AccessType
 	// This is a REQUIRED field.
 	AccessMode *VolumeCapability_AccessMode
 }
@@ -1955,12 +1817,12 @@ func (b0 VolumeCapability_builder) Build() *VolumeCapability {
 	b, x := &b0, m0
 	_, _ = b, x
 	if b.Block != nil {
-		x.AccessType = &VolumeCapability_Block{b.Block}
+		x.xxx_hidden_AccessType = &volumeCapability_Block{b.Block}
 	}
 	if b.Mount != nil {
-		x.AccessType = &VolumeCapability_Mount{b.Mount}
+		x.xxx_hidden_AccessType = &volumeCapability_Mount{b.Mount}
 	}
-	x.AccessMode = b.AccessMode
+	x.xxx_hidden_AccessMode = b.AccessMode
 	return m0
 }
 
@@ -1978,33 +1840,27 @@ type isVolumeCapability_AccessType interface {
 	isVolumeCapability_AccessType()
 }
 
-type VolumeCapability_Block struct {
+type volumeCapability_Block struct {
 	Block *VolumeCapability_BlockVolume `protobuf:"bytes,1,opt,name=block,proto3,oneof"`
 }
 
-type VolumeCapability_Mount struct {
+type volumeCapability_Mount struct {
 	Mount *VolumeCapability_MountVolume `protobuf:"bytes,2,opt,name=mount,proto3,oneof"`
 }
 
-func (*VolumeCapability_Block) isVolumeCapability_AccessType() {}
+func (*volumeCapability_Block) isVolumeCapability_AccessType() {}
 
-func (*VolumeCapability_Mount) isVolumeCapability_AccessType() {}
+func (*volumeCapability_Mount) isVolumeCapability_AccessType() {}
 
 // The capacity of the storage space in bytes. To specify an exact size,
 // `required_bytes` and `limit_bytes` SHALL be set to the same value. At
 // least one of the these fields MUST be specified.
 type CapacityRange struct {
-	state protoimpl.MessageState `protogen:"hybrid.v1"`
-	// Volume MUST be at least this big. This field is OPTIONAL.
-	// A value of 0 is equal to an unspecified field value.
-	// The value of this field MUST NOT be negative.
-	RequiredBytes int64 `protobuf:"varint,1,opt,name=required_bytes,json=requiredBytes,proto3" json:"required_bytes,omitempty"`
-	// Volume MUST not be bigger than this. This field is OPTIONAL.
-	// A value of 0 is equal to an unspecified field value.
-	// The value of this field MUST NOT be negative.
-	LimitBytes    int64 `protobuf:"varint,2,opt,name=limit_bytes,json=limitBytes,proto3" json:"limit_bytes,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state                    protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_RequiredBytes int64                  `protobuf:"varint,1,opt,name=required_bytes,json=requiredBytes,proto3" json:"required_bytes,omitempty"`
+	xxx_hidden_LimitBytes    int64                  `protobuf:"varint,2,opt,name=limit_bytes,json=limitBytes,proto3" json:"limit_bytes,omitempty"`
+	unknownFields            protoimpl.UnknownFields
+	sizeCache                protoimpl.SizeCache
 }
 
 func (x *CapacityRange) Reset() {
@@ -2034,24 +1890,24 @@ func (x *CapacityRange) ProtoReflect() protoreflect.Message {
 
 func (x *CapacityRange) GetRequiredBytes() int64 {
 	if x != nil {
-		return x.RequiredBytes
+		return x.xxx_hidden_RequiredBytes
 	}
 	return 0
 }
 
 func (x *CapacityRange) GetLimitBytes() int64 {
 	if x != nil {
-		return x.LimitBytes
+		return x.xxx_hidden_LimitBytes
 	}
 	return 0
 }
 
 func (x *CapacityRange) SetRequiredBytes(v int64) {
-	x.RequiredBytes = v
+	x.xxx_hidden_RequiredBytes = v
 }
 
 func (x *CapacityRange) SetLimitBytes(v int64) {
-	x.LimitBytes = v
+	x.xxx_hidden_LimitBytes = v
 }
 
 type CapacityRange_builder struct {
@@ -2071,80 +1927,21 @@ func (b0 CapacityRange_builder) Build() *CapacityRange {
 	m0 := &CapacityRange{}
 	b, x := &b0, m0
 	_, _ = b, x
-	x.RequiredBytes = b.RequiredBytes
-	x.LimitBytes = b.LimitBytes
+	x.xxx_hidden_RequiredBytes = b.RequiredBytes
+	x.xxx_hidden_LimitBytes = b.LimitBytes
 	return m0
 }
 
 // Information about a specific volume.
 type Volume struct {
-	state protoimpl.MessageState `protogen:"hybrid.v1"`
-	// The capacity of the volume in bytes. This field is OPTIONAL. If not
-	// set (value of 0), it indicates that the capacity of the volume is
-	// unknown (e.g., NFS share).
-	// The value of this field MUST NOT be negative.
-	CapacityBytes int64 `protobuf:"varint,1,opt,name=capacity_bytes,json=capacityBytes,proto3" json:"capacity_bytes,omitempty"`
-	// The identifier for this volume, generated by the plugin.
-	// This field is REQUIRED.
-	// This field MUST contain enough information to uniquely identify
-	// this specific volume vs all other volumes supported by this plugin.
-	// This field SHALL be used by the CO in subsequent calls to refer to
-	// this volume.
-	// The SP is NOT responsible for global uniqueness of volume_id across
-	// multiple SPs.
-	VolumeId string `protobuf:"bytes,2,opt,name=volume_id,json=volumeId,proto3" json:"volume_id,omitempty"`
-	// Opaque static properties of the volume. SP MAY use this field to
-	// ensure subsequent volume validation and publishing calls have
-	// contextual information.
-	// The contents of this field SHALL be opaque to a CO.
-	// The contents of this field SHALL NOT be mutable.
-	// The contents of this field SHALL be safe for the CO to cache.
-	// The contents of this field SHOULD NOT contain sensitive
-	// information.
-	// The contents of this field SHOULD NOT be used for uniquely
-	// identifying a volume. The `volume_id` alone SHOULD be sufficient to
-	// identify the volume.
-	// A volume uniquely identified by `volume_id` SHALL always report the
-	// same volume_context.
-	// This field is OPTIONAL and when present MUST be passed to volume
-	// validation and publishing calls.
-	VolumeContext map[string]string `protobuf:"bytes,3,rep,name=volume_context,json=volumeContext,proto3" json:"volume_context,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
-	// If specified, indicates that the volume is not empty and is
-	// pre-populated with data from the specified source.
-	// This field is OPTIONAL.
-	ContentSource *VolumeContentSource `protobuf:"bytes,4,opt,name=content_source,json=contentSource,proto3" json:"content_source,omitempty"`
-	// Specifies where (regions, zones, racks, etc.) the provisioned
-	// volume is accessible from.
-	// A plugin that returns this field MUST also set the
-	// VOLUME_ACCESSIBILITY_CONSTRAINTS plugin capability.
-	// An SP MAY specify multiple topologies to indicate the volume is
-	// accessible from multiple locations.
-	// COs MAY use this information along with the topology information
-	// returned by NodeGetInfo to ensure that a given volume is accessible
-	// from a given node when scheduling workloads.
-	// This field is OPTIONAL. If it is not specified, the CO MAY assume
-	// the volume is equally accessible from all nodes in the cluster and
-	// MAY schedule workloads referencing the volume on any available
-	// node.
-	//
-	// Example 1:
-	//
-	//	accessible_topology = {"region": "R1", "zone": "Z2"}
-	//
-	// Indicates a volume accessible only from the "region" "R1" and the
-	// "zone" "Z2".
-	//
-	// Example 2:
-	//
-	//	accessible_topology =
-	//	  {"region": "R1", "zone": "Z2"},
-	//	  {"region": "R1", "zone": "Z3"}
-	//
-	// Indicates a volume accessible from both "zone" "Z2" and "zone" "Z3"
-	// in the "region" "R1".
-	AccessibleTopology []*Topology `protobuf:"bytes,5,rep,name=accessible_topology,json=accessibleTopology,proto3" json:"accessible_topology,omitempty"`
-	unknownFields      protoimpl.UnknownFields
-	sizeCache          protoimpl.SizeCache
+	state                         protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_CapacityBytes      int64                  `protobuf:"varint,1,opt,name=capacity_bytes,json=capacityBytes,proto3" json:"capacity_bytes,omitempty"`
+	xxx_hidden_VolumeId           string                 `protobuf:"bytes,2,opt,name=volume_id,json=volumeId,proto3" json:"volume_id,omitempty"`
+	xxx_hidden_VolumeContext      map[string]string      `protobuf:"bytes,3,rep,name=volume_context,json=volumeContext,proto3" json:"volume_context,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	xxx_hidden_ContentSource      *VolumeContentSource   `protobuf:"bytes,4,opt,name=content_source,json=contentSource,proto3" json:"content_source,omitempty"`
+	xxx_hidden_AccessibleTopology *[]*Topology           `protobuf:"bytes,5,rep,name=accessible_topology,json=accessibleTopology,proto3" json:"accessible_topology,omitempty"`
+	unknownFields                 protoimpl.UnknownFields
+	sizeCache                     protoimpl.SizeCache
 }
 
 func (x *Volume) Reset() {
@@ -2174,68 +1971,70 @@ func (x *Volume) ProtoReflect() protoreflect.Message {
 
 func (x *Volume) GetCapacityBytes() int64 {
 	if x != nil {
-		return x.CapacityBytes
+		return x.xxx_hidden_CapacityBytes
 	}
 	return 0
 }
 
 func (x *Volume) GetVolumeId() string {
 	if x != nil {
-		return x.VolumeId
+		return x.xxx_hidden_VolumeId
 	}
 	return ""
 }
 
 func (x *Volume) GetVolumeContext() map[string]string {
 	if x != nil {
-		return x.VolumeContext
+		return x.xxx_hidden_VolumeContext
 	}
 	return nil
 }
 
 func (x *Volume) GetContentSource() *VolumeContentSource {
 	if x != nil {
-		return x.ContentSource
+		return x.xxx_hidden_ContentSource
 	}
 	return nil
 }
 
 func (x *Volume) GetAccessibleTopology() []*Topology {
 	if x != nil {
-		return x.AccessibleTopology
+		if x.xxx_hidden_AccessibleTopology != nil {
+			return *x.xxx_hidden_AccessibleTopology
+		}
 	}
 	return nil
 }
 
 func (x *Volume) SetCapacityBytes(v int64) {
-	x.CapacityBytes = v
+	x.xxx_hidden_CapacityBytes = v
 }
 
 func (x *Volume) SetVolumeId(v string) {
-	x.VolumeId = v
+	x.xxx_hidden_VolumeId = v
 }
 
 func (x *Volume) SetVolumeContext(v map[string]string) {
-	x.VolumeContext = v
+	x.xxx_hidden_VolumeContext = v
 }
 
 func (x *Volume) SetContentSource(v *VolumeContentSource) {
-	x.ContentSource = v
+	x.xxx_hidden_ContentSource = v
 }
 
 func (x *Volume) SetAccessibleTopology(v []*Topology) {
-	x.AccessibleTopology = v
+	x.xxx_hidden_AccessibleTopology = &v
 }
 
 func (x *Volume) HasContentSource() bool {
 	if x == nil {
 		return false
 	}
-	return x.ContentSource != nil
+	return x.xxx_hidden_ContentSource != nil
 }
 
 func (x *Volume) ClearContentSource() {
-	x.ContentSource = nil
+	x.xxx_hidden_ContentSource = nil
 }
 
 type Volume_builder struct {
@@ -2311,170 +2110,20 @@ func (b0 Volume_builder) Build() *Volume {
 	m0 := &Volume{}
 	b, x := &b0, m0
 	_, _ = b, x
-	x.CapacityBytes = b.CapacityBytes
-	x.VolumeId = b.VolumeId
-	x.VolumeContext = b.VolumeContext
-	x.ContentSource = b.ContentSource
-	x.AccessibleTopology = b.AccessibleTopology
+	x.xxx_hidden_CapacityBytes = b.CapacityBytes
+	x.xxx_hidden_VolumeId = b.VolumeId
+	x.xxx_hidden_VolumeContext = b.VolumeContext
+	x.xxx_hidden_ContentSource = b.ContentSource
+	x.xxx_hidden_AccessibleTopology = &b.AccessibleTopology
 	return m0
 }
 
 type TopologyRequirement struct {
-	state protoimpl.MessageState `protogen:"hybrid.v1"`
-	// Specifies the list of topologies the provisioned volume MUST be
-	// accessible from.
-	// This field is OPTIONAL. If TopologyRequirement is specified either
-	// requisite or preferred or both MUST be specified.
-	//
-	// If requisite is specified, the provisioned volume MUST be
-	// accessible from at least one of the requisite topologies.
-	//
-	// Given
-	//
-	//	x = number of topologies provisioned volume is accessible from
-	//	n = number of requisite topologies
-	//
-	// The CO MUST ensure n >= 1. The SP MUST ensure x >= 1
-	// If x==n, then the SP MUST make the provisioned volume available to
-	// all topologies from the list of requisite topologies. If it is
-	// unable to do so, the SP MUST fail the CreateVolume call.
-	// For example, if a volume should be accessible from a single zone,
-	// and requisite =
-	//
-	//	{"region": "R1", "zone": "Z2"}
-	//
-	// then the provisioned volume MUST be accessible from the "region"
-	// "R1" and the "zone" "Z2".
-	// Similarly, if a volume should be accessible from two zones, and
-	// requisite =
-	//
-	//	{"region": "R1", "zone": "Z2"},
-	//	{"region": "R1", "zone": "Z3"}
-	//
-	// then the provisioned volume MUST be accessible from the "region"
-	// "R1" and both "zone" "Z2" and "zone" "Z3".
-	//
-	// If x<n, then the SP SHALL choose x unique topologies from the list
-	// of requisite topologies. If it is unable to do so, the SP MUST fail
-	// the CreateVolume call.
-	// For example, if a volume should be accessible from a single zone,
-	// and requisite =
-	//
-	//	{"region": "R1", "zone": "Z2"},
-	//	{"region": "R1", "zone": "Z3"}
-	//
-	// then the SP may choose to make the provisioned volume available in
-	// either the "zone" "Z2" or the "zone" "Z3" in the "region" "R1".
-	// Similarly, if a volume should be accessible from two zones, and
-	// requisite =
-	//
-	//	{"region": "R1", "zone": "Z2"},
-	//	{"region": "R1", "zone": "Z3"},
-	//	{"region": "R1", "zone": "Z4"}
-	//
-	// then the provisioned volume MUST be accessible from any combination
-	// of two unique topologies: e.g. "R1/Z2" and "R1/Z3", or "R1/Z2" and
-	//
-	//	"R1/Z4", or "R1/Z3" and "R1/Z4".
-	//
-	// If x>n, then the SP MUST make the provisioned volume available from
-	// all topologies from the list of requisite topologies and MAY choose
-	// the remaining x-n unique topologies from the list of all possible
-	// topologies. If it is unable to do so, the SP MUST fail the
-	// CreateVolume call.
-	// For example, if a volume should be accessible from two zones, and
-	// requisite =
-	//
-	//	{"region": "R1", "zone": "Z2"}
-	//
-	// then the provisioned volume MUST be accessible from the "region"
-	// "R1" and the "zone" "Z2" and the SP may select the second zone
-	// independently, e.g. "R1/Z4".
-	Requisite []*Topology `protobuf:"bytes,1,rep,name=requisite,proto3" json:"requisite,omitempty"`
-	// Specifies the list of topologies the CO would prefer the volume to
-	// be provisioned in.
-	//
-	// This field is OPTIONAL. If TopologyRequirement is specified either
-	// requisite or preferred or both MUST be specified.
-	//
-	// An SP MUST attempt to make the provisioned volume available using
-	// the preferred topologies in order from first to last.
-	//
-	// If requisite is specified, all topologies in preferred list MUST
-	// also be present in the list of requisite topologies.
-	//
-	// If the SP is unable to to make the provisioned volume available
-	// from any of the preferred topologies, the SP MAY choose a topology
-	// from the list of requisite topologies.
-	// If the list of requisite topologies is not specified, then the SP
-	// MAY choose from the list of all possible topologies.
-	// If the list of requisite topologies is specified and the SP is
-	// unable to to make the provisioned volume available from any of the
-	// requisite topologies it MUST fail the CreateVolume call.
-	//
-	// Example 1:
-	// Given a volume should be accessible from a single zone, and
-	// requisite =
-	//
-	//	{"region": "R1", "zone": "Z2"},
-	//	{"region": "R1", "zone": "Z3"}
-	//
-	// preferred =
-	//
-	//	{"region": "R1", "zone": "Z3"}
-	//
-	// then the SP SHOULD first attempt to make the provisioned volume
-	// available from "zone" "Z3" in the "region" "R1" and fall back to
-	// "zone" "Z2" in the "region" "R1" if that is not possible.
-	//
-	// Example 2:
-	// Given a volume should be accessible from a single zone, and
-	// requisite =
-	//
-	//	{"region": "R1", "zone": "Z2"},
-	//	{"region": "R1", "zone": "Z3"},
-	//	{"region": "R1", "zone": "Z4"},
-	//	{"region": "R1", "zone": "Z5"}
-	//
-	// preferred =
-	//
-	//	{"region": "R1", "zone": "Z4"},
-	//	{"region": "R1", "zone": "Z2"}
-	//
-	// then the SP SHOULD first attempt to make the provisioned volume
-	// accessible from "zone" "Z4" in the "region" "R1" and fall back to
-	// "zone" "Z2" in the "region" "R1" if that is not possible. If that
-	// is not possible, the SP may choose between either the "zone"
-	// "Z3" or "Z5" in the "region" "R1".
-	//
-	// Example 3:
-	// Given a volume should be accessible from TWO zones (because an
-	// opaque parameter in CreateVolumeRequest, for example, specifies
-	// the volume is accessible from two zones, aka synchronously
-	// replicated), and
-	// requisite =
-	//
-	//	{"region": "R1", "zone": "Z2"},
-	//	{"region": "R1", "zone": "Z3"},
-	//	{"region": "R1", "zone": "Z4"},
-	//	{"region": "R1", "zone": "Z5"}
-	//
-	// preferred =
-	//
-	//	{"region": "R1", "zone": "Z5"},
-	//	{"region": "R1", "zone": "Z3"}
-	//
-	// then the SP SHOULD first attempt to make the provisioned volume
-	// accessible from the combination of the two "zones" "Z5" and "Z3" in
-	// the "region" "R1". If that's not possible, it should fall back to
-	// a combination of "Z5" and other possibilities from the list of
-	// requisite. If that's not possible, it should fall back  to a
-	// combination of "Z3" and other possibilities from the list of
-	// requisite. If that's not possible, it should fall back  to a
-	// combination of other possibilities from the list of requisite.
-	Preferred     []*Topology `protobuf:"bytes,2,rep,name=preferred,proto3" json:"preferred,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state                protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Requisite *[]*Topology           `protobuf:"bytes,1,rep,name=requisite,proto3" json:"requisite,omitempty"`
+	xxx_hidden_Preferred *[]*Topology           `protobuf:"bytes,2,rep,name=preferred,proto3" json:"preferred,omitempty"`
+	unknownFields        protoimpl.UnknownFields
+	sizeCache            protoimpl.SizeCache
 }
 
 func (x *TopologyRequirement) Reset() {
@@ -2504,24 +2153,28 @@ func (x *TopologyRequirement) ProtoReflect() protoreflect.Message {
 
 func (x *TopologyRequirement) GetRequisite() []*Topology {
 	if x != nil {
-		return x.Requisite
+		if x.xxx_hidden_Requisite != nil {
+			return *x.xxx_hidden_Requisite
+		}
 	}
 	return nil
 }
 
 func (x *TopologyRequirement) GetPreferred() []*Topology {
 	if x != nil {
-		return x.Preferred
+		if x.xxx_hidden_Preferred != nil {
+			return *x.xxx_hidden_Preferred
+		}
 	}
 	return nil
 }
 
 func (x *TopologyRequirement) SetRequisite(v []*Topology) {
-	x.Requisite = v
+	x.xxx_hidden_Requisite = &v
 }
 
 func (x *TopologyRequirement) SetPreferred(v []*Topology) {
-	x.Preferred = v
+	x.xxx_hidden_Preferred = &v
 }
 
 type TopologyRequirement_builder struct {
@@ -2685,8 +2338,8 @@ func (b0 TopologyRequirement_builder) Build() *TopologyRequirement {
 	m0 := &TopologyRequirement{}
 	b, x := &b0, m0
 	_, _ = b, x
-	x.Requisite = b.Requisite
-	x.Preferred = b.Preferred
+	x.xxx_hidden_Requisite = &b.Requisite
+	x.xxx_hidden_Preferred = &b.Preferred
 	return m0
 }
 
@@ -2720,10 +2373,10 @@ func (b0 TopologyRequirement_builder) Build() *TopologyRequirement {
 // alphanumeric character with '-', '_', '.', or alphanumerics in
 // between.
 type Topology struct {
-	state         protoimpl.MessageState `protogen:"hybrid.v1"`
-	Segments      map[string]string      `protobuf:"bytes,1,rep,name=segments,proto3" json:"segments,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state               protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Segments map[string]string      `protobuf:"bytes,1,rep,name=segments,proto3" json:"segments,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	unknownFields       protoimpl.UnknownFields
+	sizeCache           protoimpl.SizeCache
 }
 
 func (x *Topology) Reset() {
@@ -2753,13 +2406,13 @@ func (x *Topology) ProtoReflect() protoreflect.Message {
 
 func (x *Topology) GetSegments() map[string]string {
 	if x != nil {
-		return x.Segments
+		return x.xxx_hidden_Segments
 	}
 	return nil
 }
 
 func (x *Topology) SetSegments(v map[string]string) {
-	x.Segments = v
+	x.xxx_hidden_Segments = v
 }
 
 type Topology_builder struct {
@@ -2772,21 +2425,16 @@ func (b0 Topology_builder) Build() *Topology {
 	m0 := &Topology{}
 	b, x := &b0, m0
 	_, _ = b, x
-	x.Segments = b.Segments
+	x.xxx_hidden_Segments = b.Segments
 	return m0
 }
 
 type DeleteVolumeRequest struct {
-	state protoimpl.MessageState `protogen:"hybrid.v1"`
-	// The ID of the volume to be deprovisioned.
-	// This field is REQUIRED.
-	VolumeId string `protobuf:"bytes,1,opt,name=volume_id,json=volumeId,proto3" json:"volume_id,omitempty"`
-	// Secrets required by plugin to complete volume deletion request.
-	// This field is OPTIONAL. Refer to the `Secrets Requirements`
-	// section on how to use this field.
-	Secrets       map[string]string `protobuf:"bytes,2,rep,name=secrets,proto3" json:"secrets,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state               protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_VolumeId string                 `protobuf:"bytes,1,opt,name=volume_id,json=volumeId,proto3" json:"volume_id,omitempty"`
+	xxx_hidden_Secrets  map[string]string      `protobuf:"bytes,2,rep,name=secrets,proto3" json:"secrets,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	unknownFields       protoimpl.UnknownFields
+	sizeCache           protoimpl.SizeCache
 }
 
 func (x *DeleteVolumeRequest) Reset() {
@@ -2816,24 +2464,24 @@ func (x *DeleteVolumeRequest) ProtoReflect() protoreflect.Message {
 
 func (x *DeleteVolumeRequest) GetVolumeId() string {
 	if x != nil {
-		return x.VolumeId
+		return x.xxx_hidden_VolumeId
 	}
 	return ""
 }
 
 func (x *DeleteVolumeRequest) GetSecrets() map[string]string {
 	if x != nil {
-		return x.Secrets
+		return x.xxx_hidden_Secrets
 	}
 	return nil
 }
 
 func (x *DeleteVolumeRequest) SetVolumeId(v string) {
-	x.VolumeId = v
+	x.xxx_hidden_VolumeId = v
 }
 
 func (x *DeleteVolumeRequest) SetSecrets(v map[string]string) {
-	x.Secrets = v
+	x.xxx_hidden_Secrets = v
 }
 
 type DeleteVolumeRequest_builder struct {
@@ -2852,13 +2500,13 @@ func (b0 DeleteVolumeRequest_builder) Build() *DeleteVolumeRequest {
 	m0 := &DeleteVolumeRequest{}
 	b, x := &b0, m0
 	_, _ = b, x
-	x.VolumeId = b.VolumeId
-	x.Secrets = b.Secrets
+	x.xxx_hidden_VolumeId = b.VolumeId
+	x.xxx_hidden_Secrets = b.Secrets
 	return m0
 }
 
 type DeleteVolumeResponse struct {
-	state         protoimpl.MessageState `protogen:"hybrid.v1"`
+	state         protoimpl.MessageState `protogen:"opaque.v1"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -2901,34 +2549,15 @@ func (b0 DeleteVolumeResponse_builder) Build() *DeleteVolumeResponse {
 }
 
 type ControllerPublishVolumeRequest struct {
-	state protoimpl.MessageState `protogen:"hybrid.v1"`
-	// The ID of the volume to be used on a node.
-	// This field is REQUIRED.
-	VolumeId string `protobuf:"bytes,1,opt,name=volume_id,json=volumeId,proto3" json:"volume_id,omitempty"`
-	// The ID of the node. This field is REQUIRED. The CO SHALL set this
-	// field to match the node ID returned by `NodeGetInfo`.
-	NodeId string `protobuf:"bytes,2,opt,name=node_id,json=nodeId,proto3" json:"node_id,omitempty"`
-	// Volume capability describing how the CO intends to use this volume.
-	// SP MUST ensure the CO can use the published volume as described.
-	// Otherwise SP MUST return the appropriate gRPC error code.
-	// This is a REQUIRED field.
-	VolumeCapability *VolumeCapability `protobuf:"bytes,3,opt,name=volume_capability,json=volumeCapability,proto3" json:"volume_capability,omitempty"`
-	// Indicates SP MUST publish the volume in readonly mode.
-	// CO MUST set this field to false if SP does not have the
-	// PUBLISH_READONLY controller capability.
-	// This is a REQUIRED field.
-	Readonly bool `protobuf:"varint,4,opt,name=readonly,proto3" json:"readonly,omitempty"`
-	// Secrets required by plugin to complete controller publish volume
-	// request. This field is OPTIONAL. Refer to the
-	// `Secrets Requirements` section on how to use this field.
-	Secrets map[string]string `protobuf:"bytes,5,rep,name=secrets,proto3" json:"secrets,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
-	// Volume context as returned by SP in
-	// CreateVolumeResponse.Volume.volume_context.
-	// This field is OPTIONAL and MUST match the volume_context of the
-	// volume identified by `volume_id`.
-	VolumeContext map[string]string `protobuf:"bytes,6,rep,name=volume_context,json=volumeContext,proto3" json:"volume_context,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state                       protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_VolumeId         string                 `protobuf:"bytes,1,opt,name=volume_id,json=volumeId,proto3" json:"volume_id,omitempty"`
+	xxx_hidden_NodeId           string                 `protobuf:"bytes,2,opt,name=node_id,json=nodeId,proto3" json:"node_id,omitempty"`
+	xxx_hidden_VolumeCapability *VolumeCapability      `protobuf:"bytes,3,opt,name=volume_capability,json=volumeCapability,proto3" json:"volume_capability,omitempty"`
+	xxx_hidden_Readonly         bool                   `protobuf:"varint,4,opt,name=readonly,proto3" json:"readonly,omitempty"`
+	xxx_hidden_Secrets          map[string]string      `protobuf:"bytes,5,rep,name=secrets,proto3" json:"secrets,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	xxx_hidden_VolumeContext    map[string]string      `protobuf:"bytes,6,rep,name=volume_context,json=volumeContext,proto3" json:"volume_context,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	unknownFields               protoimpl.UnknownFields
+	sizeCache                   protoimpl.SizeCache
 }
 
 func (x *ControllerPublishVolumeRequest) Reset() {
@@ -2958,79 +2587,79 @@ func (x *ControllerPublishVolumeRequest) ProtoReflect() protoreflect.Message {
 
 func (x *ControllerPublishVolumeRequest) GetVolumeId() string {
 	if x != nil {
-		return x.VolumeId
+		return x.xxx_hidden_VolumeId
 	}
 	return ""
 }
 
 func (x *ControllerPublishVolumeRequest) GetNodeId() string {
 	if x != nil {
-		return x.NodeId
+		return x.xxx_hidden_NodeId
 	}
 	return ""
 }
 
 func (x *ControllerPublishVolumeRequest) GetVolumeCapability() *VolumeCapability {
 	if x != nil {
-		return x.VolumeCapability
+		return x.xxx_hidden_VolumeCapability
 	}
 	return nil
 }
 
 func (x *ControllerPublishVolumeRequest) GetReadonly() bool {
 	if x != nil {
-		return x.Readonly
+		return x.xxx_hidden_Readonly
 	}
 	return false
 }
 
 func (x *ControllerPublishVolumeRequest) GetSecrets() map[string]string {
 	if x != nil {
-		return x.Secrets
+		return x.xxx_hidden_Secrets
 	}
 	return nil
 }
 
 func (x *ControllerPublishVolumeRequest) GetVolumeContext() map[string]string {
 	if x != nil {
-		return x.VolumeContext
+		return x.xxx_hidden_VolumeContext
 	}
 	return nil
 }
 
 func (x *ControllerPublishVolumeRequest) SetVolumeId(v string) {
-	x.VolumeId = v
+	x.xxx_hidden_VolumeId = v
 }
 
 func (x *ControllerPublishVolumeRequest) SetNodeId(v string) {
-	x.NodeId = v
+	x.xxx_hidden_NodeId = v
 }
 
 func (x *ControllerPublishVolumeRequest) SetVolumeCapability(v *VolumeCapability) {
-	x.VolumeCapability = v
+	x.xxx_hidden_VolumeCapability = v
 }
 
 func (x *ControllerPublishVolumeRequest) SetReadonly(v bool) {
-	x.Readonly = v
+	x.xxx_hidden_Readonly = v
 }
 
 func (x *ControllerPublishVolumeRequest) SetSecrets(v map[string]string) {
-	x.Secrets = v
+	x.xxx_hidden_Secrets = v
 }
 
 func (x *ControllerPublishVolumeRequest) SetVolumeContext(v map[string]string) {
-	x.VolumeContext = v
+	x.xxx_hidden_VolumeContext = v
 }
 
 func (x *ControllerPublishVolumeRequest) HasVolumeCapability() bool {
 	if x == nil {
 		return false
 	}
-	return x.VolumeCapability != nil
+	return x.xxx_hidden_VolumeCapability != nil
 }
 
 func (x *ControllerPublishVolumeRequest) ClearVolumeCapability() {
-	x.VolumeCapability = nil
+	x.xxx_hidden_VolumeCapability = nil
 }
 
 type ControllerPublishVolumeRequest_builder struct {
@@ -3067,33 +2696,20 @@ func (b0 ControllerPublishVolumeRequest_builder) Build() *ControllerPublishVolum
 	m0 := &ControllerPublishVolumeRequest{}
 	b, x := &b0, m0
 	_, _ = b, x
-	x.VolumeId = b.VolumeId
-	x.NodeId = b.NodeId
-	x.VolumeCapability = b.VolumeCapability
-	x.Readonly = b.Readonly
-	x.Secrets = b.Secrets
-	x.VolumeContext = b.VolumeContext
+	x.xxx_hidden_VolumeId = b.VolumeId
+	x.xxx_hidden_NodeId = b.NodeId
+	x.xxx_hidden_VolumeCapability = b.VolumeCapability
+	x.xxx_hidden_Readonly = b.Readonly
+	x.xxx_hidden_Secrets = b.Secrets
+	x.xxx_hidden_VolumeContext = b.VolumeContext
 	return m0
 }
 
 type ControllerPublishVolumeResponse struct {
-	state protoimpl.MessageState `protogen:"hybrid.v1"`
-	// Opaque static publish properties of the volume. SP MAY use this
-	// field to ensure subsequent `NodeStageVolume` or `NodePublishVolume`
-	// calls calls have contextual information.
-	// The contents of this field SHALL be opaque to a CO.
-	// The contents of this field SHALL NOT be mutable.
-	// The contents of this field SHALL be safe for the CO to cache.
-	// The contents of this field SHOULD NOT contain sensitive
-	// information.
-	// The contents of this field SHOULD NOT be used for uniquely
-	// identifying a volume. The `volume_id` alone SHOULD be sufficient to
-	// identify the volume.
-	// This field is OPTIONAL and when present MUST be passed to
-	// subsequent `NodeStageVolume` or `NodePublishVolume` calls
-	PublishContext map[string]string `protobuf:"bytes,1,rep,name=publish_context,json=publishContext,proto3" json:"publish_context,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
-	unknownFields  protoimpl.UnknownFields
-	sizeCache      protoimpl.SizeCache
+	state                     protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_PublishContext map[string]string      `protobuf:"bytes,1,rep,name=publish_context,json=publishContext,proto3" json:"publish_context,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	unknownFields             protoimpl.UnknownFields
+	sizeCache                 protoimpl.SizeCache
 }
 
 func (x *ControllerPublishVolumeResponse) Reset() {
@@ -3123,13 +2739,13 @@ func (x *ControllerPublishVolumeResponse) ProtoReflect() protoreflect.Message {
 
 func (x *ControllerPublishVolumeResponse) GetPublishContext() map[string]string {
 	if x != nil {
-		return x.PublishContext
+		return x.xxx_hidden_PublishContext
 	}
 	return nil
 }
 
 func (x *ControllerPublishVolumeResponse) SetPublishContext(v map[string]string) {
-	x.PublishContext = v
+	x.xxx_hidden_PublishContext = v
 }
 
 type ControllerPublishVolumeResponse_builder struct {
@@ -3155,28 +2771,17 @@ func (b0 ControllerPublishVolumeResponse_builder) Build() *ControllerPublishVolu
 	m0 := &ControllerPublishVolumeResponse{}
 	b, x := &b0, m0
 	_, _ = b, x
-	x.PublishContext = b.PublishContext
+	x.xxx_hidden_PublishContext = b.PublishContext
 	return m0
 }
 
 type ControllerUnpublishVolumeRequest struct {
-	state protoimpl.MessageState `protogen:"hybrid.v1"`
-	// The ID of the volume. This field is REQUIRED.
-	VolumeId string `protobuf:"bytes,1,opt,name=volume_id,json=volumeId,proto3" json:"volume_id,omitempty"`
-	// The ID of the node. This field is OPTIONAL. The CO SHOULD set this
-	// field to match the node ID returned by `NodeGetInfo` or leave it
-	// unset. If the value is set, the SP MUST unpublish the volume from
-	// the specified node. If the value is unset, the SP MUST unpublish
-	// the volume from all nodes it is published to.
-	NodeId string `protobuf:"bytes,2,opt,name=node_id,json=nodeId,proto3" json:"node_id,omitempty"`
-	// Secrets required by plugin to complete controller unpublish volume
-	// request. This SHOULD be the same secrets passed to the
-	// ControllerPublishVolume call for the specified volume.
-	// This field is OPTIONAL. Refer to the `Secrets Requirements`
-	// section on how to use this field.
-	Secrets       map[string]string `protobuf:"bytes,3,rep,name=secrets,proto3" json:"secrets,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state               protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_VolumeId string                 `protobuf:"bytes,1,opt,name=volume_id,json=volumeId,proto3" json:"volume_id,omitempty"`
+	xxx_hidden_NodeId   string                 `protobuf:"bytes,2,opt,name=node_id,json=nodeId,proto3" json:"node_id,omitempty"`
+	xxx_hidden_Secrets  map[string]string      `protobuf:"bytes,3,rep,name=secrets,proto3" json:"secrets,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	unknownFields       protoimpl.UnknownFields
+	sizeCache           protoimpl.SizeCache
 }
 
 func (x *ControllerUnpublishVolumeRequest) Reset() {
@@ -3206,35 +2811,35 @@ func (x *ControllerUnpublishVolumeRequest) ProtoReflect() protoreflect.Message {
 
 func (x *ControllerUnpublishVolumeRequest) GetVolumeId() string {
 	if x != nil {
-		return x.VolumeId
+		return x.xxx_hidden_VolumeId
 	}
 	return ""
 }
 
 func (x *ControllerUnpublishVolumeRequest) GetNodeId() string {
 	if x != nil {
-		return x.NodeId
+		return x.xxx_hidden_NodeId
 	}
 	return ""
 }
 
 func (x *ControllerUnpublishVolumeRequest) GetSecrets() map[string]string {
 	if x != nil {
-		return x.Secrets
+		return x.xxx_hidden_Secrets
 	}
 	return nil
 }
 
 func (x *ControllerUnpublishVolumeRequest) SetVolumeId(v string) {
-	x.VolumeId = v
+	x.xxx_hidden_VolumeId = v
 }
 
 func (x *ControllerUnpublishVolumeRequest) SetNodeId(v string) {
-	x.NodeId = v
+	x.xxx_hidden_NodeId = v
 }
 
 func (x *ControllerUnpublishVolumeRequest) SetSecrets(v map[string]string) {
-	x.Secrets = v
+	x.xxx_hidden_Secrets = v
 }
 
 type ControllerUnpublishVolumeRequest_builder struct {
@@ -3260,14 +2865,14 @@ func (b0 ControllerUnpublishVolumeRequest_builder) Build() *ControllerUnpublishV
 	m0 := &ControllerUnpublishVolumeRequest{}
 	b, x := &b0, m0
 	_, _ = b, x
-	x.VolumeId = b.VolumeId
-	x.NodeId = b.NodeId
-	x.Secrets = b.Secrets
+	x.xxx_hidden_VolumeId = b.VolumeId
+	x.xxx_hidden_NodeId = b.NodeId
+	x.xxx_hidden_Secrets = b.Secrets
 	return m0
 }
 
 type ControllerUnpublishVolumeResponse struct {
-	state         protoimpl.MessageState `protogen:"hybrid.v1"`
+	state         protoimpl.MessageState `protogen:"opaque.v1"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -3310,30 +2915,15 @@ func (b0 ControllerUnpublishVolumeResponse_builder) Build() *ControllerUnpublish
 }
 
 type ValidateVolumeCapabilitiesRequest struct {
-	state protoimpl.MessageState `protogen:"hybrid.v1"`
-	// The ID of the volume to check. This field is REQUIRED.
-	VolumeId string `protobuf:"bytes,1,opt,name=volume_id,json=volumeId,proto3" json:"volume_id,omitempty"`
-	// Volume context as returned by SP in
-	// CreateVolumeResponse.Volume.volume_context.
-	// This field is OPTIONAL and MUST match the volume_context of the
-	// volume identified by `volume_id`.
-	VolumeContext map[string]string `protobuf:"bytes,2,rep,name=volume_context,json=volumeContext,proto3" json:"volume_context,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
-	// The capabilities that the CO wants to check for the volume. This
-	// call SHALL return "confirmed" only if all the volume capabilities
-	// specified below are supported. This field is REQUIRED.
-	VolumeCapabilities []*VolumeCapability `protobuf:"bytes,3,rep,name=volume_capabilities,json=volumeCapabilities,proto3" json:"volume_capabilities,omitempty"`
-	// See CreateVolumeRequest.parameters.
-	// This field is OPTIONAL.
-	Parameters map[string]string `protobuf:"bytes,4,rep,name=parameters,proto3" json:"parameters,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
-	// Secrets required by plugin to complete volume validation request.
-	// This field is OPTIONAL. Refer to the `Secrets Requirements`
-	// section on how to use this field.
-	Secrets map[string]string `protobuf:"bytes,5,rep,name=secrets,proto3" json:"secrets,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
-	// See CreateVolumeRequest.mutable_parameters.
-	// This field is OPTIONAL.
-	MutableParameters map[string]string `protobuf:"bytes,6,rep,name=mutable_parameters,json=mutableParameters,proto3" json:"mutable_parameters,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
-	unknownFields     protoimpl.UnknownFields
-	sizeCache         protoimpl.SizeCache
+	state                         protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_VolumeId           string                 `protobuf:"bytes,1,opt,name=volume_id,json=volumeId,proto3" json:"volume_id,omitempty"`
+	xxx_hidden_VolumeContext      map[string]string      `protobuf:"bytes,2,rep,name=volume_context,json=volumeContext,proto3" json:"volume_context,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	xxx_hidden_VolumeCapabilities *[]*VolumeCapability   `protobuf:"bytes,3,rep,name=volume_capabilities,json=volumeCapabilities,proto3" json:"volume_capabilities,omitempty"`
+	xxx_hidden_Parameters         map[string]string      `protobuf:"bytes,4,rep,name=parameters,proto3" json:"parameters,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	xxx_hidden_Secrets            map[string]string      `protobuf:"bytes,5,rep,name=secrets,proto3" json:"secrets,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	xxx_hidden_MutableParameters  map[string]string      `protobuf:"bytes,6,rep,name=mutable_parameters,json=mutableParameters,proto3" json:"mutable_parameters,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	unknownFields                 protoimpl.UnknownFields
+	sizeCache                     protoimpl.SizeCache
 }
 
 func (x *ValidateVolumeCapabilitiesRequest) Reset() {
@@ -3363,68 +2953,70 @@ func (x *ValidateVolumeCapabilitiesRequest) ProtoReflect() protoreflect.Message 
 
 func (x *ValidateVolumeCapabilitiesRequest) GetVolumeId() string {
 	if x != nil {
-		return x.VolumeId
+		return x.xxx_hidden_VolumeId
 	}
 	return ""
 }
 
 func (x *ValidateVolumeCapabilitiesRequest) GetVolumeContext() map[string]string {
 	if x != nil {
-		return x.VolumeContext
+		return x.xxx_hidden_VolumeContext
 	}
 	return nil
 }
 
 func (x *ValidateVolumeCapabilitiesRequest) GetVolumeCapabilities() []*VolumeCapability {
 	if x != nil {
-		return x.VolumeCapabilities
+		if x.xxx_hidden_VolumeCapabilities != nil {
+			return *x.xxx_hidden_VolumeCapabilities
+		}
 	}
 	return nil
 }
 
 func (x *ValidateVolumeCapabilitiesRequest) GetParameters() map[string]string {
 	if x != nil {
-		return x.Parameters
+		return x.xxx_hidden_Parameters
 	}
 	return nil
 }
 
 func (x *ValidateVolumeCapabilitiesRequest) GetSecrets() map[string]string {
 	if x != nil {
-		return x.Secrets
+		return x.xxx_hidden_Secrets
 	}
 	return nil
 }
 
 func (x *ValidateVolumeCapabilitiesRequest) GetMutableParameters() map[string]string {
 	if x != nil {
-		return x.MutableParameters
+		return x.xxx_hidden_MutableParameters
 	}
 	return nil
 }
 
 func (x *ValidateVolumeCapabilitiesRequest) SetVolumeId(v string) {
-	x.VolumeId = v
+	x.xxx_hidden_VolumeId = v
 }
 
 func (x *ValidateVolumeCapabilitiesRequest) SetVolumeContext(v map[string]string) {
-	x.VolumeContext = v
+	x.xxx_hidden_VolumeContext = v
 }
 
 func (x *ValidateVolumeCapabilitiesRequest) SetVolumeCapabilities(v []*VolumeCapability) {
-	x.VolumeCapabilities = v
+	x.xxx_hidden_VolumeCapabilities = &v
 }
 
 func (x *ValidateVolumeCapabilitiesRequest) SetParameters(v map[string]string) {
-	x.Parameters = v
+	x.xxx_hidden_Parameters = v
 }
 
 func (x *ValidateVolumeCapabilitiesRequest) SetSecrets(v map[string]string) {
-	x.Secrets = v
+	x.xxx_hidden_Secrets = v
 }
 
 func (x *ValidateVolumeCapabilitiesRequest) SetMutableParameters(v map[string]string) {
-	x.MutableParameters = v
+	x.xxx_hidden_MutableParameters = v
 }
 
 type ValidateVolumeCapabilitiesRequest_builder struct {
@@ -3457,32 +3049,21 @@ func (b0 ValidateVolumeCapabilitiesRequest_builder) Build() *ValidateVolumeCapab
 	m0 := &ValidateVolumeCapabilitiesRequest{}
 	b, x := &b0, m0
 	_, _ = b, x
-	x.VolumeId = b.VolumeId
-	x.VolumeContext = b.VolumeContext
-	x.VolumeCapabilities = b.VolumeCapabilities
-	x.Parameters = b.Parameters
-	x.Secrets = b.Secrets
-	x.MutableParameters = b.MutableParameters
+	x.xxx_hidden_VolumeId = b.VolumeId
+	x.xxx_hidden_VolumeContext = b.VolumeContext
+	x.xxx_hidden_VolumeCapabilities = &b.VolumeCapabilities
+	x.xxx_hidden_Parameters = b.Parameters
+	x.xxx_hidden_Secrets = b.Secrets
+	x.xxx_hidden_MutableParameters = b.MutableParameters
 	return m0
 }
 
 type ValidateVolumeCapabilitiesResponse struct {
-	state protoimpl.MessageState `protogen:"hybrid.v1"`
-	// Confirmed indicates to the CO the set of capabilities that the
-	// plugin has validated. This field SHALL only be set to a non-empty
-	// value for successful validation responses.
-	// For successful validation responses, the CO SHALL compare the
-	// fields of this message to the originally requested capabilities in
-	// order to guard against an older plugin reporting "valid" for newer
-	// capability fields that it does not yet understand.
-	// This field is OPTIONAL.
-	Confirmed *ValidateVolumeCapabilitiesResponse_Confirmed `protobuf:"bytes,1,opt,name=confirmed,proto3" json:"confirmed,omitempty"`
-	// Message to the CO if `confirmed` above is empty. This field is
-	// OPTIONAL.
-	// An empty string is equal to an unspecified field value.
-	Message       string `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state                protoimpl.MessageState                        `protogen:"opaque.v1"`
+	xxx_hidden_Confirmed *ValidateVolumeCapabilitiesResponse_Confirmed `protobuf:"bytes,1,opt,name=confirmed,proto3" json:"confirmed,omitempty"`
+	xxx_hidden_Message   string                                        `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
+	unknownFields        protoimpl.UnknownFields
+	sizeCache            protoimpl.SizeCache
 }
 
 func (x *ValidateVolumeCapabilitiesResponse) Reset() {
@@ -3512,35 +3093,35 @@ func (x *ValidateVolumeCapabilitiesResponse) ProtoReflect() protoreflect.Message
 
 func (x *ValidateVolumeCapabilitiesResponse) GetConfirmed() *ValidateVolumeCapabilitiesResponse_Confirmed {
 	if x != nil {
-		return x.Confirmed
+		return x.xxx_hidden_Confirmed
 	}
 	return nil
 }
 
 func (x *ValidateVolumeCapabilitiesResponse) GetMessage() string {
 	if x != nil {
-		return x.Message
+		return x.xxx_hidden_Message
 	}
 	return ""
 }
 
 func (x *ValidateVolumeCapabilitiesResponse) SetConfirmed(v *ValidateVolumeCapabilitiesResponse_Confirmed) {
-	x.Confirmed = v
+	x.xxx_hidden_Confirmed = v
 }
 
 func (x *ValidateVolumeCapabilitiesResponse) SetMessage(v string) {
-	x.Message = v
+	x.xxx_hidden_Message = v
 }
 
 func (x *ValidateVolumeCapabilitiesResponse) HasConfirmed() bool {
 	if x == nil {
 		return false
 	}
-	return x.Confirmed != nil
+	return x.xxx_hidden_Confirmed != nil
 }
 
 func (x *ValidateVolumeCapabilitiesResponse) ClearConfirmed() {
-	x.Confirmed = nil
+	x.xxx_hidden_Confirmed = nil
 }
 
 type ValidateVolumeCapabilitiesResponse_builder struct {
@@ -3565,29 +3146,17 @@ func (b0 ValidateVolumeCapabilitiesResponse_builder) Build() *ValidateVolumeCapa
 	m0 := &ValidateVolumeCapabilitiesResponse{}
 	b, x := &b0, m0
 	_, _ = b, x
-	x.Confirmed = b.Confirmed
-	x.Message = b.Message
+	x.xxx_hidden_Confirmed = b.Confirmed
+	x.xxx_hidden_Message = b.Message
 	return m0
 }
 
 type ListVolumesRequest struct {
-	state protoimpl.MessageState `protogen:"hybrid.v1"`
-	// If specified (non-zero value), the Plugin MUST NOT return more
-	// entries than this number in the response. If the actual number of
-	// entries is more than this number, the Plugin MUST set `next_token`
-	// in the response which can be used to get the next page of entries
-	// in the subsequent `ListVolumes` call. This field is OPTIONAL. If
-	// not specified (zero value), it means there is no restriction on the
-	// number of entries that can be returned.
-	// The value of this field MUST NOT be negative.
-	MaxEntries int32 `protobuf:"varint,1,opt,name=max_entries,json=maxEntries,proto3" json:"max_entries,omitempty"`
-	// A token to specify where to start paginating. Set this field to
-	// `next_token` returned by a previous `ListVolumes` call to get the
-	// next page of entries. This field is OPTIONAL.
-	// An empty string is equal to an unspecified field value.
-	StartingToken string `protobuf:"bytes,2,opt,name=starting_token,json=startingToken,proto3" json:"starting_token,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state                    protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_MaxEntries    int32                  `protobuf:"varint,1,opt,name=max_entries,json=maxEntries,proto3" json:"max_entries,omitempty"`
+	xxx_hidden_StartingToken string                 `protobuf:"bytes,2,opt,name=starting_token,json=startingToken,proto3" json:"starting_token,omitempty"`
+	unknownFields            protoimpl.UnknownFields
+	sizeCache                protoimpl.SizeCache
 }
 
 func (x *ListVolumesRequest) Reset() {
@@ -3617,24 +3186,24 @@ func (x *ListVolumesRequest) ProtoReflect() protoreflect.Message {
 
 func (x *ListVolumesRequest) GetMaxEntries() int32 {
 	if x != nil {
-		return x.MaxEntries
+		return x.xxx_hidden_MaxEntries
 	}
 	return 0
 }
 
 func (x *ListVolumesRequest) GetStartingToken() string {
 	if x != nil {
-		return x.StartingToken
+		return x.xxx_hidden_StartingToken
 	}
 	return ""
 }
 
 func (x *ListVolumesRequest) SetMaxEntries(v int32) {
-	x.MaxEntries = v
+	x.xxx_hidden_MaxEntries = v
 }
 
 func (x *ListVolumesRequest) SetStartingToken(v string) {
-	x.StartingToken = v
+	x.xxx_hidden_StartingToken = v
 }
 
 type ListVolumesRequest_builder struct {
@@ -3660,23 +3229,17 @@ func (b0 ListVolumesRequest_builder) Build() *ListVolumesRequest {
 	m0 := &ListVolumesRequest{}
 	b, x := &b0, m0
 	_, _ = b, x
-	x.MaxEntries = b.MaxEntries
-	x.StartingToken = b.StartingToken
+	x.xxx_hidden_MaxEntries = b.MaxEntries
+	x.xxx_hidden_StartingToken = b.StartingToken
 	return m0
 }
 
 type ListVolumesResponse struct {
-	state   protoimpl.MessageState       `protogen:"hybrid.v1"`
-	Entries []*ListVolumesResponse_Entry `protobuf:"bytes,1,rep,name=entries,proto3" json:"entries,omitempty"`
-	// This token allows you to get the next page of entries for
-	// `ListVolumes` request. If the number of entries is larger than
-	// `max_entries`, use the `next_token` as a value for the
-	// `starting_token` field in the next `ListVolumes` request. This
-	// field is OPTIONAL.
-	// An empty string is equal to an unspecified field value.
-	NextToken     string `protobuf:"bytes,2,opt,name=next_token,json=nextToken,proto3" json:"next_token,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state                protoimpl.MessageState        `protogen:"opaque.v1"`
+	xxx_hidden_Entries   *[]*ListVolumesResponse_Entry `protobuf:"bytes,1,rep,name=entries,proto3" json:"entries,omitempty"`
+	xxx_hidden_NextToken string                        `protobuf:"bytes,2,opt,name=next_token,json=nextToken,proto3" json:"next_token,omitempty"`
+	unknownFields        protoimpl.UnknownFields
+	sizeCache            protoimpl.SizeCache
 }
 
 func (x *ListVolumesResponse) Reset() {
@@ -3706,24 +3269,26 @@ func (x *ListVolumesResponse) ProtoReflect() protoreflect.Message {
 
 func (x *ListVolumesResponse) GetEntries() []*ListVolumesResponse_Entry {
 	if x != nil {
-		return x.Entries
+		if x.xxx_hidden_Entries != nil {
+			return *x.xxx_hidden_Entries
+		}
 	}
 	return nil
 }
 
 func (x *ListVolumesResponse) GetNextToken() string {
 	if x != nil {
-		return x.NextToken
+		return x.xxx_hidden_NextToken
 	}
 	return ""
 }
 
 func (x *ListVolumesResponse) SetEntries(v []*ListVolumesResponse_Entry) {
-	x.Entries = v
+	x.xxx_hidden_Entries = &v
 }
 
 func (x *ListVolumesResponse) SetNextToken(v string) {
-	x.NextToken = v
+	x.xxx_hidden_NextToken = v
 }
 
 type ListVolumesResponse_builder struct {
@@ -3743,18 +3308,16 @@ func (b0 ListVolumesResponse_builder) Build() *ListVolumesResponse {
 	m0 := &ListVolumesResponse{}
 	b, x := &b0, m0
 	_, _ = b, x
-	x.Entries = b.Entries
-	x.NextToken = b.NextToken
+	x.xxx_hidden_Entries = &b.Entries
+	x.xxx_hidden_NextToken = b.NextToken
 	return m0
 }
 
 type ControllerGetVolumeRequest struct {
-	state protoimpl.MessageState `protogen:"hybrid.v1"`
-	// The ID of the volume to fetch current volume information for.
-	// This field is REQUIRED.
-	VolumeId      string `protobuf:"bytes,1,opt,name=volume_id,json=volumeId,proto3" json:"volume_id,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state               protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_VolumeId string                 `protobuf:"bytes,1,opt,name=volume_id,json=volumeId,proto3" json:"volume_id,omitempty"`
+	unknownFields       protoimpl.UnknownFields
+	sizeCache           protoimpl.SizeCache
 }
 
 func (x *ControllerGetVolumeRequest) Reset() {
@@ -3784,13 +3347,13 @@ func (x *ControllerGetVolumeRequest) ProtoReflect() protoreflect.Message {
 
 func (x *ControllerGetVolumeRequest) GetVolumeId() string {
 	if x != nil {
-		return x.VolumeId
+		return x.xxx_hidden_VolumeId
 	}
 	return ""
 }
 
 func (x *ControllerGetVolumeRequest) SetVolumeId(v string) {
-	x.VolumeId = v
+	x.xxx_hidden_VolumeId = v
 }
 
 type ControllerGetVolumeRequest_builder struct {
@@ -3805,18 +3368,16 @@ func (b0 ControllerGetVolumeRequest_builder) Build() *ControllerGetVolumeRequest
 	m0 := &ControllerGetVolumeRequest{}
 	b, x := &b0, m0
 	_, _ = b, x
-	x.VolumeId = b.VolumeId
+	x.xxx_hidden_VolumeId = b.VolumeId
 	return m0
 }
 
 type ControllerGetVolumeResponse struct {
-	state protoimpl.MessageState `protogen:"hybrid.v1"`
-	// This field is REQUIRED
-	Volume *Volume `protobuf:"bytes,1,opt,name=volume,proto3" json:"volume,omitempty"`
-	// This field is REQUIRED.
-	Status        *ControllerGetVolumeResponse_VolumeStatus `protobuf:"bytes,2,opt,name=status,proto3" json:"status,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state             protoimpl.MessageState                    `protogen:"opaque.v1"`
+	xxx_hidden_Volume *Volume                                   `protobuf:"bytes,1,opt,name=volume,proto3" json:"volume,omitempty"`
+	xxx_hidden_Status *ControllerGetVolumeResponse_VolumeStatus `protobuf:"bytes,2,opt,name=status,proto3" json:"status,omitempty"`
+	unknownFields     protoimpl.UnknownFields
+	sizeCache         protoimpl.SizeCache
 }
 
 func (x *ControllerGetVolumeResponse) Reset() {
@@ -3846,46 +3407,46 @@ func (x *ControllerGetVolumeResponse) ProtoReflect() protoreflect.Message {
 
 func (x *ControllerGetVolumeResponse) GetVolume() *Volume {
 	if x != nil {
-		return x.Volume
+		return x.xxx_hidden_Volume
 	}
 	return nil
 }
 
 func (x *ControllerGetVolumeResponse) GetStatus() *ControllerGetVolumeResponse_VolumeStatus {
 	if x != nil {
-		return x.Status
+		return x.xxx_hidden_Status
 	}
 	return nil
 }
 
 func (x *ControllerGetVolumeResponse) SetVolume(v *Volume) {
-	x.Volume = v
+	x.xxx_hidden_Volume = v
 }
 
 func (x *ControllerGetVolumeResponse) SetStatus(v *ControllerGetVolumeResponse_VolumeStatus) {
-	x.Status = v
+	x.xxx_hidden_Status = v
 }
 
 func (x *ControllerGetVolumeResponse) HasVolume() bool {
 	if x == nil {
 		return false
 	}
-	return x.Volume != nil
+	return x.xxx_hidden_Volume != nil
 }
 
 func (x *ControllerGetVolumeResponse) HasStatus() bool {
 	if x == nil {
 		return false
 	}
-	return x.Status != nil
+	return x.xxx_hidden_Status != nil
 }
 
 func (x *ControllerGetVolumeResponse) ClearVolume() {
-	x.Volume = nil
+	x.xxx_hidden_Volume = nil
 }
 
 func (x *ControllerGetVolumeResponse) ClearStatus() {
-	x.Status = nil
+	x.xxx_hidden_Status = nil
 }
 
 type ControllerGetVolumeResponse_builder struct {
@@ -3901,31 +3462,18 @@ func (b0 ControllerGetVolumeResponse_builder) Build() *ControllerGetVolumeRespon
 	m0 := &ControllerGetVolumeResponse{}
 	b, x := &b0, m0
 	_, _ = b, x
-	x.Volume = b.Volume
-	x.Status = b.Status
+	x.xxx_hidden_Volume = b.Volume
+	x.xxx_hidden_Status = b.Status
 	return m0
 }
 
 type ControllerModifyVolumeRequest struct {
-	state protoimpl.MessageState `protogen:"hybrid.v1"`
-	// Contains identity information for the existing volume.
-	// This field is REQUIRED.
-	VolumeId string `protobuf:"bytes,1,opt,name=volume_id,json=volumeId,proto3" json:"volume_id,omitempty"`
-	// Secrets required by plugin to complete modify volume request.
-	// This field is OPTIONAL. Refer to the `Secrets Requirements`
-	// section on how to use this field.
-	Secrets map[string]string `protobuf:"bytes,2,rep,name=secrets,proto3" json:"secrets,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
-	// Plugin specific volume attributes to mutate, passed in as
-	// opaque key-value pairs.
-	// This field is REQUIRED. The Plugin is responsible for
-	// parsing and validating these parameters. COs will treat these
-	// as opaque. The CO SHOULD specify the intended values of all mutable
-	// parameters it intends to modify. SPs MUST NOT modify volumes based
-	// on the absence of keys, only keys that are specified should result
-	// in modifications to the volume.
-	MutableParameters map[string]string `protobuf:"bytes,3,rep,name=mutable_parameters,json=mutableParameters,proto3" json:"mutable_parameters,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
-	unknownFields     protoimpl.UnknownFields
-	sizeCache         protoimpl.SizeCache
+	state                        protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_VolumeId          string                 `protobuf:"bytes,1,opt,name=volume_id,json=volumeId,proto3" json:"volume_id,omitempty"`
+	xxx_hidden_Secrets           map[string]string      `protobuf:"bytes,2,rep,name=secrets,proto3" json:"secrets,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	xxx_hidden_MutableParameters map[string]string      `protobuf:"bytes,3,rep,name=mutable_parameters,json=mutableParameters,proto3" json:"mutable_parameters,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	unknownFields                protoimpl.UnknownFields
+	sizeCache                    protoimpl.SizeCache
 }
 
 func (x *ControllerModifyVolumeRequest) Reset() {
@@ -3955,35 +3503,35 @@ func (x *ControllerModifyVolumeRequest) ProtoReflect() protoreflect.Message {
 
 func (x *ControllerModifyVolumeRequest) GetVolumeId() string {
 	if x != nil {
-		return x.VolumeId
+		return x.xxx_hidden_VolumeId
 	}
 	return ""
 }
 
 func (x *ControllerModifyVolumeRequest) GetSecrets() map[string]string {
 	if x != nil {
-		return x.Secrets
+		return x.xxx_hidden_Secrets
 	}
 	return nil
 }
 
 func (x *ControllerModifyVolumeRequest) GetMutableParameters() map[string]string {
 	if x != nil {
-		return x.MutableParameters
+		return x.xxx_hidden_MutableParameters
 	}
 	return nil
 }
 
 func (x *ControllerModifyVolumeRequest) SetVolumeId(v string) {
-	x.VolumeId = v
+	x.xxx_hidden_VolumeId = v
 }
 
 func (x *ControllerModifyVolumeRequest) SetSecrets(v map[string]string) {
-	x.Secrets = v
+	x.xxx_hidden_Secrets = v
 }
 
 func (x *ControllerModifyVolumeRequest) SetMutableParameters(v map[string]string) {
-	x.MutableParameters = v
+	x.xxx_hidden_MutableParameters = v
 }
 
 type ControllerModifyVolumeRequest_builder struct {
@@ -4011,14 +3559,14 @@ func (b0 ControllerModifyVolumeRequest_builder) Build() *ControllerModifyVolumeR
 	m0 := &ControllerModifyVolumeRequest{}
 	b, x := &b0, m0
 	_, _ = b, x
-	x.VolumeId = b.VolumeId
-	x.Secrets = b.Secrets
-	x.MutableParameters = b.MutableParameters
+	x.xxx_hidden_VolumeId = b.VolumeId
+	x.xxx_hidden_Secrets = b.Secrets
+	x.xxx_hidden_MutableParameters = b.MutableParameters
 	return m0
 }
 
 type ControllerModifyVolumeResponse struct {
-	state         protoimpl.MessageState `protogen:"hybrid.v1"`
+	state         protoimpl.MessageState `protogen:"opaque.v1"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -4061,27 +3609,12 @@ func (b0 ControllerModifyVolumeResponse_builder) Build() *ControllerModifyVolume
 }
 
 type GetCapacityRequest struct {
-	state protoimpl.MessageState `protogen:"hybrid.v1"`
-	// If specified, the Plugin SHALL report the capacity of the storage
-	// that can be used to provision volumes that satisfy ALL of the
-	// specified `volume_capabilities`. These are the same
-	// `volume_capabilities` the CO will use in `CreateVolumeRequest`.
-	// This field is OPTIONAL.
-	VolumeCapabilities []*VolumeCapability `protobuf:"bytes,1,rep,name=volume_capabilities,json=volumeCapabilities,proto3" json:"volume_capabilities,omitempty"`
-	// If specified, the Plugin SHALL report the capacity of the storage
-	// that can be used to provision volumes with the given Plugin
-	// specific `parameters`. These are the same `parameters` the CO will
-	// use in `CreateVolumeRequest`. This field is OPTIONAL.
-	Parameters map[string]string `protobuf:"bytes,2,rep,name=parameters,proto3" json:"parameters,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
-	// If specified, the Plugin SHALL report the capacity of the storage
-	// that can be used to provision volumes that in the specified
-	// `accessible_topology`. This is the same as the
-	// `accessible_topology` the CO returns in a `CreateVolumeResponse`.
-	// This field is OPTIONAL. This field SHALL NOT be set unless the
-	// plugin advertises the VOLUME_ACCESSIBILITY_CONSTRAINTS capability.
-	AccessibleTopology *Topology `protobuf:"bytes,3,opt,name=accessible_topology,json=accessibleTopology,proto3" json:"accessible_topology,omitempty"`
-	unknownFields      protoimpl.UnknownFields
-	sizeCache          protoimpl.SizeCache
+	state                         protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_VolumeCapabilities *[]*VolumeCapability   `protobuf:"bytes,1,rep,name=volume_capabilities,json=volumeCapabilities,proto3" json:"volume_capabilities,omitempty"`
+	xxx_hidden_Parameters         map[string]string      `protobuf:"bytes,2,rep,name=parameters,proto3" json:"parameters,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	xxx_hidden_AccessibleTopology *Topology              `protobuf:"bytes,3,opt,name=accessible_topology,json=accessibleTopology,proto3" json:"accessible_topology,omitempty"`
+	unknownFields                 protoimpl.UnknownFields
+	sizeCache                     protoimpl.SizeCache
 }
 
 func (x *GetCapacityRequest) Reset() {
@@ -4111,46 +3644,48 @@ func (x *GetCapacityRequest) ProtoReflect() protoreflect.Message {
 
 func (x *GetCapacityRequest) GetVolumeCapabilities() []*VolumeCapability {
 	if x != nil {
-		return x.VolumeCapabilities
+		if x.xxx_hidden_VolumeCapabilities != nil {
+			return *x.xxx_hidden_VolumeCapabilities
+		}
 	}
 	return nil
 }
 
 func (x *GetCapacityRequest) GetParameters() map[string]string {
 	if x != nil {
-		return x.Parameters
+		return x.xxx_hidden_Parameters
 	}
 	return nil
 }
 
 func (x *GetCapacityRequest) GetAccessibleTopology() *Topology {
 	if x != nil {
-		return x.AccessibleTopology
+		return x.xxx_hidden_AccessibleTopology
 	}
 	return nil
 }
 
 func (x *GetCapacityRequest) SetVolumeCapabilities(v []*VolumeCapability) {
-	x.VolumeCapabilities = v
+	x.xxx_hidden_VolumeCapabilities = &v
 }
 
 func (x *GetCapacityRequest) SetParameters(v map[string]string) {
-	x.Parameters = v
+	x.xxx_hidden_Parameters = v
 }
 
 func (x *GetCapacityRequest) SetAccessibleTopology(v *Topology) {
-	x.AccessibleTopology = v
+	x.xxx_hidden_AccessibleTopology = v
 }
 
 func (x *GetCapacityRequest) HasAccessibleTopology() bool {
 	if x == nil {
 		return false
 	}
-	return x.AccessibleTopology != nil
+	return x.xxx_hidden_AccessibleTopology != nil
 }
 
 func (x *GetCapacityRequest) ClearAccessibleTopology() {
-	x.AccessibleTopology = nil
+	x.xxx_hidden_AccessibleTopology = nil
 }
 
 type GetCapacityRequest_builder struct {
@@ -4180,55 +3715,19 @@ func (b0 GetCapacityRequest_builder) Build() *GetCapacityRequest {
 	m0 := &GetCapacityRequest{}
 	b, x := &b0, m0
 	_, _ = b, x
-	x.VolumeCapabilities = b.VolumeCapabilities
-	x.Parameters = b.Parameters
-	x.AccessibleTopology = b.AccessibleTopology
+	x.xxx_hidden_VolumeCapabilities = &b.VolumeCapabilities
+	x.xxx_hidden_Parameters = b.Parameters
+	x.xxx_hidden_AccessibleTopology = b.AccessibleTopology
 	return m0
 }
 
 type GetCapacityResponse struct {
-	state protoimpl.MessageState `protogen:"hybrid.v1"`
-	// The available capacity, in bytes, of the storage that can be used
-	// to provision volumes. If `volume_capabilities` or `parameters` is
-	// specified in the request, the Plugin SHALL take those into
-	// consideration when calculating the available capacity of the
-	// storage. This field is REQUIRED.
-	// The value of this field MUST NOT be negative.
-	AvailableCapacity int64 `protobuf:"varint,1,opt,name=available_capacity,json=availableCapacity,proto3" json:"available_capacity,omitempty"`
-	// The largest size that may be used in a
-	// CreateVolumeRequest.capacity_range.required_bytes field
-	// to create a volume with the same parameters as those in
-	// GetCapacityRequest.
-	//
-	// If `volume_capabilities` or `parameters` is
-	// specified in the request, the Plugin SHALL take those into
-	// consideration when calculating the minimum volume size of the
-	// storage.
-	//
-	// This field is OPTIONAL. MUST NOT be negative.
-	// The Plugin SHOULD provide a value for this field if it has
-	// a maximum size for individual volumes and leave it unset
-	// otherwise. COs MAY use it to make decision about
-	// where to create volumes.
-	MaximumVolumeSize *wrapperspb.Int64Value `protobuf:"bytes,2,opt,name=maximum_volume_size,json=maximumVolumeSize,proto3" json:"maximum_volume_size,omitempty"`
-	// The smallest size that may be used in a
-	// CreateVolumeRequest.capacity_range.limit_bytes field
-	// to create a volume with the same parameters as those in
-	// GetCapacityRequest.
-	//
-	// If `volume_capabilities` or `parameters` is
-	// specified in the request, the Plugin SHALL take those into
-	// consideration when calculating the maximum volume size of the
-	// storage.
-	//
-	// This field is OPTIONAL. MUST NOT be negative.
-	// The Plugin SHOULD provide a value for this field if it has
-	// a minimum size for individual volumes and leave it unset
-	// otherwise. COs MAY use it to make decision about
-	// where to create volumes.
-	MinimumVolumeSize *wrapperspb.Int64Value `protobuf:"bytes,3,opt,name=minimum_volume_size,json=minimumVolumeSize,proto3" json:"minimum_volume_size,omitempty"`
-	unknownFields     protoimpl.UnknownFields
-	sizeCache         protoimpl.SizeCache
+	state                        protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_AvailableCapacity int64                  `protobuf:"varint,1,opt,name=available_capacity,json=availableCapacity,proto3" json:"available_capacity,omitempty"`
+	xxx_hidden_MaximumVolumeSize *wrapperspb.Int64Value `protobuf:"bytes,2,opt,name=maximum_volume_size,json=maximumVolumeSize,proto3" json:"maximum_volume_size,omitempty"`
+	xxx_hidden_MinimumVolumeSize *wrapperspb.Int64Value `protobuf:"bytes,3,opt,name=minimum_volume_size,json=minimumVolumeSize,proto3" json:"minimum_volume_size,omitempty"`
+	unknownFields                protoimpl.UnknownFields
+	sizeCache                    protoimpl.SizeCache
 }
 
 func (x *GetCapacityResponse) Reset() {
@@ -4258,57 +3757,57 @@ func (x *GetCapacityResponse) ProtoReflect() protoreflect.Message {
 
 func (x *GetCapacityResponse) GetAvailableCapacity() int64 {
 	if x != nil {
-		return x.AvailableCapacity
+		return x.xxx_hidden_AvailableCapacity
 	}
 	return 0
 }
 
 func (x *GetCapacityResponse) GetMaximumVolumeSize() *wrapperspb.Int64Value {
 	if x != nil {
-		return x.MaximumVolumeSize
+		return x.xxx_hidden_MaximumVolumeSize
 	}
 	return nil
 }
 
 func (x *GetCapacityResponse) GetMinimumVolumeSize() *wrapperspb.Int64Value {
 	if x != nil {
-		return x.MinimumVolumeSize
+		return x.xxx_hidden_MinimumVolumeSize
 	}
 	return nil
 }
 
 func (x *GetCapacityResponse) SetAvailableCapacity(v int64) {
-	x.AvailableCapacity = v
+	x.xxx_hidden_AvailableCapacity = v
 }
 
 func (x *GetCapacityResponse) SetMaximumVolumeSize(v *wrapperspb.Int64Value) {
-	x.MaximumVolumeSize = v
+	x.xxx_hidden_MaximumVolumeSize = v
 }
 
 func (x *GetCapacityResponse) SetMinimumVolumeSize(v *wrapperspb.Int64Value) {
-	x.MinimumVolumeSize = v
+	x.xxx_hidden_MinimumVolumeSize = v
 }
 
 func (x *GetCapacityResponse) HasMaximumVolumeSize() bool {
 	if x == nil {
 		return false
 	}
-	return x.MaximumVolumeSize != nil
+	return x.xxx_hidden_MaximumVolumeSize != nil
 }
 
 func (x *GetCapacityResponse) HasMinimumVolumeSize() bool {
 	if x == nil {
 		return false
 	}
-	return x.MinimumVolumeSize != nil
+	return x.xxx_hidden_MinimumVolumeSize != nil
 }
 
 func (x *GetCapacityResponse) ClearMaximumVolumeSize() {
-	x.MaximumVolumeSize = nil
+	x.xxx_hidden_MaximumVolumeSize = nil
 }
 
 func (x *GetCapacityResponse) ClearMinimumVolumeSize() {
-	x.MinimumVolumeSize = nil
+	x.xxx_hidden_MinimumVolumeSize = nil
 }
 
 type GetCapacityResponse_builder struct {
@@ -4359,14 +3858,14 @@ func (b0 GetCapacityResponse_builder) Build() *GetCapacityResponse {
 	m0 := &GetCapacityResponse{}
 	b, x := &b0, m0
 	_, _ = b, x
-	x.AvailableCapacity = b.AvailableCapacity
-	x.MaximumVolumeSize = b.MaximumVolumeSize
-	x.MinimumVolumeSize = b.MinimumVolumeSize
+	x.xxx_hidden_AvailableCapacity = b.AvailableCapacity
+	x.xxx_hidden_MaximumVolumeSize = b.MaximumVolumeSize
+	x.xxx_hidden_MinimumVolumeSize = b.MinimumVolumeSize
 	return m0
 }
 
 type ControllerGetCapabilitiesRequest struct {
-	state         protoimpl.MessageState `protogen:"hybrid.v1"`
+	state         protoimpl.MessageState `protogen:"opaque.v1"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -4409,12 +3908,10 @@ func (b0 ControllerGetCapabilitiesRequest_builder) Build() *ControllerGetCapabil
 }
 
 type ControllerGetCapabilitiesResponse struct {
-	state protoimpl.MessageState `protogen:"hybrid.v1"`
-	// All the capabilities that the controller service supports. This
-	// field is OPTIONAL.
-	Capabilities  []*ControllerServiceCapability `protobuf:"bytes,1,rep,name=capabilities,proto3" json:"capabilities,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state                   protoimpl.MessageState          `protogen:"opaque.v1"`
+	xxx_hidden_Capabilities *[]*ControllerServiceCapability `protobuf:"bytes,1,rep,name=capabilities,proto3" json:"capabilities,omitempty"`
+	unknownFields           protoimpl.UnknownFields
+	sizeCache               protoimpl.SizeCache
 }
 
 func (x *ControllerGetCapabilitiesResponse) Reset() {
@@ -4444,13 +3941,15 @@ func (x *ControllerGetCapabilitiesResponse) ProtoReflect() protoreflect.Message 
 
 func (x *ControllerGetCapabilitiesResponse) GetCapabilities() []*ControllerServiceCapability {
 	if x != nil {
-		return x.Capabilities
+		if x.xxx_hidden_Capabilities != nil {
+			return *x.xxx_hidden_Capabilities
+		}
 	}
 	return nil
 }
 
 func (x *ControllerGetCapabilitiesResponse) SetCapabilities(v []*ControllerServiceCapability) {
-	x.Capabilities = v
+	x.xxx_hidden_Capabilities = &v
 }
 
 type ControllerGetCapabilitiesResponse_builder struct {
@@ -4465,19 +3964,16 @@ func (b0 ControllerGetCapabilitiesResponse_builder) Build() *ControllerGetCapabi
 	m0 := &ControllerGetCapabilitiesResponse{}
 	b, x := &b0, m0
 	_, _ = b, x
-	x.Capabilities = b.Capabilities
+	x.xxx_hidden_Capabilities = &b.Capabilities
 	return m0
 }
 
 // Specifies a capability of the controller service.
 type ControllerServiceCapability struct {
-	state protoimpl.MessageState `protogen:"hybrid.v1"`
-	// Types that are valid to be assigned to Type:
-	//
-	//	*ControllerServiceCapability_Rpc
-	Type          isControllerServiceCapability_Type `protobuf_oneof:"type"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state           protoimpl.MessageState             `protogen:"opaque.v1"`
+	xxx_hidden_Type isControllerServiceCapability_Type `protobuf_oneof:"type"`
+	unknownFields   protoimpl.UnknownFields
+	sizeCache       protoimpl.SizeCache
 }
 
 func (x *ControllerServiceCapability) Reset() {
@@ -4505,16 +4001,9 @@ func (x *ControllerServiceCapability) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-func (x *ControllerServiceCapability) GetType() isControllerServiceCapability_Type {
-	if x != nil {
-		return x.Type
-	}
-	return nil
-}
-
 func (x *ControllerServiceCapability) GetRpc() *ControllerServiceCapability_RPC {
 	if x != nil {
-		if x, ok := x.Type.(*ControllerServiceCapability_Rpc); ok {
+		if x, ok := x.xxx_hidden_Type.(*controllerServiceCapability_Rpc); ok {
 			return x.Rpc
 		}
 	}
@@ -4523,34 +4012,34 @@ func (x *ControllerServiceCapability) GetRpc() *ControllerServiceCapability_RPC 
 
 func (x *ControllerServiceCapability) SetRpc(v *ControllerServiceCapability_RPC) {
 	if v == nil {
-		x.Type = nil
+		x.xxx_hidden_Type = nil
 		return
 	}
-	x.Type = &ControllerServiceCapability_Rpc{v}
+	x.xxx_hidden_Type = &controllerServiceCapability_Rpc{v}
 }
 
 func (x *ControllerServiceCapability) HasType() bool {
 	if x == nil {
 		return false
 	}
-	return x.Type != nil
+	return x.xxx_hidden_Type != nil
 }
 
 func (x *ControllerServiceCapability) HasRpc() bool {
 	if x == nil {
 		return false
 	}
-	_, ok := x.Type.(*ControllerServiceCapability_Rpc)
+	_, ok := x.xxx_hidden_Type.(*controllerServiceCapability_Rpc)
 	return ok
 }
 
 func (x *ControllerServiceCapability) ClearType() {
-	x.Type = nil
+	x.xxx_hidden_Type = nil
 }
 
 func (x *ControllerServiceCapability) ClearRpc() {
-	if _, ok := x.Type.(*ControllerServiceCapability_Rpc); ok {
-		x.Type = nil
+	if _, ok := x.xxx_hidden_Type.(*controllerServiceCapability_Rpc); ok {
+		x.xxx_hidden_Type = nil
 	}
 }
 
@@ -4561,8 +4050,8 @@ func (x *ControllerServiceCapability) WhichType() case_ControllerServiceCapabili
 	if x == nil {
 		return ControllerServiceCapability_Type_not_set_case
 	}
-	switch x.Type.(type) {
-	case *ControllerServiceCapability_Rpc:
+	switch x.xxx_hidden_Type.(type) {
+	case *controllerServiceCapability_Rpc:
 		return ControllerServiceCapability_Rpc_case
 	default:
 		return ControllerServiceCapability_Type_not_set_case
@@ -4572,10 +4061,10 @@ func (x *ControllerServiceCapability) WhichType() case_ControllerServiceCapabili
 type ControllerServiceCapability_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
-	// Fields of oneof Type:
+	// Fields of oneof xxx_hidden_Type:
 	// RPC that the controller supports.
 	Rpc *ControllerServiceCapability_RPC
-	// -- end of Type
+	// -- end of xxx_hidden_Type
 }
 
 func (b0 ControllerServiceCapability_builder) Build() *ControllerServiceCapability {
@@ -4583,7 +4072,7 @@ func (b0 ControllerServiceCapability_builder) Build() *ControllerServiceCapabili
 	b, x := &b0, m0
 	_, _ = b, x
 	if b.Rpc != nil {
-		x.Type = &ControllerServiceCapability_Rpc{b.Rpc}
+		x.xxx_hidden_Type = &controllerServiceCapability_Rpc{b.Rpc}
 	}
 	return m0
 }
@@ -4602,42 +4091,21 @@ type isControllerServiceCapability_Type interface {
 	isControllerServiceCapability_Type()
 }
 
-type ControllerServiceCapability_Rpc struct {
+type controllerServiceCapability_Rpc struct {
 	// RPC that the controller supports.
 	Rpc *ControllerServiceCapability_RPC `protobuf:"bytes,1,opt,name=rpc,proto3,oneof"`
 }
 
-func (*ControllerServiceCapability_Rpc) isControllerServiceCapability_Type() {}
+func (*controllerServiceCapability_Rpc) isControllerServiceCapability_Type() {}
 
 type CreateSnapshotRequest struct {
-	state protoimpl.MessageState `protogen:"hybrid.v1"`
-	// The ID of the source volume to be snapshotted.
-	// This field is REQUIRED.
-	SourceVolumeId string `protobuf:"bytes,1,opt,name=source_volume_id,json=sourceVolumeId,proto3" json:"source_volume_id,omitempty"`
-	// The suggested name for the snapshot. This field is REQUIRED for
-	// idempotency.
-	// Any Unicode string that conforms to the length limit is allowed
-	// except those containing the following banned characters:
-	// U+0000-U+0008, U+000B, U+000C, U+000E-U+001F, U+007F-U+009F.
-	// (These are control characters other than commonly used whitespace.)
-	Name string `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
-	// Secrets required by plugin to complete snapshot creation request.
-	// This field is OPTIONAL. Refer to the `Secrets Requirements`
-	// section on how to use this field.
-	Secrets map[string]string `protobuf:"bytes,3,rep,name=secrets,proto3" json:"secrets,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
-	// Plugin specific parameters passed in as opaque key-value pairs.
-	// This field is OPTIONAL. The Plugin is responsible for parsing and
-	// validating these parameters. COs will treat these as opaque.
-	// Use cases for opaque parameters:
-	//   - Specify a policy to automatically clean up the snapshot.
-	//   - Specify an expiration date for the snapshot.
-	//   - Specify whether the snapshot is readonly or read/write.
-	//   - Specify if the snapshot should be replicated to some place.
-	//   - Specify primary or secondary for replication systems that
-	//     support snapshotting only on primary.
-	Parameters    map[string]string `protobuf:"bytes,4,rep,name=parameters,proto3" json:"parameters,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state                     protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_SourceVolumeId string                 `protobuf:"bytes,1,opt,name=source_volume_id,json=sourceVolumeId,proto3" json:"source_volume_id,omitempty"`
+	xxx_hidden_Name           string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	xxx_hidden_Secrets        map[string]string      `protobuf:"bytes,3,rep,name=secrets,proto3" json:"secrets,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	xxx_hidden_Parameters     map[string]string      `protobuf:"bytes,4,rep,name=parameters,proto3" json:"parameters,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	unknownFields             protoimpl.UnknownFields
+	sizeCache                 protoimpl.SizeCache
 }
 
 func (x *CreateSnapshotRequest) Reset() {
@@ -4667,46 +4135,46 @@ func (x *CreateSnapshotRequest) ProtoReflect() protoreflect.Message {
 
 func (x *CreateSnapshotRequest) GetSourceVolumeId() string {
 	if x != nil {
-		return x.SourceVolumeId
+		return x.xxx_hidden_SourceVolumeId
 	}
 	return ""
 }
 
 func (x *CreateSnapshotRequest) GetName() string {
 	if x != nil {
-		return x.Name
+		return x.xxx_hidden_Name
 	}
 	return ""
 }
 
 func (x *CreateSnapshotRequest) GetSecrets() map[string]string {
 	if x != nil {
-		return x.Secrets
+		return x.xxx_hidden_Secrets
 	}
 	return nil
 }
 
 func (x *CreateSnapshotRequest) GetParameters() map[string]string {
 	if x != nil {
-		return x.Parameters
+		return x.xxx_hidden_Parameters
 	}
 	return nil
 }
 
 func (x *CreateSnapshotRequest) SetSourceVolumeId(v string) {
-	x.SourceVolumeId = v
+	x.xxx_hidden_SourceVolumeId = v
 }
 
 func (x *CreateSnapshotRequest) SetName(v string) {
-	x.Name = v
+	x.xxx_hidden_Name = v
 }
 
 func (x *CreateSnapshotRequest) SetSecrets(v map[string]string) {
-	x.Secrets = v
+	x.xxx_hidden_Secrets = v
 }
 
 func (x *CreateSnapshotRequest) SetParameters(v map[string]string) {
-	x.Parameters = v
+	x.xxx_hidden_Parameters = v
 }
 
 type CreateSnapshotRequest_builder struct {
@@ -4743,21 +4211,18 @@ func (b0 CreateSnapshotRequest_builder) Build() *CreateSnapshotRequest {
 	m0 := &CreateSnapshotRequest{}
 	b, x := &b0, m0
 	_, _ = b, x
-	x.SourceVolumeId = b.SourceVolumeId
-	x.Name = b.Name
-	x.Secrets = b.Secrets
-	x.Parameters = b.Parameters
+	x.xxx_hidden_SourceVolumeId = b.SourceVolumeId
+	x.xxx_hidden_Name = b.Name
+	x.xxx_hidden_Secrets = b.Secrets
+	x.xxx_hidden_Parameters = b.Parameters
 	return m0
 }
 
 type CreateSnapshotResponse struct {
-	state protoimpl.MessageState `protogen:"hybrid.v1"`
-	// Contains all attributes of the newly created snapshot that are
-	// relevant to the CO along with information required by the Plugin
-	// to uniquely identify the snapshot. This field is REQUIRED.
-	Snapshot      *Snapshot `protobuf:"bytes,1,opt,name=snapshot,proto3" json:"snapshot,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state               protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Snapshot *Snapshot              `protobuf:"bytes,1,opt,name=snapshot,proto3" json:"snapshot,omitempty"`
+	unknownFields       protoimpl.UnknownFields
+	sizeCache           protoimpl.SizeCache
 }
 
 func (x *CreateSnapshotResponse) Reset() {
@@ -4787,24 +4252,24 @@ func (x *CreateSnapshotResponse) ProtoReflect() protoreflect.Message {
 
 func (x *CreateSnapshotResponse) GetSnapshot() *Snapshot {
 	if x != nil {
-		return x.Snapshot
+		return x.xxx_hidden_Snapshot
 	}
 	return nil
 }
 
 func (x *CreateSnapshotResponse) SetSnapshot(v *Snapshot) {
-	x.Snapshot = v
+	x.xxx_hidden_Snapshot = v
 }
 
 func (x *CreateSnapshotResponse) HasSnapshot() bool {
 	if x == nil {
 		return false
 	}
-	return x.Snapshot != nil
+	return x.xxx_hidden_Snapshot != nil
 }
 
 func (x *CreateSnapshotResponse) ClearSnapshot() {
-	x.Snapshot = nil
+	x.xxx_hidden_Snapshot = nil
 }
 
 type CreateSnapshotResponse_builder struct {
@@ -4820,58 +4285,21 @@ func (b0 CreateSnapshotResponse_builder) Build() *CreateSnapshotResponse {
 	m0 := &CreateSnapshotResponse{}
 	b, x := &b0, m0
 	_, _ = b, x
-	x.Snapshot = b.Snapshot
+	x.xxx_hidden_Snapshot = b.Snapshot
 	return m0
 }
 
 // Information about a specific snapshot.
 type Snapshot struct {
-	state protoimpl.MessageState `protogen:"hybrid.v1"`
-	// This is the complete size of the snapshot in bytes. The purpose of
-	// this field is to give CO guidance on how much space is needed to
-	// create a volume from this snapshot. The size of the volume MUST NOT
-	// be less than the size of the source snapshot. This field is
-	// OPTIONAL. If this field is not set, it indicates that this size is
-	// unknown. The value of this field MUST NOT be negative and a size of
-	// zero means it is unspecified.
-	SizeBytes int64 `protobuf:"varint,1,opt,name=size_bytes,json=sizeBytes,proto3" json:"size_bytes,omitempty"`
-	// The identifier for this snapshot, generated by the plugin.
-	// This field is REQUIRED.
-	// This field MUST contain enough information to uniquely identify
-	// this specific snapshot vs all other snapshots supported by this
-	// plugin.
-	// This field SHALL be used by the CO in subsequent calls to refer to
-	// this snapshot.
-	// The SP is NOT responsible for global uniqueness of snapshot_id
-	// across multiple SPs.
-	SnapshotId string `protobuf:"bytes,2,opt,name=snapshot_id,json=snapshotId,proto3" json:"snapshot_id,omitempty"`
-	// Identity information for the source volume. Note that creating a
-	// snapshot from a snapshot is not supported here so the source has to
-	// be a volume. This field is REQUIRED.
-	SourceVolumeId string `protobuf:"bytes,3,opt,name=source_volume_id,json=sourceVolumeId,proto3" json:"source_volume_id,omitempty"`
-	// Timestamp when the point-in-time snapshot is taken on the storage
-	// system. This field is REQUIRED.
-	CreationTime *timestamppb.Timestamp `protobuf:"bytes,4,opt,name=creation_time,json=creationTime,proto3" json:"creation_time,omitempty"`
-	// Indicates if a snapshot is ready to use as a
-	// `volume_content_source` in a `CreateVolumeRequest`. The default
-	// value is false. This field is REQUIRED.
-	ReadyToUse bool `protobuf:"varint,5,opt,name=ready_to_use,json=readyToUse,proto3" json:"ready_to_use,omitempty"`
-	// The ID of the volume group snapshot that this snapshot is part of.
-	// It uniquely identifies the group snapshot on the storage system.
-	// This field is OPTIONAL.
-	// If this snapshot is a member of a volume group snapshot, and it
-	// MUST NOT be deleted as a stand alone snapshot, then the SP
-	// MUST provide the ID of the volume group snapshot in this field.
-	// If provided, CO MUST use this field in subsequent volume group
-	// snapshot operations to indicate that this snapshot is part of the
-	// specified group snapshot.
-	// If not provided, CO SHALL treat the snapshot as independent,
-	// and SP SHALL allow it to be deleted separately.
-	// If this message is inside a VolumeGroupSnapshot message, the value
-	// MUST be the same as the group_snapshot_id in that message.
-	GroupSnapshotId string `protobuf:"bytes,6,opt,name=group_snapshot_id,json=groupSnapshotId,proto3" json:"group_snapshot_id,omitempty"`
-	unknownFields   protoimpl.UnknownFields
-	sizeCache       protoimpl.SizeCache
+	state                      protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_SizeBytes       int64                  `protobuf:"varint,1,opt,name=size_bytes,json=sizeBytes,proto3" json:"size_bytes,omitempty"`
+	xxx_hidden_SnapshotId      string                 `protobuf:"bytes,2,opt,name=snapshot_id,json=snapshotId,proto3" json:"snapshot_id,omitempty"`
+	xxx_hidden_SourceVolumeId  string                 `protobuf:"bytes,3,opt,name=source_volume_id,json=sourceVolumeId,proto3" json:"source_volume_id,omitempty"`
+	xxx_hidden_CreationTime    *timestamppb.Timestamp `protobuf:"bytes,4,opt,name=creation_time,json=creationTime,proto3" json:"creation_time,omitempty"`
+	xxx_hidden_ReadyToUse      bool                   `protobuf:"varint,5,opt,name=ready_to_use,json=readyToUse,proto3" json:"ready_to_use,omitempty"`
+	xxx_hidden_GroupSnapshotId string                 `protobuf:"bytes,6,opt,name=group_snapshot_id,json=groupSnapshotId,proto3" json:"group_snapshot_id,omitempty"`
+	unknownFields              protoimpl.UnknownFields
+	sizeCache                  protoimpl.SizeCache
 }
 
 func (x *Snapshot) Reset() {
@@ -4901,79 +4329,79 @@ func (x *Snapshot) ProtoReflect() protoreflect.Message {
 
 func (x *Snapshot) GetSizeBytes() int64 {
 	if x != nil {
-		return x.SizeBytes
+		return x.xxx_hidden_SizeBytes
 	}
 	return 0
 }
 
 func (x *Snapshot) GetSnapshotId() string {
 	if x != nil {
-		return x.SnapshotId
+		return x.xxx_hidden_SnapshotId
 	}
 	return ""
 }
 
 func (x *Snapshot) GetSourceVolumeId() string {
 	if x != nil {
-		return x.SourceVolumeId
+		return x.xxx_hidden_SourceVolumeId
 	}
 	return ""
 }
 
 func (x *Snapshot) GetCreationTime() *timestamppb.Timestamp {
 	if x != nil {
-		return x.CreationTime
+		return x.xxx_hidden_CreationTime
 	}
 	return nil
 }
 
 func (x *Snapshot) GetReadyToUse() bool {
 	if x != nil {
-		return x.ReadyToUse
+		return x.xxx_hidden_ReadyToUse
 	}
 	return false
 }
 
 func (x *Snapshot) GetGroupSnapshotId() string {
 	if x != nil {
-		return x.GroupSnapshotId
+		return x.xxx_hidden_GroupSnapshotId
 	}
 	return ""
 }
 
 func (x *Snapshot) SetSizeBytes(v int64) {
-	x.SizeBytes = v
+	x.xxx_hidden_SizeBytes = v
 }
 
 func (x *Snapshot) SetSnapshotId(v string) {
-	x.SnapshotId = v
+	x.xxx_hidden_SnapshotId = v
 }
 
 func (x *Snapshot) SetSourceVolumeId(v string) {
-	x.SourceVolumeId = v
+	x.xxx_hidden_SourceVolumeId = v
 }
 
 func (x *Snapshot) SetCreationTime(v *timestamppb.Timestamp) {
-	x.CreationTime = v
+	x.xxx_hidden_CreationTime = v
 }
 
 func (x *Snapshot) SetReadyToUse(v bool) {
-	x.ReadyToUse = v
+	x.xxx_hidden_ReadyToUse = v
 }
 
 func (x *Snapshot) SetGroupSnapshotId(v string) {
-	x.GroupSnapshotId = v
+	x.xxx_hidden_GroupSnapshotId = v
 }
 
 func (x *Snapshot) HasCreationTime() bool {
 	if x == nil {
 		return false
 	}
-	return x.CreationTime != nil
+	return x.xxx_hidden_CreationTime != nil
 }
 
 func (x *Snapshot) ClearCreationTime() {
-	x.CreationTime = nil
+	x.xxx_hidden_CreationTime = nil
 }
 
 type Snapshot_builder struct {
@@ -5028,26 +4456,21 @@ func (b0 Snapshot_builder) Build() *Snapshot {
 	m0 := &Snapshot{}
 	b, x := &b0, m0
 	_, _ = b, x
-	x.SizeBytes = b.SizeBytes
-	x.SnapshotId = b.SnapshotId
-	x.SourceVolumeId = b.SourceVolumeId
-	x.CreationTime = b.CreationTime
-	x.ReadyToUse = b.ReadyToUse
-	x.GroupSnapshotId = b.GroupSnapshotId
+	x.xxx_hidden_SizeBytes = b.SizeBytes
+	x.xxx_hidden_SnapshotId = b.SnapshotId
+	x.xxx_hidden_SourceVolumeId = b.SourceVolumeId
+	x.xxx_hidden_CreationTime = b.CreationTime
+	x.xxx_hidden_ReadyToUse = b.ReadyToUse
+	x.xxx_hidden_GroupSnapshotId = b.GroupSnapshotId
 	return m0
 }
 
 type DeleteSnapshotRequest struct {
-	state protoimpl.MessageState `protogen:"hybrid.v1"`
-	// The ID of the snapshot to be deleted.
-	// This field is REQUIRED.
-	SnapshotId string `protobuf:"bytes,1,opt,name=snapshot_id,json=snapshotId,proto3" json:"snapshot_id,omitempty"`
-	// Secrets required by plugin to complete snapshot deletion request.
-	// This field is OPTIONAL. Refer to the `Secrets Requirements`
-	// section on how to use this field.
-	Secrets       map[string]string `protobuf:"bytes,2,rep,name=secrets,proto3" json:"secrets,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state                 protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_SnapshotId string                 `protobuf:"bytes,1,opt,name=snapshot_id,json=snapshotId,proto3" json:"snapshot_id,omitempty"`
+	xxx_hidden_Secrets    map[string]string      `protobuf:"bytes,2,rep,name=secrets,proto3" json:"secrets,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	unknownFields         protoimpl.UnknownFields
+	sizeCache             protoimpl.SizeCache
 }
 
 func (x *DeleteSnapshotRequest) Reset() {
@@ -5077,24 +4500,24 @@ func (x *DeleteSnapshotRequest) ProtoReflect() protoreflect.Message {
 
 func (x *DeleteSnapshotRequest) GetSnapshotId() string {
 	if x != nil {
-		return x.SnapshotId
+		return x.xxx_hidden_SnapshotId
 	}
 	return ""
 }
 
 func (x *DeleteSnapshotRequest) GetSecrets() map[string]string {
 	if x != nil {
-		return x.Secrets
+		return x.xxx_hidden_Secrets
 	}
 	return nil
 }
 
 func (x *DeleteSnapshotRequest) SetSnapshotId(v string) {
-	x.SnapshotId = v
+	x.xxx_hidden_SnapshotId = v
 }
 
 func (x *DeleteSnapshotRequest) SetSecrets(v map[string]string) {
-	x.Secrets = v
+	x.xxx_hidden_Secrets = v
 }
 
 type DeleteSnapshotRequest_builder struct {
@@ -5113,13 +4536,13 @@ func (b0 DeleteSnapshotRequest_builder) Build() *DeleteSnapshotRequest {
 	m0 := &DeleteSnapshotRequest{}
 	b, x := &b0, m0
 	_, _ = b, x
-	x.SnapshotId = b.SnapshotId
-	x.Secrets = b.Secrets
+	x.xxx_hidden_SnapshotId = b.SnapshotId
+	x.xxx_hidden_Secrets = b.Secrets
 	return m0
 }
 
 type DeleteSnapshotResponse struct {
-	state         protoimpl.MessageState `protogen:"hybrid.v1"`
+	state         protoimpl.MessageState `protogen:"opaque.v1"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -5164,36 +4587,14 @@ func (b0 DeleteSnapshotResponse_builder) Build() *DeleteSnapshotResponse {
 // List all snapshots on the storage system regardless of how they were
 // created.
 type ListSnapshotsRequest struct {
-	state protoimpl.MessageState `protogen:"hybrid.v1"`
-	// If specified (non-zero value), the Plugin MUST NOT return more
-	// entries than this number in the response. If the actual number of
-	// entries is more than this number, the Plugin MUST set `next_token`
-	// in the response which can be used to get the next page of entries
-	// in the subsequent `ListSnapshots` call. This field is OPTIONAL. If
-	// not specified (zero value), it means there is no restriction on the
-	// number of entries that can be returned.
-	// The value of this field MUST NOT be negative.
-	MaxEntries int32 `protobuf:"varint,1,opt,name=max_entries,json=maxEntries,proto3" json:"max_entries,omitempty"`
-	// A token to specify where to start paginating. Set this field to
-	// `next_token` returned by a previous `ListSnapshots` call to get the
-	// next page of entries. This field is OPTIONAL.
-	// An empty string is equal to an unspecified field value.
-	StartingToken string `protobuf:"bytes,2,opt,name=starting_token,json=startingToken,proto3" json:"starting_token,omitempty"`
-	// Identity information for the source volume. This field is OPTIONAL.
-	// It can be used to list snapshots by volume.
-	SourceVolumeId string `protobuf:"bytes,3,opt,name=source_volume_id,json=sourceVolumeId,proto3" json:"source_volume_id,omitempty"`
-	// Identity information for a specific snapshot. This field is
-	// OPTIONAL. It can be used to list only a specific snapshot.
-	// ListSnapshots will return with current snapshot information
-	// and will not block if the snapshot is being processed after
-	// it is cut.
-	SnapshotId string `protobuf:"bytes,4,opt,name=snapshot_id,json=snapshotId,proto3" json:"snapshot_id,omitempty"`
-	// Secrets required by plugin to complete ListSnapshot request.
-	// This field is OPTIONAL. Refer to the `Secrets Requirements`
-	// section on how to use this field.
-	Secrets       map[string]string `protobuf:"bytes,5,rep,name=secrets,proto3" json:"secrets,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state                     protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_MaxEntries     int32                  `protobuf:"varint,1,opt,name=max_entries,json=maxEntries,proto3" json:"max_entries,omitempty"`
+	xxx_hidden_StartingToken  string                 `protobuf:"bytes,2,opt,name=starting_token,json=startingToken,proto3" json:"starting_token,omitempty"`
+	xxx_hidden_SourceVolumeId string                 `protobuf:"bytes,3,opt,name=source_volume_id,json=sourceVolumeId,proto3" json:"source_volume_id,omitempty"`
+	xxx_hidden_SnapshotId     string                 `protobuf:"bytes,4,opt,name=snapshot_id,json=snapshotId,proto3" json:"snapshot_id,omitempty"`
+	xxx_hidden_Secrets        map[string]string      `protobuf:"bytes,5,rep,name=secrets,proto3" json:"secrets,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	unknownFields             protoimpl.UnknownFields
+	sizeCache                 protoimpl.SizeCache
 }
 
 func (x *ListSnapshotsRequest) Reset() {
@@ -5223,57 +4624,57 @@ func (x *ListSnapshotsRequest) ProtoReflect() protoreflect.Message {
 
 func (x *ListSnapshotsRequest) GetMaxEntries() int32 {
 	if x != nil {
-		return x.MaxEntries
+		return x.xxx_hidden_MaxEntries
 	}
 	return 0
 }
 
 func (x *ListSnapshotsRequest) GetStartingToken() string {
 	if x != nil {
-		return x.StartingToken
+		return x.xxx_hidden_StartingToken
 	}
 	return ""
 }
 
 func (x *ListSnapshotsRequest) GetSourceVolumeId() string {
 	if x != nil {
-		return x.SourceVolumeId
+		return x.xxx_hidden_SourceVolumeId
 	}
 	return ""
 }
 
 func (x *ListSnapshotsRequest) GetSnapshotId() string {
 	if x != nil {
-		return x.SnapshotId
+		return x.xxx_hidden_SnapshotId
 	}
 	return ""
 }
 
 func (x *ListSnapshotsRequest) GetSecrets() map[string]string {
 	if x != nil {
-		return x.Secrets
+		return x.xxx_hidden_Secrets
 	}
 	return nil
 }
 
 func (x *ListSnapshotsRequest) SetMaxEntries(v int32) {
-	x.MaxEntries = v
+	x.xxx_hidden_MaxEntries = v
 }
 
 func (x *ListSnapshotsRequest) SetStartingToken(v string) {
-	x.StartingToken = v
+	x.xxx_hidden_StartingToken = v
 }
 
 func (x *ListSnapshotsRequest) SetSourceVolumeId(v string) {
-	x.SourceVolumeId = v
+	x.xxx_hidden_SourceVolumeId = v
 }
 
 func (x *ListSnapshotsRequest) SetSnapshotId(v string) {
-	x.SnapshotId = v
+	x.xxx_hidden_SnapshotId = v
 }
 
 func (x *ListSnapshotsRequest) SetSecrets(v map[string]string) {
-	x.Secrets = v
+	x.xxx_hidden_Secrets = v
 }
 
 type ListSnapshotsRequest_builder struct {
@@ -5312,26 +4713,20 @@ func (b0 ListSnapshotsRequest_builder) Build() *ListSnapshotsRequest {
 	m0 := &ListSnapshotsRequest{}
 	b, x := &b0, m0
 	_, _ = b, x
-	x.MaxEntries = b.MaxEntries
-	x.StartingToken = b.StartingToken
-	x.SourceVolumeId = b.SourceVolumeId
-	x.SnapshotId = b.SnapshotId
-	x.Secrets = b.Secrets
+	x.xxx_hidden_MaxEntries = b.MaxEntries
+	x.xxx_hidden_StartingToken = b.StartingToken
+	x.xxx_hidden_SourceVolumeId = b.SourceVolumeId
+	x.xxx_hidden_SnapshotId = b.SnapshotId
+	x.xxx_hidden_Secrets = b.Secrets
 	return m0
 }
 
 type ListSnapshotsResponse struct {
-	state   protoimpl.MessageState         `protogen:"hybrid.v1"`
-	Entries []*ListSnapshotsResponse_Entry `protobuf:"bytes,1,rep,name=entries,proto3" json:"entries,omitempty"`
-	// This token allows you to get the next page of entries for
-	// `ListSnapshots` request. If the number of entries is larger than
-	// `max_entries`, use the `next_token` as a value for the
-	// `starting_token` field in the next `ListSnapshots` request. This
-	// field is OPTIONAL.
-	// An empty string is equal to an unspecified field value.
-	NextToken     string `protobuf:"bytes,2,opt,name=next_token,json=nextToken,proto3" json:"next_token,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state                protoimpl.MessageState          `protogen:"opaque.v1"`
+	xxx_hidden_Entries   *[]*ListSnapshotsResponse_Entry `protobuf:"bytes,1,rep,name=entries,proto3" json:"entries,omitempty"`
+	xxx_hidden_NextToken string                          `protobuf:"bytes,2,opt,name=next_token,json=nextToken,proto3" json:"next_token,omitempty"`
+	unknownFields        protoimpl.UnknownFields
+	sizeCache            protoimpl.SizeCache
 }
 
 func (x *ListSnapshotsResponse) Reset() {
@@ -5361,24 +4756,26 @@ func (x *ListSnapshotsResponse) ProtoReflect() protoreflect.Message {
 
 func (x *ListSnapshotsResponse) GetEntries() []*ListSnapshotsResponse_Entry {
 	if x != nil {
-		return x.Entries
+		if x.xxx_hidden_Entries != nil {
+			return *x.xxx_hidden_Entries
+		}
 	}
 	return nil
 }
 
 func (x *ListSnapshotsResponse) GetNextToken() string {
 	if x != nil {
-		return x.NextToken
+		return x.xxx_hidden_NextToken
 	}
 	return ""
 }
 
 func (x *ListSnapshotsResponse) SetEntries(v []*ListSnapshotsResponse_Entry) {
-	x.Entries = v
+	x.xxx_hidden_Entries = &v
 }
 
 func (x *ListSnapshotsResponse) SetNextToken(v string) {
-	x.NextToken = v
+	x.xxx_hidden_NextToken = v
 }
 
 type ListSnapshotsResponse_builder struct {
@@ -5398,31 +4795,19 @@ func (b0 ListSnapshotsResponse_builder) Build() *ListSnapshotsResponse {
 	m0 := &ListSnapshotsResponse{}
 	b, x := &b0, m0
 	_, _ = b, x
-	x.Entries = b.Entries
-	x.NextToken = b.NextToken
+	x.xxx_hidden_Entries = &b.Entries
+	x.xxx_hidden_NextToken = b.NextToken
 	return m0
 }
 
 type ControllerExpandVolumeRequest struct {
-	state protoimpl.MessageState `protogen:"hybrid.v1"`
-	// The ID of the volume to expand. This field is REQUIRED.
-	VolumeId string `protobuf:"bytes,1,opt,name=volume_id,json=volumeId,proto3" json:"volume_id,omitempty"`
-	// This allows CO to specify the capacity requirements of the volume
-	// after expansion. This field is REQUIRED.
-	CapacityRange *CapacityRange `protobuf:"bytes,2,opt,name=capacity_range,json=capacityRange,proto3" json:"capacity_range,omitempty"`
-	// Secrets required by the plugin for expanding the volume.
-	// This field is OPTIONAL.
-	Secrets map[string]string `protobuf:"bytes,3,rep,name=secrets,proto3" json:"secrets,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
-	// Volume capability describing how the CO intends to use this volume.
-	// This allows SP to determine if volume is being used as a block
-	// device or mounted file system. For example - if volume is
-	// being used as a block device - the SP MAY set
-	// node_expansion_required to false in ControllerExpandVolumeResponse
-	// to skip invocation of NodeExpandVolume on the node by the CO.
-	// This is an OPTIONAL field.
-	VolumeCapability *VolumeCapability `protobuf:"bytes,4,opt,name=volume_capability,json=volumeCapability,proto3" json:"volume_capability,omitempty"`
-	unknownFields    protoimpl.UnknownFields
-	sizeCache        protoimpl.SizeCache
+	state                       protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_VolumeId         string                 `protobuf:"bytes,1,opt,name=volume_id,json=volumeId,proto3" json:"volume_id,omitempty"`
+	xxx_hidden_CapacityRange    *CapacityRange         `protobuf:"bytes,2,opt,name=capacity_range,json=capacityRange,proto3" json:"capacity_range,omitempty"`
+	xxx_hidden_Secrets          map[string]string      `protobuf:"bytes,3,rep,name=secrets,proto3" json:"secrets,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	xxx_hidden_VolumeCapability *VolumeCapability      `protobuf:"bytes,4,opt,name=volume_capability,json=volumeCapability,proto3" json:"volume_capability,omitempty"`
+	unknownFields               protoimpl.UnknownFields
+	sizeCache                   protoimpl.SizeCache
 }
 
 func (x *ControllerExpandVolumeRequest) Reset() {
@@ -5452,68 +4837,68 @@ func (x *ControllerExpandVolumeRequest) ProtoReflect() protoreflect.Message {
 
 func (x *ControllerExpandVolumeRequest) GetVolumeId() string {
 	if x != nil {
-		return x.VolumeId
+		return x.xxx_hidden_VolumeId
 	}
 	return ""
 }
 
 func (x *ControllerExpandVolumeRequest) GetCapacityRange() *CapacityRange {
 	if x != nil {
-		return x.CapacityRange
+		return x.xxx_hidden_CapacityRange
 	}
 	return nil
 }
 
 func (x *ControllerExpandVolumeRequest) GetSecrets() map[string]string {
 	if x != nil {
-		return x.Secrets
+		return x.xxx_hidden_Secrets
 	}
 	return nil
 }
 
 func (x *ControllerExpandVolumeRequest) GetVolumeCapability() *VolumeCapability {
 	if x != nil {
-		return x.VolumeCapability
+		return x.xxx_hidden_VolumeCapability
 	}
 	return nil
 }
 
 func (x *ControllerExpandVolumeRequest) SetVolumeId(v string) {
-	x.VolumeId = v
+	x.xxx_hidden_VolumeId = v
 }
 
 func (x *ControllerExpandVolumeRequest) SetCapacityRange(v *CapacityRange) {
-	x.CapacityRange = v
+	x.xxx_hidden_CapacityRange = v
 }
 
 func (x *ControllerExpandVolumeRequest) SetSecrets(v map[string]string) {
-	x.Secrets = v
+	x.xxx_hidden_Secrets = v
 }
 
 func (x *ControllerExpandVolumeRequest) SetVolumeCapability(v *VolumeCapability) {
-	x.VolumeCapability = v
+	x.xxx_hidden_VolumeCapability = v
 }
 
 func (x *ControllerExpandVolumeRequest) HasCapacityRange() bool {
 	if x == nil {
 		return false
 	}
-	return x.CapacityRange != nil
+	return x.xxx_hidden_CapacityRange != nil
 }
 
 func (x *ControllerExpandVolumeRequest) HasVolumeCapability() bool {
 	if x == nil {
 		return false
 	}
-	return x.VolumeCapability != nil
+	return x.xxx_hidden_VolumeCapability != nil
 }
 
 func (x *ControllerExpandVolumeRequest) ClearCapacityRange() {
-	x.CapacityRange = nil
+	x.xxx_hidden_CapacityRange = nil
 }
 
 func (x *ControllerExpandVolumeRequest) ClearVolumeCapability() {
-	x.VolumeCapability = nil
+	x.xxx_hidden_VolumeCapability = nil
 }
 
 type ControllerExpandVolumeRequest_builder struct {
@@ -5541,23 +4926,19 @@ func (b0 ControllerExpandVolumeRequest_builder) Build() *ControllerExpandVolumeR
 	m0 := &ControllerExpandVolumeRequest{}
 	b, x := &b0, m0
 	_, _ = b, x
-	x.VolumeId = b.VolumeId
-	x.CapacityRange = b.CapacityRange
-	x.Secrets = b.Secrets
-	x.VolumeCapability = b.VolumeCapability
+	x.xxx_hidden_VolumeId = b.VolumeId
+	x.xxx_hidden_CapacityRange = b.CapacityRange
+	x.xxx_hidden_Secrets = b.Secrets
+	x.xxx_hidden_VolumeCapability = b.VolumeCapability
 	return m0
 }
 
 type ControllerExpandVolumeResponse struct {
-	state protoimpl.MessageState `protogen:"hybrid.v1"`
-	// Capacity of volume after expansion. This field is REQUIRED.
-	CapacityBytes int64 `protobuf:"varint,1,opt,name=capacity_bytes,json=capacityBytes,proto3" json:"capacity_bytes,omitempty"`
-	// Whether node expansion is required for the volume. When true
-	// the CO MUST make NodeExpandVolume RPC call on the node. This field
-	// is REQUIRED.
-	NodeExpansionRequired bool `protobuf:"varint,2,opt,name=node_expansion_required,json=nodeExpansionRequired,proto3" json:"node_expansion_required,omitempty"`
-	unknownFields         protoimpl.UnknownFields
-	sizeCache             protoimpl.SizeCache
+	state                            protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_CapacityBytes         int64                  `protobuf:"varint,1,opt,name=capacity_bytes,json=capacityBytes,proto3" json:"capacity_bytes,omitempty"`
+	xxx_hidden_NodeExpansionRequired bool                   `protobuf:"varint,2,opt,name=node_expansion_required,json=nodeExpansionRequired,proto3" json:"node_expansion_required,omitempty"`
+	unknownFields                    protoimpl.UnknownFields
+	sizeCache                        protoimpl.SizeCache
 }
 
 func (x *ControllerExpandVolumeResponse) Reset() {
@@ -5587,24 +4968,24 @@ func (x *ControllerExpandVolumeResponse) ProtoReflect() protoreflect.Message {
 
 func (x *ControllerExpandVolumeResponse) GetCapacityBytes() int64 {
 	if x != nil {
-		return x.CapacityBytes
+		return x.xxx_hidden_CapacityBytes
 	}
 	return 0
 }
 
 func (x *ControllerExpandVolumeResponse) GetNodeExpansionRequired() bool {
 	if x != nil {
-		return x.NodeExpansionRequired
+		return x.xxx_hidden_NodeExpansionRequired
 	}
 	return false
 }
 
 func (x *ControllerExpandVolumeResponse) SetCapacityBytes(v int64) {
-	x.CapacityBytes = v
+	x.xxx_hidden_CapacityBytes = v
 }
 
 func (x *ControllerExpandVolumeResponse) SetNodeExpansionRequired(v bool) {
-	x.NodeExpansionRequired = v
+	x.xxx_hidden_NodeExpansionRequired = v
 }
 
 type ControllerExpandVolumeResponse_builder struct {
@@ -5622,51 +5003,21 @@ func (b0 ControllerExpandVolumeResponse_builder) Build() *ControllerExpandVolume
 	m0 := &ControllerExpandVolumeResponse{}
 	b, x := &b0, m0
 	_, _ = b, x
-	x.CapacityBytes = b.CapacityBytes
-	x.NodeExpansionRequired = b.NodeExpansionRequired
+	x.xxx_hidden_CapacityBytes = b.CapacityBytes
+	x.xxx_hidden_NodeExpansionRequired = b.NodeExpansionRequired
 	return m0
 }
 
 type NodeStageVolumeRequest struct {
-	state protoimpl.MessageState `protogen:"hybrid.v1"`
-	// The ID of the volume to publish. This field is REQUIRED.
-	VolumeId string `protobuf:"bytes,1,opt,name=volume_id,json=volumeId,proto3" json:"volume_id,omitempty"`
-	// The CO SHALL set this field to the value returned by
-	// `ControllerPublishVolume` if the corresponding Controller Plugin
-	// has `PUBLISH_UNPUBLISH_VOLUME` controller capability, and SHALL be
-	// left unset if the corresponding Controller Plugin does not have
-	// this capability. This is an OPTIONAL field.
-	PublishContext map[string]string `protobuf:"bytes,2,rep,name=publish_context,json=publishContext,proto3" json:"publish_context,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
-	// The path to which the volume MAY be staged. It MUST be an
-	// absolute path in the root filesystem of the process serving this
-	// request, and MUST be a directory. The CO SHALL ensure that there
-	// is only one `staging_target_path` per volume. The CO SHALL ensure
-	// that the path is directory and that the process serving the
-	// request has `read` and `write` permission to that directory. The
-	// CO SHALL be responsible for creating the directory if it does not
-	// exist.
-	// This is a REQUIRED field.
-	// This field overrides the general CSI size limit.
-	// SP SHOULD support the maximum path length allowed by the operating
-	// system/filesystem, but, at a minimum, SP MUST accept a max path
-	// length of at least 128 bytes.
-	StagingTargetPath string `protobuf:"bytes,3,opt,name=staging_target_path,json=stagingTargetPath,proto3" json:"staging_target_path,omitempty"`
-	// Volume capability describing how the CO intends to use this volume.
-	// SP MUST ensure the CO can use the staged volume as described.
-	// Otherwise SP MUST return the appropriate gRPC error code.
-	// This is a REQUIRED field.
-	VolumeCapability *VolumeCapability `protobuf:"bytes,4,opt,name=volume_capability,json=volumeCapability,proto3" json:"volume_capability,omitempty"`
-	// Secrets required by plugin to complete node stage volume request.
-	// This field is OPTIONAL. Refer to the `Secrets Requirements`
-	// section on how to use this field.
-	Secrets map[string]string `protobuf:"bytes,5,rep,name=secrets,proto3" json:"secrets,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
-	// Volume context as returned by SP in
-	// CreateVolumeResponse.Volume.volume_context.
-	// This field is OPTIONAL and MUST match the volume_context of the
-	// volume identified by `volume_id`.
-	VolumeContext map[string]string `protobuf:"bytes,6,rep,name=volume_context,json=volumeContext,proto3" json:"volume_context,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state                        protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_VolumeId          string                 `protobuf:"bytes,1,opt,name=volume_id,json=volumeId,proto3" json:"volume_id,omitempty"`
+	xxx_hidden_PublishContext    map[string]string      `protobuf:"bytes,2,rep,name=publish_context,json=publishContext,proto3" json:"publish_context,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	xxx_hidden_StagingTargetPath string                 `protobuf:"bytes,3,opt,name=staging_target_path,json=stagingTargetPath,proto3" json:"staging_target_path,omitempty"`
+	xxx_hidden_VolumeCapability  *VolumeCapability      `protobuf:"bytes,4,opt,name=volume_capability,json=volumeCapability,proto3" json:"volume_capability,omitempty"`
+	xxx_hidden_Secrets           map[string]string      `protobuf:"bytes,5,rep,name=secrets,proto3" json:"secrets,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	xxx_hidden_VolumeContext     map[string]string      `protobuf:"bytes,6,rep,name=volume_context,json=volumeContext,proto3" json:"volume_context,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	unknownFields                protoimpl.UnknownFields
+	sizeCache                    protoimpl.SizeCache
 }
 
 func (x *NodeStageVolumeRequest) Reset() {
@@ -5696,79 +5047,79 @@ func (x *NodeStageVolumeRequest) ProtoReflect() protoreflect.Message {
 
 func (x *NodeStageVolumeRequest) GetVolumeId() string {
 	if x != nil {
-		return x.VolumeId
+		return x.xxx_hidden_VolumeId
 	}
 	return ""
 }
 
 func (x *NodeStageVolumeRequest) GetPublishContext() map[string]string {
 	if x != nil {
-		return x.PublishContext
+		return x.xxx_hidden_PublishContext
 	}
 	return nil
 }
 
 func (x *NodeStageVolumeRequest) GetStagingTargetPath() string {
 	if x != nil {
-		return x.StagingTargetPath
+		return x.xxx_hidden_StagingTargetPath
 	}
 	return ""
 }
 
 func (x *NodeStageVolumeRequest) GetVolumeCapability() *VolumeCapability {
 	if x != nil {
-		return x.VolumeCapability
+		return x.xxx_hidden_VolumeCapability
 	}
 	return nil
 }
 
 func (x *NodeStageVolumeRequest) GetSecrets() map[string]string {
 	if x != nil {
-		return x.Secrets
+		return x.xxx_hidden_Secrets
 	}
 	return nil
 }
 
 func (x *NodeStageVolumeRequest) GetVolumeContext() map[string]string {
 	if x != nil {
-		return x.VolumeContext
+		return x.xxx_hidden_VolumeContext
 	}
 	return nil
 }
 
 func (x *NodeStageVolumeRequest) SetVolumeId(v string) {
-	x.VolumeId = v
+	x.xxx_hidden_VolumeId = v
 }
 
 func (x *NodeStageVolumeRequest) SetPublishContext(v map[string]string) {
-	x.PublishContext = v
+	x.xxx_hidden_PublishContext = v
 }
 
 func (x *NodeStageVolumeRequest) SetStagingTargetPath(v string) {
-	x.StagingTargetPath = v
+	x.xxx_hidden_StagingTargetPath = v
 }
 
 func (x *NodeStageVolumeRequest) SetVolumeCapability(v *VolumeCapability) {
-	x.VolumeCapability = v
+	x.xxx_hidden_VolumeCapability = v
 }
 
 func (x *NodeStageVolumeRequest) SetSecrets(v map[string]string) {
-	x.Secrets = v
+	x.xxx_hidden_Secrets = v
 }
 
 func (x *NodeStageVolumeRequest) SetVolumeContext(v map[string]string) {
-	x.VolumeContext = v
+	x.xxx_hidden_VolumeContext = v
 }
 
 func (x *NodeStageVolumeRequest) HasVolumeCapability() bool {
 	if x == nil {
 		return false
 	}
-	return x.VolumeCapability != nil
+	return x.xxx_hidden_VolumeCapability != nil
 }
 
 func (x *NodeStageVolumeRequest) ClearVolumeCapability() {
-	x.VolumeCapability = nil
+	x.xxx_hidden_VolumeCapability = nil
 }
 
 type NodeStageVolumeRequest_builder struct {
@@ -5816,17 +5167,17 @@ func (b0 NodeStageVolumeRequest_builder) Build() *NodeStageVolumeRequest {
 	m0 := &NodeStageVolumeRequest{}
 	b, x := &b0, m0
 	_, _ = b, x
-	x.VolumeId = b.VolumeId
-	x.PublishContext = b.PublishContext
-	x.StagingTargetPath = b.StagingTargetPath
-	x.VolumeCapability = b.VolumeCapability
-	x.Secrets = b.Secrets
-	x.VolumeContext = b.VolumeContext
+	x.xxx_hidden_VolumeId = b.VolumeId
+	x.xxx_hidden_PublishContext = b.PublishContext
+	x.xxx_hidden_StagingTargetPath = b.StagingTargetPath
+	x.xxx_hidden_VolumeCapability = b.VolumeCapability
+	x.xxx_hidden_Secrets = b.Secrets
+	x.xxx_hidden_VolumeContext = b.VolumeContext
 	return m0
 }
 
 type NodeStageVolumeResponse struct {
-	state         protoimpl.MessageState `protogen:"hybrid.v1"`
+	state         protoimpl.MessageState `protogen:"opaque.v1"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -5869,19 +5220,11 @@ func (b0 NodeStageVolumeResponse_builder) Build() *NodeStageVolumeResponse {
 }
 
 type NodeUnstageVolumeRequest struct {
-	state protoimpl.MessageState `protogen:"hybrid.v1"`
-	// The ID of the volume. This field is REQUIRED.
-	VolumeId string `protobuf:"bytes,1,opt,name=volume_id,json=volumeId,proto3" json:"volume_id,omitempty"`
-	// The path at which the volume was staged. It MUST be an absolute
-	// path in the root filesystem of the process serving this request.
-	// This is a REQUIRED field.
-	// This field overrides the general CSI size limit.
-	// SP SHOULD support the maximum path length allowed by the operating
-	// system/filesystem, but, at a minimum, SP MUST accept a max path
-	// length of at least 128 bytes.
-	StagingTargetPath string `protobuf:"bytes,2,opt,name=staging_target_path,json=stagingTargetPath,proto3" json:"staging_target_path,omitempty"`
-	unknownFields     protoimpl.UnknownFields
-	sizeCache         protoimpl.SizeCache
+	state                        protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_VolumeId          string                 `protobuf:"bytes,1,opt,name=volume_id,json=volumeId,proto3" json:"volume_id,omitempty"`
+	xxx_hidden_StagingTargetPath string                 `protobuf:"bytes,2,opt,name=staging_target_path,json=stagingTargetPath,proto3" json:"staging_target_path,omitempty"`
+	unknownFields                protoimpl.UnknownFields
+	sizeCache                    protoimpl.SizeCache
 }
 
 func (x *NodeUnstageVolumeRequest) Reset() {
@@ -5911,24 +5254,24 @@ func (x *NodeUnstageVolumeRequest) ProtoReflect() protoreflect.Message {
 
 func (x *NodeUnstageVolumeRequest) GetVolumeId() string {
 	if x != nil {
-		return x.VolumeId
+		return x.xxx_hidden_VolumeId
 	}
 	return ""
 }
 
 func (x *NodeUnstageVolumeRequest) GetStagingTargetPath() string {
 	if x != nil {
-		return x.StagingTargetPath
+		return x.xxx_hidden_StagingTargetPath
 	}
 	return ""
 }
 
 func (x *NodeUnstageVolumeRequest) SetVolumeId(v string) {
-	x.VolumeId = v
+	x.xxx_hidden_VolumeId = v
 }
 
 func (x *NodeUnstageVolumeRequest) SetStagingTargetPath(v string) {
-	x.StagingTargetPath = v
+	x.xxx_hidden_StagingTargetPath = v
 }
 
 type NodeUnstageVolumeRequest_builder struct {
@@ -5950,13 +5293,13 @@ func (b0 NodeUnstageVolumeRequest_builder) Build() *NodeUnstageVolumeRequest {
 	m0 := &NodeUnstageVolumeRequest{}
 	b, x := &b0, m0
 	_, _ = b, x
-	x.VolumeId = b.VolumeId
-	x.StagingTargetPath = b.StagingTargetPath
+	x.xxx_hidden_VolumeId = b.VolumeId
+	x.xxx_hidden_StagingTargetPath = b.StagingTargetPath
 	return m0
 }
 
 type NodeUnstageVolumeResponse struct {
-	state         protoimpl.MessageState `protogen:"hybrid.v1"`
+	state         protoimpl.MessageState `protogen:"opaque.v1"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -5999,62 +5342,17 @@ func (b0 NodeUnstageVolumeResponse_builder) Build() *NodeUnstageVolumeResponse {
 }
 
 type NodePublishVolumeRequest struct {
-	state protoimpl.MessageState `protogen:"hybrid.v1"`
-	// The ID of the volume to publish. This field is REQUIRED.
-	VolumeId string `protobuf:"bytes,1,opt,name=volume_id,json=volumeId,proto3" json:"volume_id,omitempty"`
-	// The CO SHALL set this field to the value returned by
-	// `ControllerPublishVolume` if the corresponding Controller Plugin
-	// has `PUBLISH_UNPUBLISH_VOLUME` controller capability, and SHALL be
-	// left unset if the corresponding Controller Plugin does not have
-	// this capability. This is an OPTIONAL field.
-	PublishContext map[string]string `protobuf:"bytes,2,rep,name=publish_context,json=publishContext,proto3" json:"publish_context,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
-	// The path to which the volume was staged by `NodeStageVolume`.
-	// It MUST be an absolute path in the root filesystem of the process
-	// serving this request.
-	// It MUST be set if the Node Plugin implements the
-	// `STAGE_UNSTAGE_VOLUME` node capability.
-	// This is an OPTIONAL field.
-	// This field overrides the general CSI size limit.
-	// SP SHOULD support the maximum path length allowed by the operating
-	// system/filesystem, but, at a minimum, SP MUST accept a max path
-	// length of at least 128 bytes.
-	StagingTargetPath string `protobuf:"bytes,3,opt,name=staging_target_path,json=stagingTargetPath,proto3" json:"staging_target_path,omitempty"`
-	// The path to which the volume will be published. It MUST be an
-	// absolute path in the root filesystem of the process serving this
-	// request. The CO SHALL ensure uniqueness of target_path per volume.
-	// The CO SHALL ensure that the parent directory of this path exists
-	// and that the process serving the request has `read` and `write`
-	// permissions to that parent directory.
-	// For volumes with an access type of block, the SP SHALL place the
-	// block device at target_path.
-	// For volumes with an access type of mount, the SP SHALL place the
-	// mounted directory at target_path.
-	// Creation of target_path is the responsibility of the SP.
-	// This is a REQUIRED field.
-	// This field overrides the general CSI size limit.
-	// SP SHOULD support the maximum path length allowed by the operating
-	// system/filesystem, but, at a minimum, SP MUST accept a max path
-	// length of at least 128 bytes.
-	TargetPath string `protobuf:"bytes,4,opt,name=target_path,json=targetPath,proto3" json:"target_path,omitempty"`
-	// Volume capability describing how the CO intends to use this volume.
-	// SP MUST ensure the CO can use the published volume as described.
-	// Otherwise SP MUST return the appropriate gRPC error code.
-	// This is a REQUIRED field.
-	VolumeCapability *VolumeCapability `protobuf:"bytes,5,opt,name=volume_capability,json=volumeCapability,proto3" json:"volume_capability,omitempty"`
-	// Indicates SP MUST publish the volume in readonly mode.
-	// This field is REQUIRED.
-	Readonly bool `protobuf:"varint,6,opt,name=readonly,proto3" json:"readonly,omitempty"`
-	// Secrets required by plugin to complete node publish volume request.
-	// This field is OPTIONAL. Refer to the `Secrets Requirements`
-	// section on how to use this field.
-	Secrets map[string]string `protobuf:"bytes,7,rep,name=secrets,proto3" json:"secrets,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
-	// Volume context as returned by SP in
-	// CreateVolumeResponse.Volume.volume_context.
-	// This field is OPTIONAL and MUST match the volume_context of the
-	// volume identified by `volume_id`.
-	VolumeContext map[string]string `protobuf:"bytes,8,rep,name=volume_context,json=volumeContext,proto3" json:"volume_context,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state                        protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_VolumeId          string                 `protobuf:"bytes,1,opt,name=volume_id,json=volumeId,proto3" json:"volume_id,omitempty"`
+	xxx_hidden_PublishContext    map[string]string      `protobuf:"bytes,2,rep,name=publish_context,json=publishContext,proto3" json:"publish_context,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	xxx_hidden_StagingTargetPath string                 `protobuf:"bytes,3,opt,name=staging_target_path,json=stagingTargetPath,proto3" json:"staging_target_path,omitempty"`
+	xxx_hidden_TargetPath        string                 `protobuf:"bytes,4,opt,name=target_path,json=targetPath,proto3" json:"target_path,omitempty"`
+	xxx_hidden_VolumeCapability  *VolumeCapability      `protobuf:"bytes,5,opt,name=volume_capability,json=volumeCapability,proto3" json:"volume_capability,omitempty"`
+	xxx_hidden_Readonly          bool                   `protobuf:"varint,6,opt,name=readonly,proto3" json:"readonly,omitempty"`
+	xxx_hidden_Secrets           map[string]string      `protobuf:"bytes,7,rep,name=secrets,proto3" json:"secrets,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	xxx_hidden_VolumeContext     map[string]string      `protobuf:"bytes,8,rep,name=volume_context,json=volumeContext,proto3" json:"volume_context,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	unknownFields                protoimpl.UnknownFields
+	sizeCache                    protoimpl.SizeCache
 }
 
 func (x *NodePublishVolumeRequest) Reset() {
@@ -6084,101 +5382,101 @@ func (x *NodePublishVolumeRequest) ProtoReflect() protoreflect.Message {
 
 func (x *NodePublishVolumeRequest) GetVolumeId() string {
 	if x != nil {
-		return x.VolumeId
+		return x.xxx_hidden_VolumeId
 	}
 	return ""
 }
 
 func (x *NodePublishVolumeRequest) GetPublishContext() map[string]string {
 	if x != nil {
-		return x.PublishContext
+		return x.xxx_hidden_PublishContext
 	}
 	return nil
 }
 
 func (x *NodePublishVolumeRequest) GetStagingTargetPath() string {
 	if x != nil {
-		return x.StagingTargetPath
+		return x.xxx_hidden_StagingTargetPath
 	}
 	return ""
 }
 
 func (x *NodePublishVolumeRequest) GetTargetPath() string {
 	if x != nil {
-		return x.TargetPath
+		return x.xxx_hidden_TargetPath
 	}
 	return ""
 }
 
 func (x *NodePublishVolumeRequest) GetVolumeCapability() *VolumeCapability {
 	if x != nil {
-		return x.VolumeCapability
+		return x.xxx_hidden_VolumeCapability
 	}
 	return nil
 }
 
 func (x *NodePublishVolumeRequest) GetReadonly() bool {
 	if x != nil {
-		return x.Readonly
+		return x.xxx_hidden_Readonly
 	}
 	return false
 }
 
 func (x *NodePublishVolumeRequest) GetSecrets() map[string]string {
 	if x != nil {
-		return x.Secrets
+		return x.xxx_hidden_Secrets
 	}
 	return nil
 }
 
 func (x *NodePublishVolumeRequest) GetVolumeContext() map[string]string {
 	if x != nil {
-		return x.VolumeContext
+		return x.xxx_hidden_VolumeContext
 	}
 	return nil
 }
 
 func (x *NodePublishVolumeRequest) SetVolumeId(v string) {
-	x.VolumeId = v
+	x.xxx_hidden_VolumeId = v
 }
 
 func (x *NodePublishVolumeRequest) SetPublishContext(v map[string]string) {
-	x.PublishContext = v
+	x.xxx_hidden_PublishContext = v
 }
 
 func (x *NodePublishVolumeRequest) SetStagingTargetPath(v string) {
-	x.StagingTargetPath = v
+	x.xxx_hidden_StagingTargetPath = v
 }
 
 func (x *NodePublishVolumeRequest) SetTargetPath(v string) {
-	x.TargetPath = v
+	x.xxx_hidden_TargetPath = v
 }
 
 func (x *NodePublishVolumeRequest) SetVolumeCapability(v *VolumeCapability) {
-	x.VolumeCapability = v
+	x.xxx_hidden_VolumeCapability = v
 }
 
 func (x *NodePublishVolumeRequest) SetReadonly(v bool) {
-	x.Readonly = v
+	x.xxx_hidden_Readonly = v
 }
 
 func (x *NodePublishVolumeRequest) SetSecrets(v map[string]string) {
-	x.Secrets = v
+	x.xxx_hidden_Secrets = v
 }
 
 func (x *NodePublishVolumeRequest) SetVolumeContext(v map[string]string) {
-	x.VolumeContext = v
+	x.xxx_hidden_VolumeContext = v
 }
 
 func (x *NodePublishVolumeRequest) HasVolumeCapability() bool {
 	if x == nil {
 		return false
 	}
-	return x.VolumeCapability != nil
+	return x.xxx_hidden_VolumeCapability != nil
 }
 
 func (x *NodePublishVolumeRequest) ClearVolumeCapability() {
-	x.VolumeCapability = nil
+	x.xxx_hidden_VolumeCapability = nil
 }
 
 type NodePublishVolumeRequest_builder struct {
@@ -6243,19 +5541,19 @@ func (b0 NodePublishVolumeRequest_builder) Build() *NodePublishVolumeRequest {
 	m0 := &NodePublishVolumeRequest{}
 	b, x := &b0, m0
 	_, _ = b, x
-	x.VolumeId = b.VolumeId
-	x.PublishContext = b.PublishContext
-	x.StagingTargetPath = b.StagingTargetPath
-	x.TargetPath = b.TargetPath
-	x.VolumeCapability = b.VolumeCapability
-	x.Readonly = b.Readonly
-	x.Secrets = b.Secrets
-	x.VolumeContext = b.VolumeContext
+	x.xxx_hidden_VolumeId = b.VolumeId
+	x.xxx_hidden_PublishContext = b.PublishContext
+	x.xxx_hidden_StagingTargetPath = b.StagingTargetPath
+	x.xxx_hidden_TargetPath = b.TargetPath
+	x.xxx_hidden_VolumeCapability = b.VolumeCapability
+	x.xxx_hidden_Readonly = b.Readonly
+	x.xxx_hidden_Secrets = b.Secrets
+	x.xxx_hidden_VolumeContext = b.VolumeContext
 	return m0
 }
 
 type NodePublishVolumeResponse struct {
-	state         protoimpl.MessageState `protogen:"hybrid.v1"`
+	state         protoimpl.MessageState `protogen:"opaque.v1"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -6298,20 +5596,11 @@ func (b0 NodePublishVolumeResponse_builder) Build() *NodePublishVolumeResponse {
 }
 
 type NodeUnpublishVolumeRequest struct {
-	state protoimpl.MessageState `protogen:"hybrid.v1"`
-	// The ID of the volume. This field is REQUIRED.
-	VolumeId string `protobuf:"bytes,1,opt,name=volume_id,json=volumeId,proto3" json:"volume_id,omitempty"`
-	// The path at which the volume was published. It MUST be an absolute
-	// path in the root filesystem of the process serving this request.
-	// The SP MUST delete the file or directory it created at this path.
-	// This is a REQUIRED field.
-	// This field overrides the general CSI size limit.
-	// SP SHOULD support the maximum path length allowed by the operating
-	// system/filesystem, but, at a minimum, SP MUST accept a max path
-	// length of at least 128 bytes.
-	TargetPath    string `protobuf:"bytes,2,opt,name=target_path,json=targetPath,proto3" json:"target_path,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state                 protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_VolumeId   string                 `protobuf:"bytes,1,opt,name=volume_id,json=volumeId,proto3" json:"volume_id,omitempty"`
+	xxx_hidden_TargetPath string                 `protobuf:"bytes,2,opt,name=target_path,json=targetPath,proto3" json:"target_path,omitempty"`
+	unknownFields         protoimpl.UnknownFields
+	sizeCache             protoimpl.SizeCache
 }
 
 func (x *NodeUnpublishVolumeRequest) Reset() {
@@ -6341,24 +5630,24 @@ func (x *NodeUnpublishVolumeRequest) ProtoReflect() protoreflect.Message {
 
 func (x *NodeUnpublishVolumeRequest) GetVolumeId() string {
 	if x != nil {
-		return x.VolumeId
+		return x.xxx_hidden_VolumeId
 	}
 	return ""
 }
 
 func (x *NodeUnpublishVolumeRequest) GetTargetPath() string {
 	if x != nil {
-		return x.TargetPath
+		return x.xxx_hidden_TargetPath
 	}
 	return ""
 }
 
 func (x *NodeUnpublishVolumeRequest) SetVolumeId(v string) {
-	x.VolumeId = v
+	x.xxx_hidden_VolumeId = v
 }
 
 func (x *NodeUnpublishVolumeRequest) SetTargetPath(v string) {
-	x.TargetPath = v
+	x.xxx_hidden_TargetPath = v
 }
 
 type NodeUnpublishVolumeRequest_builder struct {
@@ -6381,13 +5670,13 @@ func (b0 NodeUnpublishVolumeRequest_builder) Build() *NodeUnpublishVolumeRequest
 	m0 := &NodeUnpublishVolumeRequest{}
 	b, x := &b0, m0
 	_, _ = b, x
-	x.VolumeId = b.VolumeId
-	x.TargetPath = b.TargetPath
+	x.xxx_hidden_VolumeId = b.VolumeId
+	x.xxx_hidden_TargetPath = b.TargetPath
 	return m0
 }
 
 type NodeUnpublishVolumeResponse struct {
-	state         protoimpl.MessageState `protogen:"hybrid.v1"`
+	state         protoimpl.MessageState `protogen:"opaque.v1"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -6430,31 +5719,12 @@ func (b0 NodeUnpublishVolumeResponse_builder) Build() *NodeUnpublishVolumeRespon
 }
 
 type NodeGetVolumeStatsRequest struct {
-	state protoimpl.MessageState `protogen:"hybrid.v1"`
-	// The ID of the volume. This field is REQUIRED.
-	VolumeId string `protobuf:"bytes,1,opt,name=volume_id,json=volumeId,proto3" json:"volume_id,omitempty"`
-	// It can be any valid path where volume was previously
-	// staged or published.
-	// It MUST be an absolute path in the root filesystem of
-	// the process serving this request.
-	// This is a REQUIRED field.
-	// This field overrides the general CSI size limit.
-	// SP SHOULD support the maximum path length allowed by the operating
-	// system/filesystem, but, at a minimum, SP MUST accept a max path
-	// length of at least 128 bytes.
-	VolumePath string `protobuf:"bytes,2,opt,name=volume_path,json=volumePath,proto3" json:"volume_path,omitempty"`
-	// The path where the volume is staged, if the plugin has the
-	// STAGE_UNSTAGE_VOLUME capability, otherwise empty.
-	// If not empty, it MUST be an absolute path in the root
-	// filesystem of the process serving this request.
-	// This field is OPTIONAL.
-	// This field overrides the general CSI size limit.
-	// SP SHOULD support the maximum path length allowed by the operating
-	// system/filesystem, but, at a minimum, SP MUST accept a max path
-	// length of at least 128 bytes.
-	StagingTargetPath string `protobuf:"bytes,3,opt,name=staging_target_path,json=stagingTargetPath,proto3" json:"staging_target_path,omitempty"`
-	unknownFields     protoimpl.UnknownFields
-	sizeCache         protoimpl.SizeCache
+	state                        protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_VolumeId          string                 `protobuf:"bytes,1,opt,name=volume_id,json=volumeId,proto3" json:"volume_id,omitempty"`
+	xxx_hidden_VolumePath        string                 `protobuf:"bytes,2,opt,name=volume_path,json=volumePath,proto3" json:"volume_path,omitempty"`
+	xxx_hidden_StagingTargetPath string                 `protobuf:"bytes,3,opt,name=staging_target_path,json=stagingTargetPath,proto3" json:"staging_target_path,omitempty"`
+	unknownFields                protoimpl.UnknownFields
+	sizeCache                    protoimpl.SizeCache
 }
 
 func (x *NodeGetVolumeStatsRequest) Reset() {
@@ -6484,35 +5754,35 @@ func (x *NodeGetVolumeStatsRequest) ProtoReflect() protoreflect.Message {
 
 func (x *NodeGetVolumeStatsRequest) GetVolumeId() string {
 	if x != nil {
-		return x.VolumeId
+		return x.xxx_hidden_VolumeId
 	}
 	return ""
 }
 
 func (x *NodeGetVolumeStatsRequest) GetVolumePath() string {
 	if x != nil {
-		return x.VolumePath
+		return x.xxx_hidden_VolumePath
 	}
 	return ""
 }
 
 func (x *NodeGetVolumeStatsRequest) GetStagingTargetPath() string {
 	if x != nil {
-		return x.StagingTargetPath
+		return x.xxx_hidden_StagingTargetPath
 	}
 	return ""
 }
 
 func (x *NodeGetVolumeStatsRequest) SetVolumeId(v string) {
-	x.VolumeId = v
+	x.xxx_hidden_VolumeId = v
 }
 
 func (x *NodeGetVolumeStatsRequest) SetVolumePath(v string) {
-	x.VolumePath = v
+	x.xxx_hidden_VolumePath = v
 }
 
 func (x *NodeGetVolumeStatsRequest) SetStagingTargetPath(v string) {
-	x.StagingTargetPath = v
+	x.xxx_hidden_StagingTargetPath = v
 }
 
 type NodeGetVolumeStatsRequest_builder struct {
@@ -6546,23 +5816,18 @@ func (b0 NodeGetVolumeStatsRequest_builder) Build() *NodeGetVolumeStatsRequest {
 	m0 := &NodeGetVolumeStatsRequest{}
 	b, x := &b0, m0
 	_, _ = b, x
-	x.VolumeId = b.VolumeId
-	x.VolumePath = b.VolumePath
-	x.StagingTargetPath = b.StagingTargetPath
+	x.xxx_hidden_VolumeId = b.VolumeId
+	x.xxx_hidden_VolumePath = b.VolumePath
+	x.xxx_hidden_StagingTargetPath = b.StagingTargetPath
 	return m0
 }
 
 type NodeGetVolumeStatsResponse struct {
-	state protoimpl.MessageState `protogen:"hybrid.v1"`
-	// This field is OPTIONAL.
-	Usage []*VolumeUsage `protobuf:"bytes,1,rep,name=usage,proto3" json:"usage,omitempty"`
-	// Information about the current condition of the volume.
-	// This field is OPTIONAL.
-	// This field MUST be specified if the VOLUME_CONDITION node
-	// capability is supported.
-	VolumeCondition *VolumeCondition `protobuf:"bytes,2,opt,name=volume_condition,json=volumeCondition,proto3" json:"volume_condition,omitempty"`
-	unknownFields   protoimpl.UnknownFields
-	sizeCache       protoimpl.SizeCache
+	state                      protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Usage           *[]*VolumeUsage        `protobuf:"bytes,1,rep,name=usage,proto3" json:"usage,omitempty"`
+	xxx_hidden_VolumeCondition *VolumeCondition       `protobuf:"bytes,2,opt,name=volume_condition,json=volumeCondition,proto3" json:"volume_condition,omitempty"`
+	unknownFields              protoimpl.UnknownFields
+	sizeCache                  protoimpl.SizeCache
 }
 
 func (x *NodeGetVolumeStatsResponse) Reset() {
@@ -6592,35 +5857,37 @@ func (x *NodeGetVolumeStatsResponse) ProtoReflect() protoreflect.Message {
 
 func (x *NodeGetVolumeStatsResponse) GetUsage() []*VolumeUsage {
 	if x != nil {
-		return x.Usage
+		if x.xxx_hidden_Usage != nil {
+			return *x.xxx_hidden_Usage
+		}
 	}
 	return nil
 }
 
 func (x *NodeGetVolumeStatsResponse) GetVolumeCondition() *VolumeCondition {
 	if x != nil {
-		return x.VolumeCondition
+		return x.xxx_hidden_VolumeCondition
 	}
 	return nil
 }
 
 func (x *NodeGetVolumeStatsResponse) SetUsage(v []*VolumeUsage) {
-	x.Usage = v
+	x.xxx_hidden_Usage = &v
 }
 
 func (x *NodeGetVolumeStatsResponse) SetVolumeCondition(v *VolumeCondition) {
-	x.VolumeCondition = v
+	x.xxx_hidden_VolumeCondition = v
 }
 
 func (x *NodeGetVolumeStatsResponse) HasVolumeCondition() bool {
 	if x == nil {
 		return false
 	}
-	return x.VolumeCondition != nil
+	return x.xxx_hidden_VolumeCondition != nil
 }
 
 func (x *NodeGetVolumeStatsResponse) ClearVolumeCondition() {
-	x.VolumeCondition = nil
+	x.xxx_hidden_VolumeCondition = nil
 }
 
 type NodeGetVolumeStatsResponse_builder struct {
@@ -6639,26 +5906,19 @@ func (b0 NodeGetVolumeStatsResponse_builder) Build() *NodeGetVolumeStatsResponse
 	m0 := &NodeGetVolumeStatsResponse{}
 	b, x := &b0, m0
 	_, _ = b, x
-	x.Usage = b.Usage
-	x.VolumeCondition = b.VolumeCondition
+	x.xxx_hidden_Usage = &b.Usage
+	x.xxx_hidden_VolumeCondition = b.VolumeCondition
 	return m0
 }
 
 type VolumeUsage struct {
-	state protoimpl.MessageState `protogen:"hybrid.v1"`
-	// The available capacity in specified Unit. This field is OPTIONAL.
-	// The value of this field MUST NOT be negative.
-	Available int64 `protobuf:"varint,1,opt,name=available,proto3" json:"available,omitempty"`
-	// The total capacity in specified Unit. This field is REQUIRED.
-	// The value of this field MUST NOT be negative.
-	Total int64 `protobuf:"varint,2,opt,name=total,proto3" json:"total,omitempty"`
-	// The used capacity in specified Unit. This field is OPTIONAL.
-	// The value of this field MUST NOT be negative.
-	Used int64 `protobuf:"varint,3,opt,name=used,proto3" json:"used,omitempty"`
-	// Units by which values are measured. This field is REQUIRED.
-	Unit          VolumeUsage_Unit `protobuf:"varint,4,opt,name=unit,proto3,enum=csi.v1.VolumeUsage_Unit" json:"unit,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state                protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Available int64                  `protobuf:"varint,1,opt,name=available,proto3" json:"available,omitempty"`
+	xxx_hidden_Total     int64                  `protobuf:"varint,2,opt,name=total,proto3" json:"total,omitempty"`
+	xxx_hidden_Used      int64                  `protobuf:"varint,3,opt,name=used,proto3" json:"used,omitempty"`
+	xxx_hidden_Unit      VolumeUsage_Unit       `protobuf:"varint,4,opt,name=unit,proto3,enum=csi.v1.VolumeUsage_Unit" json:"unit,omitempty"`
+	unknownFields        protoimpl.UnknownFields
+	sizeCache            protoimpl.SizeCache
 }
 
 func (x *VolumeUsage) Reset() {
@@ -6688,46 +5948,46 @@ func (x *VolumeUsage) ProtoReflect() protoreflect.Message {
 
 func (x *VolumeUsage) GetAvailable() int64 {
 	if x != nil {
-		return x.Available
+		return x.xxx_hidden_Available
 	}
 	return 0
 }
 
 func (x *VolumeUsage) GetTotal() int64 {
 	if x != nil {
-		return x.Total
+		return x.xxx_hidden_Total
 	}
 	return 0
 }
 
 func (x *VolumeUsage) GetUsed() int64 {
 	if x != nil {
-		return x.Used
+		return x.xxx_hidden_Used
 	}
 	return 0
 }
 
 func (x *VolumeUsage) GetUnit() VolumeUsage_Unit {
 	if x != nil {
-		return x.Unit
+		return x.xxx_hidden_Unit
 	}
 	return VolumeUsage_UNKNOWN
 }
 
 func (x *VolumeUsage) SetAvailable(v int64) {
-	x.Available = v
+	x.xxx_hidden_Available = v
 }
 
 func (x *VolumeUsage) SetTotal(v int64) {
-	x.Total = v
+	x.xxx_hidden_Total = v
 }
 
 func (x *VolumeUsage) SetUsed(v int64) {
-	x.Used = v
+	x.xxx_hidden_Used = v
 }
 
 func (x *VolumeUsage) SetUnit(v VolumeUsage_Unit) {
-	x.Unit = v
+	x.xxx_hidden_Unit = v
 }
 
 type VolumeUsage_builder struct {
@@ -6750,25 +6010,20 @@ func (b0 VolumeUsage_builder) Build() *VolumeUsage {
 	m0 := &VolumeUsage{}
 	b, x := &b0, m0
 	_, _ = b, x
-	x.Available = b.Available
-	x.Total = b.Total
-	x.Used = b.Used
-	x.Unit = b.Unit
+	x.xxx_hidden_Available = b.Available
+	x.xxx_hidden_Total = b.Total
+	x.xxx_hidden_Used = b.Used
+	x.xxx_hidden_Unit = b.Unit
 	return m0
 }
 
 // VolumeCondition represents the current condition of a volume.
 type VolumeCondition struct {
-	state protoimpl.MessageState `protogen:"hybrid.v1"`
-	// Normal volumes are available for use and operating optimally.
-	// An abnormal volume does not meet these criteria.
-	// This field is REQUIRED.
-	Abnormal bool `protobuf:"varint,1,opt,name=abnormal,proto3" json:"abnormal,omitempty"`
-	// The message describing the condition of the volume.
-	// This field is REQUIRED.
-	Message       string `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state               protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Abnormal bool                   `protobuf:"varint,1,opt,name=abnormal,proto3" json:"abnormal,omitempty"`
+	xxx_hidden_Message  string                 `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
+	unknownFields       protoimpl.UnknownFields
+	sizeCache           protoimpl.SizeCache
 }
 
 func (x *VolumeCondition) Reset() {
@@ -6798,24 +6053,24 @@ func (x *VolumeCondition) ProtoReflect() protoreflect.Message {
 
 func (x *VolumeCondition) GetAbnormal() bool {
 	if x != nil {
-		return x.Abnormal
+		return x.xxx_hidden_Abnormal
 	}
 	return false
 }
 
 func (x *VolumeCondition) GetMessage() string {
 	if x != nil {
-		return x.Message
+		return x.xxx_hidden_Message
 	}
 	return ""
 }
 
 func (x *VolumeCondition) SetAbnormal(v bool) {
-	x.Abnormal = v
+	x.xxx_hidden_Abnormal = v
 }
 
 func (x *VolumeCondition) SetMessage(v string) {
-	x.Message = v
+	x.xxx_hidden_Message = v
 }
 
 type VolumeCondition_builder struct {
@@ -6834,13 +6089,13 @@ func (b0 VolumeCondition_builder) Build() *VolumeCondition {
 	m0 := &VolumeCondition{}
 	b, x := &b0, m0
 	_, _ = b, x
-	x.Abnormal = b.Abnormal
-	x.Message = b.Message
+	x.xxx_hidden_Abnormal = b.Abnormal
+	x.xxx_hidden_Message = b.Message
 	return m0
 }
 
 type NodeGetCapabilitiesRequest struct {
-	state         protoimpl.MessageState `protogen:"hybrid.v1"`
+	state         protoimpl.MessageState `protogen:"opaque.v1"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -6883,12 +6138,10 @@ func (b0 NodeGetCapabilitiesRequest_builder) Build() *NodeGetCapabilitiesRequest
 }
 
 type NodeGetCapabilitiesResponse struct {
-	state protoimpl.MessageState `protogen:"hybrid.v1"`
-	// All the capabilities that the node service supports. This field
-	// is OPTIONAL.
-	Capabilities  []*NodeServiceCapability `protobuf:"bytes,1,rep,name=capabilities,proto3" json:"capabilities,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state                   protoimpl.MessageState    `protogen:"opaque.v1"`
+	xxx_hidden_Capabilities *[]*NodeServiceCapability `protobuf:"bytes,1,rep,name=capabilities,proto3" json:"capabilities,omitempty"`
+	unknownFields           protoimpl.UnknownFields
+	sizeCache               protoimpl.SizeCache
 }
 
 func (x *NodeGetCapabilitiesResponse) Reset() {
@@ -6918,13 +6171,15 @@ func (x *NodeGetCapabilitiesResponse) ProtoReflect() protoreflect.Message {
 
 func (x *NodeGetCapabilitiesResponse) GetCapabilities() []*NodeServiceCapability {
 	if x != nil {
-		return x.Capabilities
+		if x.xxx_hidden_Capabilities != nil {
+			return *x.xxx_hidden_Capabilities
+		}
 	}
 	return nil
 }
 
 func (x *NodeGetCapabilitiesResponse) SetCapabilities(v []*NodeServiceCapability) {
-	x.Capabilities = v
+	x.xxx_hidden_Capabilities = &v
 }
 
 type NodeGetCapabilitiesResponse_builder struct {
@@ -6939,19 +6194,16 @@ func (b0 NodeGetCapabilitiesResponse_builder) Build() *NodeGetCapabilitiesRespon
 	m0 := &NodeGetCapabilitiesResponse{}
 	b, x := &b0, m0
 	_, _ = b, x
-	x.Capabilities = b.Capabilities
+	x.xxx_hidden_Capabilities = &b.Capabilities
 	return m0
 }
 
 // Specifies a capability of the node service.
 type NodeServiceCapability struct {
-	state protoimpl.MessageState `protogen:"hybrid.v1"`
-	// Types that are valid to be assigned to Type:
-	//
-	//	*NodeServiceCapability_Rpc
-	Type          isNodeServiceCapability_Type `protobuf_oneof:"type"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state           protoimpl.MessageState       `protogen:"opaque.v1"`
+	xxx_hidden_Type isNodeServiceCapability_Type `protobuf_oneof:"type"`
+	unknownFields   protoimpl.UnknownFields
+	sizeCache       protoimpl.SizeCache
 }
 
 func (x *NodeServiceCapability) Reset() {
@@ -6979,16 +6231,9 @@ func (x *NodeServiceCapability) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-func (x *NodeServiceCapability) GetType() isNodeServiceCapability_Type {
-	if x != nil {
-		return x.Type
-	}
-	return nil
-}
-
 func (x *NodeServiceCapability) GetRpc() *NodeServiceCapability_RPC {
 	if x != nil {
-		if x, ok := x.Type.(*NodeServiceCapability_Rpc); ok {
+		if x, ok := x.xxx_hidden_Type.(*nodeServiceCapability_Rpc); ok {
 			return x.Rpc
 		}
 	}
@@ -6997,34 +6242,34 @@ func (x *NodeServiceCapability) GetRpc() *NodeServiceCapability_RPC {
 
 func (x *NodeServiceCapability) SetRpc(v *NodeServiceCapability_RPC) {
 	if v == nil {
-		x.Type = nil
+		x.xxx_hidden_Type = nil
 		return
 	}
-	x.Type = &NodeServiceCapability_Rpc{v}
+	x.xxx_hidden_Type = &nodeServiceCapability_Rpc{v}
 }
 
 func (x *NodeServiceCapability) HasType() bool {
 	if x == nil {
 		return false
 	}
-	return x.Type != nil
+	return x.xxx_hidden_Type != nil
 }
 
 func (x *NodeServiceCapability) HasRpc() bool {
 	if x == nil {
 		return false
 	}
-	_, ok := x.Type.(*NodeServiceCapability_Rpc)
+	_, ok := x.xxx_hidden_Type.(*nodeServiceCapability_Rpc)
 	return ok
 }
 
 func (x *NodeServiceCapability) ClearType() {
-	x.Type = nil
+	x.xxx_hidden_Type = nil
 }
 
 func (x *NodeServiceCapability) ClearRpc() {
-	if _, ok := x.Type.(*NodeServiceCapability_Rpc); ok {
-		x.Type = nil
+	if _, ok := x.xxx_hidden_Type.(*nodeServiceCapability_Rpc); ok {
+		x.xxx_hidden_Type = nil
 	}
 }
 
@@ -7035,8 +6280,8 @@ func (x *NodeServiceCapability) WhichType() case_NodeServiceCapability_Type {
 	if x == nil {
 		return NodeServiceCapability_Type_not_set_case
 	}
-	switch x.Type.(type) {
-	case *NodeServiceCapability_Rpc:
+	switch x.xxx_hidden_Type.(type) {
+	case *nodeServiceCapability_Rpc:
 		return NodeServiceCapability_Rpc_case
 	default:
 		return NodeServiceCapability_Type_not_set_case
@@ -7046,10 +6291,10 @@ func (x *NodeServiceCapability) WhichType() case_NodeServiceCapability_Type {
 type NodeServiceCapability_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
-	// Fields of oneof Type:
+	// Fields of oneof xxx_hidden_Type:
 	// RPC that the controller supports.
 	Rpc *NodeServiceCapability_RPC
-	// -- end of Type
+	// -- end of xxx_hidden_Type
 }
 
 func (b0 NodeServiceCapability_builder) Build() *NodeServiceCapability {
@@ -7057,7 +6302,7 @@ func (b0 NodeServiceCapability_builder) Build() *NodeServiceCapability {
 	b, x := &b0, m0
 	_, _ = b, x
 	if b.Rpc != nil {
-		x.Type = &NodeServiceCapability_Rpc{b.Rpc}
+		x.xxx_hidden_Type = &nodeServiceCapability_Rpc{b.Rpc}
 	}
 	return m0
 }
@@ -7076,15 +6321,15 @@ type isNodeServiceCapability_Type interface {
 	isNodeServiceCapability_Type()
 }
 
-type NodeServiceCapability_Rpc struct {
+type nodeServiceCapability_Rpc struct {
 	// RPC that the controller supports.
 	Rpc *NodeServiceCapability_RPC `protobuf:"bytes,1,opt,name=rpc,proto3,oneof"`
 }
 
-func (*NodeServiceCapability_Rpc) isNodeServiceCapability_Type() {}
+func (*nodeServiceCapability_Rpc) isNodeServiceCapability_Type() {}
 
 type NodeGetInfoRequest struct {
-	state         protoimpl.MessageState `protogen:"hybrid.v1"`
+	state         protoimpl.MessageState `protogen:"opaque.v1"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -7127,48 +6372,12 @@ func (b0 NodeGetInfoRequest_builder) Build() *NodeGetInfoRequest {
 }
 
 type NodeGetInfoResponse struct {
-	state protoimpl.MessageState `protogen:"hybrid.v1"`
-	// The identifier of the node as understood by the SP.
-	// This field is REQUIRED.
-	// This field MUST contain enough information to uniquely identify
-	// this specific node vs all other nodes supported by this plugin.
-	// This field SHALL be used by the CO in subsequent calls, including
-	// `ControllerPublishVolume`, to refer to this node.
-	// The SP is NOT responsible for global uniqueness of node_id across
-	// multiple SPs.
-	// This field overrides the general CSI size limit.
-	// The size of this field SHALL NOT exceed 256 bytes. The general
-	// CSI size limit, 128 byte, is RECOMMENDED for best backwards
-	// compatibility.
-	NodeId string `protobuf:"bytes,1,opt,name=node_id,json=nodeId,proto3" json:"node_id,omitempty"`
-	// Maximum number of volumes that controller can publish to the node.
-	// If value is not set or zero CO SHALL decide how many volumes of
-	// this type can be published by the controller to the node. The
-	// plugin MUST NOT set negative values here.
-	// This field is OPTIONAL.
-	MaxVolumesPerNode int64 `protobuf:"varint,2,opt,name=max_volumes_per_node,json=maxVolumesPerNode,proto3" json:"max_volumes_per_node,omitempty"`
-	// Specifies where (regions, zones, racks, etc.) the node is
-	// accessible from.
-	// A plugin that returns this field MUST also set the
-	// VOLUME_ACCESSIBILITY_CONSTRAINTS plugin capability.
-	// COs MAY use this information along with the topology information
-	// returned in CreateVolumeResponse to ensure that a given volume is
-	// accessible from a given node when scheduling workloads.
-	// This field is OPTIONAL. If it is not specified, the CO MAY assume
-	// the node is not subject to any topological constraint, and MAY
-	// schedule workloads that reference any volume V, such that there are
-	// no topological constraints declared for V.
-	//
-	// Example 1:
-	//
-	//	accessible_topology =
-	//	  {"region": "R1", "zone": "Z2"}
-	//
-	// Indicates the node exists within the "region" "R1" and the "zone"
-	// "Z2".
-	AccessibleTopology *Topology `protobuf:"bytes,3,opt,name=accessible_topology,json=accessibleTopology,proto3" json:"accessible_topology,omitempty"`
-	unknownFields      protoimpl.UnknownFields
-	sizeCache          protoimpl.SizeCache
+	state                         protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_NodeId             string                 `protobuf:"bytes,1,opt,name=node_id,json=nodeId,proto3" json:"node_id,omitempty"`
+	xxx_hidden_MaxVolumesPerNode  int64                  `protobuf:"varint,2,opt,name=max_volumes_per_node,json=maxVolumesPerNode,proto3" json:"max_volumes_per_node,omitempty"`
+	xxx_hidden_AccessibleTopology *Topology              `protobuf:"bytes,3,opt,name=accessible_topology,json=accessibleTopology,proto3" json:"accessible_topology,omitempty"`
+	unknownFields                 protoimpl.UnknownFields
+	sizeCache                     protoimpl.SizeCache
 }
 
 func (x *NodeGetInfoResponse) Reset() {
@@ -7198,46 +6407,46 @@ func (x *NodeGetInfoResponse) ProtoReflect() protoreflect.Message {
 
 func (x *NodeGetInfoResponse) GetNodeId() string {
 	if x != nil {
-		return x.NodeId
+		return x.xxx_hidden_NodeId
 	}
 	return ""
 }
 
 func (x *NodeGetInfoResponse) GetMaxVolumesPerNode() int64 {
 	if x != nil {
-		return x.MaxVolumesPerNode
+		return x.xxx_hidden_MaxVolumesPerNode
 	}
 	return 0
 }
 
 func (x *NodeGetInfoResponse) GetAccessibleTopology() *Topology {
 	if x != nil {
-		return x.AccessibleTopology
+		return x.xxx_hidden_AccessibleTopology
 	}
 	return nil
 }
 
 func (x *NodeGetInfoResponse) SetNodeId(v string) {
-	x.NodeId = v
+	x.xxx_hidden_NodeId = v
 }
 
 func (x *NodeGetInfoResponse) SetMaxVolumesPerNode(v int64) {
-	x.MaxVolumesPerNode = v
+	x.xxx_hidden_MaxVolumesPerNode = v
 }
 
 func (x *NodeGetInfoResponse) SetAccessibleTopology(v *Topology) {
-	x.AccessibleTopology = v
+	x.xxx_hidden_AccessibleTopology = v
 }
 
 func (x *NodeGetInfoResponse) HasAccessibleTopology() bool {
 	if x == nil {
 		return false
 	}
-	return x.AccessibleTopology != nil
+	return x.xxx_hidden_AccessibleTopology != nil
 }
 
 func (x *NodeGetInfoResponse) ClearAccessibleTopology() {
-	x.AccessibleTopology = nil
+	x.xxx_hidden_AccessibleTopology = nil
 }
 
 type NodeGetInfoResponse_builder struct {
@@ -7288,55 +6497,22 @@ func (b0 NodeGetInfoResponse_builder) Build() *NodeGetInfoResponse {
 	m0 := &NodeGetInfoResponse{}
 	b, x := &b0, m0
 	_, _ = b, x
-	x.NodeId = b.NodeId
-	x.MaxVolumesPerNode = b.MaxVolumesPerNode
-	x.AccessibleTopology = b.AccessibleTopology
+	x.xxx_hidden_NodeId = b.NodeId
+	x.xxx_hidden_MaxVolumesPerNode = b.MaxVolumesPerNode
+	x.xxx_hidden_AccessibleTopology = b.AccessibleTopology
 	return m0
 }
 
 type NodeExpandVolumeRequest struct {
-	state protoimpl.MessageState `protogen:"hybrid.v1"`
-	// The ID of the volume. This field is REQUIRED.
-	VolumeId string `protobuf:"bytes,1,opt,name=volume_id,json=volumeId,proto3" json:"volume_id,omitempty"`
-	// The path on which volume is available. This field is REQUIRED.
-	// This field overrides the general CSI size limit.
-	// SP SHOULD support the maximum path length allowed by the operating
-	// system/filesystem, but, at a minimum, SP MUST accept a max path
-	// length of at least 128 bytes.
-	VolumePath string `protobuf:"bytes,2,opt,name=volume_path,json=volumePath,proto3" json:"volume_path,omitempty"`
-	// This allows CO to specify the capacity requirements of the volume
-	// after expansion. If capacity_range is omitted then a plugin MAY
-	// inspect the file system of the volume to determine the maximum
-	// capacity to which the volume can be expanded. In such cases a
-	// plugin MAY expand the volume to its maximum capacity.
-	// This field is OPTIONAL.
-	CapacityRange *CapacityRange `protobuf:"bytes,3,opt,name=capacity_range,json=capacityRange,proto3" json:"capacity_range,omitempty"`
-	// The path where the volume is staged, if the plugin has the
-	// STAGE_UNSTAGE_VOLUME capability, otherwise empty.
-	// If not empty, it MUST be an absolute path in the root
-	// filesystem of the process serving this request.
-	// This field is OPTIONAL.
-	// This field overrides the general CSI size limit.
-	// SP SHOULD support the maximum path length allowed by the operating
-	// system/filesystem, but, at a minimum, SP MUST accept a max path
-	// length of at least 128 bytes.
-	StagingTargetPath string `protobuf:"bytes,4,opt,name=staging_target_path,json=stagingTargetPath,proto3" json:"staging_target_path,omitempty"`
-	// Volume capability describing how the CO intends to use this volume.
-	// This allows SP to determine if volume is being used as a block
-	// device or mounted file system. For example - if volume is being
-	// used as a block device the SP MAY choose to skip expanding the
-	// filesystem in NodeExpandVolume implementation but still perform
-	// rest of the housekeeping needed for expanding the volume. If
-	// volume_capability is omitted the SP MAY determine
-	// access_type from given volume_path for the volume and perform
-	// node expansion. This is an OPTIONAL field.
-	VolumeCapability *VolumeCapability `protobuf:"bytes,5,opt,name=volume_capability,json=volumeCapability,proto3" json:"volume_capability,omitempty"`
-	// Secrets required by plugin to complete node expand volume request.
-	// This field is OPTIONAL. Refer to the `Secrets Requirements`
-	// section on how to use this field.
-	Secrets       map[string]string `protobuf:"bytes,6,rep,name=secrets,proto3" json:"secrets,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state                        protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_VolumeId          string                 `protobuf:"bytes,1,opt,name=volume_id,json=volumeId,proto3" json:"volume_id,omitempty"`
+	xxx_hidden_VolumePath        string                 `protobuf:"bytes,2,opt,name=volume_path,json=volumePath,proto3" json:"volume_path,omitempty"`
+	xxx_hidden_CapacityRange     *CapacityRange         `protobuf:"bytes,3,opt,name=capacity_range,json=capacityRange,proto3" json:"capacity_range,omitempty"`
+	xxx_hidden_StagingTargetPath string                 `protobuf:"bytes,4,opt,name=staging_target_path,json=stagingTargetPath,proto3" json:"staging_target_path,omitempty"`
+	xxx_hidden_VolumeCapability  *VolumeCapability      `protobuf:"bytes,5,opt,name=volume_capability,json=volumeCapability,proto3" json:"volume_capability,omitempty"`
+	xxx_hidden_Secrets           map[string]string      `protobuf:"bytes,6,rep,name=secrets,proto3" json:"secrets,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	unknownFields                protoimpl.UnknownFields
+	sizeCache                    protoimpl.SizeCache
 }
 
 func (x *NodeExpandVolumeRequest) Reset() {
@@ -7366,90 +6542,90 @@ func (x *NodeExpandVolumeRequest) ProtoReflect() protoreflect.Message {
 
 func (x *NodeExpandVolumeRequest) GetVolumeId() string {
 	if x != nil {
-		return x.VolumeId
+		return x.xxx_hidden_VolumeId
 	}
 	return ""
 }
 
 func (x *NodeExpandVolumeRequest) GetVolumePath() string {
 	if x != nil {
-		return x.VolumePath
+		return x.xxx_hidden_VolumePath
 	}
 	return ""
 }
 
 func (x *NodeExpandVolumeRequest) GetCapacityRange() *CapacityRange {
 	if x != nil {
-		return x.CapacityRange
+		return x.xxx_hidden_CapacityRange
 	}
 	return nil
 }
 
 func (x *NodeExpandVolumeRequest) GetStagingTargetPath() string {
 	if x != nil {
-		return x.StagingTargetPath
+		return x.xxx_hidden_StagingTargetPath
 	}
 	return ""
 }
 
 func (x *NodeExpandVolumeRequest) GetVolumeCapability() *VolumeCapability {
 	if x != nil {
-		return x.VolumeCapability
+		return x.xxx_hidden_VolumeCapability
 	}
 	return nil
 }
 
 func (x *NodeExpandVolumeRequest) GetSecrets() map[string]string {
 	if x != nil {
-		return x.Secrets
+		return x.xxx_hidden_Secrets
 	}
 	return nil
 }
 
 func (x *NodeExpandVolumeRequest) SetVolumeId(v string) {
-	x.VolumeId = v
+	x.xxx_hidden_VolumeId = v
 }
 
 func (x *NodeExpandVolumeRequest) SetVolumePath(v string) {
-	x.VolumePath = v
+	x.xxx_hidden_VolumePath = v
 }
 
 func (x *NodeExpandVolumeRequest) SetCapacityRange(v *CapacityRange) {
-	x.CapacityRange = v
+	x.xxx_hidden_CapacityRange = v
 }
 
 func (x *NodeExpandVolumeRequest) SetStagingTargetPath(v string) {
-	x.StagingTargetPath = v
+	x.xxx_hidden_StagingTargetPath = v
 }
 
 func (x *NodeExpandVolumeRequest) SetVolumeCapability(v *VolumeCapability) {
-	x.VolumeCapability = v
+	x.xxx_hidden_VolumeCapability = v
 }
 
 func (x *NodeExpandVolumeRequest) SetSecrets(v map[string]string) {
-	x.Secrets = v
+	x.xxx_hidden_Secrets = v
 }
 
 func (x *NodeExpandVolumeRequest) HasCapacityRange() bool {
 	if x == nil {
 		return false
 	}
-	return x.CapacityRange != nil
+	return x.xxx_hidden_CapacityRange != nil
 }
 
 func (x *NodeExpandVolumeRequest) HasVolumeCapability() bool {
 	if x == nil {
 		return false
 	}
-	return x.VolumeCapability != nil
+	return x.xxx_hidden_VolumeCapability != nil
 }
 
 func (x *NodeExpandVolumeRequest) ClearCapacityRange() {
-	x.CapacityRange = nil
+	x.xxx_hidden_CapacityRange = nil
 }
 
 func (x *NodeExpandVolumeRequest) ClearVolumeCapability() {
-	x.VolumeCapability = nil
+	x.xxx_hidden_VolumeCapability = nil
 }
 
 type NodeExpandVolumeRequest_builder struct {
@@ -7500,21 +6676,20 @@ func (b0 NodeExpandVolumeRequest_builder) Build() *NodeExpandVolumeRequest {
 	m0 := &NodeExpandVolumeRequest{}
 	b, x := &b0, m0
 	_, _ = b, x
-	x.VolumeId = b.VolumeId
-	x.VolumePath = b.VolumePath
-	x.CapacityRange = b.CapacityRange
-	x.StagingTargetPath = b.StagingTargetPath
-	x.VolumeCapability = b.VolumeCapability
-	x.Secrets = b.Secrets
+	x.xxx_hidden_VolumeId = b.VolumeId
+	x.xxx_hidden_VolumePath = b.VolumePath
+	x.xxx_hidden_CapacityRange = b.CapacityRange
+	x.xxx_hidden_StagingTargetPath = b.StagingTargetPath
+	x.xxx_hidden_VolumeCapability = b.VolumeCapability
+	x.xxx_hidden_Secrets = b.Secrets
 	return m0
 }
 
 type NodeExpandVolumeResponse struct {
-	state protoimpl.MessageState `protogen:"hybrid.v1"`
-	// The capacity of the volume in bytes. This field is OPTIONAL.
-	CapacityBytes int64 `protobuf:"varint,1,opt,name=capacity_bytes,json=capacityBytes,proto3" json:"capacity_bytes,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state                    protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_CapacityBytes int64                  `protobuf:"varint,1,opt,name=capacity_bytes,json=capacityBytes,proto3" json:"capacity_bytes,omitempty"`
+	unknownFields            protoimpl.UnknownFields
+	sizeCache                protoimpl.SizeCache
 }
 
 func (x *NodeExpandVolumeResponse) Reset() {
@@ -7544,13 +6719,13 @@ func (x *NodeExpandVolumeResponse) ProtoReflect() protoreflect.Message {
 
 func (x *NodeExpandVolumeResponse) GetCapacityBytes() int64 {
 	if x != nil {
-		return x.CapacityBytes
+		return x.xxx_hidden_CapacityBytes
 	}
 	return 0
 }
 
 func (x *NodeExpandVolumeResponse) SetCapacityBytes(v int64) {
-	x.CapacityBytes = v
+	x.xxx_hidden_CapacityBytes = v
 }
 
 type NodeExpandVolumeResponse_builder struct {
@@ -7564,12 +6739,12 @@ func (b0 NodeExpandVolumeResponse_builder) Build() *NodeExpandVolumeResponse {
 	m0 := &NodeExpandVolumeResponse{}
 	b, x := &b0, m0
 	_, _ = b, x
-	x.CapacityBytes = b.CapacityBytes
+	x.xxx_hidden_CapacityBytes = b.CapacityBytes
 	return m0
 }
 
 type GroupControllerGetCapabilitiesRequest struct {
-	state         protoimpl.MessageState `protogen:"hybrid.v1"`
+	state         protoimpl.MessageState `protogen:"opaque.v1"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -7612,12 +6787,10 @@ func (b0 GroupControllerGetCapabilitiesRequest_builder) Build() *GroupController
 }
 
 type GroupControllerGetCapabilitiesResponse struct {
-	state protoimpl.MessageState `protogen:"hybrid.v1"`
-	// All the capabilities that the group controller service supports.
-	// This field is OPTIONAL.
-	Capabilities  []*GroupControllerServiceCapability `protobuf:"bytes,1,rep,name=capabilities,proto3" json:"capabilities,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state                   protoimpl.MessageState               `protogen:"opaque.v1"`
+	xxx_hidden_Capabilities *[]*GroupControllerServiceCapability `protobuf:"bytes,1,rep,name=capabilities,proto3" json:"capabilities,omitempty"`
+	unknownFields           protoimpl.UnknownFields
+	sizeCache               protoimpl.SizeCache
 }
 
 func (x *GroupControllerGetCapabilitiesResponse) Reset() {
@@ -7647,13 +6820,15 @@ func (x *GroupControllerGetCapabilitiesResponse) ProtoReflect() protoreflect.Mes
 
 func (x *GroupControllerGetCapabilitiesResponse) GetCapabilities() []*GroupControllerServiceCapability {
 	if x != nil {
-		return x.Capabilities
+		if x.xxx_hidden_Capabilities != nil {
+			return *x.xxx_hidden_Capabilities
+		}
 	}
 	return nil
 }
 
 func (x *GroupControllerGetCapabilitiesResponse) SetCapabilities(v []*GroupControllerServiceCapability) {
-	x.Capabilities = v
+	x.xxx_hidden_Capabilities = &v
 }
 
 type GroupControllerGetCapabilitiesResponse_builder struct {
@@ -7668,19 +6843,16 @@ func (b0 GroupControllerGetCapabilitiesResponse_builder) Build() *GroupControlle
 	m0 := &GroupControllerGetCapabilitiesResponse{}
 	b, x := &b0, m0
 	_, _ = b, x
-	x.Capabilities = b.Capabilities
+	x.xxx_hidden_Capabilities = &b.Capabilities
 	return m0
 }
 
 // Specifies a capability of the group controller service.
 type GroupControllerServiceCapability struct {
-	state protoimpl.MessageState `protogen:"hybrid.v1"`
-	// Types that are valid to be assigned to Type:
-	//
-	//	*GroupControllerServiceCapability_Rpc
-	Type          isGroupControllerServiceCapability_Type `protobuf_oneof:"type"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state           protoimpl.MessageState                  `protogen:"opaque.v1"`
+	xxx_hidden_Type isGroupControllerServiceCapability_Type `protobuf_oneof:"type"`
+	unknownFields   protoimpl.UnknownFields
+	sizeCache       protoimpl.SizeCache
 }
 
 func (x *GroupControllerServiceCapability) Reset() {
@@ -7708,16 +6880,9 @@ func (x *GroupControllerServiceCapability) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-func (x *GroupControllerServiceCapability) GetType() isGroupControllerServiceCapability_Type {
-	if x != nil {
-		return x.Type
-	}
-	return nil
-}
-
 func (x *GroupControllerServiceCapability) GetRpc() *GroupControllerServiceCapability_RPC {
 	if x != nil {
-		if x, ok := x.Type.(*GroupControllerServiceCapability_Rpc); ok {
+		if x, ok := x.xxx_hidden_Type.(*groupControllerServiceCapability_Rpc); ok {
 			return x.Rpc
 		}
 	}
@@ -7726,34 +6891,34 @@ func (x *GroupControllerServiceCapability) GetRpc() *GroupControllerServiceCapab
 
 func (x *GroupControllerServiceCapability) SetRpc(v *GroupControllerServiceCapability_RPC) {
 	if v == nil {
-		x.Type = nil
+		x.xxx_hidden_Type = nil
 		return
 	}
-	x.Type = &GroupControllerServiceCapability_Rpc{v}
+	x.xxx_hidden_Type = &groupControllerServiceCapability_Rpc{v}
 }
 
 func (x *GroupControllerServiceCapability) HasType() bool {
 	if x == nil {
 		return false
 	}
-	return x.Type != nil
+	return x.xxx_hidden_Type != nil
 }
 
 func (x *GroupControllerServiceCapability) HasRpc() bool {
 	if x == nil {
 		return false
 	}
-	_, ok := x.Type.(*GroupControllerServiceCapability_Rpc)
+	_, ok := x.xxx_hidden_Type.(*groupControllerServiceCapability_Rpc)
 	return ok
 }
 
 func (x *GroupControllerServiceCapability) ClearType() {
-	x.Type = nil
+	x.xxx_hidden_Type = nil
 }
 
 func (x *GroupControllerServiceCapability) ClearRpc() {
-	if _, ok := x.Type.(*GroupControllerServiceCapability_Rpc); ok {
-		x.Type = nil
+	if _, ok := x.xxx_hidden_Type.(*groupControllerServiceCapability_Rpc); ok {
+		x.xxx_hidden_Type = nil
 	}
 }
 
@@ -7764,8 +6929,8 @@ func (x *GroupControllerServiceCapability) WhichType() case_GroupControllerServi
 	if x == nil {
 		return GroupControllerServiceCapability_Type_not_set_case
 	}
-	switch x.Type.(type) {
-	case *GroupControllerServiceCapability_Rpc:
+	switch x.xxx_hidden_Type.(type) {
+	case *groupControllerServiceCapability_Rpc:
 		return GroupControllerServiceCapability_Rpc_case
 	default:
 		return GroupControllerServiceCapability_Type_not_set_case
@@ -7775,10 +6940,10 @@ func (x *GroupControllerServiceCapability) WhichType() case_GroupControllerServi
 type GroupControllerServiceCapability_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
-	// Fields of oneof Type:
+	// Fields of oneof xxx_hidden_Type:
 	// RPC that the controller supports.
 	Rpc *GroupControllerServiceCapability_RPC
-	// -- end of Type
+	// -- end of xxx_hidden_Type
 }
 
 func (b0 GroupControllerServiceCapability_builder) Build() *GroupControllerServiceCapability {
@@ -7786,7 +6951,7 @@ func (b0 GroupControllerServiceCapability_builder) Build() *GroupControllerServi
 	b, x := &b0, m0
 	_, _ = b, x
 	if b.Rpc != nil {
-		x.Type = &GroupControllerServiceCapability_Rpc{b.Rpc}
+		x.xxx_hidden_Type = &groupControllerServiceCapability_Rpc{b.Rpc}
 	}
 	return m0
 }
@@ -7805,38 +6970,21 @@ type isGroupControllerServiceCapability_Type interface {
 	isGroupControllerServiceCapability_Type()
 }
 
-type GroupControllerServiceCapability_Rpc struct {
+type groupControllerServiceCapability_Rpc struct {
 	// RPC that the controller supports.
 	Rpc *GroupControllerServiceCapability_RPC `protobuf:"bytes,1,opt,name=rpc,proto3,oneof"`
 }
 
-func (*GroupControllerServiceCapability_Rpc) isGroupControllerServiceCapability_Type() {}
+func (*groupControllerServiceCapability_Rpc) isGroupControllerServiceCapability_Type() {}
 
 type CreateVolumeGroupSnapshotRequest struct {
-	state protoimpl.MessageState `protogen:"hybrid.v1"`
-	// The suggested name for the group snapshot. This field is REQUIRED
-	// for idempotency.
-	// Any Unicode string that conforms to the length limit is allowed
-	// except those containing the following banned characters:
-	// U+0000-U+0008, U+000B, U+000C, U+000E-U+001F, U+007F-U+009F.
-	// (These are control characters other than commonly used whitespace.)
-	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
-	// volume IDs of the source volumes to be snapshotted together.
-	// This field is REQUIRED.
-	SourceVolumeIds []string `protobuf:"bytes,2,rep,name=source_volume_ids,json=sourceVolumeIds,proto3" json:"source_volume_ids,omitempty"`
-	// Secrets required by plugin to complete
-	// ControllerCreateVolumeGroupSnapshot request.
-	// This field is OPTIONAL. Refer to the `Secrets Requirements`
-	// section on how to use this field.
-	// The secrets provided in this field SHOULD be the same for
-	// all group snapshot operations on the same group snapshot.
-	Secrets map[string]string `protobuf:"bytes,3,rep,name=secrets,proto3" json:"secrets,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
-	// Plugin specific parameters passed in as opaque key-value pairs.
-	// This field is OPTIONAL. The Plugin is responsible for parsing and
-	// validating these parameters. COs will treat these as opaque.
-	Parameters    map[string]string `protobuf:"bytes,4,rep,name=parameters,proto3" json:"parameters,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state                      protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Name            string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	xxx_hidden_SourceVolumeIds []string               `protobuf:"bytes,2,rep,name=source_volume_ids,json=sourceVolumeIds,proto3" json:"source_volume_ids,omitempty"`
+	xxx_hidden_Secrets         map[string]string      `protobuf:"bytes,3,rep,name=secrets,proto3" json:"secrets,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	xxx_hidden_Parameters      map[string]string      `protobuf:"bytes,4,rep,name=parameters,proto3" json:"parameters,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	unknownFields              protoimpl.UnknownFields
+	sizeCache                  protoimpl.SizeCache
 }
 
 func (x *CreateVolumeGroupSnapshotRequest) Reset() {
@@ -7866,46 +7014,46 @@ func (x *CreateVolumeGroupSnapshotRequest) ProtoReflect() protoreflect.Message {
 
 func (x *CreateVolumeGroupSnapshotRequest) GetName() string {
 	if x != nil {
-		return x.Name
+		return x.xxx_hidden_Name
 	}
 	return ""
 }
 
 func (x *CreateVolumeGroupSnapshotRequest) GetSourceVolumeIds() []string {
 	if x != nil {
-		return x.SourceVolumeIds
+		return x.xxx_hidden_SourceVolumeIds
 	}
 	return nil
 }
 
 func (x *CreateVolumeGroupSnapshotRequest) GetSecrets() map[string]string {
 	if x != nil {
-		return x.Secrets
+		return x.xxx_hidden_Secrets
 	}
 	return nil
 }
 
 func (x *CreateVolumeGroupSnapshotRequest) GetParameters() map[string]string {
 	if x != nil {
-		return x.Parameters
+		return x.xxx_hidden_Parameters
 	}
 	return nil
 }
 
 func (x *CreateVolumeGroupSnapshotRequest) SetName(v string) {
-	x.Name = v
+	x.xxx_hidden_Name = v
 }
 
 func (x *CreateVolumeGroupSnapshotRequest) SetSourceVolumeIds(v []string) {
-	x.SourceVolumeIds = v
+	x.xxx_hidden_SourceVolumeIds = v
 }
 
 func (x *CreateVolumeGroupSnapshotRequest) SetSecrets(v map[string]string) {
-	x.Secrets = v
+	x.xxx_hidden_Secrets = v
 }
 
 func (x *CreateVolumeGroupSnapshotRequest) SetParameters(v map[string]string) {
-	x.Parameters = v
+	x.xxx_hidden_Parameters = v
 }
 
 type CreateVolumeGroupSnapshotRequest_builder struct {
@@ -7938,20 +7086,18 @@ func (b0 CreateVolumeGroupSnapshotRequest_builder) Build() *CreateVolumeGroupSna
 	m0 := &CreateVolumeGroupSnapshotRequest{}
 	b, x := &b0, m0
 	_, _ = b, x
-	x.Name = b.Name
-	x.SourceVolumeIds = b.SourceVolumeIds
-	x.Secrets = b.Secrets
-	x.Parameters = b.Parameters
+	x.xxx_hidden_Name = b.Name
+	x.xxx_hidden_SourceVolumeIds = b.SourceVolumeIds
+	x.xxx_hidden_Secrets = b.Secrets
+	x.xxx_hidden_Parameters = b.Parameters
 	return m0
 }
 
 type CreateVolumeGroupSnapshotResponse struct {
-	state protoimpl.MessageState `protogen:"hybrid.v1"`
-	// Contains all attributes of the newly created group snapshot.
-	// This field is REQUIRED.
-	GroupSnapshot *VolumeGroupSnapshot `protobuf:"bytes,1,opt,name=group_snapshot,json=groupSnapshot,proto3" json:"group_snapshot,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state                    protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_GroupSnapshot *VolumeGroupSnapshot   `protobuf:"bytes,1,opt,name=group_snapshot,json=groupSnapshot,proto3" json:"group_snapshot,omitempty"`
+	unknownFields            protoimpl.UnknownFields
+	sizeCache                protoimpl.SizeCache
 }
 
 func (x *CreateVolumeGroupSnapshotResponse) Reset() {
@@ -7981,24 +7127,24 @@ func (x *CreateVolumeGroupSnapshotResponse) ProtoReflect() protoreflect.Message 
 
 func (x *CreateVolumeGroupSnapshotResponse) GetGroupSnapshot() *VolumeGroupSnapshot {
 	if x != nil {
-		return x.GroupSnapshot
+		return x.xxx_hidden_GroupSnapshot
 	}
 	return nil
 }
 
 func (x *CreateVolumeGroupSnapshotResponse) SetGroupSnapshot(v *VolumeGroupSnapshot) {
-	x.GroupSnapshot = v
+	x.xxx_hidden_GroupSnapshot = v
 }
 
 func (x *CreateVolumeGroupSnapshotResponse) HasGroupSnapshot() bool {
 	if x == nil {
 		return false
 	}
-	return x.GroupSnapshot != nil
+	return x.xxx_hidden_GroupSnapshot != nil
 }
 
 func (x *CreateVolumeGroupSnapshotResponse) ClearGroupSnapshot() {
-	x.GroupSnapshot = nil
+	x.xxx_hidden_GroupSnapshot = nil
 }
 
 type CreateVolumeGroupSnapshotResponse_builder struct {
@@ -8013,40 +7159,18 @@ func (b0 CreateVolumeGroupSnapshotResponse_builder) Build() *CreateVolumeGroupSn
 	m0 := &CreateVolumeGroupSnapshotResponse{}
 	b, x := &b0, m0
 	_, _ = b, x
-	x.GroupSnapshot = b.GroupSnapshot
+	x.xxx_hidden_GroupSnapshot = b.GroupSnapshot
 	return m0
 }
 
 type VolumeGroupSnapshot struct {
-	state protoimpl.MessageState `protogen:"hybrid.v1"`
-	// The identifier for this group snapshot, generated by the plugin.
-	// This field MUST contain enough information to uniquely identify
-	// this specific snapshot vs all other group snapshots supported by
-	// this plugin.
-	// This field SHALL be used by the CO in subsequent calls to refer to
-	// this group snapshot.
-	// The SP is NOT responsible for global uniqueness of
-	// group_snapshot_id across multiple SPs.
-	// This field is REQUIRED.
-	GroupSnapshotId string `protobuf:"bytes,1,opt,name=group_snapshot_id,json=groupSnapshotId,proto3" json:"group_snapshot_id,omitempty"`
-	// A list of snapshots belonging to this group.
-	// This field is REQUIRED.
-	Snapshots []*Snapshot `protobuf:"bytes,2,rep,name=snapshots,proto3" json:"snapshots,omitempty"`
-	// Timestamp of when the volume group snapshot was taken.
-	// This field is REQUIRED.
-	CreationTime *timestamppb.Timestamp `protobuf:"bytes,3,opt,name=creation_time,json=creationTime,proto3" json:"creation_time,omitempty"`
-	// Indicates if all individual snapshots in the group snapshot
-	// are ready to use as a `volume_content_source` in a
-	// `CreateVolumeRequest`. The default value is false.
-	// If any snapshot in the list of snapshots in this message have
-	// ready_to_use set to false, the SP MUST set this field to false.
-	// If all of the snapshots in the list of snapshots in this message
-	// have ready_to_use set to true, the SP SHOULD set this field to
-	// true.
-	// This field is REQUIRED.
-	ReadyToUse    bool `protobuf:"varint,4,opt,name=ready_to_use,json=readyToUse,proto3" json:"ready_to_use,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state                      protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_GroupSnapshotId string                 `protobuf:"bytes,1,opt,name=group_snapshot_id,json=groupSnapshotId,proto3" json:"group_snapshot_id,omitempty"`
+	xxx_hidden_Snapshots       *[]*Snapshot           `protobuf:"bytes,2,rep,name=snapshots,proto3" json:"snapshots,omitempty"`
+	xxx_hidden_CreationTime    *timestamppb.Timestamp `protobuf:"bytes,3,opt,name=creation_time,json=creationTime,proto3" json:"creation_time,omitempty"`
+	xxx_hidden_ReadyToUse      bool                   `protobuf:"varint,4,opt,name=ready_to_use,json=readyToUse,proto3" json:"ready_to_use,omitempty"`
+	unknownFields              protoimpl.UnknownFields
+	sizeCache                  protoimpl.SizeCache
 }
 
 func (x *VolumeGroupSnapshot) Reset() {
@@ -8076,57 +7200,59 @@ func (x *VolumeGroupSnapshot) ProtoReflect() protoreflect.Message {
 
 func (x *VolumeGroupSnapshot) GetGroupSnapshotId() string {
 	if x != nil {
-		return x.GroupSnapshotId
+		return x.xxx_hidden_GroupSnapshotId
 	}
 	return ""
 }
 
 func (x *VolumeGroupSnapshot) GetSnapshots() []*Snapshot {
 	if x != nil {
-		return x.Snapshots
+		if x.xxx_hidden_Snapshots != nil {
+			return *x.xxx_hidden_Snapshots
+		}
 	}
 	return nil
 }
 
 func (x *VolumeGroupSnapshot) GetCreationTime() *timestamppb.Timestamp {
 	if x != nil {
-		return x.CreationTime
+		return x.xxx_hidden_CreationTime
 	}
 	return nil
 }
 
 func (x *VolumeGroupSnapshot) GetReadyToUse() bool {
 	if x != nil {
-		return x.ReadyToUse
+		return x.xxx_hidden_ReadyToUse
 	}
 	return false
 }
 
 func (x *VolumeGroupSnapshot) SetGroupSnapshotId(v string) {
-	x.GroupSnapshotId = v
+	x.xxx_hidden_GroupSnapshotId = v
 }
 
 func (x *VolumeGroupSnapshot) SetSnapshots(v []*Snapshot) {
-	x.Snapshots = v
+	x.xxx_hidden_Snapshots = &v
 }
 
 func (x *VolumeGroupSnapshot) SetCreationTime(v *timestamppb.Timestamp) {
-	x.CreationTime = v
+	x.xxx_hidden_CreationTime = v
 }
 
 func (x *VolumeGroupSnapshot) SetReadyToUse(v bool) {
-	x.ReadyToUse = v
+	x.xxx_hidden_ReadyToUse = v
 }
 
 func (x *VolumeGroupSnapshot) HasCreationTime() bool {
 	if x == nil {
 		return false
 	}
-	return x.CreationTime != nil
+	return x.xxx_hidden_CreationTime != nil
 }
 
 func (x *VolumeGroupSnapshot) ClearCreationTime() {
-	x.CreationTime = nil
+	x.xxx_hidden_CreationTime = nil
 }
 
 type VolumeGroupSnapshot_builder struct {
@@ -8164,37 +7290,20 @@ func (b0 VolumeGroupSnapshot_builder) Build() *VolumeGroupSnapshot {
 	m0 := &VolumeGroupSnapshot{}
 	b, x := &b0, m0
 	_, _ = b, x
-	x.GroupSnapshotId = b.GroupSnapshotId
-	x.Snapshots = b.Snapshots
-	x.CreationTime = b.CreationTime
-	x.ReadyToUse = b.ReadyToUse
+	x.xxx_hidden_GroupSnapshotId = b.GroupSnapshotId
+	x.xxx_hidden_Snapshots = &b.Snapshots
+	x.xxx_hidden_CreationTime = b.CreationTime
+	x.xxx_hidden_ReadyToUse = b.ReadyToUse
 	return m0
 }
 
 type DeleteVolumeGroupSnapshotRequest struct {
-	state protoimpl.MessageState `protogen:"hybrid.v1"`
-	// The ID of the group snapshot to be deleted.
-	// This field is REQUIRED.
-	GroupSnapshotId string `protobuf:"bytes,1,opt,name=group_snapshot_id,json=groupSnapshotId,proto3" json:"group_snapshot_id,omitempty"`
-	// A list of snapshot IDs that are part of this group snapshot.
-	// If SP does not need to rely on this field to delete the snapshots
-	// in the group, it SHOULD check this field and report an error
-	// if it has the ability to detect a mismatch.
-	// Some SPs require this list to delete the snapshots in the group.
-	// If SP needs to use this field to delete the snapshots in the
-	// group, it MUST report an error if it has the ability to detect
-	// a mismatch.
-	// This field is REQUIRED.
-	SnapshotIds []string `protobuf:"bytes,2,rep,name=snapshot_ids,json=snapshotIds,proto3" json:"snapshot_ids,omitempty"`
-	// Secrets required by plugin to complete group snapshot deletion
-	// request.
-	// This field is OPTIONAL. Refer to the `Secrets Requirements`
-	// section on how to use this field.
-	// The secrets provided in this field SHOULD be the same for
-	// all group snapshot operations on the same group snapshot.
-	Secrets       map[string]string `protobuf:"bytes,3,rep,name=secrets,proto3" json:"secrets,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state                      protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_GroupSnapshotId string                 `protobuf:"bytes,1,opt,name=group_snapshot_id,json=groupSnapshotId,proto3" json:"group_snapshot_id,omitempty"`
+	xxx_hidden_SnapshotIds     []string               `protobuf:"bytes,2,rep,name=snapshot_ids,json=snapshotIds,proto3" json:"snapshot_ids,omitempty"`
+	xxx_hidden_Secrets         map[string]string      `protobuf:"bytes,3,rep,name=secrets,proto3" json:"secrets,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	unknownFields              protoimpl.UnknownFields
+	sizeCache                  protoimpl.SizeCache
 }
 
 func (x *DeleteVolumeGroupSnapshotRequest) Reset() {
@@ -8224,35 +7333,35 @@ func (x *DeleteVolumeGroupSnapshotRequest) ProtoReflect() protoreflect.Message {
 
 func (x *DeleteVolumeGroupSnapshotRequest) GetGroupSnapshotId() string {
 	if x != nil {
-		return x.GroupSnapshotId
+		return x.xxx_hidden_GroupSnapshotId
 	}
 	return ""
 }
 
 func (x *DeleteVolumeGroupSnapshotRequest) GetSnapshotIds() []string {
 	if x != nil {
-		return x.SnapshotIds
+		return x.xxx_hidden_SnapshotIds
 	}
 	return nil
 }
 
 func (x *DeleteVolumeGroupSnapshotRequest) GetSecrets() map[string]string {
 	if x != nil {
-		return x.Secrets
+		return x.xxx_hidden_Secrets
 	}
 	return nil
 }
 
 func (x *DeleteVolumeGroupSnapshotRequest) SetGroupSnapshotId(v string) {
-	x.GroupSnapshotId = v
+	x.xxx_hidden_GroupSnapshotId = v
 }
 
 func (x *DeleteVolumeGroupSnapshotRequest) SetSnapshotIds(v []string) {
-	x.SnapshotIds = v
+	x.xxx_hidden_SnapshotIds = v
 }
 
 func (x *DeleteVolumeGroupSnapshotRequest) SetSecrets(v map[string]string) {
-	x.Secrets = v
+	x.xxx_hidden_Secrets = v
 }
 
 type DeleteVolumeGroupSnapshotRequest_builder struct {
@@ -8284,14 +7393,14 @@ func (b0 DeleteVolumeGroupSnapshotRequest_builder) Build() *DeleteVolumeGroupSna
 	m0 := &DeleteVolumeGroupSnapshotRequest{}
 	b, x := &b0, m0
 	_, _ = b, x
-	x.GroupSnapshotId = b.GroupSnapshotId
-	x.SnapshotIds = b.SnapshotIds
-	x.Secrets = b.Secrets
+	x.xxx_hidden_GroupSnapshotId = b.GroupSnapshotId
+	x.xxx_hidden_SnapshotIds = b.SnapshotIds
+	x.xxx_hidden_Secrets = b.Secrets
 	return m0
 }
 
 type DeleteVolumeGroupSnapshotResponse struct {
-	state         protoimpl.MessageState `protogen:"hybrid.v1"`
+	state         protoimpl.MessageState `protogen:"opaque.v1"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -8334,30 +7443,12 @@ func (b0 DeleteVolumeGroupSnapshotResponse_builder) Build() *DeleteVolumeGroupSn
 }
 
 type GetVolumeGroupSnapshotRequest struct {
-	state protoimpl.MessageState `protogen:"hybrid.v1"`
-	// The ID of the group snapshot to fetch current group snapshot
-	// information for.
-	// This field is REQUIRED.
-	GroupSnapshotId string `protobuf:"bytes,1,opt,name=group_snapshot_id,json=groupSnapshotId,proto3" json:"group_snapshot_id,omitempty"`
-	// A list of snapshot IDs that are part of this group snapshot.
-	// If SP does not need to rely on this field to get the snapshots
-	// in the group, it SHOULD check this field and report an error
-	// if it has the ability to detect a mismatch.
-	// Some SPs require this list to get the snapshots in the group.
-	// If SP needs to use this field to get the snapshots in the
-	// group, it MUST report an error if it has the ability to detect
-	// a mismatch.
-	// This field is REQUIRED.
-	SnapshotIds []string `protobuf:"bytes,2,rep,name=snapshot_ids,json=snapshotIds,proto3" json:"snapshot_ids,omitempty"`
-	// Secrets required by plugin to complete
-	// GetVolumeGroupSnapshot request.
-	// This field is OPTIONAL. Refer to the `Secrets Requirements`
-	// section on how to use this field.
-	// The secrets provided in this field SHOULD be the same for
-	// all group snapshot operations on the same group snapshot.
-	Secrets       map[string]string `protobuf:"bytes,3,rep,name=secrets,proto3" json:"secrets,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state                      protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_GroupSnapshotId string                 `protobuf:"bytes,1,opt,name=group_snapshot_id,json=groupSnapshotId,proto3" json:"group_snapshot_id,omitempty"`
+	xxx_hidden_SnapshotIds     []string               `protobuf:"bytes,2,rep,name=snapshot_ids,json=snapshotIds,proto3" json:"snapshot_ids,omitempty"`
+	xxx_hidden_Secrets         map[string]string      `protobuf:"bytes,3,rep,name=secrets,proto3" json:"secrets,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	unknownFields              protoimpl.UnknownFields
+	sizeCache                  protoimpl.SizeCache
 }
 
 func (x *GetVolumeGroupSnapshotRequest) Reset() {
@@ -8387,35 +7478,35 @@ func (x *GetVolumeGroupSnapshotRequest) ProtoReflect() protoreflect.Message {
 
 func (x *GetVolumeGroupSnapshotRequest) GetGroupSnapshotId() string {
 	if x != nil {
-		return x.GroupSnapshotId
+		return x.xxx_hidden_GroupSnapshotId
 	}
 	return ""
 }
 
 func (x *GetVolumeGroupSnapshotRequest) GetSnapshotIds() []string {
 	if x != nil {
-		return x.SnapshotIds
+		return x.xxx_hidden_SnapshotIds
 	}
 	return nil
 }
 
 func (x *GetVolumeGroupSnapshotRequest) GetSecrets() map[string]string {
 	if x != nil {
-		return x.Secrets
+		return x.xxx_hidden_Secrets
 	}
 	return nil
 }
 
 func (x *GetVolumeGroupSnapshotRequest) SetGroupSnapshotId(v string) {
-	x.GroupSnapshotId = v
+	x.xxx_hidden_GroupSnapshotId = v
 }
 
 func (x *GetVolumeGroupSnapshotRequest) SetSnapshotIds(v []string) {
-	x.SnapshotIds = v
+	x.xxx_hidden_SnapshotIds = v
 }
 
 func (x *GetVolumeGroupSnapshotRequest) SetSecrets(v map[string]string) {
-	x.Secrets = v
+	x.xxx_hidden_Secrets = v
 }
 
 type GetVolumeGroupSnapshotRequest_builder struct {
@@ -8448,18 +7539,17 @@ func (b0 GetVolumeGroupSnapshotRequest_builder) Build() *GetVolumeGroupSnapshotR
 	m0 := &GetVolumeGroupSnapshotRequest{}
 	b, x := &b0, m0
 	_, _ = b, x
-	x.GroupSnapshotId = b.GroupSnapshotId
-	x.SnapshotIds = b.SnapshotIds
-	x.Secrets = b.Secrets
+	x.xxx_hidden_GroupSnapshotId = b.GroupSnapshotId
+	x.xxx_hidden_SnapshotIds = b.SnapshotIds
+	x.xxx_hidden_Secrets = b.Secrets
 	return m0
 }
 
 type GetVolumeGroupSnapshotResponse struct {
-	state protoimpl.MessageState `protogen:"hybrid.v1"`
-	// This field is REQUIRED
-	GroupSnapshot *VolumeGroupSnapshot `protobuf:"bytes,1,opt,name=group_snapshot,json=groupSnapshot,proto3" json:"group_snapshot,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state                    protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_GroupSnapshot *VolumeGroupSnapshot   `protobuf:"bytes,1,opt,name=group_snapshot,json=groupSnapshot,proto3" json:"group_snapshot,omitempty"`
+	unknownFields            protoimpl.UnknownFields
+	sizeCache                protoimpl.SizeCache
 }
 
 func (x *GetVolumeGroupSnapshotResponse) Reset() {
@@ -8489,24 +7579,24 @@ func (x *GetVolumeGroupSnapshotResponse) ProtoReflect() protoreflect.Message {
 
 func (x *GetVolumeGroupSnapshotResponse) GetGroupSnapshot() *VolumeGroupSnapshot {
 	if x != nil {
-		return x.GroupSnapshot
+		return x.xxx_hidden_GroupSnapshot
 	}
 	return nil
 }
 
 func (x *GetVolumeGroupSnapshotResponse) SetGroupSnapshot(v *VolumeGroupSnapshot) {
-	x.GroupSnapshot = v
+	x.xxx_hidden_GroupSnapshot = v
 }
 
 func (x *GetVolumeGroupSnapshotResponse) HasGroupSnapshot() bool {
 	if x == nil {
 		return false
 	}
-	return x.GroupSnapshot != nil
+	return x.xxx_hidden_GroupSnapshot != nil
 }
 
 func (x *GetVolumeGroupSnapshotResponse) ClearGroupSnapshot() {
-	x.GroupSnapshot = nil
+	x.xxx_hidden_GroupSnapshot = nil
 }
 
 type GetVolumeGroupSnapshotResponse_builder struct {
@@ -8520,23 +7610,17 @@ func (b0 GetVolumeGroupSnapshotResponse_builder) Build() *GetVolumeGroupSnapshot
 	m0 := &GetVolumeGroupSnapshotResponse{}
 	b, x := &b0, m0
 	_, _ = b, x
-	x.GroupSnapshot = b.GroupSnapshot
+	x.xxx_hidden_GroupSnapshot = b.GroupSnapshot
 	return m0
 }
 
 // BlockMetadata specifies a data range.
 type BlockMetadata struct {
-	state protoimpl.MessageState `protogen:"hybrid.v1"`
-	// This is the zero based byte position in the volume or snapshot,
-	// measured from the start of the object.
-	// This field is REQUIRED.
-	ByteOffset int64 `protobuf:"varint,1,opt,name=byte_offset,json=byteOffset,proto3" json:"byte_offset,omitempty"`
-	// This is the size of the data range.
-	// size_bytes MUST be greater than zero.
-	// This field is REQUIRED.
-	SizeBytes     int64 `protobuf:"varint,2,opt,name=size_bytes,json=sizeBytes,proto3" json:"size_bytes,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state                 protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_ByteOffset int64                  `protobuf:"varint,1,opt,name=byte_offset,json=byteOffset,proto3" json:"byte_offset,omitempty"`
+	xxx_hidden_SizeBytes  int64                  `protobuf:"varint,2,opt,name=size_bytes,json=sizeBytes,proto3" json:"size_bytes,omitempty"`
+	unknownFields         protoimpl.UnknownFields
+	sizeCache             protoimpl.SizeCache
 }
 
 func (x *BlockMetadata) Reset() {
@@ -8566,24 +7650,24 @@ func (x *BlockMetadata) ProtoReflect() protoreflect.Message {
 
 func (x *BlockMetadata) GetByteOffset() int64 {
 	if x != nil {
-		return x.ByteOffset
+		return x.xxx_hidden_ByteOffset
 	}
 	return 0
 }
 
 func (x *BlockMetadata) GetSizeBytes() int64 {
 	if x != nil {
-		return x.SizeBytes
+		return x.xxx_hidden_SizeBytes
 	}
 	return 0
 }
 
 func (x *BlockMetadata) SetByteOffset(v int64) {
-	x.ByteOffset = v
+	x.xxx_hidden_ByteOffset = v
 }
 
 func (x *BlockMetadata) SetSizeBytes(v int64) {
-	x.SizeBytes = v
+	x.xxx_hidden_SizeBytes = v
 }
 
 type BlockMetadata_builder struct {
@@ -8603,8 +7687,8 @@ func (b0 BlockMetadata_builder) Build() *BlockMetadata {
 	m0 := &BlockMetadata{}
 	b, x := &b0, m0
 	_, _ = b, x
-	x.ByteOffset = b.ByteOffset
-	x.SizeBytes = b.SizeBytes
+	x.xxx_hidden_ByteOffset = b.ByteOffset
+	x.xxx_hidden_SizeBytes = b.SizeBytes
 	return m0
 }
 
@@ -8613,37 +7697,13 @@ func (b0 BlockMetadata_builder) Build() *BlockMetadata {
 // data ranges that have valid data as they were the target of some
 // previous write operation on the volume.
 type GetMetadataAllocatedRequest struct {
-	state protoimpl.MessageState `protogen:"hybrid.v1"`
-	// This is the identifier of the snapshot.
-	// This field is REQUIRED.
-	SnapshotId string `protobuf:"bytes,1,opt,name=snapshot_id,json=snapshotId,proto3" json:"snapshot_id,omitempty"`
-	// This indicates the zero based starting byte position in the volume
-	// snapshot from which the result should be computed.
-	// It is intended to be used to continue a previously interrupted
-	// call.
-	// The CO SHOULD specify this value to be the offset of the byte
-	// position immediately after the last byte of the last data range
-	// received, if continuing an interrupted operation, or zero if not.
-	// The SP MUST ensure that the returned response stream does not
-	// contain BlockMetadata tuples that end before the requested
-	// starting_offset: i.e. if S is the requested starting_offset, and
-	// B0 is block_metadata[0] of the first message in the response
-	// stream, then (S < B0.byte_offset + B0.size_bytes) must be true.
-	// This field is REQUIRED.
-	StartingOffset int64 `protobuf:"varint,2,opt,name=starting_offset,json=startingOffset,proto3" json:"starting_offset,omitempty"`
-	// This is an optional parameter, and if non-zero it specifies the
-	// maximum number of tuples to be returned in each
-	// GetMetadataAllocatedResponse message returned by the RPC stream.
-	// The plugin will determine an appropriate value if 0, and is
-	// always free to send less than the requested value.
-	// This field is OPTIONAL.
-	MaxResults int32 `protobuf:"varint,3,opt,name=max_results,json=maxResults,proto3" json:"max_results,omitempty"`
-	// Secrets required by plugin to complete the request.
-	// This field is OPTIONAL. Refer to the `Secrets Requirements`
-	// section on how to use this field.
-	Secrets       map[string]string `protobuf:"bytes,4,rep,name=secrets,proto3" json:"secrets,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state                     protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_SnapshotId     string                 `protobuf:"bytes,1,opt,name=snapshot_id,json=snapshotId,proto3" json:"snapshot_id,omitempty"`
+	xxx_hidden_StartingOffset int64                  `protobuf:"varint,2,opt,name=starting_offset,json=startingOffset,proto3" json:"starting_offset,omitempty"`
+	xxx_hidden_MaxResults     int32                  `protobuf:"varint,3,opt,name=max_results,json=maxResults,proto3" json:"max_results,omitempty"`
+	xxx_hidden_Secrets        map[string]string      `protobuf:"bytes,4,rep,name=secrets,proto3" json:"secrets,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	unknownFields             protoimpl.UnknownFields
+	sizeCache                 protoimpl.SizeCache
 }
 
 func (x *GetMetadataAllocatedRequest) Reset() {
@@ -8673,46 +7733,46 @@ func (x *GetMetadataAllocatedRequest) ProtoReflect() protoreflect.Message {
 
 func (x *GetMetadataAllocatedRequest) GetSnapshotId() string {
 	if x != nil {
-		return x.SnapshotId
+		return x.xxx_hidden_SnapshotId
 	}
 	return ""
 }
 
 func (x *GetMetadataAllocatedRequest) GetStartingOffset() int64 {
 	if x != nil {
-		return x.StartingOffset
+		return x.xxx_hidden_StartingOffset
 	}
 	return 0
 }
 
 func (x *GetMetadataAllocatedRequest) GetMaxResults() int32 {
 	if x != nil {
-		return x.MaxResults
+		return x.xxx_hidden_MaxResults
 	}
 	return 0
 }
 
 func (x *GetMetadataAllocatedRequest) GetSecrets() map[string]string {
 	if x != nil {
-		return x.Secrets
+		return x.xxx_hidden_Secrets
 	}
 	return nil
 }
 
 func (x *GetMetadataAllocatedRequest) SetSnapshotId(v string) {
-	x.SnapshotId = v
+	x.xxx_hidden_SnapshotId = v
 }
 
 func (x *GetMetadataAllocatedRequest) SetStartingOffset(v int64) {
-	x.StartingOffset = v
+	x.xxx_hidden_StartingOffset = v
 }
 
 func (x *GetMetadataAllocatedRequest) SetMaxResults(v int32) {
-	x.MaxResults = v
+	x.xxx_hidden_MaxResults = v
 }
 
 func (x *GetMetadataAllocatedRequest) SetSecrets(v map[string]string) {
-	x.Secrets = v
+	x.xxx_hidden_Secrets = v
 }
 
 type GetMetadataAllocatedRequest_builder struct {
@@ -8752,10 +7812,10 @@ func (b0 GetMetadataAllocatedRequest_builder) Build() *GetMetadataAllocatedReque
 	m0 := &GetMetadataAllocatedRequest{}
 	b, x := &b0, m0
 	_, _ = b, x
-	x.SnapshotId = b.SnapshotId
-	x.StartingOffset = b.StartingOffset
-	x.MaxResults = b.MaxResults
-	x.Secrets = b.Secrets
+	x.xxx_hidden_SnapshotId = b.SnapshotId
+	x.xxx_hidden_StartingOffset = b.StartingOffset
+	x.xxx_hidden_MaxResults = b.MaxResults
+	x.xxx_hidden_Secrets = b.Secrets
 	return m0
 }
 
@@ -8763,35 +7823,12 @@ func (b0 GetMetadataAllocatedRequest_builder) Build() *GetMetadataAllocatedReque
 // Cumulatively, they provide information on the allocated data
 // ranges in the snapshot.
 type GetMetadataAllocatedResponse struct {
-	state protoimpl.MessageState `protogen:"hybrid.v1"`
-	// This specifies the style used in the BlockMetadata sequence.
-	// This value must be the same in all such messages returned by
-	// the stream.
-	// If block_metadata_type is FIXED_LENGTH, then the size_bytes field
-	// of each message in the block_metadata list MUST be constant.
-	// This field is REQUIRED.
-	BlockMetadataType BlockMetadataType `protobuf:"varint,1,opt,name=block_metadata_type,json=blockMetadataType,proto3,enum=csi.v1.BlockMetadataType" json:"block_metadata_type,omitempty"`
-	// This returns the capacity of the underlying volume in bytes.
-	// This value must be the same in all such messages returned by
-	// the stream.
-	// This field is REQUIRED.
-	VolumeCapacityBytes int64 `protobuf:"varint,2,opt,name=volume_capacity_bytes,json=volumeCapacityBytes,proto3" json:"volume_capacity_bytes,omitempty"`
-	// This is a list of data range tuples.
-	// If the value of max_results in the GetMetadataAllocatedRequest
-	// message is greater than zero, then the number of entries in this
-	// list MUST be less than or equal to that value.
-	// The SP MUST respect the value of starting_offset in the request.
-	// The byte_offset fields of adjacent BlockMetadata messages
-	// MUST be strictly increasing and messages MUST NOT overlap:
-	// i.e. for any two BlockMetadata messages, A and B, if A is returned
-	// before B, then (A.byte_offset + A.size_bytes <= B.byte_offset)
-	// MUST be true.
-	// This MUST also be true if A and B are from block_metadata lists in
-	// different GetMetadataAllocatedResponse messages in the gRPC stream.
-	// This field is OPTIONAL.
-	BlockMetadata []*BlockMetadata `protobuf:"bytes,3,rep,name=block_metadata,json=blockMetadata,proto3" json:"block_metadata,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state                          protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_BlockMetadataType   BlockMetadataType      `protobuf:"varint,1,opt,name=block_metadata_type,json=blockMetadataType,proto3,enum=csi.v1.BlockMetadataType" json:"block_metadata_type,omitempty"`
+	xxx_hidden_VolumeCapacityBytes int64                  `protobuf:"varint,2,opt,name=volume_capacity_bytes,json=volumeCapacityBytes,proto3" json:"volume_capacity_bytes,omitempty"`
+	xxx_hidden_BlockMetadata       *[]*BlockMetadata      `protobuf:"bytes,3,rep,name=block_metadata,json=blockMetadata,proto3" json:"block_metadata,omitempty"`
+	unknownFields                  protoimpl.UnknownFields
+	sizeCache                      protoimpl.SizeCache
 }
 
 func (x *GetMetadataAllocatedResponse) Reset() {
@@ -8821,35 +7858,37 @@ func (x *GetMetadataAllocatedResponse) ProtoReflect() protoreflect.Message {
 
 func (x *GetMetadataAllocatedResponse) GetBlockMetadataType() BlockMetadataType {
 	if x != nil {
-		return x.BlockMetadataType
+		return x.xxx_hidden_BlockMetadataType
 	}
 	return BlockMetadataType_UNKNOWN
 }
 
 func (x *GetMetadataAllocatedResponse) GetVolumeCapacityBytes() int64 {
 	if x != nil {
-		return x.VolumeCapacityBytes
+		return x.xxx_hidden_VolumeCapacityBytes
 	}
 	return 0
 }
 
 func (x *GetMetadataAllocatedResponse) GetBlockMetadata() []*BlockMetadata {
 	if x != nil {
-		return x.BlockMetadata
+		if x.xxx_hidden_BlockMetadata != nil {
+			return *x.xxx_hidden_BlockMetadata
+		}
 	}
 	return nil
 }
 
 func (x *GetMetadataAllocatedResponse) SetBlockMetadataType(v BlockMetadataType) {
-	x.BlockMetadataType = v
+	x.xxx_hidden_BlockMetadataType = v
 }
 
 func (x *GetMetadataAllocatedResponse) SetVolumeCapacityBytes(v int64) {
-	x.VolumeCapacityBytes = v
+	x.xxx_hidden_VolumeCapacityBytes = v
 }
 
 func (x *GetMetadataAllocatedResponse) SetBlockMetadata(v []*BlockMetadata) {
-	x.BlockMetadata = v
+	x.xxx_hidden_BlockMetadata = &v
 }
 
 type GetMetadataAllocatedResponse_builder struct {
@@ -8887,51 +7926,23 @@ func (b0 GetMetadataAllocatedResponse_builder) Build() *GetMetadataAllocatedResp
 	m0 := &GetMetadataAllocatedResponse{}
 	b, x := &b0, m0
 	_, _ = b, x
-	x.BlockMetadataType = b.BlockMetadataType
-	x.VolumeCapacityBytes = b.VolumeCapacityBytes
-	x.BlockMetadata = b.BlockMetadata
+	x.xxx_hidden_BlockMetadataType = b.BlockMetadataType
+	x.xxx_hidden_VolumeCapacityBytes = b.VolumeCapacityBytes
+	x.xxx_hidden_BlockMetadata = &b.BlockMetadata
 	return m0
 }
 
 // The GetMetadataDeltaRequest message is used to solicit metadata on
 // the data ranges that have changed between two snapshots.
 type GetMetadataDeltaRequest struct {
-	state protoimpl.MessageState `protogen:"hybrid.v1"`
-	// This is the identifier of the snapshot against which changes
-	// are to be computed.
-	// This field is REQUIRED.
-	BaseSnapshotId string `protobuf:"bytes,1,opt,name=base_snapshot_id,json=baseSnapshotId,proto3" json:"base_snapshot_id,omitempty"`
-	// This is the identifier of a second snapshot in the same volume,
-	// created after the base snapshot.
-	// This field is REQUIRED.
-	TargetSnapshotId string `protobuf:"bytes,2,opt,name=target_snapshot_id,json=targetSnapshotId,proto3" json:"target_snapshot_id,omitempty"`
-	// This indicates the zero based starting byte position in the volume
-	// snapshot from which the result should be computed.
-	// It is intended to be used to continue a previously interrupted
-	// call.
-	// The CO SHOULD specify this value to be the offset of the byte
-	// position immediately after the last byte of the last data range
-	// received, if continuing an interrupted operation, or zero if not.
-	// The SP MUST ensure that the returned response stream does not
-	// contain BlockMetadata tuples that end before the requested
-	// starting_offset: i.e. if S is the requested starting_offset, and
-	// B0 is block_metadata[0] of the first message in the response
-	// stream, then (S < B0.byte_offset + B0.size_bytes) must be true.
-	// This field is REQUIRED.
-	StartingOffset int64 `protobuf:"varint,3,opt,name=starting_offset,json=startingOffset,proto3" json:"starting_offset,omitempty"`
-	// This is an optional parameter, and if non-zero it specifies the
-	// maximum number of tuples to be returned in each
-	// GetMetadataDeltaResponse message returned by the RPC stream.
-	// The plugin will determine an appropriate value if 0, and is
-	// always free to send less than the requested value.
-	// This field is OPTIONAL.
-	MaxResults int32 `protobuf:"varint,4,opt,name=max_results,json=maxResults,proto3" json:"max_results,omitempty"`
-	// Secrets required by plugin to complete the request.
-	// This field is OPTIONAL. Refer to the `Secrets Requirements`
-	// section on how to use this field.
-	Secrets       map[string]string `protobuf:"bytes,5,rep,name=secrets,proto3" json:"secrets,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state                       protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_BaseSnapshotId   string                 `protobuf:"bytes,1,opt,name=base_snapshot_id,json=baseSnapshotId,proto3" json:"base_snapshot_id,omitempty"`
+	xxx_hidden_TargetSnapshotId string                 `protobuf:"bytes,2,opt,name=target_snapshot_id,json=targetSnapshotId,proto3" json:"target_snapshot_id,omitempty"`
+	xxx_hidden_StartingOffset   int64                  `protobuf:"varint,3,opt,name=starting_offset,json=startingOffset,proto3" json:"starting_offset,omitempty"`
+	xxx_hidden_MaxResults       int32                  `protobuf:"varint,4,opt,name=max_results,json=maxResults,proto3" json:"max_results,omitempty"`
+	xxx_hidden_Secrets          map[string]string      `protobuf:"bytes,5,rep,name=secrets,proto3" json:"secrets,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	unknownFields               protoimpl.UnknownFields
+	sizeCache                   protoimpl.SizeCache
 }
 
 func (x *GetMetadataDeltaRequest) Reset() {
@@ -8961,57 +7972,57 @@ func (x *GetMetadataDeltaRequest) ProtoReflect() protoreflect.Message {
 
 func (x *GetMetadataDeltaRequest) GetBaseSnapshotId() string {
 	if x != nil {
-		return x.BaseSnapshotId
+		return x.xxx_hidden_BaseSnapshotId
 	}
 	return ""
 }
 
 func (x *GetMetadataDeltaRequest) GetTargetSnapshotId() string {
 	if x != nil {
-		return x.TargetSnapshotId
+		return x.xxx_hidden_TargetSnapshotId
 	}
 	return ""
 }
 
 func (x *GetMetadataDeltaRequest) GetStartingOffset() int64 {
 	if x != nil {
-		return x.StartingOffset
+		return x.xxx_hidden_StartingOffset
 	}
 	return 0
 }
 
 func (x *GetMetadataDeltaRequest) GetMaxResults() int32 {
 	if x != nil {
-		return x.MaxResults
+		return x.xxx_hidden_MaxResults
 	}
 	return 0
 }
 
 func (x *GetMetadataDeltaRequest) GetSecrets() map[string]string {
 	if x != nil {
-		return x.Secrets
+		return x.xxx_hidden_Secrets
 	}
 	return nil
 }
 
 func (x *GetMetadataDeltaRequest) SetBaseSnapshotId(v string) {
-	x.BaseSnapshotId = v
+	x.xxx_hidden_BaseSnapshotId = v
 }
 
 func (x *GetMetadataDeltaRequest) SetTargetSnapshotId(v string) {
-	x.TargetSnapshotId = v
+	x.xxx_hidden_TargetSnapshotId = v
 }
 
 func (x *GetMetadataDeltaRequest) SetStartingOffset(v int64) {
-	x.StartingOffset = v
+	x.xxx_hidden_StartingOffset = v
 }
 
 func (x *GetMetadataDeltaRequest) SetMaxResults(v int32) {
-	x.MaxResults = v
+	x.xxx_hidden_MaxResults = v
 }
 
 func (x *GetMetadataDeltaRequest) SetSecrets(v map[string]string) {
-	x.Secrets = v
+	x.xxx_hidden_Secrets = v
 }
 
 type GetMetadataDeltaRequest_builder struct {
@@ -9056,11 +8067,11 @@ func (b0 GetMetadataDeltaRequest_builder) Build() *GetMetadataDeltaRequest {
 	m0 := &GetMetadataDeltaRequest{}
 	b, x := &b0, m0
 	_, _ = b, x
-	x.BaseSnapshotId = b.BaseSnapshotId
-	x.TargetSnapshotId = b.TargetSnapshotId
-	x.StartingOffset = b.StartingOffset
-	x.MaxResults = b.MaxResults
-	x.Secrets = b.Secrets
+	x.xxx_hidden_BaseSnapshotId = b.BaseSnapshotId
+	x.xxx_hidden_TargetSnapshotId = b.TargetSnapshotId
+	x.xxx_hidden_StartingOffset = b.StartingOffset
+	x.xxx_hidden_MaxResults = b.MaxResults
+	x.xxx_hidden_Secrets = b.Secrets
 	return m0
 }
 
@@ -9069,35 +8080,12 @@ func (b0 GetMetadataDeltaRequest_builder) Build() *GetMetadataDeltaRequest {
 // have changed between the base and target snapshots specified
 // in the GetMetadataDeltaRequest message.
 type GetMetadataDeltaResponse struct {
-	state protoimpl.MessageState `protogen:"hybrid.v1"`
-	// This specifies the style used in the BlockMetadata sequence.
-	// This value must be the same in all such messages returned by
-	// the stream.
-	// If block_metadata_type is FIXED_LENGTH, then the size_bytes field
-	// of each message in the block_metadata list MUST be constant.
-	// This field is REQUIRED.
-	BlockMetadataType BlockMetadataType `protobuf:"varint,1,opt,name=block_metadata_type,json=blockMetadataType,proto3,enum=csi.v1.BlockMetadataType" json:"block_metadata_type,omitempty"`
-	// This returns the capacity of the underlying volume in bytes.
-	// This value must be the same in all such messages returned by
-	// the stream.
-	// This field is REQUIRED.
-	VolumeCapacityBytes int64 `protobuf:"varint,2,opt,name=volume_capacity_bytes,json=volumeCapacityBytes,proto3" json:"volume_capacity_bytes,omitempty"`
-	// This is a list of data range tuples.
-	// If the value of max_results in the GetMetadataDeltaRequest message
-	// is greater than zero, then the number of entries in this list MUST
-	// be less than or equal to that value.
-	// The SP MUST respect the value of starting_offset in the request.
-	// The byte_offset fields of adjacent BlockMetadata messages
-	// MUST be strictly increasing and messages MUST NOT overlap:
-	// i.e. for any two BlockMetadata messages, A and B, if A is returned
-	// before B, then (A.byte_offset + A.size_bytes <= B.byte_offset)
-	// MUST be true.
-	// This MUST also be true if A and B are from block_metadata lists in
-	// different GetMetadataDeltaResponse messages in the gRPC stream.
-	// This field is OPTIONAL.
-	BlockMetadata []*BlockMetadata `protobuf:"bytes,3,rep,name=block_metadata,json=blockMetadata,proto3" json:"block_metadata,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state                          protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_BlockMetadataType   BlockMetadataType      `protobuf:"varint,1,opt,name=block_metadata_type,json=blockMetadataType,proto3,enum=csi.v1.BlockMetadataType" json:"block_metadata_type,omitempty"`
+	xxx_hidden_VolumeCapacityBytes int64                  `protobuf:"varint,2,opt,name=volume_capacity_bytes,json=volumeCapacityBytes,proto3" json:"volume_capacity_bytes,omitempty"`
+	xxx_hidden_BlockMetadata       *[]*BlockMetadata      `protobuf:"bytes,3,rep,name=block_metadata,json=blockMetadata,proto3" json:"block_metadata,omitempty"`
+	unknownFields                  protoimpl.UnknownFields
+	sizeCache                      protoimpl.SizeCache
 }
 
 func (x *GetMetadataDeltaResponse) Reset() {
@@ -9127,35 +8115,37 @@ func (x *GetMetadataDeltaResponse) ProtoReflect() protoreflect.Message {
 
 func (x *GetMetadataDeltaResponse) GetBlockMetadataType() BlockMetadataType {
 	if x != nil {
-		return x.BlockMetadataType
+		return x.xxx_hidden_BlockMetadataType
 	}
 	return BlockMetadataType_UNKNOWN
 }
 
 func (x *GetMetadataDeltaResponse) GetVolumeCapacityBytes() int64 {
 	if x != nil {
-		return x.VolumeCapacityBytes
+		return x.xxx_hidden_VolumeCapacityBytes
 	}
 	return 0
 }
 
 func (x *GetMetadataDeltaResponse) GetBlockMetadata() []*BlockMetadata {
 	if x != nil {
-		return x.BlockMetadata
+		if x.xxx_hidden_BlockMetadata != nil {
+			return *x.xxx_hidden_BlockMetadata
+		}
 	}
 	return nil
 }
 
 func (x *GetMetadataDeltaResponse) SetBlockMetadataType(v BlockMetadataType) {
-	x.BlockMetadataType = v
+	x.xxx_hidden_BlockMetadataType = v
 }
 
 func (x *GetMetadataDeltaResponse) SetVolumeCapacityBytes(v int64) {
-	x.VolumeCapacityBytes = v
+	x.xxx_hidden_VolumeCapacityBytes = v
 }
 
 func (x *GetMetadataDeltaResponse) SetBlockMetadata(v []*BlockMetadata) {
-	x.BlockMetadata = v
+	x.xxx_hidden_BlockMetadata = &v
 }
 
 type GetMetadataDeltaResponse_builder struct {
@@ -9193,17 +8183,17 @@ func (b0 GetMetadataDeltaResponse_builder) Build() *GetMetadataDeltaResponse {
 	m0 := &GetMetadataDeltaResponse{}
 	b, x := &b0, m0
 	_, _ = b, x
-	x.BlockMetadataType = b.BlockMetadataType
-	x.VolumeCapacityBytes = b.VolumeCapacityBytes
-	x.BlockMetadata = b.BlockMetadata
+	x.xxx_hidden_BlockMetadataType = b.BlockMetadataType
+	x.xxx_hidden_VolumeCapacityBytes = b.VolumeCapacityBytes
+	x.xxx_hidden_BlockMetadata = &b.BlockMetadata
 	return m0
 }
 
 type PluginCapability_Service struct {
-	state         protoimpl.MessageState        `protogen:"hybrid.v1"`
-	Type          PluginCapability_Service_Type `protobuf:"varint,1,opt,name=type,proto3,enum=csi.v1.PluginCapability_Service_Type" json:"type,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state           protoimpl.MessageState        `protogen:"opaque.v1"`
+	xxx_hidden_Type PluginCapability_Service_Type `protobuf:"varint,1,opt,name=type,proto3,enum=csi.v1.PluginCapability_Service_Type" json:"type,omitempty"`
+	unknownFields   protoimpl.UnknownFields
+	sizeCache       protoimpl.SizeCache
 }
 
 func (x *PluginCapability_Service) Reset() {
@@ -9233,13 +8223,13 @@ func (x *PluginCapability_Service) ProtoReflect() protoreflect.Message {
 
 func (x *PluginCapability_Service) GetType() PluginCapability_Service_Type {
 	if x != nil {
-		return x.Type
+		return x.xxx_hidden_Type
 	}
 	return PluginCapability_Service_UNKNOWN
 }
 
 func (x *PluginCapability_Service) SetType(v PluginCapability_Service_Type) {
-	x.Type = v
+	x.xxx_hidden_Type = v
 }
 
 type PluginCapability_Service_builder struct {
@@ -9252,15 +8242,15 @@ func (b0 PluginCapability_Service_builder) Build() *PluginCapability_Service {
 	m0 := &PluginCapability_Service{}
 	b, x := &b0, m0
 	_, _ = b, x
-	x.Type = b.Type
+	x.xxx_hidden_Type = b.Type
 	return m0
 }
 
 type PluginCapability_VolumeExpansion struct {
-	state         protoimpl.MessageState                `protogen:"hybrid.v1"`
-	Type          PluginCapability_VolumeExpansion_Type `protobuf:"varint,1,opt,name=type,proto3,enum=csi.v1.PluginCapability_VolumeExpansion_Type" json:"type,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state           protoimpl.MessageState                `protogen:"opaque.v1"`
+	xxx_hidden_Type PluginCapability_VolumeExpansion_Type `protobuf:"varint,1,opt,name=type,proto3,enum=csi.v1.PluginCapability_VolumeExpansion_Type" json:"type,omitempty"`
+	unknownFields   protoimpl.UnknownFields
+	sizeCache       protoimpl.SizeCache
 }
 
 func (x *PluginCapability_VolumeExpansion) Reset() {
@@ -9290,13 +8280,13 @@ func (x *PluginCapability_VolumeExpansion) ProtoReflect() protoreflect.Message {
 
 func (x *PluginCapability_VolumeExpansion) GetType() PluginCapability_VolumeExpansion_Type {
 	if x != nil {
-		return x.Type
+		return x.xxx_hidden_Type
 	}
 	return PluginCapability_VolumeExpansion_UNKNOWN
 }
 
 func (x *PluginCapability_VolumeExpansion) SetType(v PluginCapability_VolumeExpansion_Type) {
-	x.Type = v
+	x.xxx_hidden_Type = v
 }
 
 type PluginCapability_VolumeExpansion_builder struct {
@@ -9309,19 +8299,15 @@ func (b0 PluginCapability_VolumeExpansion_builder) Build() *PluginCapability_Vol
 	m0 := &PluginCapability_VolumeExpansion{}
 	b, x := &b0, m0
 	_, _ = b, x
-	x.Type = b.Type
+	x.xxx_hidden_Type = b.Type
 	return m0
 }
 
 type VolumeContentSource_SnapshotSource struct {
-	state protoimpl.MessageState `protogen:"hybrid.v1"`
-	// Contains identity information for the existing source snapshot.
-	// This field is REQUIRED. Plugin is REQUIRED to support creating
-	// volume from snapshot if it supports the capability
-	// CREATE_DELETE_SNAPSHOT.
-	SnapshotId    string `protobuf:"bytes,1,opt,name=snapshot_id,json=snapshotId,proto3" json:"snapshot_id,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state                 protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_SnapshotId string                 `protobuf:"bytes,1,opt,name=snapshot_id,json=snapshotId,proto3" json:"snapshot_id,omitempty"`
+	unknownFields         protoimpl.UnknownFields
+	sizeCache             protoimpl.SizeCache
 }
 
 func (x *VolumeContentSource_SnapshotSource) Reset() {
@@ -9351,13 +8337,13 @@ func (x *VolumeContentSource_SnapshotSource) ProtoReflect() protoreflect.Message
 
 func (x *VolumeContentSource_SnapshotSource) GetSnapshotId() string {
 	if x != nil {
-		return x.SnapshotId
+		return x.xxx_hidden_SnapshotId
 	}
 	return ""
 }
 
 func (x *VolumeContentSource_SnapshotSource) SetSnapshotId(v string) {
-	x.SnapshotId = v
+	x.xxx_hidden_SnapshotId = v
 }
 
 type VolumeContentSource_SnapshotSource_builder struct {
@@ -9374,18 +8360,15 @@ func (b0 VolumeContentSource_SnapshotSource_builder) Build() *VolumeContentSourc
 	m0 := &VolumeContentSource_SnapshotSource{}
 	b, x := &b0, m0
 	_, _ = b, x
-	x.SnapshotId = b.SnapshotId
+	x.xxx_hidden_SnapshotId = b.SnapshotId
 	return m0
 }
 
 type VolumeContentSource_VolumeSource struct {
-	state protoimpl.MessageState `protogen:"hybrid.v1"`
-	// Contains identity information for the existing source volume.
-	// This field is REQUIRED. Plugins reporting CLONE_VOLUME
-	// capability MUST support creating a volume from another volume.
-	VolumeId      string `protobuf:"bytes,1,opt,name=volume_id,json=volumeId,proto3" json:"volume_id,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state               protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_VolumeId string                 `protobuf:"bytes,1,opt,name=volume_id,json=volumeId,proto3" json:"volume_id,omitempty"`
+	unknownFields       protoimpl.UnknownFields
+	sizeCache           protoimpl.SizeCache
 }
 
 func (x *VolumeContentSource_VolumeSource) Reset() {
@@ -9415,13 +8398,13 @@ func (x *VolumeContentSource_VolumeSource) ProtoReflect() protoreflect.Message {
 
 func (x *VolumeContentSource_VolumeSource) GetVolumeId() string {
 	if x != nil {
-		return x.VolumeId
+		return x.xxx_hidden_VolumeId
 	}
 	return ""
 }
 
 func (x *VolumeContentSource_VolumeSource) SetVolumeId(v string) {
-	x.VolumeId = v
+	x.xxx_hidden_VolumeId = v
 }
 
 type VolumeContentSource_VolumeSource_builder struct {
@@ -9437,13 +8420,13 @@ func (b0 VolumeContentSource_VolumeSource_builder) Build() *VolumeContentSource_
 	m0 := &VolumeContentSource_VolumeSource{}
 	b, x := &b0, m0
 	_, _ = b, x
-	x.VolumeId = b.VolumeId
+	x.xxx_hidden_VolumeId = b.VolumeId
 	return m0
 }
 
 // Indicate that the volume will be accessed via the block device API.
 type VolumeCapability_BlockVolume struct {
-	state         protoimpl.MessageState `protogen:"hybrid.v1"`
+	state         protoimpl.MessageState `protogen:"opaque.v1"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -9487,30 +8470,12 @@ func (b0 VolumeCapability_BlockVolume_builder) Build() *VolumeCapability_BlockVo
 
 // Indicate that the volume will be accessed via the filesystem API.
 type VolumeCapability_MountVolume struct {
-	state protoimpl.MessageState `protogen:"hybrid.v1"`
-	// The filesystem type. This field is OPTIONAL.
-	// An empty string is equal to an unspecified field value.
-	FsType string `protobuf:"bytes,1,opt,name=fs_type,json=fsType,proto3" json:"fs_type,omitempty"`
-	// The mount options that can be used for the volume. This field is
-	// OPTIONAL. `mount_flags` MAY contain sensitive information.
-	// Therefore, the CO and the Plugin MUST NOT leak this information
-	// to untrusted entities. The total size of this repeated field
-	// SHALL NOT exceed 4 KiB.
-	MountFlags []string `protobuf:"bytes,2,rep,name=mount_flags,json=mountFlags,proto3" json:"mount_flags,omitempty"`
-	// If SP has VOLUME_MOUNT_GROUP node capability and CO provides
-	// this field then SP MUST ensure that the volume_mount_group
-	// parameter is passed as the group identifier to the underlying
-	// operating system mount system call, with the understanding
-	// that the set of available mount call parameters and/or
-	// mount implementations may vary across operating systems.
-	// Additionally, new file and/or directory entries written to
-	// the underlying filesystem SHOULD be permission-labeled in such a
-	// manner, unless otherwise modified by a workload, that they are
-	// both readable and writable by said mount group identifier.
-	// This is an OPTIONAL field.
-	VolumeMountGroup string `protobuf:"bytes,3,opt,name=volume_mount_group,json=volumeMountGroup,proto3" json:"volume_mount_group,omitempty"`
-	unknownFields    protoimpl.UnknownFields
-	sizeCache        protoimpl.SizeCache
+	state                       protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_FsType           string                 `protobuf:"bytes,1,opt,name=fs_type,json=fsType,proto3" json:"fs_type,omitempty"`
+	xxx_hidden_MountFlags       []string               `protobuf:"bytes,2,rep,name=mount_flags,json=mountFlags,proto3" json:"mount_flags,omitempty"`
+	xxx_hidden_VolumeMountGroup string                 `protobuf:"bytes,3,opt,name=volume_mount_group,json=volumeMountGroup,proto3" json:"volume_mount_group,omitempty"`
+	unknownFields               protoimpl.UnknownFields
+	sizeCache                   protoimpl.SizeCache
 }
 
 func (x *VolumeCapability_MountVolume) Reset() {
@@ -9540,35 +8505,35 @@ func (x *VolumeCapability_MountVolume) ProtoReflect() protoreflect.Message {
 
 func (x *VolumeCapability_MountVolume) GetFsType() string {
 	if x != nil {
-		return x.FsType
+		return x.xxx_hidden_FsType
 	}
 	return ""
 }
 
 func (x *VolumeCapability_MountVolume) GetMountFlags() []string {
 	if x != nil {
-		return x.MountFlags
+		return x.xxx_hidden_MountFlags
 	}
 	return nil
 }
 
 func (x *VolumeCapability_MountVolume) GetVolumeMountGroup() string {
 	if x != nil {
-		return x.VolumeMountGroup
+		return x.xxx_hidden_VolumeMountGroup
 	}
 	return ""
 }
 
 func (x *VolumeCapability_MountVolume) SetFsType(v string) {
-	x.FsType = v
+	x.xxx_hidden_FsType = v
 }
 
 func (x *VolumeCapability_MountVolume) SetMountFlags(v []string) {
-	x.MountFlags = v
+	x.xxx_hidden_MountFlags = v
 }
 
 func (x *VolumeCapability_MountVolume) SetVolumeMountGroup(v string) {
-	x.VolumeMountGroup = v
+	x.xxx_hidden_VolumeMountGroup = v
 }
 
 type VolumeCapability_MountVolume_builder struct {
@@ -9601,19 +8566,18 @@ func (b0 VolumeCapability_MountVolume_builder) Build() *VolumeCapability_MountVo
 	m0 := &VolumeCapability_MountVolume{}
 	b, x := &b0, m0
 	_, _ = b, x
-	x.FsType = b.FsType
-	x.MountFlags = b.MountFlags
-	x.VolumeMountGroup = b.VolumeMountGroup
+	x.xxx_hidden_FsType = b.FsType
+	x.xxx_hidden_MountFlags = b.MountFlags
+	x.xxx_hidden_VolumeMountGroup = b.VolumeMountGroup
 	return m0
 }
 
 // Specify how a volume can be accessed.
 type VolumeCapability_AccessMode struct {
-	state protoimpl.MessageState `protogen:"hybrid.v1"`
-	// This field is REQUIRED.
-	Mode          VolumeCapability_AccessMode_Mode `protobuf:"varint,1,opt,name=mode,proto3,enum=csi.v1.VolumeCapability_AccessMode_Mode" json:"mode,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state           protoimpl.MessageState           `protogen:"opaque.v1"`
+	xxx_hidden_Mode VolumeCapability_AccessMode_Mode `protobuf:"varint,1,opt,name=mode,proto3,enum=csi.v1.VolumeCapability_AccessMode_Mode" json:"mode,omitempty"`
+	unknownFields   protoimpl.UnknownFields
+	sizeCache       protoimpl.SizeCache
 }
 
 func (x *VolumeCapability_AccessMode) Reset() {
@@ -9643,13 +8607,13 @@ func (x *VolumeCapability_AccessMode) ProtoReflect() protoreflect.Message {
 
 func (x *VolumeCapability_AccessMode) GetMode() VolumeCapability_AccessMode_Mode {
 	if x != nil {
-		return x.Mode
+		return x.xxx_hidden_Mode
 	}
 	return VolumeCapability_AccessMode_UNKNOWN
 }
 
 func (x *VolumeCapability_AccessMode) SetMode(v VolumeCapability_AccessMode_Mode) {
-	x.Mode = v
+	x.xxx_hidden_Mode = v
 }
 
 type VolumeCapability_AccessMode_builder struct {
@@ -9663,26 +8627,18 @@ func (b0 VolumeCapability_AccessMode_builder) Build() *VolumeCapability_AccessMo
 	m0 := &VolumeCapability_AccessMode{}
 	b, x := &b0, m0
 	_, _ = b, x
-	x.Mode = b.Mode
+	x.xxx_hidden_Mode = b.Mode
 	return m0
 }
 
 type ValidateVolumeCapabilitiesResponse_Confirmed struct {
-	state protoimpl.MessageState `protogen:"hybrid.v1"`
-	// Volume context validated by the plugin.
-	// This field is OPTIONAL.
-	VolumeContext map[string]string `protobuf:"bytes,1,rep,name=volume_context,json=volumeContext,proto3" json:"volume_context,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
-	// Volume capabilities supported by the plugin.
-	// This field is REQUIRED.
-	VolumeCapabilities []*VolumeCapability `protobuf:"bytes,2,rep,name=volume_capabilities,json=volumeCapabilities,proto3" json:"volume_capabilities,omitempty"`
-	// The volume creation parameters validated by the plugin.
-	// This field is OPTIONAL.
-	Parameters map[string]string `protobuf:"bytes,3,rep,name=parameters,proto3" json:"parameters,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
-	// The volume creation mutable_parameters validated by the plugin.
-	// This field is OPTIONAL.
-	MutableParameters map[string]string `protobuf:"bytes,4,rep,name=mutable_parameters,json=mutableParameters,proto3" json:"mutable_parameters,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
-	unknownFields     protoimpl.UnknownFields
-	sizeCache         protoimpl.SizeCache
+	state                         protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_VolumeContext      map[string]string      `protobuf:"bytes,1,rep,name=volume_context,json=volumeContext,proto3" json:"volume_context,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	xxx_hidden_VolumeCapabilities *[]*VolumeCapability   `protobuf:"bytes,2,rep,name=volume_capabilities,json=volumeCapabilities,proto3" json:"volume_capabilities,omitempty"`
+	xxx_hidden_Parameters         map[string]string      `protobuf:"bytes,3,rep,name=parameters,proto3" json:"parameters,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	xxx_hidden_MutableParameters  map[string]string      `protobuf:"bytes,4,rep,name=mutable_parameters,json=mutableParameters,proto3" json:"mutable_parameters,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	unknownFields                 protoimpl.UnknownFields
+	sizeCache                     protoimpl.SizeCache
 }
 
 func (x *ValidateVolumeCapabilitiesResponse_Confirmed) Reset() {
@@ -9712,46 +8668,48 @@ func (x *ValidateVolumeCapabilitiesResponse_Confirmed) ProtoReflect() protorefle
 
 func (x *ValidateVolumeCapabilitiesResponse_Confirmed) GetVolumeContext() map[string]string {
 	if x != nil {
-		return x.VolumeContext
+		return x.xxx_hidden_VolumeContext
 	}
 	return nil
 }
 
 func (x *ValidateVolumeCapabilitiesResponse_Confirmed) GetVolumeCapabilities() []*VolumeCapability {
 	if x != nil {
-		return x.VolumeCapabilities
+		if x.xxx_hidden_VolumeCapabilities != nil {
+			return *x.xxx_hidden_VolumeCapabilities
+		}
 	}
 	return nil
 }
 
 func (x *ValidateVolumeCapabilitiesResponse_Confirmed) GetParameters() map[string]string {
 	if x != nil {
-		return x.Parameters
+		return x.xxx_hidden_Parameters
 	}
 	return nil
 }
 
 func (x *ValidateVolumeCapabilitiesResponse_Confirmed) GetMutableParameters() map[string]string {
 	if x != nil {
-		return x.MutableParameters
+		return x.xxx_hidden_MutableParameters
 	}
 	return nil
 }
 
 func (x *ValidateVolumeCapabilitiesResponse_Confirmed) SetVolumeContext(v map[string]string) {
-	x.VolumeContext = v
+	x.xxx_hidden_VolumeContext = v
 }
 
 func (x *ValidateVolumeCapabilitiesResponse_Confirmed) SetVolumeCapabilities(v []*VolumeCapability) {
-	x.VolumeCapabilities = v
+	x.xxx_hidden_VolumeCapabilities = &v
 }
 
 func (x *ValidateVolumeCapabilitiesResponse_Confirmed) SetParameters(v map[string]string) {
-	x.Parameters = v
+	x.xxx_hidden_Parameters = v
 }
 
 func (x *ValidateVolumeCapabilitiesResponse_Confirmed) SetMutableParameters(v map[string]string) {
-	x.MutableParameters = v
+	x.xxx_hidden_MutableParameters = v
 }
 
 type ValidateVolumeCapabilitiesResponse_Confirmed_builder struct {
@@ -9775,33 +8733,19 @@ func (b0 ValidateVolumeCapabilitiesResponse_Confirmed_builder) Build() *Validate
 	m0 := &ValidateVolumeCapabilitiesResponse_Confirmed{}
 	b, x := &b0, m0
 	_, _ = b, x
-	x.VolumeContext = b.VolumeContext
-	x.VolumeCapabilities = b.VolumeCapabilities
-	x.Parameters = b.Parameters
-	x.MutableParameters = b.MutableParameters
+	x.xxx_hidden_VolumeContext = b.VolumeContext
+	x.xxx_hidden_VolumeCapabilities = &b.VolumeCapabilities
+	x.xxx_hidden_Parameters = b.Parameters
+	x.xxx_hidden_MutableParameters = b.MutableParameters
 	return m0
 }
 
 type ListVolumesResponse_VolumeStatus struct {
-	state protoimpl.MessageState `protogen:"hybrid.v1"`
-	// A list of all `node_id` of nodes that the volume in this entry
-	// is controller published on.
-	// This field is OPTIONAL. If it is not specified and the SP has
-	// the LIST_VOLUMES_PUBLISHED_NODES controller capability, the CO
-	// MAY assume the volume is not controller published to any nodes.
-	// If the field is not specified and the SP does not have the
-	// LIST_VOLUMES_PUBLISHED_NODES controller capability, the CO MUST
-	// not interpret this field.
-	// published_node_ids MAY include nodes not published to or
-	// reported by the SP. The CO MUST be resilient to that.
-	PublishedNodeIds []string `protobuf:"bytes,1,rep,name=published_node_ids,json=publishedNodeIds,proto3" json:"published_node_ids,omitempty"`
-	// Information about the current condition of the volume.
-	// This field is OPTIONAL.
-	// This field MUST be specified if the
-	// VOLUME_CONDITION controller capability is supported.
-	VolumeCondition *VolumeCondition `protobuf:"bytes,2,opt,name=volume_condition,json=volumeCondition,proto3" json:"volume_condition,omitempty"`
-	unknownFields   protoimpl.UnknownFields
-	sizeCache       protoimpl.SizeCache
+	state                       protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_PublishedNodeIds []string               `protobuf:"bytes,1,rep,name=published_node_ids,json=publishedNodeIds,proto3" json:"published_node_ids,omitempty"`
+	xxx_hidden_VolumeCondition  *VolumeCondition       `protobuf:"bytes,2,opt,name=volume_condition,json=volumeCondition,proto3" json:"volume_condition,omitempty"`
+	unknownFields               protoimpl.UnknownFields
+	sizeCache                   protoimpl.SizeCache
 }
 
 func (x *ListVolumesResponse_VolumeStatus) Reset() {
@@ -9831,35 +8775,35 @@ func (x *ListVolumesResponse_VolumeStatus) ProtoReflect() protoreflect.Message {
 
 func (x *ListVolumesResponse_VolumeStatus) GetPublishedNodeIds() []string {
 	if x != nil {
-		return x.PublishedNodeIds
+		return x.xxx_hidden_PublishedNodeIds
 	}
 	return nil
 }
 
 func (x *ListVolumesResponse_VolumeStatus) GetVolumeCondition() *VolumeCondition {
 	if x != nil {
-		return x.VolumeCondition
+		return x.xxx_hidden_VolumeCondition
 	}
 	return nil
 }
 
 func (x *ListVolumesResponse_VolumeStatus) SetPublishedNodeIds(v []string) {
-	x.PublishedNodeIds = v
+	x.xxx_hidden_PublishedNodeIds = v
 }
 
 func (x *ListVolumesResponse_VolumeStatus) SetVolumeCondition(v *VolumeCondition) {
-	x.VolumeCondition = v
+	x.xxx_hidden_VolumeCondition = v
 }
 
 func (x *ListVolumesResponse_VolumeStatus) HasVolumeCondition() bool {
 	if x == nil {
 		return false
 	}
-	return x.VolumeCondition != nil
+	return x.xxx_hidden_VolumeCondition != nil
 }
 
 func (x *ListVolumesResponse_VolumeStatus) ClearVolumeCondition() {
-	x.VolumeCondition = nil
+	x.xxx_hidden_VolumeCondition = nil
 }
 
 type ListVolumesResponse_VolumeStatus_builder struct {
@@ -9887,21 +8831,17 @@ func (b0 ListVolumesResponse_VolumeStatus_builder) Build() *ListVolumesResponse_
 	m0 := &ListVolumesResponse_VolumeStatus{}
 	b, x := &b0, m0
 	_, _ = b, x
-	x.PublishedNodeIds = b.PublishedNodeIds
-	x.VolumeCondition = b.VolumeCondition
+	x.xxx_hidden_PublishedNodeIds = b.PublishedNodeIds
+	x.xxx_hidden_VolumeCondition = b.VolumeCondition
 	return m0
 }
 
 type ListVolumesResponse_Entry struct {
-	state protoimpl.MessageState `protogen:"hybrid.v1"`
-	// This field is REQUIRED
-	Volume *Volume `protobuf:"bytes,1,opt,name=volume,proto3" json:"volume,omitempty"`
-	// This field is OPTIONAL. This field MUST be specified if the
-	// LIST_VOLUMES_PUBLISHED_NODES controller capability is
-	// supported.
-	Status        *ListVolumesResponse_VolumeStatus `protobuf:"bytes,2,opt,name=status,proto3" json:"status,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state             protoimpl.MessageState            `protogen:"opaque.v1"`
+	xxx_hidden_Volume *Volume                           `protobuf:"bytes,1,opt,name=volume,proto3" json:"volume,omitempty"`
+	xxx_hidden_Status *ListVolumesResponse_VolumeStatus `protobuf:"bytes,2,opt,name=status,proto3" json:"status,omitempty"`
+	unknownFields     protoimpl.UnknownFields
+	sizeCache         protoimpl.SizeCache
 }
 
 func (x *ListVolumesResponse_Entry) Reset() {
@@ -9931,46 +8871,46 @@ func (x *ListVolumesResponse_Entry) ProtoReflect() protoreflect.Message {
 
 func (x *ListVolumesResponse_Entry) GetVolume() *Volume {
 	if x != nil {
-		return x.Volume
+		return x.xxx_hidden_Volume
 	}
 	return nil
 }
 
 func (x *ListVolumesResponse_Entry) GetStatus() *ListVolumesResponse_VolumeStatus {
 	if x != nil {
-		return x.Status
+		return x.xxx_hidden_Status
 	}
 	return nil
 }
 
 func (x *ListVolumesResponse_Entry) SetVolume(v *Volume) {
-	x.Volume = v
+	x.xxx_hidden_Volume = v
 }
 
 func (x *ListVolumesResponse_Entry) SetStatus(v *ListVolumesResponse_VolumeStatus) {
-	x.Status = v
+	x.xxx_hidden_Status = v
 }
 
 func (x *ListVolumesResponse_Entry) HasVolume() bool {
 	if x == nil {
 		return false
 	}
-	return x.Volume != nil
+	return x.xxx_hidden_Volume != nil
 }
 
 func (x *ListVolumesResponse_Entry) HasStatus() bool {
 	if x == nil {
 		return false
 	}
-	return x.Status != nil
+	return x.xxx_hidden_Status != nil
 }
 
 func (x *ListVolumesResponse_Entry) ClearVolume() {
-	x.Volume = nil
+	x.xxx_hidden_Volume = nil
 }
 
 func (x *ListVolumesResponse_Entry) ClearStatus() {
-	x.Status = nil
+	x.xxx_hidden_Status = nil
 }
 
 type ListVolumesResponse_Entry_builder struct {
@@ -9988,28 +8928,17 @@ func (b0 ListVolumesResponse_Entry_builder) Build() *ListVolumesResponse_Entry {
 	m0 := &ListVolumesResponse_Entry{}
 	b, x := &b0, m0
 	_, _ = b, x
-	x.Volume = b.Volume
-	x.Status = b.Status
+	x.xxx_hidden_Volume = b.Volume
+	x.xxx_hidden_Status = b.Status
 	return m0
 }
 
 type ControllerGetVolumeResponse_VolumeStatus struct {
-	state protoimpl.MessageState `protogen:"hybrid.v1"`
-	// A list of all the `node_id` of nodes that this volume is
-	// controller published on.
-	// This field is OPTIONAL.
-	// This field MUST be specified if the LIST_VOLUMES_PUBLISHED_NODES
-	// controller capability is supported.
-	// published_node_ids MAY include nodes not published to or
-	// reported by the SP. The CO MUST be resilient to that.
-	PublishedNodeIds []string `protobuf:"bytes,1,rep,name=published_node_ids,json=publishedNodeIds,proto3" json:"published_node_ids,omitempty"`
-	// Information about the current condition of the volume.
-	// This field is OPTIONAL.
-	// This field MUST be specified if the
-	// VOLUME_CONDITION controller capability is supported.
-	VolumeCondition *VolumeCondition `protobuf:"bytes,2,opt,name=volume_condition,json=volumeCondition,proto3" json:"volume_condition,omitempty"`
-	unknownFields   protoimpl.UnknownFields
-	sizeCache       protoimpl.SizeCache
+	state                       protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_PublishedNodeIds []string               `protobuf:"bytes,1,rep,name=published_node_ids,json=publishedNodeIds,proto3" json:"published_node_ids,omitempty"`
+	xxx_hidden_VolumeCondition  *VolumeCondition       `protobuf:"bytes,2,opt,name=volume_condition,json=volumeCondition,proto3" json:"volume_condition,omitempty"`
+	unknownFields               protoimpl.UnknownFields
+	sizeCache                   protoimpl.SizeCache
 }
 
 func (x *ControllerGetVolumeResponse_VolumeStatus) Reset() {
@@ -10039,35 +8968,35 @@ func (x *ControllerGetVolumeResponse_VolumeStatus) ProtoReflect() protoreflect.M
 
 func (x *ControllerGetVolumeResponse_VolumeStatus) GetPublishedNodeIds() []string {
 	if x != nil {
-		return x.PublishedNodeIds
+		return x.xxx_hidden_PublishedNodeIds
 	}
 	return nil
 }
 
 func (x *ControllerGetVolumeResponse_VolumeStatus) GetVolumeCondition() *VolumeCondition {
 	if x != nil {
-		return x.VolumeCondition
+		return x.xxx_hidden_VolumeCondition
 	}
 	return nil
 }
 
 func (x *ControllerGetVolumeResponse_VolumeStatus) SetPublishedNodeIds(v []string) {
-	x.PublishedNodeIds = v
+	x.xxx_hidden_PublishedNodeIds = v
 }
 
 func (x *ControllerGetVolumeResponse_VolumeStatus) SetVolumeCondition(v *VolumeCondition) {
-	x.VolumeCondition = v
+	x.xxx_hidden_VolumeCondition = v
 }
 
 func (x *ControllerGetVolumeResponse_VolumeStatus) HasVolumeCondition() bool {
 	if x == nil {
 		return false
 	}
-	return x.VolumeCondition != nil
+	return x.xxx_hidden_VolumeCondition != nil
 }
 
 func (x *ControllerGetVolumeResponse_VolumeStatus) ClearVolumeCondition() {
-	x.VolumeCondition = nil
+	x.xxx_hidden_VolumeCondition = nil
 }
 
 type ControllerGetVolumeResponse_VolumeStatus_builder struct {
@@ -10092,16 +9021,16 @@ func (b0 ControllerGetVolumeResponse_VolumeStatus_builder) Build() *ControllerGe
 	m0 := &ControllerGetVolumeResponse_VolumeStatus{}
 	b, x := &b0, m0
 	_, _ = b, x
-	x.PublishedNodeIds = b.PublishedNodeIds
-	x.VolumeCondition = b.VolumeCondition
+	x.xxx_hidden_PublishedNodeIds = b.PublishedNodeIds
+	x.xxx_hidden_VolumeCondition = b.VolumeCondition
 	return m0
 }
 
 type ControllerServiceCapability_RPC struct {
-	state         protoimpl.MessageState               `protogen:"hybrid.v1"`
-	Type          ControllerServiceCapability_RPC_Type `protobuf:"varint,1,opt,name=type,proto3,enum=csi.v1.ControllerServiceCapability_RPC_Type" json:"type,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state           protoimpl.MessageState               `protogen:"opaque.v1"`
+	xxx_hidden_Type ControllerServiceCapability_RPC_Type `protobuf:"varint,1,opt,name=type,proto3,enum=csi.v1.ControllerServiceCapability_RPC_Type" json:"type,omitempty"`
+	unknownFields   protoimpl.UnknownFields
+	sizeCache       protoimpl.SizeCache
 }
 
 func (x *ControllerServiceCapability_RPC) Reset() {
@@ -10131,13 +9060,13 @@ func (x *ControllerServiceCapability_RPC) ProtoReflect() protoreflect.Message {
 
 func (x *ControllerServiceCapability_RPC) GetType() ControllerServiceCapability_RPC_Type {
 	if x != nil {
-		return x.Type
+		return x.xxx_hidden_Type
 	}
 	return ControllerServiceCapability_RPC_UNKNOWN
 }
 
 func (x *ControllerServiceCapability_RPC) SetType(v ControllerServiceCapability_RPC_Type) {
-	x.Type = v
+	x.xxx_hidden_Type = v
 }
 
 type ControllerServiceCapability_RPC_builder struct {
@@ -10150,15 +9079,15 @@ func (b0 ControllerServiceCapability_RPC_builder) Build() *ControllerServiceCapa
 	m0 := &ControllerServiceCapability_RPC{}
 	b, x := &b0, m0
 	_, _ = b, x
-	x.Type = b.Type
+	x.xxx_hidden_Type = b.Type
 	return m0
 }
 
 type ListSnapshotsResponse_Entry struct {
-	state         protoimpl.MessageState `protogen:"hybrid.v1"`
-	Snapshot      *Snapshot              `protobuf:"bytes,1,opt,name=snapshot,proto3" json:"snapshot,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state               protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Snapshot *Snapshot              `protobuf:"bytes,1,opt,name=snapshot,proto3" json:"snapshot,omitempty"`
+	unknownFields       protoimpl.UnknownFields
+	sizeCache           protoimpl.SizeCache
 }
 
 func (x *ListSnapshotsResponse_Entry) Reset() {
@@ -10188,24 +9117,24 @@ func (x *ListSnapshotsResponse_Entry) ProtoReflect() protoreflect.Message {
 
 func (x *ListSnapshotsResponse_Entry) GetSnapshot() *Snapshot {
 	if x != nil {
-		return x.Snapshot
+		return x.xxx_hidden_Snapshot
 	}
 	return nil
 }
 
 func (x *ListSnapshotsResponse_Entry) SetSnapshot(v *Snapshot) {
-	x.Snapshot = v
+	x.xxx_hidden_Snapshot = v
 }
 
 func (x *ListSnapshotsResponse_Entry) HasSnapshot() bool {
 	if x == nil {
 		return false
 	}
-	return x.Snapshot != nil
+	return x.xxx_hidden_Snapshot != nil
 }
 
 func (x *ListSnapshotsResponse_Entry) ClearSnapshot() {
-	x.Snapshot = nil
+	x.xxx_hidden_Snapshot = nil
 }
 
 type ListSnapshotsResponse_Entry_builder struct {
@@ -10218,15 +9147,15 @@ func (b0 ListSnapshotsResponse_Entry_builder) Build() *ListSnapshotsResponse_Ent
 	m0 := &ListSnapshotsResponse_Entry{}
 	b, x := &b0, m0
 	_, _ = b, x
-	x.Snapshot = b.Snapshot
+	x.xxx_hidden_Snapshot = b.Snapshot
 	return m0
 }
 
 type NodeServiceCapability_RPC struct {
-	state         protoimpl.MessageState         `protogen:"hybrid.v1"`
-	Type          NodeServiceCapability_RPC_Type `protobuf:"varint,1,opt,name=type,proto3,enum=csi.v1.NodeServiceCapability_RPC_Type" json:"type,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state           protoimpl.MessageState         `protogen:"opaque.v1"`
+	xxx_hidden_Type NodeServiceCapability_RPC_Type `protobuf:"varint,1,opt,name=type,proto3,enum=csi.v1.NodeServiceCapability_RPC_Type" json:"type,omitempty"`
+	unknownFields   protoimpl.UnknownFields
+	sizeCache       protoimpl.SizeCache
 }
 
 func (x *NodeServiceCapability_RPC) Reset() {
@@ -10256,13 +9185,13 @@ func (x *NodeServiceCapability_RPC) ProtoReflect() protoreflect.Message {
 
 func (x *NodeServiceCapability_RPC) GetType() NodeServiceCapability_RPC_Type {
 	if x != nil {
-		return x.Type
+		return x.xxx_hidden_Type
 	}
 	return NodeServiceCapability_RPC_UNKNOWN
 }
 
 func (x *NodeServiceCapability_RPC) SetType(v NodeServiceCapability_RPC_Type) {
-	x.Type = v
+	x.xxx_hidden_Type = v
 }
 
 type NodeServiceCapability_RPC_builder struct {
@@ -10275,15 +9204,15 @@ func (b0 NodeServiceCapability_RPC_builder) Build() *NodeServiceCapability_RPC {
 	m0 := &NodeServiceCapability_RPC{}
 	b, x := &b0, m0
 	_, _ = b, x
-	x.Type = b.Type
+	x.xxx_hidden_Type = b.Type
 	return m0
 }
 
 type GroupControllerServiceCapability_RPC struct {
-	state         protoimpl.MessageState                    `protogen:"hybrid.v1"`
-	Type          GroupControllerServiceCapability_RPC_Type `protobuf:"varint,1,opt,name=type,proto3,enum=csi.v1.GroupControllerServiceCapability_RPC_Type" json:"type,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state           protoimpl.MessageState                    `protogen:"opaque.v1"`
+	xxx_hidden_Type GroupControllerServiceCapability_RPC_Type `protobuf:"varint,1,opt,name=type,proto3,enum=csi.v1.GroupControllerServiceCapability_RPC_Type" json:"type,omitempty"`
+	unknownFields   protoimpl.UnknownFields
+	sizeCache       protoimpl.SizeCache
 }
 
 func (x *GroupControllerServiceCapability_RPC) Reset() {
@@ -10313,13 +9242,13 @@ func (x *GroupControllerServiceCapability_RPC) ProtoReflect() protoreflect.Messa
 
 func (x *GroupControllerServiceCapability_RPC) GetType() GroupControllerServiceCapability_RPC_Type {
 	if x != nil {
-		return x.Type
+		return x.xxx_hidden_Type
 	}
 	return GroupControllerServiceCapability_RPC_UNKNOWN
 }
 
 func (x *GroupControllerServiceCapability_RPC) SetType(v GroupControllerServiceCapability_RPC_Type) {
-	x.Type = v
+	x.xxx_hidden_Type = v
 }
 
 type GroupControllerServiceCapability_RPC_builder struct {
@@ -10332,7 +9261,7 @@ func (b0 GroupControllerServiceCapability_RPC_builder) Build() *GroupControllerS
 	m0 := &GroupControllerServiceCapability_RPC{}
 	b, x := &b0, m0
 	_, _ = b, x
-	x.Type = b.Type
+	x.xxx_hidden_Type = b.Type
 	return m0
 }
 
@@ -12092,25 +11021,25 @@ func file_csi_proto_init() {
 		return
 	}
 	file_csi_proto_msgTypes[4].OneofWrappers = []any{
-		(*PluginCapability_Service_)(nil),
-		(*PluginCapability_VolumeExpansion_)(nil),
+		(*pluginCapability_Service_)(nil),
+		(*pluginCapability_VolumeExpansion_)(nil),
 	}
 	file_csi_proto_msgTypes[8].OneofWrappers = []any{
-		(*VolumeContentSource_Snapshot)(nil),
-		(*VolumeContentSource_Volume)(nil),
+		(*volumeContentSource_Snapshot)(nil),
+		(*volumeContentSource_Volume)(nil),
 	}
 	file_csi_proto_msgTypes[10].OneofWrappers = []any{
-		(*VolumeCapability_Block)(nil),
-		(*VolumeCapability_Mount)(nil),
+		(*volumeCapability_Block)(nil),
+		(*volumeCapability_Mount)(nil),
 	}
 	file_csi_proto_msgTypes[33].OneofWrappers = []any{
-		(*ControllerServiceCapability_Rpc)(nil),
+		(*controllerServiceCapability_Rpc)(nil),
 	}
 	file_csi_proto_msgTypes[57].OneofWrappers = []any{
-		(*NodeServiceCapability_Rpc)(nil),
+		(*nodeServiceCapability_Rpc)(nil),
 	}
 	file_csi_proto_msgTypes[64].OneofWrappers = []any{
-		(*GroupControllerServiceCapability_Rpc)(nil),
+		(*groupControllerServiceCapability_Rpc)(nil),
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
