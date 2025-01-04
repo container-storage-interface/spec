@@ -26,7 +26,7 @@ endif
 
 # Only set PROTOC_VER if it has an empty value.
 ifeq (,$(strip $(PROTOC_VER)))
-PROTOC_VER := 25.2
+PROTOC_VER := 29.2
 endif
 
 PROTOC_OS := $(shell uname -s)
@@ -49,7 +49,7 @@ PROTOC := $(PROTOC_TMP_DIR)/bin/protoc
 $(GOBIN)/protoc-gen-go: ../../go.mod
 	go install google.golang.org/protobuf/cmd/protoc-gen-go
 $(GOBIN)/protoc-gen-go-grpc:
-	go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.3.0
+	go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.5.1
 
 $(PROTOC):
 	-mkdir -p "$(PROTOC_TMP_DIR)" && \
