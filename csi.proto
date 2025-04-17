@@ -94,6 +94,11 @@ service Controller {
   rpc ListSnapshots (ListSnapshotsRequest)
     returns (ListSnapshotsResponse) {}
 
+  rpc GetSnapshot (GetSnapshotRequest)
+    returns (GetSnapshotResponse) {
+        option (alpha_method) = true;
+    }
+
   rpc ControllerExpandVolume (ControllerExpandVolumeRequest)
     returns (ControllerExpandVolumeResponse) {}
 
@@ -1185,6 +1190,10 @@ message ControllerServiceCapability {
       // Indicates the SP supports modifying volume with mutable
       // parameters. See ControllerModifyVolume for details.
       MODIFY_VOLUME = 14 [(alpha_enum_value) = true];
+
+      // Indicates the SP supports the GetSnapshot RPC.
+      // This enables COs to fetch an existing snapshot.
+      GET_SNAPSHOT = 15 [(alpha_enum_value) = true];
     }
 
     Type type = 1;
@@ -1346,6 +1355,25 @@ message ListSnapshotsResponse {
   // field is OPTIONAL.
   // An empty string is equal to an unspecified field value.
   string next_token = 2;
+}
+message GetSnapshotRequest {
+  option (alpha_message) = true;
+
+  // The ID of the snapshot to fetch current snapshot information for.
+  // This field is REQUIRED.
+  string snapshot_id = 1;
+
+  // Secrets required by plugin to complete GetSnapshot request.
+  // This field is OPTIONAL. Refer to the `Secrets Requirements`
+  // section on how to use this field.
+  map<string, string> secrets = 2 [(csi_secret) = true];
+}
+
+message GetSnapshotResponse {
+  option (alpha_message) = true;
+
+  // This field is REQUIRED
+  Snapshot snapshot = 1;
 }
 message ControllerExpandVolumeRequest {
   // The ID of the volume to expand. This field is REQUIRED.

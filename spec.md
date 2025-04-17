@@ -375,6 +375,11 @@ service Controller {
   rpc ListSnapshots (ListSnapshotsRequest)
     returns (ListSnapshotsResponse) {}
 
+  rpc GetSnapshot (GetSnapshotRequest)
+    returns (GetSnapshotResponse) {
+        option (alpha_method) = true;
+    }
+
   rpc ControllerExpandVolume (ControllerExpandVolumeRequest)
     returns (ControllerExpandVolumeResponse) {}
 
@@ -1870,6 +1875,10 @@ message ControllerServiceCapability {
       // Indicates the SP supports modifying volume with mutable
       // parameters. See ControllerModifyVolume for details.
       MODIFY_VOLUME = 14 [(alpha_enum_value) = true];
+
+      // Indicates the SP supports the GetSnapshot RPC.
+      // This enables COs to fetch an existing snapshot.
+      GET_SNAPSHOT = 15 [(alpha_enum_value) = true];
     }
 
     Type type = 1;
@@ -2147,6 +2156,50 @@ The CO MUST implement the specified error recovery behavior when it encounters t
 |-----------|-----------|-------------|-------------------|
 | Invalid `starting_token` | 10 ABORTED | Indicates that `starting_token` is not valid. | Caller SHOULD start the `ListSnapshots` operation again with an empty `starting_token`. |
 
+#### `GetSnapshot`
+
+**ALPHA FEATURE**
+
+This optional RPC MAY be called by the CO to fetch current information about a snapshot.
+
+A Controller Plugin MUST implement this `GetSnapshot` RPC call if it has `GET_SNAPSHOT` capability.
+
+An SP that supports Group Controller Service and the CREATE_DELETE_GET_VOLUME_GROUP_SNAPSHOT capability SHOULD implement the `GetSnapshot` RPC in order to retrieve information for individual snapshots that are part of a group snapshot.
+
+`GetSnapshotResponse` should contain current information of a snapshot if it exists.
+If the snapshot does not exist any more, `GetSnapshot` should return gRPC error code `NOT_FOUND`. Snapshots which were recently created and not yet ready to use must be retrievable with this RPC.
+
+```protobuf
+message GetSnapshotRequest {
+  option (alpha_message) = true;
+
+  // The ID of the snapshot to fetch current snapshot information for.
+  // This field is REQUIRED.
+  string snapshot_id = 1;
+
+  // Secrets required by plugin to complete GetSnapshot request.
+  // This field is OPTIONAL. Refer to the `Secrets Requirements`
+  // section on how to use this field.
+  map<string, string> secrets = 2 [(csi_secret) = true];
+}
+
+message GetSnapshotResponse {
+  option (alpha_message) = true;
+
+  // This field is REQUIRED
+  Snapshot snapshot = 1;
+}
+```
+
+##### GetSnapshot Errors
+
+If the plugin is unable to complete the GetSnapshot call successfully, it MUST return a non-ok gRPC code in the gRPC status.
+If the conditions defined below are encountered, the plugin MUST return the specified gRPC error code.
+The CO MUST implement the specified error recovery behavior when it encounters the gRPC error code.
+
+| Condition | gRPC Code | Description | Recovery Behavior |
+|-----------|-----------|-------------|-------------------|
+| Snapshot does not exist | 5 NOT_FOUND | Indicates that a snapshot corresponding to the specified `snapshot_id` does not exist. | Caller MUST verify that the `snapshot_id` is correct and that the snapshot is accessible and has not been deleted before retrying with exponential back off. |
 
 #### `ControllerExpandVolume`
 
