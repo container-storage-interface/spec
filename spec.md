@@ -1671,7 +1671,7 @@ The CO MUST implement the specified error recovery behavior when it encounters t
 #### `ControllerModifyVolume`
 
 A Controller plugin MUST implement this RPC call if the plugin has the MODIFY_VOLUME controller capability.
-This RPC allows the CO to change mutable key attributes of a volume. 
+This RPC allows the CO to change mutable key attributes and the accessible topology of a volume. 
 
 This operation MUST be idempotent. 
 The new mutable parameters in ControllerModifyVolume can be different from the existing mutable parameters. 
@@ -1714,6 +1714,7 @@ message ControllerModifyVolumeResponse {
 | Parameters not supported | 3 INVALID_ARGUMENT | Indicates that the CO has specified mutable parameters not supported by the volume. | Caller MAY verify mutable parameters. |
 | Exceeds capabilities | 3 INVALID_ARGUMENT | Indicates that the CO has specified capabilities not supported by the volume. | Caller MAY verify volume capabilities by calling ValidateVolumeCapabilities and retry with matching capabilities. |
 | Volume does not exist | 5 NOT_FOUND | Indicates that a volume corresponding to the specified volume_id does not exist. | Caller MUST verify that the volume_id is correct and that the volume is accessible and has not been deleted before retrying with exponential back off. |
+| Topology conflict | 9 FAILED_PRECONDITION | Indicates that the CO has requested a modification that would make the volume inaccessible to some already attached nodes. | Caller MAY detach the volume from the nodes that are in conflict and retry. |
 
 #### `GetCapacity`
 
