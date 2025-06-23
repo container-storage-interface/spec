@@ -392,6 +392,11 @@ service Controller {
     returns (ControllerModifyVolumeResponse) {
         option (alpha_method) = true;
     }
+
+  rpc ControllerModifyVolumeTopology (ControllerModifyVolumeTopologyRequest)
+    returns (ControllerModifyVolumeTopologyResponse) {
+        option (alpha_method) = true;
+    }
 }
 
 service GroupController {
@@ -1714,6 +1719,88 @@ message ControllerModifyVolumeResponse {
 | Parameters not supported | 3 INVALID_ARGUMENT | Indicates that the CO has specified mutable parameters not supported by the volume. | Caller MAY verify mutable parameters. |
 | Exceeds capabilities | 3 INVALID_ARGUMENT | Indicates that the CO has specified capabilities not supported by the volume. | Caller MAY verify volume capabilities by calling ValidateVolumeCapabilities and retry with matching capabilities. |
 | Volume does not exist | 5 NOT_FOUND | Indicates that a volume corresponding to the specified volume_id does not exist. | Caller MUST verify that the volume_id is correct and that the volume is accessible and has not been deleted before retrying with exponential back off. |
+
+#### `ControllerModifyVolumeTopology`
+
+**ALPHA FEATURE**
+
+A Controller plugin MUST implement this RPC call if the plugin has the MODIFY_VOLUME_TOPOLOGY controller capability.
+This RPC allows the CO to change the accessible topology of a volume.
+
+```protobuf
+message ControllerModifyVolumeTopologyRequest {
+  option (alpha_message) = true;
+
+  // Container identity information for the existing volume.
+  // This field is REQUIRED
+  string volume_id = 1;
+
+  // Secrets required by plugin to complete modify volume topology request.
+  // This field is OPTIONAL. Refer to the `Secrets Requirements`
+  // section on how to use this field.
+  map<string, string> secrets = 2 [(csi_secret) = true];
+
+  // Specifies where (regions, zones, racks, etc.) the modified
+  // volume is accessible from.
+  // A plugin that returns this field MUST also set the
+  // VOLUME_ACCESSIBILITY_CONSTRAINTS plugin capability.
+  // An SP MAY specify multiple topologies to indicate the volume is
+  // accessible from multiple locations.
+  // COs MAY use this information along with the topology information
+  // returned by NodeGetInfo to ensure that a given volume is accessible
+  // from a given node when scheduling workloads.
+  // This field is OPTIONAL. It is effective to replace the
+  // accessible_topology returned by CreateVolume if the plugin has
+  // MODIFY_VOLUME_TOPOLOGY controller capability.
+  // If it is not specified, the CO MAY assume
+  // the volume is equally accessible from all nodes in the cluster and
+  // MAY schedule workloads referencing the volume on any available
+  // node. 
+  //
+  // SP MUST only set this field if allow_topology_updates is set
+  // in the request. SP SHOULD fail the request if it needs to update
+  // the topology but is not allowed by the CO.
+  repeated Topology accessible_topology = 3;
+}
+
+message ControllerModifyVolumeTopologyResponse {
+  option (alpha_message) = true;
+
+  // Specifies where (regions, zones, racks, etc.) the modified
+  // volume is accessible from.
+  // A plugin that returns this field MUST also set the
+  // VOLUME_ACCESSIBILITY_CONSTRAINTS plugin capability.
+  // An SP MAY specify multiple topologies to indicate the volume is
+  // accessible from multiple locations.
+  // COs MAY use this information along with the topology information
+  // returned by NodeGetInfo to ensure that a given volume is accessible
+  // from a given node when scheduling workloads.
+  // This field is OPTIONAL. It is effective to replace the
+  // accessible_topology returned by CreateVolume if the plugin has
+  // MODIFY_VOLUME_TOPOLOGY controller capability.
+  // If it is not specified, the CO MAY assume
+  // the volume is equally accessible from all nodes in the cluster and
+  // MAY schedule workloads referencing the volume on any available
+  // node. 
+  //
+  // SP MUST only set this field if allow_topology_updates is set
+  // in the request. SP SHOULD fail the request if it needs to update
+  // the topology but is not allowed by the CO.
+  repeated Topology accessible_topology = 1;
+
+  // Indicates whether the modification is still in progress.
+  // SPs MAY set in_progress to update the accessible_topology
+  // before the modification finishes to reduce possible race conditions.
+  // COs SHOULD retry the request if in_progress is set to true,
+  // until in_progress is set to false.
+  bool in_progress = 2;
+}
+```
+
+##### ControllerModifyVolumeTopology Errors
+| Condition | gRPC Code | Description | Recovery Behavior |
+|-----------|-----------|-------------|-------------------|
+| Topology conflict | 9 FAILED_PRECONDITION | Indicates that the CO has requested a modification that would make the volume inaccessible to some already attached nodes. | Caller MAY detach the volume from the nodes that are in conflict and retry. |
 
 #### `GetCapacity`
 
