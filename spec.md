@@ -3343,7 +3343,7 @@ The following conditions are well defined:
 
 | Condition | gRPC Code | Description | Recovery Behavior |
 |-----------|-----------|-------------|-------------------|
-| Missing or otherwise invalid argument | 3 INVALID_ARGUMENT | Indicates that a required argument field was not specified or an argument value is invalid | The caller should correct the error and resubmit the call. |
+| Missing or otherwise invalid argument | 3 INVALID_ARGUMENT | Indicates that a required argument field was not specified or an argument value is invalid. | The caller should correct the error and resubmit the call. |
 | Invalid `snapshot_id` | 5 NOT_FOUND | Indicates that the snapshot specified was not found. | The caller should re-check that this object exists. |
 | Invalid `starting_offset` | 11 OUT_OF_RANGE | The starting offset is negative or exceeds the volume size. | The caller should specify a valid offset. |
 
@@ -3437,8 +3437,9 @@ The following conditions are well defined:
 
 | Condition | gRPC Code | Description | Recovery Behavior |
 |-----------|-----------|-------------|-------------------|
-| Missing or otherwise invalid argument | 3 INVALID_ARGUMENT | Indicates that a required argument field was not specified or an argument value is invalid | The caller should correct the error and resubmit the call. |
+| Missing or otherwise invalid argument | 3 INVALID_ARGUMENT | Indicates that a required argument field was not specified or an argument value is invalid. | The caller should correct the error and resubmit the call. |
 | Invalid `base_snapshot_id` or `target_snapshot_id` | 5 NOT_FOUND | Indicates that the snapshots specified were not found. | The caller should re-check that these objects exist. |
+| Changed block tracking is not enabled | 9 FAILED_PRECONDITION | Changed block tracking has not been enabled in the underlying storage subsystem. | The caller should perform a full backup instead. The operation would proceed if changed block tracking was enabled in the storage subsystem, but how this is to be accomplished is beyond the scope of this specification. |
 | Invalid `starting_offset` | 11 OUT_OF_RANGE | The starting offset is negative or exceeds the volume size. | The caller should specify a valid offset. |
 
 ## Protocol
