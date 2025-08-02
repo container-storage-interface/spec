@@ -1711,8 +1711,7 @@ message ControllerModifyVolumeResponse {
 
 | Condition | gRPC Code | Description | Recovery Behavior |
 |-----------|-----------|-------------|-------------------|
-| Parameters not supported | 3 INVALID_ARGUMENT | Indicates that the CO has specified mutable parameters not supported by the volume. | Caller MAY verify mutable parameters. |
-| Exceeds capabilities | 3 INVALID_ARGUMENT | Indicates that the CO has specified capabilities not supported by the volume. | Caller MAY verify volume capabilities by calling ValidateVolumeCapabilities and retry with matching capabilities. |
+| Parameters not supported | 3 INVALID_ARGUMENT | Indicates that the CO has specified invalid mutable parameter keys or values, or the specified volume cannot support the specified parameters. The SP MUST NOT have applied any modification to the volume as part of this specific call. | A caller may verify volume capabilities by calling ValidateVolumeCapabilities and then retry the request with valid mutable parameters. |
 | Volume does not exist | 5 NOT_FOUND | Indicates that a volume corresponding to the specified volume_id does not exist. | Caller MUST verify that the volume_id is correct and that the volume is accessible and has not been deleted before retrying with exponential back off. |
 
 #### `GetCapacity`
