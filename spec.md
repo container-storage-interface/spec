@@ -390,7 +390,6 @@ service Controller {
 
   rpc ControllerModifyVolume (ControllerModifyVolumeRequest)
     returns (ControllerModifyVolumeResponse) {
-        option (alpha_method) = true;
     }
 }
 
@@ -884,7 +883,7 @@ message CreateVolumeRequest {
   // as if they take precedence over the parameters field.
   // This field SHALL NOT be specified unless the SP has the
   // MODIFY_VOLUME plugin capability.
-  map<string, string> mutable_parameters = 8 [(alpha_field) = true];
+  map<string, string> mutable_parameters = 8;
 }
 
 // Specifies what source the volume will be created from. One of the
@@ -1478,7 +1477,7 @@ message ValidateVolumeCapabilitiesRequest {
 
   // See CreateVolumeRequest.mutable_parameters.
   // This field is OPTIONAL.
-  map<string, string> mutable_parameters = 6 [(alpha_field) = true];
+  map<string, string> mutable_parameters = 6;
 }
 
 message ValidateVolumeCapabilitiesResponse {
@@ -1497,7 +1496,7 @@ message ValidateVolumeCapabilitiesResponse {
 
     // The volume creation mutable_parameters validated by the plugin.
     // This field is OPTIONAL.
-    map<string, string> mutable_parameters = 4 [(alpha_field) = true];
+    map<string, string> mutable_parameters = 4;
   }
 
   // Confirmed indicates to the CO the set of capabilities that the
@@ -1679,8 +1678,6 @@ The new mutable parameters in ControllerModifyVolume can be different from the e
 
 ```protobuf
 message ControllerModifyVolumeRequest {
-  option (alpha_message) = true;
-
   // Contains identity information for the existing volume.
   // This field is REQUIRED.
   string volume_id = 1;
@@ -1702,7 +1699,6 @@ message ControllerModifyVolumeRequest {
 }
 
 message ControllerModifyVolumeResponse {
-  option (alpha_message) = true;
 }
 
 ```
@@ -1873,7 +1869,7 @@ message ControllerServiceCapability {
 
       // Indicates the SP supports modifying volume with mutable
       // parameters. See ControllerModifyVolume for details.
-      MODIFY_VOLUME = 14 [(alpha_enum_value) = true];
+      MODIFY_VOLUME = 14;
 
       // Indicates the SP supports the GetSnapshot RPC.
       // This enables COs to fetch an existing snapshot.
