@@ -929,6 +929,9 @@ message VolumeCapability {
   message MountVolume {
     // The filesystem type. This field is OPTIONAL.
     // An empty string is equal to an unspecified field value.
+    // If SP has DEFER_FS_OPS node capability and CO specifies
+    // fs_defer_ops = true then SP MUST pass this field
+    // to the container runtime that will mount the file system.
     string fs_type = 1;
 
     // The mount options that can be used for the volume. This field is
@@ -936,6 +939,9 @@ message VolumeCapability {
     // Therefore, the CO and the Plugin MUST NOT leak this information
     // to untrusted entities. The total size of this repeated field
     // SHALL NOT exceed 4 KiB.
+    // If SP has DEFER_FS_OPS node capability and CO specifies
+    // fs_defer_ops = true then SP MUST pass this field
+    // to the container runtime that will mount the file system.
     repeated string mount_flags = 2;
 
     // If SP has VOLUME_MOUNT_GROUP node capability and CO provides
@@ -950,6 +956,27 @@ message VolumeCapability {
     // both readable and writable by said mount group identifier.
     // This is an OPTIONAL field.
     string volume_mount_group = 3;
+
+    // If SP has DEFER_FS_OPS_WITH_SUPPLEMENTAL_GROUP node capability
+    // and CO provides this field then SP MUST ensure that the
+    // volume_supplemental_group parameter is passed as a supplemental
+    // Group ID that owns the file system after it has been mounted by
+    // the container runtime handler.
+    // A CO MUST NOT populate this field if defer_fs_ops is empty
+    // This is an OPTIONAL field.
+    string volume_supplemental_group = 4 [(alpha_field) = true];
+
+    // If SP has DEFER_FS_OPS_WITH_SUPPLEMENTAL_GROUP_CHANGE_POLICY node
+    // capability and CO provides this field then SP MUST ensure that
+    // the volume_supplemental_group_change_policy parameter is passed
+    // as the policy through which ownership by a supplemental Group ID
+    // is set after it has been mounted by the container runtime
+    // handler.
+    // A CO MUST NOT populate this field if defer_fs_ops or
+    // volume_supplemental_group is empty
+    // This is an OPTIONAL field.
+    string volume_supplemental_group_change_policy = 5
+      [(alpha_field) = true];
   }
 
   // Specify how a volume can be accessed.
@@ -2552,6 +2579,13 @@ message NodePublishVolumeRequest {
   // This field is OPTIONAL and MUST match the volume_context of the
   // volume identified by `volume_id`.
   map<string, string> volume_context = 8;
+
+  // Indicates SP MUST defer file system mount and any post-mount
+  // configuration operations (such as application of file system
+  // ownership by a supplemental group, if supported) to
+  // a container runtime handler.
+  // This field is OPTIONAL.
+  bool defer_fs_ops = 9;
 }
 
 message NodePublishVolumeResponse {
@@ -2602,6 +2636,11 @@ message NodeUnpublishVolumeRequest {
   // system/filesystem, but, at a minimum, SP MUST accept a max path
   // length of at least 128 bytes.
   string target_path = 2;
+
+  // Indicates SP MUST defer file system dismount and cleanup
+  // to a container runtime handler.
+  // This field is OPTIONAL.
+  bool defer_fs_ops = 3;
 }
 
 message NodeUnpublishVolumeResponse {
@@ -2658,6 +2697,11 @@ message NodeGetVolumeStatsRequest {
   // system/filesystem, but, at a minimum, SP MUST accept a max path
   // length of at least 128 bytes.
   string staging_target_path = 3;
+
+  // Indicates SP MUST obtain file system stats from a
+  // container runtime handler (that has mounted the file system).
+  // This field is OPTIONAL.
+  bool defer_fs_ops = 4;
 }
 
 message NodeGetVolumeStatsResponse {
@@ -2774,6 +2818,22 @@ message NodeServiceCapability {
       // with provided volume group identifier during node stage
       // or node publish RPC calls.
       VOLUME_MOUNT_GROUP = 6;
+
+      // Indicates that Node service supports deferring file system
+      // mount and management operations to a container runtime handler.
+      DEFER_FS_OPS = 7 [(alpha_enum_value) = true];
+
+      // Indicates that Node service supports passing a supplemental
+      // Group ID as a post mount configuration when deferring
+      // file system mount to a container runtime handler.
+      DEFER_FS_OPS_WITH_SUPPLEMENTAL_GROUP = 8
+        [(alpha_enum_value) = true];
+
+      // Indicates that Node service supports passing a supplemental
+      // Group ID change policy as a post mount configuration when
+      // deferring file system mount to a container runtime handler.
+      DEFER_FS_OPS_WITH_SUPPLEMENTAL_GROUP_CHANGE_POLICY = 9
+        [(alpha_enum_value) = true];
     }
 
     Type type = 1;
@@ -2843,6 +2903,13 @@ message NodeGetInfoResponse {
   // Indicates the node exists within the "region" "R1" and the "zone"
   // "Z2".
   Topology accessible_topology = 3;
+
+  // If SP has DEFER_FS_OPS node capability, a plugin MUST populate
+  // this field with the list of file systems that it supports. A CO
+  // SHOULD use this to match the deferral capabilities of a plugin
+  // with a container runtime handler for a workload.
+  // This field is OPTIONAL.
+  repeated string supported_file_systems = 4;
 }
 ```
 
@@ -2920,6 +2987,11 @@ message NodeExpandVolumeRequest {
   // section on how to use this field.
   map<string, string> secrets = 6
     [(csi_secret) = true, (alpha_field) = true];
+
+  // Indicates SP MUST defer file system expansion to a
+  // container runtime handler (that has mounted the file system).
+  // This field is OPTIONAL.
+  bool defer_fs_ops = 7 [(alpha_enum_value) = true];
 }
 
 message NodeExpandVolumeResponse {
@@ -3490,6 +3562,13 @@ The following conditions are well defined:
 * Plugins SHALL NOT specify requirements that include or otherwise reference directories and/or files on the root filesystem of the CO.
 * Plugins SHALL NOT create additional files or directories adjacent to the UNIX socket specified by `CSI_ENDPOINT`; violations of this requirement constitute "abuse".
   * The Plugin Supervisor is the ultimate authority of the directory in which the UNIX socket endpoint is created and MAY enforce policies to prevent and/or mitigate abuse of the directory by Plugins.
+
+#### Deferring Filesystem Mount and Management to a Container Runtime Handler
+A Plugin may have the capability to defer file system mount and management operations to a container runtime handler.
+The CO SHOULD populate `defer_fs_ops` as `True` in CSI Node APIs when the following conditions are fulfilled:
+- The container runtime handler (associated with a workload) supports deferral of file system mount and management operations from a CSI plugin.
+- The CSI plugin is able to support deferral of file system mount and management operations to a container runtime handler.
+- Both container runtime handler and CSI plugin is compatible around support for mounting specific file systems and applying post-mount configuration based on the workload spec (e.g. supplemental group ownership)
 
 ### Supervised Lifecycle Management
 
