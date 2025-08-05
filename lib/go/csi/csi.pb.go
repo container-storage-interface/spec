@@ -3938,7 +3938,14 @@ type NodeStageVolumeRequest struct {
 	// that the path is directory and that the process serving the
 	// request has `read` and `write` permission to that directory. The
 	// CO SHALL be responsible for creating the directory if it does not
-	// exist.
+	// exist. The CO MUST pass the same staging_target_directory to
+	// NodeStageVolume and NodePublishVolume.
+	// The SP MAY use staging_target_directory in
+	// any way it chooses, including but not limited to:
+	// - as a mount point to stage the volume directly
+	// - as a parent directory for a newly created mount point
+	// - as a parent directory for an attached device
+	// - as a parent directory for metadata files
 	// This is a REQUIRED field.
 	// This field overrides the general CSI size limit.
 	// SP SHOULD support the maximum path length allowed by the operating
