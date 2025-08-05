@@ -1532,7 +1532,7 @@ The CO MUST implement the specified error recovery behavior when it encounters t
 
 A Controller Plugin MUST implement this RPC call if it has `LIST_VOLUMES` capability.
 The Plugin SHALL return the information about all the volumes that it knows about.
-If volumes are created and/or deleted while the CO is concurrently paging through `ListVolumes` results then it is possible that the CO MAY either witness duplicate volumes in the list, not witness existing volumes, or both.
+If volumes are created and/or deleted while the CO is concurrently paging through `ListVolumes` results then it is possible that the CO MAY witness duplicate volumes in the list, witness non-existent volumes, not witness existing volumes, all or any of these.
 The CO SHALL NOT expect a consistent "view" of all volumes when paging through the volume list via multiple calls to `ListVolumes`.
 
 ```protobuf
@@ -3562,4 +3562,4 @@ Supervised plugins MAY be isolated and/or resource-bounded.
 
 ##### Resource Requirements
 
-* SPs SHOULD unambiguously document all of a Plugin’s resource requirements.
+* SPs SHOULD unambiguously document all the resource requirements of a Plugin.
