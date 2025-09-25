@@ -185,21 +185,22 @@ var Identity_ServiceDesc = grpc.ServiceDesc{
 }
 
 const (
-	Controller_CreateVolume_FullMethodName               = "/csi.v1.Controller/CreateVolume"
-	Controller_DeleteVolume_FullMethodName               = "/csi.v1.Controller/DeleteVolume"
-	Controller_ControllerPublishVolume_FullMethodName    = "/csi.v1.Controller/ControllerPublishVolume"
-	Controller_ControllerUnpublishVolume_FullMethodName  = "/csi.v1.Controller/ControllerUnpublishVolume"
-	Controller_ValidateVolumeCapabilities_FullMethodName = "/csi.v1.Controller/ValidateVolumeCapabilities"
-	Controller_ListVolumes_FullMethodName                = "/csi.v1.Controller/ListVolumes"
-	Controller_GetCapacity_FullMethodName                = "/csi.v1.Controller/GetCapacity"
-	Controller_ControllerGetCapabilities_FullMethodName  = "/csi.v1.Controller/ControllerGetCapabilities"
-	Controller_CreateSnapshot_FullMethodName             = "/csi.v1.Controller/CreateSnapshot"
-	Controller_DeleteSnapshot_FullMethodName             = "/csi.v1.Controller/DeleteSnapshot"
-	Controller_ListSnapshots_FullMethodName              = "/csi.v1.Controller/ListSnapshots"
-	Controller_GetSnapshot_FullMethodName                = "/csi.v1.Controller/GetSnapshot"
-	Controller_ControllerExpandVolume_FullMethodName     = "/csi.v1.Controller/ControllerExpandVolume"
-	Controller_ControllerGetVolume_FullMethodName        = "/csi.v1.Controller/ControllerGetVolume"
-	Controller_ControllerModifyVolume_FullMethodName     = "/csi.v1.Controller/ControllerModifyVolume"
+	Controller_CreateVolume_FullMethodName                   = "/csi.v1.Controller/CreateVolume"
+	Controller_DeleteVolume_FullMethodName                   = "/csi.v1.Controller/DeleteVolume"
+	Controller_ControllerPublishVolume_FullMethodName        = "/csi.v1.Controller/ControllerPublishVolume"
+	Controller_ControllerUnpublishVolume_FullMethodName      = "/csi.v1.Controller/ControllerUnpublishVolume"
+	Controller_ValidateVolumeCapabilities_FullMethodName     = "/csi.v1.Controller/ValidateVolumeCapabilities"
+	Controller_ListVolumes_FullMethodName                    = "/csi.v1.Controller/ListVolumes"
+	Controller_GetCapacity_FullMethodName                    = "/csi.v1.Controller/GetCapacity"
+	Controller_ControllerGetCapabilities_FullMethodName      = "/csi.v1.Controller/ControllerGetCapabilities"
+	Controller_CreateSnapshot_FullMethodName                 = "/csi.v1.Controller/CreateSnapshot"
+	Controller_DeleteSnapshot_FullMethodName                 = "/csi.v1.Controller/DeleteSnapshot"
+	Controller_ListSnapshots_FullMethodName                  = "/csi.v1.Controller/ListSnapshots"
+	Controller_GetSnapshot_FullMethodName                    = "/csi.v1.Controller/GetSnapshot"
+	Controller_ControllerExpandVolume_FullMethodName         = "/csi.v1.Controller/ControllerExpandVolume"
+	Controller_ControllerGetVolume_FullMethodName            = "/csi.v1.Controller/ControllerGetVolume"
+	Controller_ControllerModifyVolume_FullMethodName         = "/csi.v1.Controller/ControllerModifyVolume"
+	Controller_ControllerModifyVolumeTopology_FullMethodName = "/csi.v1.Controller/ControllerModifyVolumeTopology"
 )
 
 // ControllerClient is the client API for Controller service.
@@ -221,6 +222,7 @@ type ControllerClient interface {
 	ControllerExpandVolume(ctx context.Context, in *ControllerExpandVolumeRequest, opts ...grpc.CallOption) (*ControllerExpandVolumeResponse, error)
 	ControllerGetVolume(ctx context.Context, in *ControllerGetVolumeRequest, opts ...grpc.CallOption) (*ControllerGetVolumeResponse, error)
 	ControllerModifyVolume(ctx context.Context, in *ControllerModifyVolumeRequest, opts ...grpc.CallOption) (*ControllerModifyVolumeResponse, error)
+	ControllerModifyVolumeTopology(ctx context.Context, in *ControllerModifyVolumeTopologyRequest, opts ...grpc.CallOption) (*ControllerModifyVolumeTopologyResponse, error)
 }
 
 type controllerClient struct {
@@ -366,6 +368,15 @@ func (c *controllerClient) ControllerModifyVolume(ctx context.Context, in *Contr
 	return out, nil
 }
 
+func (c *controllerClient) ControllerModifyVolumeTopology(ctx context.Context, in *ControllerModifyVolumeTopologyRequest, opts ...grpc.CallOption) (*ControllerModifyVolumeTopologyResponse, error) {
+	out := new(ControllerModifyVolumeTopologyResponse)
+	err := c.cc.Invoke(ctx, Controller_ControllerModifyVolumeTopology_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ControllerServer is the server API for Controller service.
 // All implementations must embed UnimplementedControllerServer
 // for forward compatibility
@@ -385,6 +396,7 @@ type ControllerServer interface {
 	ControllerExpandVolume(context.Context, *ControllerExpandVolumeRequest) (*ControllerExpandVolumeResponse, error)
 	ControllerGetVolume(context.Context, *ControllerGetVolumeRequest) (*ControllerGetVolumeResponse, error)
 	ControllerModifyVolume(context.Context, *ControllerModifyVolumeRequest) (*ControllerModifyVolumeResponse, error)
+	ControllerModifyVolumeTopology(context.Context, *ControllerModifyVolumeTopologyRequest) (*ControllerModifyVolumeTopologyResponse, error)
 	mustEmbedUnimplementedControllerServer()
 }
 
@@ -436,6 +448,9 @@ func (UnimplementedControllerServer) ControllerGetVolume(context.Context, *Contr
 }
 func (UnimplementedControllerServer) ControllerModifyVolume(context.Context, *ControllerModifyVolumeRequest) (*ControllerModifyVolumeResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ControllerModifyVolume not implemented")
+}
+func (UnimplementedControllerServer) ControllerModifyVolumeTopology(context.Context, *ControllerModifyVolumeTopologyRequest) (*ControllerModifyVolumeTopologyResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ControllerModifyVolumeTopology not implemented")
 }
 func (UnimplementedControllerServer) mustEmbedUnimplementedControllerServer() {}
 
@@ -720,6 +735,24 @@ func _Controller_ControllerModifyVolume_Handler(srv interface{}, ctx context.Con
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Controller_ControllerModifyVolumeTopology_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ControllerModifyVolumeTopologyRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ControllerServer).ControllerModifyVolumeTopology(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Controller_ControllerModifyVolumeTopology_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ControllerServer).ControllerModifyVolumeTopology(ctx, req.(*ControllerModifyVolumeTopologyRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Controller_ServiceDesc is the grpc.ServiceDesc for Controller service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -786,6 +819,10 @@ var Controller_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ControllerModifyVolume",
 			Handler:    _Controller_ControllerModifyVolume_Handler,
+		},
+		{
+			MethodName: "ControllerModifyVolumeTopology",
+			Handler:    _Controller_ControllerModifyVolumeTopology_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
