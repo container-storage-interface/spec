@@ -3134,7 +3134,7 @@ The CO MUST implement the specified error recovery behavior when it encounters t
 
 #### `GetVolumeGroupSnapshot`
 
-This optional RPC MAY be called by the CO to fetch current information about a volume group snapshot.
+This RPC MAY be called by the CO to fetch current information about a volume group snapshot.
 
 A Controller Plugin MUST implement this `GetVolumeGroupSnapshot` RPC call if it has `CREATE_DELETE_GET_VOLUME_GROUP_SNAPSHOT` capability.
 
