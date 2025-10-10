@@ -2034,8 +2034,8 @@ The CO MUST implement the specified error recovery behavior when it encounters t
 | Condition | gRPC Code | Description | Recovery Behavior |
 |-----------|-----------|-------------|-------------------|
 | Snapshot already exists but is incompatible | 6 ALREADY_EXISTS | Indicates that a snapshot corresponding to the specified snapshot `name` already exists but is incompatible with the specified `volume_id`. | Caller MUST fix the arguments or use a different `name` before retrying. |
+| Not enough space to create snapshot | 8 RESOURCE_EXHAUSTED | There is not enough space on the storage system to handle the create snapshot request. | Caller SHOULD fail this request. Future calls to CreateSnapshot MAY succeed if space is freed up. |
 | Operation pending for snapshot | 10 ABORTED | Indicates that there is already an operation pending for the specified snapshot. In general the Cluster Orchestrator (CO) is responsible for ensuring that there is no more than one call "in-flight" per snapshot at a given time. However, in some circumstances, the CO MAY lose state (for example when the CO crashes and restarts), and MAY issue multiple calls simultaneously for the same snapshot. The Plugin, SHOULD handle this as gracefully as possible, and MAY return this error code to reject secondary calls. | Caller SHOULD ensure that there are no other calls pending for the specified snapshot, and then retry with exponential back off. |
-| Not enough space to create snapshot | 13 RESOURCE_EXHAUSTED | There is not enough space on the storage system to handle the create snapshot request. | Caller SHOULD fail this request. Future calls to CreateSnapshot MAY succeed if space is freed up. |
 
 
 #### `DeleteSnapshot`
@@ -3078,8 +3078,8 @@ The CO MUST implement the specified error recovery behavior when it encounters t
 | Condition | gRPC Code | Description | Recovery Behavior |
 |-----------|-----------|-------------|-------------------|
 | Group snapshot already exists but is incompatible | 6 ALREADY_EXISTS | Indicates that a group snapshot corresponding to the specified group snapshot `name` already exists but is incompatible with the specified `source_volume_ids` or `parameters`. | Caller MUST fix the arguments or use a different `name` before retrying. |
+| Not enough space to create group snapshot | 8 RESOURCE_EXHAUSTED | There is not enough space on the storage system to handle the create group snapshot request. | Future calls to CreateVolumeGroupSnapshot MAY succeed if space is freed up. |
 | Cannot snapshot multiple volumes together | 9 FAILED_PRECONDITION | Indicates that the specified volumes cannot be snapshotted together because the volumes are not configured properly based on requirements from the SP. | Caller MUST fix the configuration of the volumes so that they meet the requirements for group snapshotting before retrying. |
-| Not enough space to create group snapshot | 13 RESOURCE_EXHAUSTED | There is not enough space on the storage system to handle the create group snapshot request. | Future calls to CreateVolumeGroupSnapshot MAY succeed if space is freed up. |
 
 #### `DeleteVolumeGroupSnapshot`
 
