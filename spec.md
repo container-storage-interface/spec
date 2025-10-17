@@ -2162,7 +2162,8 @@ A Controller Plugin MUST implement this `GetSnapshot` RPC call if it has `GET_SN
 An SP that supports Group Controller Service and the CREATE_DELETE_GET_VOLUME_GROUP_SNAPSHOT capability SHOULD implement the `GetSnapshot` RPC in order to retrieve information for individual snapshots that are part of a group snapshot.
 
 `GetSnapshotResponse` should contain current information of a snapshot if it exists.
-If the snapshot does not exist any more, `GetSnapshot` should return gRPC error code `NOT_FOUND`. Snapshots which were recently created and not yet ready to use must be retrievable with this RPC.
+If the snapshot does not exist any more, `GetSnapshot` should return gRPC error code `NOT_FOUND`. 
+Snapshots which were recently created and not yet ready to use must be retrievable with this RPC.
 
 ```protobuf
 message GetSnapshotRequest {
