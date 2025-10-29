@@ -1,26 +1,6 @@
 all: build
 
 ########################################################################
-##                             GOLANG                                 ##
-########################################################################
-
-# If GOPATH isn't defined then set its default location.
-ifeq (,$(strip $(GOPATH)))
-GOPATH := $(HOME)/go
-else
-# If GOPATH is already set then update GOPATH to be its own
-# first element.
-GOPATH := $(word 1,$(subst :, ,$(GOPATH)))
-endif
-export GOPATH
-
-GOBIN := $(shell go env GOBIN)
-ifeq (,$(strip $(GOBIN)))
-GOBIN := $(GOPATH)/bin
-endif
-
-
-########################################################################
 ##                             PROTOC                                 ##
 ########################################################################
 
@@ -46,11 +26,6 @@ PROTOC_URL := https://github.com/protocolbuffers/protobuf/releases/download/v$(P
 PROTOC_TMP_DIR := .protoc
 PROTOC := $(PROTOC_TMP_DIR)/bin/protoc
 
-$(GOBIN)/protoc-gen-go: ../../go.mod
-	go install google.golang.org/protobuf/cmd/protoc-gen-go
-$(GOBIN)/protoc-gen-go-grpc:
-	go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.3.0
-
 $(PROTOC):
 	-mkdir -p "$(PROTOC_TMP_DIR)" && \
 	  curl -L $(PROTOC_URL) -o "$(PROTOC_TMP_DIR)/$(PROTOC_ZIP)" && \
@@ -58,16 +33,7 @@ $(PROTOC):
 	  chmod 0755 "$@"
 	stat "$@" > /dev/null 2>&1
 
-PROTOC_ALL := $(GOBIN)/protoc-gen-go $(GOBIN)/protoc-gen-go-grpc $(PROTOC)
-
-########################################################################
-##                              PATH                                  ##
-########################################################################
-
-# Update PATH with GOBIN. This enables the protoc binary to discover
-# the protoc-gen-go binary
-export PATH := $(GOBIN):$(PATH)
-
+PROTOC_ALL := protoc-gen-go protoc-gen-go-grpc $(PROTOC)
 
 ########################################################################
 ##                              BUILD                                 ##
@@ -78,9 +44,10 @@ CSI_GO := $(CSI_PKG_SUB)/csi.pb.go
 CSI_GRPC := $(CSI_PKG_SUB)/csi_grpc.pb.go
 
 # This recipe generates the go language bindings
-$(CSI_GO) $(CSI_GRPC): $(CSI_PROTO) $(PROTOC_ALL)
+$(CSI_GO) $(CSI_GRPC): $(CSI_PROTO) $(PROTOC_ALL) ../../go.mod
 	@mkdir -p "$(@D)"
-	$(PROTOC) -I../.. --go-grpc_out=$(CSI_PKG_SUB) --go_out=$(CSI_PKG_SUB) \
+	$(PROTOC) --plugin=./protoc-gen-go --plugin=./protoc-gen-go-grpc \
+		-I../.. --go-grpc_out=$(CSI_PKG_SUB) --go_out=$(CSI_PKG_SUB) \
 		--go_opt=paths=source_relative --go-grpc_opt=paths=source_relative \
 		"$(<F)"
 
