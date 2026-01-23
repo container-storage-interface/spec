@@ -790,6 +790,8 @@ Plugins MAY create 3 types of volumes:
 If CO requests a volume to be created from existing snapshot or volume and the requested size of the volume is larger than the original snapshotted (or cloned volume), the Plugin can either refuse such a call with `OUT_OF_RANGE` error or MUST provide a volume that, when presented to a workload by `NodePublish` call, has both the requested (larger) size and contains data from the snapshot (or original volume).
 Explicitly, it's the responsibility of the Plugin to resize the filesystem of the newly created volume at (or before) the `NodePublish` call, if the volume has `VolumeCapability` access type `MountVolume` and the filesystem resize is required in order to provision the requested capacity.
 
+NOTE: The requested and reported sizes for a volume refer to the raw volume size that the SP allocated for the volume. Volumes with an `access_type` of `MountVolume` MAY have less available capacity due to the overhead of filesystem metadata (exact amount depends on filesystem). The underlying volume when used in `access_mode` with a value of `BlockVolume` MUST match the specified `capacity_range` request.
+
 ```protobuf
 message CreateVolumeRequest {
   // The suggested name for the storage space. This field is REQUIRED.
