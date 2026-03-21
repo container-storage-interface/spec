@@ -200,6 +200,7 @@ const (
 	Controller_ControllerExpandVolume_FullMethodName     = "/csi.v1.Controller/ControllerExpandVolume"
 	Controller_ControllerGetVolume_FullMethodName        = "/csi.v1.Controller/ControllerGetVolume"
 	Controller_ControllerModifyVolume_FullMethodName     = "/csi.v1.Controller/ControllerModifyVolume"
+	Controller_ControllerGetNodeInfo_FullMethodName      = "/csi.v1.Controller/ControllerGetNodeInfo"
 )
 
 // ControllerClient is the client API for Controller service.
@@ -221,6 +222,7 @@ type ControllerClient interface {
 	ControllerExpandVolume(ctx context.Context, in *ControllerExpandVolumeRequest, opts ...grpc.CallOption) (*ControllerExpandVolumeResponse, error)
 	ControllerGetVolume(ctx context.Context, in *ControllerGetVolumeRequest, opts ...grpc.CallOption) (*ControllerGetVolumeResponse, error)
 	ControllerModifyVolume(ctx context.Context, in *ControllerModifyVolumeRequest, opts ...grpc.CallOption) (*ControllerModifyVolumeResponse, error)
+	ControllerGetNodeInfo(ctx context.Context, in *ControllerGetNodeInfoRequest, opts ...grpc.CallOption) (*ControllerGetNodeInfoResponse, error)
 }
 
 type controllerClient struct {
@@ -366,6 +368,15 @@ func (c *controllerClient) ControllerModifyVolume(ctx context.Context, in *Contr
 	return out, nil
 }
 
+func (c *controllerClient) ControllerGetNodeInfo(ctx context.Context, in *ControllerGetNodeInfoRequest, opts ...grpc.CallOption) (*ControllerGetNodeInfoResponse, error) {
+	out := new(ControllerGetNodeInfoResponse)
+	err := c.cc.Invoke(ctx, Controller_ControllerGetNodeInfo_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ControllerServer is the server API for Controller service.
 // All implementations must embed UnimplementedControllerServer
 // for forward compatibility
@@ -385,6 +396,7 @@ type ControllerServer interface {
 	ControllerExpandVolume(context.Context, *ControllerExpandVolumeRequest) (*ControllerExpandVolumeResponse, error)
 	ControllerGetVolume(context.Context, *ControllerGetVolumeRequest) (*ControllerGetVolumeResponse, error)
 	ControllerModifyVolume(context.Context, *ControllerModifyVolumeRequest) (*ControllerModifyVolumeResponse, error)
+	ControllerGetNodeInfo(context.Context, *ControllerGetNodeInfoRequest) (*ControllerGetNodeInfoResponse, error)
 	mustEmbedUnimplementedControllerServer()
 }
 
@@ -436,6 +448,9 @@ func (UnimplementedControllerServer) ControllerGetVolume(context.Context, *Contr
 }
 func (UnimplementedControllerServer) ControllerModifyVolume(context.Context, *ControllerModifyVolumeRequest) (*ControllerModifyVolumeResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ControllerModifyVolume not implemented")
+}
+func (UnimplementedControllerServer) ControllerGetNodeInfo(context.Context, *ControllerGetNodeInfoRequest) (*ControllerGetNodeInfoResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ControllerGetNodeInfo not implemented")
 }
 func (UnimplementedControllerServer) mustEmbedUnimplementedControllerServer() {}
 
@@ -720,6 +735,24 @@ func _Controller_ControllerModifyVolume_Handler(srv interface{}, ctx context.Con
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Controller_ControllerGetNodeInfo_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ControllerGetNodeInfoRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ControllerServer).ControllerGetNodeInfo(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Controller_ControllerGetNodeInfo_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ControllerServer).ControllerGetNodeInfo(ctx, req.(*ControllerGetNodeInfoRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Controller_ServiceDesc is the grpc.ServiceDesc for Controller service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -786,6 +819,10 @@ var Controller_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ControllerModifyVolume",
 			Handler:    _Controller_ControllerModifyVolume_Handler,
+		},
+		{
+			MethodName: "ControllerGetNodeInfo",
+			Handler:    _Controller_ControllerGetNodeInfo_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
@@ -1183,6 +1220,7 @@ const (
 	Node_NodeExpandVolume_FullMethodName    = "/csi.v1.Node/NodeExpandVolume"
 	Node_NodeGetCapabilities_FullMethodName = "/csi.v1.Node/NodeGetCapabilities"
 	Node_NodeGetInfo_FullMethodName         = "/csi.v1.Node/NodeGetInfo"
+	Node_NodeGetID_FullMethodName           = "/csi.v1.Node/NodeGetID"
 )
 
 // NodeClient is the client API for Node service.
@@ -1197,6 +1235,7 @@ type NodeClient interface {
 	NodeExpandVolume(ctx context.Context, in *NodeExpandVolumeRequest, opts ...grpc.CallOption) (*NodeExpandVolumeResponse, error)
 	NodeGetCapabilities(ctx context.Context, in *NodeGetCapabilitiesRequest, opts ...grpc.CallOption) (*NodeGetCapabilitiesResponse, error)
 	NodeGetInfo(ctx context.Context, in *NodeGetInfoRequest, opts ...grpc.CallOption) (*NodeGetInfoResponse, error)
+	NodeGetID(ctx context.Context, in *NodeGetIDRequest, opts ...grpc.CallOption) (*NodeGetIDResponse, error)
 }
 
 type nodeClient struct {
@@ -1279,6 +1318,15 @@ func (c *nodeClient) NodeGetInfo(ctx context.Context, in *NodeGetInfoRequest, op
 	return out, nil
 }
 
+func (c *nodeClient) NodeGetID(ctx context.Context, in *NodeGetIDRequest, opts ...grpc.CallOption) (*NodeGetIDResponse, error) {
+	out := new(NodeGetIDResponse)
+	err := c.cc.Invoke(ctx, Node_NodeGetID_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // NodeServer is the server API for Node service.
 // All implementations must embed UnimplementedNodeServer
 // for forward compatibility
@@ -1291,6 +1339,7 @@ type NodeServer interface {
 	NodeExpandVolume(context.Context, *NodeExpandVolumeRequest) (*NodeExpandVolumeResponse, error)
 	NodeGetCapabilities(context.Context, *NodeGetCapabilitiesRequest) (*NodeGetCapabilitiesResponse, error)
 	NodeGetInfo(context.Context, *NodeGetInfoRequest) (*NodeGetInfoResponse, error)
+	NodeGetID(context.Context, *NodeGetIDRequest) (*NodeGetIDResponse, error)
 	mustEmbedUnimplementedNodeServer()
 }
 
@@ -1321,6 +1370,9 @@ func (UnimplementedNodeServer) NodeGetCapabilities(context.Context, *NodeGetCapa
 }
 func (UnimplementedNodeServer) NodeGetInfo(context.Context, *NodeGetInfoRequest) (*NodeGetInfoResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method NodeGetInfo not implemented")
+}
+func (UnimplementedNodeServer) NodeGetID(context.Context, *NodeGetIDRequest) (*NodeGetIDResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method NodeGetID not implemented")
 }
 func (UnimplementedNodeServer) mustEmbedUnimplementedNodeServer() {}
 
@@ -1479,6 +1531,24 @@ func _Node_NodeGetInfo_Handler(srv interface{}, ctx context.Context, dec func(in
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Node_NodeGetID_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(NodeGetIDRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(NodeServer).NodeGetID(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Node_NodeGetID_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(NodeServer).NodeGetID(ctx, req.(*NodeGetIDRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Node_ServiceDesc is the grpc.ServiceDesc for Node service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -1517,6 +1587,10 @@ var Node_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "NodeGetInfo",
 			Handler:    _Node_NodeGetInfo_Handler,
+		},
+		{
+			MethodName: "NodeGetID",
+			Handler:    _Node_NodeGetID_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
