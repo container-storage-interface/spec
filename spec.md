@@ -1726,13 +1726,22 @@ message ControllerModifyVolumeResponse {
 
 A Controller Plugin MUST implement this RPC call if it has `GET_NODE_INFO` controller capability.
 
-This RPC allows the CO to fetch node information (topology and maximum attachable volumes) from the controller side.
+This RPC allows the CO to fetch node information (topology, published volumes, and maximum attachable volumes) from the controller side.
 This is useful when the node side plugin cannot or should not access cloud APIs to retrieve this information (e.g., for security reasons where cloud API credentials should not be distributed to nodes).
 
 If the SP also supports `PUBLISH_UNPUBLISH_VOLUME` controller capability, the CO MAY call this RPC to dynamically update `max_volumes_per_node` when volume attachment fails with `RESOURCE_EXHAUSTED`.
 
 The CO SHOULD call this RPC after obtaining the node ID via `NodeGetID`.
-The CO MAY provide the list of volume IDs it believes are currently published to the node (including those with uncertain status), which allows the SP to calculate the volume count more accurately by knowing which published volumes are managed by CSI and which are not.
+
+The SP returns the maximum number of volumes that can be published to the node.
+The SP calculates this limit based on the instance type's attachment limit, accounting for non-volume resources that consume attachment slots (e.g., network interfaces on some instance types).
+
+The SP MAY also return the list of volume IDs that are currently published to the node according to the cloud provider's API. These volumes may not be published by CO, but still occupy slots reported by `max_volumes_per_node`.
+e.g. boot disks and manually attached disks.
+
+The CO SHALL combine these volumes with its own records (deduplicating as needed) when calculating available slots.
+
+If the SP cannot or chooses not to return this list, the SP SHOULD account for non-CSI volumes when calculating `max_volumes_per_node`.
 
 This operation MUST be idempotent.
 The CO MAY call this RPC multiple times for the same node.
@@ -1746,18 +1755,6 @@ message ControllerGetNodeInfoRequest {
   // This field overrides the general CSI size limit.
   // The size of this field SHALL NOT exceed 256 bytes.
   string node_id = 1;
-
-  // The volume IDs that the CO believes are currently published to this
-  // node. This field is OPTIONAL.
-  // This SHOULD include all volumes that the CO considers published,
-  // including those with uncertain status (e.g., publish RPC failed).
-  // The SP MAY use this information to calculate the maximum number
-  // of volumes that can be published to the node.
-  // For example, if the node has a maximum of 16 publishable volumes
-  // and 10 volumes are already published, but only 8 reported by the
-  // CO, then the SP SHOULD infer that the remaining 2 volumes are not
-  // managed by CSI and only report 14 max_volumes_per_node.
-  repeated string published_volume_ids = 2;
 }
 
 message ControllerGetNodeInfoResponse {
@@ -1786,6 +1783,15 @@ message ControllerGetNodeInfoResponse {
   // Indicates the node exists within the "region" "R1" and the "zone"
   // "Z2".
   Topology accessible_topology = 2;
+
+  // The volume IDs that are currently published to this node.
+  // These volumes may not be published by CO, but still occupy slots
+  // reported by max_volumes_per_node.
+  //
+  // This field is OPTIONAL. If provided, the CO SHALL combine these
+  // volumes with its own records (deduplicating as needed) when
+  // calculating available slots.
+  repeated string published_volume_ids = 3;
 }
 ```
 

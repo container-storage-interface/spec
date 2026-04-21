@@ -1061,18 +1061,6 @@ message ControllerGetNodeInfoRequest {
   // This field overrides the general CSI size limit.
   // The size of this field SHALL NOT exceed 256 bytes.
   string node_id = 1;
-
-  // The volume IDs that the CO believes are currently published to this
-  // node. This field is OPTIONAL.
-  // This SHOULD include all volumes that the CO considers published,
-  // including those with uncertain status (e.g., publish RPC failed).
-  // The SP MAY use this information to calculate the maximum number
-  // of volumes that can be published to the node.
-  // For example, if the node has a maximum of 16 publishable volumes
-  // and 10 volumes are already published, but only 8 reported by the
-  // CO, then the SP SHOULD infer that the remaining 2 volumes are not
-  // managed by CSI and only report 14 max_volumes_per_node.
-  repeated string published_volume_ids = 2;
 }
 
 message ControllerGetNodeInfoResponse {
@@ -1101,6 +1089,15 @@ message ControllerGetNodeInfoResponse {
   // Indicates the node exists within the "region" "R1" and the "zone"
   // "Z2".
   Topology accessible_topology = 2;
+
+  // The volume IDs that are currently published to this node.
+  // These volumes may not be published by CO, but still occupy slots
+  // reported by max_volumes_per_node.
+  //
+  // This field is OPTIONAL. If provided, the CO SHALL combine these
+  // volumes with its own records (deduplicating as needed) when
+  // calculating available slots.
+  repeated string published_volume_ids = 3;
 }
 message GetCapacityRequest {
   // If specified, the Plugin SHALL report the capacity of the storage

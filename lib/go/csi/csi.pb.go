@@ -2763,20 +2763,9 @@ type ControllerGetNodeInfoRequest struct {
 	// `NodeGetID`.
 	// This field overrides the general CSI size limit.
 	// The size of this field SHALL NOT exceed 256 bytes.
-	NodeId string `protobuf:"bytes,1,opt,name=node_id,json=nodeId,proto3" json:"node_id,omitempty"`
-	// The volume IDs that the CO believes are currently published to this
-	// node. This field is OPTIONAL.
-	// This SHOULD include all volumes that the CO considers published,
-	// including those with uncertain status (e.g., publish RPC failed).
-	// The SP MAY use this information to calculate the maximum number
-	// of volumes that can be published to the node.
-	// For example, if the node has a maximum of 16 publishable volumes
-	// and 10 volumes are already published, but only 8 reported by the
-	// CO, then the SP SHOULD infer that the remaining 2 volumes are not
-	// managed by CSI and only report 14 max_volumes_per_node.
-	PublishedVolumeIds []string `protobuf:"bytes,2,rep,name=published_volume_ids,json=publishedVolumeIds,proto3" json:"published_volume_ids,omitempty"`
-	unknownFields      protoimpl.UnknownFields
-	sizeCache          protoimpl.SizeCache
+	NodeId        string `protobuf:"bytes,1,opt,name=node_id,json=nodeId,proto3" json:"node_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
 }
 
 func (x *ControllerGetNodeInfoRequest) Reset() {
@@ -2816,13 +2805,6 @@ func (x *ControllerGetNodeInfoRequest) GetNodeId() string {
 	return ""
 }
 
-func (x *ControllerGetNodeInfoRequest) GetPublishedVolumeIds() []string {
-	if x != nil {
-		return x.PublishedVolumeIds
-	}
-	return nil
-}
-
 type ControllerGetNodeInfoResponse struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Maximum number of volumes that controller can publish to the node.
@@ -2851,6 +2833,14 @@ type ControllerGetNodeInfoResponse struct {
 	// Indicates the node exists within the "region" "R1" and the "zone"
 	// "Z2".
 	AccessibleTopology *Topology `protobuf:"bytes,2,opt,name=accessible_topology,json=accessibleTopology,proto3" json:"accessible_topology,omitempty"`
+	// The volume IDs that are currently published to this node.
+	// These volumes may not be published by CO, but still occupy slots
+	// reported by max_volumes_per_node.
+	//
+	// This field is OPTIONAL. If provided, the CO SHALL combine these
+	// volumes with its own records (deduplicating as needed) when
+	// calculating available slots.
+	PublishedVolumeIds []string `protobuf:"bytes,3,rep,name=published_volume_ids,json=publishedVolumeIds,proto3" json:"published_volume_ids,omitempty"`
 	unknownFields      protoimpl.UnknownFields
 	sizeCache          protoimpl.SizeCache
 }
@@ -2895,6 +2885,13 @@ func (x *ControllerGetNodeInfoResponse) GetMaxVolumesPerNode() int64 {
 func (x *ControllerGetNodeInfoResponse) GetAccessibleTopology() *Topology {
 	if x != nil {
 		return x.AccessibleTopology
+	}
+	return nil
+}
+
+func (x *ControllerGetNodeInfoResponse) GetPublishedVolumeIds() []string {
+	if x != nil {
+		return x.PublishedVolumeIds
 	}
 	return nil
 }
@@ -7463,13 +7460,13 @@ const file_csi_proto_rawDesc = "" +
 	"\x16MutableParametersEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
 	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\" \n" +
-	"\x1eControllerModifyVolumeResponse\"i\n" +
+	"\x1eControllerModifyVolumeResponse\"7\n" +
 	"\x1cControllerGetNodeInfoRequest\x12\x17\n" +
-	"\anode_id\x18\x01 \x01(\tR\x06nodeId\x120\n" +
-	"\x14published_volume_ids\x18\x02 \x03(\tR\x12publishedVolumeIds\"\x93\x01\n" +
+	"\anode_id\x18\x01 \x01(\tR\x06nodeId\"\xc5\x01\n" +
 	"\x1dControllerGetNodeInfoResponse\x12/\n" +
 	"\x14max_volumes_per_node\x18\x01 \x01(\x03R\x11maxVolumesPerNode\x12A\n" +
-	"\x13accessible_topology\x18\x02 \x01(\v2\x10.csi.v1.TopologyR\x12accessibleTopology\"\xad\x02\n" +
+	"\x13accessible_topology\x18\x02 \x01(\v2\x10.csi.v1.TopologyR\x12accessibleTopology\x120\n" +
+	"\x14published_volume_ids\x18\x03 \x03(\tR\x12publishedVolumeIds\"\xad\x02\n" +
 	"\x12GetCapacityRequest\x12I\n" +
 	"\x13volume_capabilities\x18\x01 \x03(\v2\x18.csi.v1.VolumeCapabilityR\x12volumeCapabilities\x12J\n" +
 	"\n" +
