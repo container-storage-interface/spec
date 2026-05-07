@@ -666,6 +666,17 @@ message PluginCapability {
       // The presence of this capability determines whether the CO will
       // attempt to invoke the OPTIONAL SnapshotMetadata service RPCs.
       SNAPSHOT_METADATA_SERVICE = 4 [(alpha_enum_value) = true];
+
+      // SNAPSHOT_ACCESSIBILITY_CONSTRAINTS indicates that the snapshots
+      // for this plugin MAY NOT be equally usable from all
+      // topologies in the cluster. A snapshot is usable from a location
+      // if volumes created from that snapshot are guaranteed to be
+      // accessible from that location. The CO MUST use the topology
+      // information returned in the CreateSnapshotResponse to ensure
+      // that a desired volume can be provisioned from a given snapshot
+      // when scheduling workloads.
+      SNAPSHOT_ACCESSIBILITY_CONSTRAINTS = 5
+        [(alpha_enum_value) = true];
     }
     Type type = 1;
   }
@@ -2119,7 +2130,7 @@ A Controller Plugin MUST implement this RPC call if it has `CREATE_DELETE_SNAPSH
 This RPC will be called by the CO to create a new snapshot from a source volume on behalf of a user.
 
 This operation MUST be idempotent.
-If a snapshot corresponding to the specified snapshot `name` is successfully cut and ready to use (meaning it MAY be specified as a `volume_content_source` in a `CreateVolumeRequest`), the Plugin MUST reply `0 OK` with the corresponding `CreateSnapshotResponse`.
+If a snapshot corresponding to the specified snapshot `name` is successfully cut and ready to use (meaning it MAY be specified as a `volume_content_source` in a `CreateVolumeRequest`), and is usable from `accessibility_requirements`, the Plugin MUST reply `0 OK` with the corresponding `CreateSnapshotResponse`.
 
 If an error occurs before a snapshot is cut, `CreateSnapshot` SHOULD return a corresponding gRPC error code that reflects the error condition.
 
@@ -2186,6 +2197,22 @@ message CreateSnapshotRequest {
   // - Specify primary or secondary for replication systems that
   //   support snapshotting only on primary.
   map<string, string> parameters = 4;
+
+  // Specifies where (regions, zones, racks, etc.) the provisioned
+  // snapshot MUST be usable from. A snapshot is usable from a location
+  // if volumes created from that snapshot are guaranteed to be
+  // accessible from that location.
+  // An SP SHALL advertise the requirements for topological
+  // accessibility information in documentation. COs SHALL only specify
+  // topological accessibility information supported by the SP.
+  // This field is OPTIONAL.
+  // This field SHALL NOT be specified unless the SP has the
+  // SNAPSHOT_ACCESSIBILITY_CONSTRAINTS plugin capability.
+  // If this field is not specified and the SP has the
+  // SNAPSHOT_ACCESSIBILITY_CONSTRAINTS plugin capability, the SP MAY
+  // choose where the provisioned snapshot is usable from.
+  TopologyRequirement accessibility_requirements = 5
+    [(alpha_field) = true];
 }
 
 message CreateSnapshotResponse {
@@ -2245,6 +2272,22 @@ message Snapshot {
   // If this message is inside a VolumeGroupSnapshot message, the value
   // MUST be the same as the group_snapshot_id in that message.
   string group_snapshot_id = 6;
+
+  // Specifies where (regions, zones, racks, etc.) the provisioned
+  // snapshot is usable from. A snapshot is usable from a location if
+  // volumes created from that snapshot are guaranteed to be accessible
+  // from that location.
+  // A plugin that returns this field MUST also set the
+  // SNAPSHOT_ACCESSIBILITY_CONSTRAINTS plugin capability.
+  // An SP MAY specify multiple topologies to indicate the snapshot is
+  // usable from multiple locations.
+  // COs MAY use this information to ensure that a desired volume can
+  // be provisioned from a given snapshot when scheduling workloads.
+  // This field is OPTIONAL. If it is not specified, the CO MAY assume
+  // the snapshot is equally usable from all topologies in the
+  // cluster and MAY provision volumes referencing the snapshot as a
+  // source without topology constraints.
+  repeated Topology accessible_topology = 7 [(alpha_field) = true];
 }
 ```
 
@@ -2258,7 +2301,7 @@ The CO MUST implement the specified error recovery behavior when it encounters t
 |-----------|-----------|-------------|-------------------|
 | Snapshot already exists but is incompatible | 6 ALREADY_EXISTS | Indicates that a snapshot corresponding to the specified snapshot `name` already exists but is incompatible with the specified `volume_id`. | Caller MUST fix the arguments or use a different `name` before retrying. |
 | Operation pending for snapshot | 10 ABORTED | Indicates that there is already an operation pending for the specified snapshot. In general the Cluster Orchestrator (CO) is responsible for ensuring that there is no more than one call "in-flight" per snapshot at a given time. However, in some circumstances, the CO MAY lose state (for example when the CO crashes and restarts), and MAY issue multiple calls simultaneously for the same snapshot. The Plugin, SHOULD handle this as gracefully as possible, and MAY return this error code to reject secondary calls. | Caller SHOULD ensure that there are no other calls pending for the specified snapshot, and then retry with exponential back off. |
-| Not enough space to create snapshot | 8 RESOURCE_EXHAUSTED | There is not enough space on the storage system to handle the create snapshot request. | Caller SHOULD fail this request. Future calls to CreateSnapshot MAY succeed if space is freed up. |
+| Not enough resources to create snapshot | 8 RESOURCE_EXHAUSTED | There is not enough space on the storage system to handle the create snapshot request, or the `accessibility_requirements` field is valid but a snapshot cannot be created with the specified topology constraints. More human-readable information MAY be provided in the gRPC `status.message` field. | Caller SHOULD fail this request. Future calls to CreateSnapshot MAY succeed once the limiting condition (e.g. space or topology/quota constraints in the requested location) is addressed. |
 
 
 #### `DeleteSnapshot`
