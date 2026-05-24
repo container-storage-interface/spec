@@ -1097,6 +1097,10 @@ message ControllerGetNodeInfoResponse {
   // This field is OPTIONAL. If provided, the CO SHALL combine these
   // volumes with its own records (deduplicating as needed) when
   // calculating available slots.
+  //
+  // The CO MUST NOT use these volume IDs for any purpose other than
+  // slot accounting. In particular, the CO MUST NOT attempt to
+  // unpublish or otherwise operate on volumes it did not publish.
   repeated string published_volume_ids = 3;
 }
 message GetCapacityRequest {

@@ -1740,6 +1740,7 @@ The SP MAY also return the list of volume IDs that are currently published to th
 e.g. boot disks and manually attached disks.
 
 The CO SHALL combine these volumes with its own records (deduplicating as needed) when calculating available slots.
+The CO MUST NOT use these volume IDs for any purpose other than slot accounting. In particular, the CO MUST NOT attempt to unpublish or otherwise operate on volumes it did not publish.
 
 If the SP cannot or chooses not to return this list, the SP SHOULD account for non-CSI volumes when calculating `max_volumes_per_node`.
 
@@ -1791,6 +1792,10 @@ message ControllerGetNodeInfoResponse {
   // This field is OPTIONAL. If provided, the CO SHALL combine these
   // volumes with its own records (deduplicating as needed) when
   // calculating available slots.
+  //
+  // The CO MUST NOT use these volume IDs for any purpose other than
+  // slot accounting. In particular, the CO MUST NOT attempt to
+  // unpublish or otherwise operate on volumes it did not publish.
   repeated string published_volume_ids = 3;
 }
 ```

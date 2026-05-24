@@ -2840,6 +2840,10 @@ type ControllerGetNodeInfoResponse struct {
 	// This field is OPTIONAL. If provided, the CO SHALL combine these
 	// volumes with its own records (deduplicating as needed) when
 	// calculating available slots.
+	//
+	// The CO MUST NOT use these volume IDs for any purpose other than
+	// slot accounting. In particular, the CO MUST NOT attempt to
+	// unpublish or otherwise operate on volumes it did not publish.
 	PublishedVolumeIds []string `protobuf:"bytes,3,rep,name=published_volume_ids,json=publishedVolumeIds,proto3" json:"published_volume_ids,omitempty"`
 	unknownFields      protoimpl.UnknownFields
 	sizeCache          protoimpl.SizeCache
