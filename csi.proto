@@ -172,11 +172,6 @@ service Node {
 
   rpc NodeGetInfo (NodeGetInfoRequest)
     returns (NodeGetInfoResponse) {}
-
-  rpc NodeGetID (NodeGetIDRequest)
-    returns (NodeGetIDResponse) {
-        option (alpha_method) = true;
-    }
 }
 message GetPluginInfoRequest {
   // Intentionally empty.
@@ -1056,8 +1051,7 @@ message ControllerModifyVolumeResponse {
 message ControllerGetNodeInfoRequest {
   // The identifier of the node as understood by the SP.
   // This field is REQUIRED.
-  // This field MUST match the node_id returned by `NodeGetInfo` or
-  // `NodeGetID`.
+  // This field MUST match the node_id returned by `NodeGetInfo`.
   // This field overrides the general CSI size limit.
   // The size of this field SHALL NOT exceed 256 bytes.
   string node_id = 1;
@@ -1739,14 +1733,15 @@ message NodeServiceCapability {
       // or node publish RPC calls.
       VOLUME_MOUNT_GROUP = 6;
 
-      // Indicates the SP supports the NodeGetID RPC.
-      // This enables COs to fetch only the node identifier from
-      // the node side without requiring cloud API credentials.
-      // The topology and capacity information can then be fetched
-      // via ControllerGetNodeInfo.
-      // If the SP supports GET_ID, it MUST also support
-      // GET_NODE_INFO controller capability.
-      GET_ID = 7 [(alpha_enum_value) = true];
+      // Indicates the SP supports the controller_get_node_info field
+      // in NodeGetInfoRequest. When the CO sets that field, the SP MAY
+      // omit accessible_topology and max_volumes_per_node from
+      // NodeGetInfoResponse and return only node_id, which the node
+      // side can obtain without cloud API credentials; the CO then
+      // fetches topology and capacity via ControllerGetNodeInfo.
+      // If the SP supports NODE_INFO_FROM_CONTROLLER, it MUST also
+      // support the GET_NODE_INFO controller capability.
+      NODE_INFO_FROM_CONTROLLER = 7 [(alpha_enum_value) = true];
     }
 
     Type type = 1;
@@ -1758,6 +1753,15 @@ message NodeServiceCapability {
   }
 }
 message NodeGetInfoRequest {
+  // When true, the CO will obtain accessible_topology and
+  // max_volumes_per_node from ControllerGetNodeInfo. The SP MAY omit
+  // those two fields from NodeGetInfoResponse and return only node_id.
+  // The CO MUST NOT consume accessible_topology or max_volumes_per_node
+  // from a response to a request with this field set.
+  // The CO MUST NOT set this field to true unless the SP has the
+  // NODE_INFO_FROM_CONTROLLER node capability.
+  // This field is OPTIONAL.
+  bool controller_get_node_info = 1 [(alpha_field) = true];
 }
 
 message NodeGetInfoResponse {
@@ -1800,26 +1804,6 @@ message NodeGetInfoResponse {
   // Indicates the node exists within the "region" "R1" and the "zone"
   // "Z2".
   Topology accessible_topology = 3;
-}
-message NodeGetIDRequest {
-  // Intentionally empty.
-}
-
-message NodeGetIDResponse {
-  // The identifier of the node as understood by the SP.
-  // This field is REQUIRED.
-  // This field MUST contain enough information to uniquely identify
-  // this specific node vs all other nodes supported by this plugin.
-  // This field SHALL be used by the CO in subsequent calls, including
-  // `ControllerPublishVolume` and `ControllerGetNodeInfo`, to refer to
-  // this node.
-  // The SP is NOT responsible for global uniqueness of node_id across
-  // multiple SPs.
-  // This field overrides the general CSI size limit.
-  // The size of this field SHALL NOT exceed 256 bytes. The general
-  // CSI size limit, 128 byte, is RECOMMENDED for best backwards
-  // compatibility.
-  string node_id = 1;
 }
 message NodeExpandVolumeRequest {
   // The ID of the volume. This field is REQUIRED.

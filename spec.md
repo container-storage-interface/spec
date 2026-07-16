@@ -453,11 +453,6 @@ service Node {
 
   rpc NodeGetInfo (NodeGetInfoRequest)
     returns (NodeGetInfoResponse) {}
-
-  rpc NodeGetID (NodeGetIDRequest)
-    returns (NodeGetIDResponse) {
-        option (alpha_method) = true;
-    }
 }
 ```
 
@@ -1731,7 +1726,7 @@ This is useful when the node side plugin cannot or should not access cloud APIs 
 
 If the SP also supports `PUBLISH_UNPUBLISH_VOLUME` controller capability, the CO MAY call this RPC to dynamically update `max_volumes_per_node` when volume attachment fails with `RESOURCE_EXHAUSTED`.
 
-The CO SHOULD call this RPC after obtaining the node ID via `NodeGetID`.
+The CO SHOULD call this RPC after obtaining the node ID via `NodeGetInfo`.
 
 The SP returns the maximum number of volumes that can be published to the node.
 The SP calculates this limit based on the instance type's attachment limit, accounting for non-volume resources that consume attachment slots (e.g., network interfaces on some instance types).
@@ -1751,8 +1746,7 @@ The CO MAY call this RPC multiple times for the same node.
 message ControllerGetNodeInfoRequest {
   // The identifier of the node as understood by the SP.
   // This field is REQUIRED.
-  // This field MUST match the node_id returned by `NodeGetInfo` or
-  // `NodeGetID`.
+  // This field MUST match the node_id returned by `NodeGetInfo`.
   // This field overrides the general CSI size limit.
   // The size of this field SHALL NOT exceed 256 bytes.
   string node_id = 1;
@@ -2877,14 +2871,15 @@ message NodeServiceCapability {
       // or node publish RPC calls.
       VOLUME_MOUNT_GROUP = 6;
 
-      // Indicates the SP supports the NodeGetID RPC.
-      // This enables COs to fetch only the node identifier from
-      // the node side without requiring cloud API credentials.
-      // The topology and capacity information can then be fetched
-      // via ControllerGetNodeInfo.
-      // If the SP supports GET_ID, it MUST also support
-      // GET_NODE_INFO controller capability.
-      GET_ID = 7 [(alpha_enum_value) = true];
+      // Indicates the SP supports the controller_get_node_info field
+      // in NodeGetInfoRequest. When the CO sets that field, the SP MAY
+      // omit accessible_topology and max_volumes_per_node from
+      // NodeGetInfoResponse and return only node_id, which the node
+      // side can obtain without cloud API credentials; the CO then
+      // fetches topology and capacity via ControllerGetNodeInfo.
+      // If the SP supports NODE_INFO_FROM_CONTROLLER, it MUST also
+      // support the GET_NODE_INFO controller capability.
+      NODE_INFO_FROM_CONTROLLER = 7 [(alpha_enum_value) = true];
     }
 
     Type type = 1;
@@ -2910,8 +2905,21 @@ The CO MAY call this RPC more than once for a given node.
 The SP SHALL NOT expect the CO to call this RPC more than once.
 The result of this call will be used by CO in `ControllerPublishVolume`.
 
+If the SP has the `NODE_INFO_FROM_CONTROLLER` node capability, the CO MAY set the `controller_get_node_info` field in the request.
+When set, the SP MAY omit `accessible_topology` and `max_volumes_per_node` from the response and return only `node_id`, which the node side can obtain without cloud API credentials (e.g., from local instance metadata).
+The CO obtains topology and capacity via `ControllerGetNodeInfo` instead, and MUST NOT consume `accessible_topology` or `max_volumes_per_node` from the response.
+
 ```protobuf
 message NodeGetInfoRequest {
+  // When true, the CO will obtain accessible_topology and
+  // max_volumes_per_node from ControllerGetNodeInfo. The SP MAY omit
+  // those two fields from NodeGetInfoResponse and return only node_id.
+  // The CO MUST NOT consume accessible_topology or max_volumes_per_node
+  // from a response to a request with this field set.
+  // The CO MUST NOT set this field to true unless the SP has the
+  // NODE_INFO_FROM_CONTROLLER node capability.
+  // This field is OPTIONAL.
+  bool controller_get_node_info = 1 [(alpha_field) = true];
 }
 
 message NodeGetInfoResponse {
@@ -2960,50 +2968,6 @@ message NodeGetInfoResponse {
 ##### NodeGetInfo Errors
 
 If the plugin is unable to complete the NodeGetInfo call successfully, it MUST return a non-ok gRPC code in the gRPC status.
-The CO MUST implement the specified error recovery behavior when it encounters the gRPC error code.
-
-#### `NodeGetID`
-
-A Node Plugin MUST implement this RPC call if it has `GET_ID` node capability.
-The Plugin SHALL assume that this RPC will be executed on the node where the volume will be used.
-If the SP supports `GET_ID` node capability, it MUST also support `GET_NODE_INFO` controller capability.
-
-This RPC returns only the node identifier without requiring cloud API access.
-This is useful when the node side plugin should not have cloud API credentials for security reasons.
-The topology and capacity information can then be fetched via `ControllerGetNodeInfo`.
-The CO SHOULD prefer calling `NodeGetID` and `ControllerGetNodeInfo` over `NodeGetInfo`, if supported by the SP.
-The returned `node_id` SHOULD be identical to that returned from `NodeGetInfo`.
-
-The CO SHOULD call this RPC for the node at which it wants to place the workload.
-The CO MAY call this RPC more than once for a given node.
-The result of this call will be used by CO in `ControllerPublishVolume` and `ControllerGetNodeInfo`.
-
-```protobuf
-message NodeGetIDRequest {
-  // Intentionally empty.
-}
-
-message NodeGetIDResponse {
-  // The identifier of the node as understood by the SP.
-  // This field is REQUIRED.
-  // This field MUST contain enough information to uniquely identify
-  // this specific node vs all other nodes supported by this plugin.
-  // This field SHALL be used by the CO in subsequent calls, including
-  // `ControllerPublishVolume` and `ControllerGetNodeInfo`, to refer to
-  // this node.
-  // The SP is NOT responsible for global uniqueness of node_id across
-  // multiple SPs.
-  // This field overrides the general CSI size limit.
-  // The size of this field SHALL NOT exceed 256 bytes. The general
-  // CSI size limit, 128 byte, is RECOMMENDED for best backwards
-  // compatibility.
-  string node_id = 1;
-}
-```
-
-##### NodeGetID Errors
-
-If the plugin is unable to complete the NodeGetID call successfully, it MUST return a non-ok gRPC code in the gRPC status.
 The CO MUST implement the specified error recovery behavior when it encounters the gRPC error code.
 
 #### `NodeExpandVolume`
