@@ -1296,7 +1296,6 @@ const (
 	Node_NodeExpandVolume_FullMethodName     = "/csi.v1.Node/NodeExpandVolume"
 	Node_NodeGetCapabilities_FullMethodName  = "/csi.v1.Node/NodeGetCapabilities"
 	Node_NodeGetInfo_FullMethodName          = "/csi.v1.Node/NodeGetInfo"
-	Node_NodeGetID_FullMethodName            = "/csi.v1.Node/NodeGetID"
 )
 
 // NodeClient is the client API for Node service.
@@ -1313,7 +1312,6 @@ type NodeClient interface {
 	NodeExpandVolume(ctx context.Context, in *NodeExpandVolumeRequest, opts ...grpc.CallOption) (*NodeExpandVolumeResponse, error)
 	NodeGetCapabilities(ctx context.Context, in *NodeGetCapabilitiesRequest, opts ...grpc.CallOption) (*NodeGetCapabilitiesResponse, error)
 	NodeGetInfo(ctx context.Context, in *NodeGetInfoRequest, opts ...grpc.CallOption) (*NodeGetInfoResponse, error)
-	NodeGetID(ctx context.Context, in *NodeGetIDRequest, opts ...grpc.CallOption) (*NodeGetIDResponse, error)
 }
 
 type nodeClient struct {
@@ -1414,15 +1412,6 @@ func (c *nodeClient) NodeGetInfo(ctx context.Context, in *NodeGetInfoRequest, op
 	return out, nil
 }
 
-func (c *nodeClient) NodeGetID(ctx context.Context, in *NodeGetIDRequest, opts ...grpc.CallOption) (*NodeGetIDResponse, error) {
-	out := new(NodeGetIDResponse)
-	err := c.cc.Invoke(ctx, Node_NodeGetID_FullMethodName, in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 // NodeServer is the server API for Node service.
 // All implementations must embed UnimplementedNodeServer
 // for forward compatibility
@@ -1437,7 +1426,6 @@ type NodeServer interface {
 	NodeExpandVolume(context.Context, *NodeExpandVolumeRequest) (*NodeExpandVolumeResponse, error)
 	NodeGetCapabilities(context.Context, *NodeGetCapabilitiesRequest) (*NodeGetCapabilitiesResponse, error)
 	NodeGetInfo(context.Context, *NodeGetInfoRequest) (*NodeGetInfoResponse, error)
-	NodeGetID(context.Context, *NodeGetIDRequest) (*NodeGetIDResponse, error)
 	mustEmbedUnimplementedNodeServer()
 }
 
@@ -1474,9 +1462,6 @@ func (UnimplementedNodeServer) NodeGetCapabilities(context.Context, *NodeGetCapa
 }
 func (UnimplementedNodeServer) NodeGetInfo(context.Context, *NodeGetInfoRequest) (*NodeGetInfoResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method NodeGetInfo not implemented")
-}
-func (UnimplementedNodeServer) NodeGetID(context.Context, *NodeGetIDRequest) (*NodeGetIDResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method NodeGetID not implemented")
 }
 func (UnimplementedNodeServer) mustEmbedUnimplementedNodeServer() {}
 
@@ -1671,24 +1656,6 @@ func _Node_NodeGetInfo_Handler(srv interface{}, ctx context.Context, dec func(in
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Node_NodeGetID_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(NodeGetIDRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(NodeServer).NodeGetID(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: Node_NodeGetID_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(NodeServer).NodeGetID(ctx, req.(*NodeGetIDRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 // Node_ServiceDesc is the grpc.ServiceDesc for Node service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -1735,10 +1702,6 @@ var Node_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "NodeGetInfo",
 			Handler:    _Node_NodeGetInfo_Handler,
-		},
-		{
-			MethodName: "NodeGetID",
-			Handler:    _Node_NodeGetID_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
