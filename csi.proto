@@ -1057,7 +1057,8 @@ enum VolumeHealthErrorType {
   // being accessible from that node.
   INACCESSIBLE = 2;
 
-  // Data loss is known or strongly suspected on underlying volume.
+  // Permanent data loss is known or strongly suspected on underlying 
+  // volume.
   DATA_LOSS = 3;
 }
 
@@ -1097,7 +1098,7 @@ message VolumeHealth {
   // ones, but MUST NOT remove an older error entry from
   // health_statuses until that condition is no longer present.
   //
-  // COs MAY ignore unknown VolumeHealthErrorType values, that they 
+  // COs MUST ignore unknown VolumeHealthErrorType values, that they 
   // don't know about.
   //
   // For example:
@@ -1325,17 +1326,17 @@ message ControllerServiceCapability {
       // This enables COs to fetch an existing snapshot.
       GET_SNAPSHOT = 15 [(alpha_enum_value) = true];
 
+      // Indicates the SP supports the ControllerGetVolumeHealth RPC.
+      // This enables COs to fetch health information for a single
+      // volume from the Controller Plugin's perspective.
+      GET_VOLUME_HEALTH = 16 [(alpha_enum_value) = true];
+	  
       // Indicates the SP supports the ControllerListVolumeHealth RPC.
       // This enables COs to fetch volume health information from
       // the Controller Plugin's perspective.
       // A SP that supports ControllerListVolumeHealth MUST also
       // support ControllerGetVolumeHealth.
-      LIST_VOLUME_HEALTH = 16 [(alpha_enum_value) = true];
-
-      // Indicates the SP supports the ControllerGetVolumeHealth RPC.
-      // This enables COs to fetch health information for a single
-      // volume from the Controller Plugin's perspective.
-      GET_VOLUME_HEALTH = 17 [(alpha_enum_value) = true];
+      LIST_VOLUME_HEALTH = 17 [(alpha_enum_value) = true];
     }
 
     Type type = 1;
@@ -1759,8 +1760,8 @@ message NodeGetVolumeHealthRequest {
   // This field is REQUIRED.
   string volume_id = 1;
 
-  // The path where the volume is or was expected to be 
-  // published on the node. If not empty, it MUST be an absolute path
+  // The path where the volume was published or CO attempted to 
+  // publish on the node. If not empty, it MUST be an absolute path
   // in the root filesystem of the process serving this request.
   // This field is OPTIONAL.
   // This field overrides the general CSI size limit.
@@ -1769,7 +1770,8 @@ message NodeGetVolumeHealthRequest {
   // length of at least 128 bytes.
   string volume_publish_path = 2;
   
-  // The path where the volume is or was staged, if the plugin has the
+  // The path where the volume was staged or CO attempted to
+  // stage the volume, if the plugin has the
   // STAGE_UNSTAGE_VOLUME capability, otherwise empty.
   // If not empty, it MUST be an absolute path in the root
   // filesystem of the process serving this request.
@@ -1830,14 +1832,14 @@ message NodeGetStorageHealthResponse {
 enum StorageHealthErrorType {
   UNKNOWN_STORAGE_HEALTH_ERROR_TYPE = 0;
 
-  // The storage backend is completely unreachable from this node.
-  // Volumes using this backend are expected to be unavailable.
-  STORAGE_UNREACHABLE = 1;
-
   // The storage backend is operating in a degraded
   // state (e.g. reduced path count, high latency).
   // Volumes using this backend may experience reduced performance.
-  STORAGE_DEGRADED = 2;
+  STORAGE_DEGRADED = 1;
+  
+  // The storage backend is completely unreachable from this node.
+  // Volumes using this backend are expected to be unavailable.
+  STORAGE_UNREACHABLE = 2;
 }
 message NodeGetCapabilitiesRequest {
   // Intentionally empty.
