@@ -1707,8 +1707,10 @@ enum VolumeHealthErrorType {
   // being accessible from that node.
   INACCESSIBLE = 2;
 
-  // Permanent data loss is known or strongly suspected on underlying 
-  // volume.
+  // Permanent data loss is known or strongly suspected on the
+  // underlying volume. The CO MAY use this signal to inform
+  // users to trigger recovery workflows such as restoring from
+  // a snapshot or replica.
   DATA_LOSS = 3;
 }
 
@@ -2088,8 +2090,8 @@ message ControllerServiceCapability {
       // Indicates the SP supports the ControllerListVolumeHealth RPC.
       // This enables COs to fetch volume health information from
       // the Controller Plugin's perspective.
-      // A SP that supports ControllerListVolumeHealth MUST also
-      // support ControllerGetVolumeHealth.
+      // A plugin which supports the LIST_VOLUME_HEALTH capability
+      // MUST also support the GET_VOLUME_HEALTH capability.
       LIST_VOLUME_HEALTH = 17 [(alpha_enum_value) = true];
     }
 
