@@ -1588,6 +1588,7 @@ message ListVolumesResponse {
     // reported by the SP. The CO MUST be resilient to that.
     repeated string published_node_ids = 1;
 
+    // Field 2 was VolumeCondition, an alpha API that has been removed.
     reserved 2;
   }
 
@@ -1863,6 +1864,7 @@ message ControllerGetVolumeResponse {
     // reported by the SP. The CO MUST be resilient to that.
     repeated string published_node_ids = 1;
 
+    // Field 2 was VolumeCondition, an alpha API that has been removed.
     reserved 2;
   }
 
@@ -2057,6 +2059,8 @@ message ControllerServiceCapability {
       // The SP MUST also support PUBLISH_UNPUBLISH_VOLUME.
       LIST_VOLUMES_PUBLISHED_NODES = 10;
 
+      // Value 11 was VOLUME_CONDITION, an alpha API that has been
+      // removed.
       reserved 11;
 
       // Indicates the SP supports the ControllerGetVolume RPC.
@@ -2880,6 +2884,7 @@ message NodeGetVolumeStatsResponse {
   // This field is OPTIONAL.
   repeated VolumeUsage usage = 1;
 
+  // Field 2 was VolumeCondition, an alpha API that has been removed.
   reserved 2;
 }
 
@@ -3086,6 +3091,8 @@ message NodeServiceCapability {
       // See VolumeExpansion for details.
       EXPAND_VOLUME = 3;
 
+      // Value 4 was VOLUME_CONDITION, an alpha API that has been
+      // removed.
       reserved 4;
 
       // Indicates the SP supports the SINGLE_NODE_SINGLE_WRITER and/or
