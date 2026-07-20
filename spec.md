@@ -360,6 +360,16 @@ service Controller {
   rpc ListVolumes (ListVolumesRequest)
     returns (ListVolumesResponse) {}
 
+  rpc ControllerListVolumeHealth (ControllerListVolumeHealthRequest)
+    returns (ControllerListVolumeHealthResponse) {
+        option (alpha_method) = true;
+    }
+
+  rpc ControllerGetVolumeHealth (ControllerGetVolumeHealthRequest)
+    returns (ControllerGetVolumeHealthResponse) {
+    	option (alpha_method) = true;
+    }
+
   rpc GetCapacity (GetCapacityRequest)
     returns (GetCapacityResponse) {}
 
@@ -438,6 +448,15 @@ service Node {
   rpc NodeGetVolumeStats (NodeGetVolumeStatsRequest)
     returns (NodeGetVolumeStatsResponse) {}
 
+  rpc NodeGetVolumeHealth (NodeGetVolumeHealthRequest)
+    returns (NodeGetVolumeHealthResponse) {
+        option (alpha_method) = true;
+    }
+
+  rpc NodeGetStorageHealth (NodeGetStorageHealthRequest)
+    returns (NodeGetStorageHealthResponse) {
+        option (alpha_method) = true;
+    }
 
   rpc NodeExpandVolume(NodeExpandVolumeRequest)
     returns (NodeExpandVolumeResponse) {}
@@ -1569,11 +1588,8 @@ message ListVolumesResponse {
     // reported by the SP. The CO MUST be resilient to that.
     repeated string published_node_ids = 1;
 
-    // Information about the current condition of the volume.
-    // This field is OPTIONAL.
-    // This field MUST be specified if the
-    // VOLUME_CONDITION controller capability is supported.
-    VolumeCondition volume_condition = 2 [(alpha_field) = true];
+    // Field 2 was VolumeCondition, an alpha API that has been removed.
+    reserved 2;
   }
 
   message Entry {
@@ -1608,6 +1624,213 @@ The CO MUST implement the specified error recovery behavior when it encounters t
 |-----------|-----------|-------------|-------------------|
 | Invalid `starting_token` | 10 ABORTED | Indicates that `starting_token` is not valid. | Caller SHOULD start the `ListVolumes` operation again with an empty `starting_token`. |
 
+#### `ControllerListVolumeHealth`
+
+**ALPHA FEATURE**
+
+A Controller Plugin MUST implement this RPC call if it has
+`LIST_VOLUME_HEALTH` controller capability.
+
+A Controller Plugin that has the `LIST_VOLUME_HEALTH` controller capability
+MUST also have the `GET_VOLUME_HEALTH` controller capability. This enables
+the CO to use `ControllerGetVolumeHealth` to resolve inconsistent
+`ControllerListVolumeHealth` paging results, including cases where a volume
+is missed while listing volume health.
+
+The Plugin SHALL return the health information about all the volumes 
+that it knows about.
+
+The Plugin SHOULD omit volumes with no known adverse health condition when
+listing all volume health. 
+
+If volumes are created, deleted, or change health while the CO is
+concurrently paging through `ControllerListVolumeHealth` results then it
+is possible that the CO MAY either witness duplicate volumes in the
+list, not witness existing volumes, or both. The CO SHALL NOT expect a
+consistent "view" of all volume health when paging through the volume
+health list via multiple calls to `ControllerListVolumeHealth`.
+
+```protobuf
+message ControllerListVolumeHealthRequest {
+  option (alpha_message) = true;
+
+  // If specified (non-zero value), the Plugin MUST NOT return more
+  // entries than this number in the response. If the actual number of
+  // entries is more than this number, the Plugin MUST set `next_token`
+  // in the response which can be used to get the next page of entries
+  // in the subsequent `ControllerListVolumeHealth` call. This field is
+  // OPTIONAL. If not specified (zero value), it means there is no
+  // restriction on the number of entries that can be returned.
+  // The value of this field MUST NOT be negative.
+  int32 max_entries = 1;
+
+  // A token to specify where to start paginating. Set this field to
+  // `next_token` returned by a previous `ControllerListVolumeHealth`
+  // call to get the next page of entries. This field is OPTIONAL.
+  // An empty string is equal to an unspecified field value.
+  string starting_token = 2;
+
+  // Secrets required by plugin to complete the request.
+  // This field is OPTIONAL. Refer to the `Secrets Requirements`
+  // section on how to use this field.
+  map<string, string> secrets = 3 [(csi_secret) = true];
+}
+
+message ControllerListVolumeHealthResponse {
+  option (alpha_message) = true;
+
+  // List of abnormal volume health entries.
+  repeated VolumeHealth entries = 1;
+
+  // This token allows you to get the next page of entries for
+  // `ControllerListVolumeHealth` request. If the number of entries is
+  // larger than `max_entries`, use the `next_token` as a value for the
+  // `starting_token` field in the next request. This field is
+  // OPTIONAL.
+  // An empty string is equal to an unspecified field value.
+  string next_token = 2;
+}
+
+enum VolumeHealthErrorType {
+  UNKNOWN_VOLUME_HEALTH_TYPE = 0;
+
+  // The volume is usable but is not operating optimally.
+  DEGRADED = 1;
+  
+  // The volume is not accessible.
+  // When a volume is reported as INACCESSIBLE in 
+  // ControllerListVolumeHealth or ControllerGetVolumeHealth 
+  // RPC calls, the CO MAY interpret the result as 
+  // volume not being accessible from all nodes in the cluster.
+  //
+  // When a volume is reported as INACCESSIBLE in NodeGetVolumeHealth 
+  // RPC call the CO MAY interpret the result as volume not 
+  // being accessible from that node.
+  INACCESSIBLE = 2;
+
+  // Permanent data loss is known or strongly suspected on the
+  // underlying volume. The CO MAY use this signal to inform
+  // users to trigger recovery workflows such as restoring from
+  // a snapshot or replica.
+  DATA_LOSS = 3;
+}
+
+message VolumeHealth {
+  option (alpha_message) = true;
+
+  message VolumeHealthEntry {
+    // One or more health status values associated with the volume.
+    // Adverse health conditions should only be removed from reporting
+    // when the corresponding health problem is no longer happening.
+    // This field is REQUIRED.
+    VolumeHealthErrorType status = 1;
+
+    // A brief CamelCase string that describes the condition and is
+    // suitable for machine parsing and concise CLI display.
+    // The Plugin MUST NOT return multiple VolumeHealthEntry messages
+    // for the same volume with the same (status, reason) combination.
+    // This field is REQUIRED.
+    string reason = 2;
+
+    // A user friendly description of the volume health condition.
+    // This field is OPTIONAL.
+    string message = 3;
+  }
+
+  // The ID of the volume.
+  // This field is REQUIRED.
+  string volume_id = 1;
+
+  // Health statuses associated with the volume. An empty list means no
+  // adverse health condition is known by the Plugin.
+  //
+  // The SP MAY report one or more health issues with the volume at the
+  // same time. A future version of the CSI spec MAY introduce
+  // additional VolumeHealthErrorType values. A Plugin that adopts a
+  // newer spec version MAY report newer error types alongside existing
+  // ones, but MUST NOT remove an older error entry from
+  // health_statuses until that condition is no longer present.
+  //
+  // COs MUST ignore unknown VolumeHealthErrorType values, that they 
+  // don't know about.
+  //
+  // For example:
+  // - CSI spec v1.12.3
+  //   A Plugin reports an adverse health condition as DEGRADED.
+  // - CSI spec v1.12.5
+  //   A new VolumeHealthErrorType value MULTIPATH_LOSS is introduced.
+  //   The Plugin upgrades and now reports [DEGRADED, MULTIPATH_LOSS]
+  //   for this volume. An older CO that does not recognize
+  //   MULTIPATH_LOSS still acts on DEGRADED as before and surfaces
+  //   the unknown value for observability without taking automated
+  //   action on it.
+  //
+  // This field is OPTIONAL.
+  repeated VolumeHealthEntry health_statuses = 2;
+}
+```
+
+##### ControllerListVolumeHealth Errors
+
+If the plugin is unable to complete the ControllerListVolumeHealth call
+successfully, it MUST return a non-ok gRPC code in the gRPC status.
+If the conditions defined below are encountered, the plugin MUST return
+the specified gRPC error code. The CO MUST implement the specified error
+recovery behavior when it encounters the gRPC error code.
+
+| Condition | gRPC Code | Description | Recovery Behavior |
+|-----------|-----------|-------------|-------------------|
+| Invalid `starting_token` | 10 ABORTED | Indicates that `starting_token` is not valid. | Caller SHOULD start the `ControllerListVolumeHealth` operation again with an empty `starting_token`. |
+
+#### `ControllerGetVolumeHealth`
+
+**ALPHA FEATURE**
+
+This optional RPC MAY be called by the CO to fetch health information
+for a single volume from the Controller Plugin's perspective.
+
+A Controller Plugin MUST implement this RPC call if it has
+`GET_VOLUME_HEALTH` or `LIST_VOLUME_HEALTH` controller capability.
+
+The Plugin SHOULD return a `VolumeHealth` entry with empty
+`health_statuses` when the volume is known and no adverse health
+condition exists.
+
+```protobuf
+message ControllerGetVolumeHealthRequest {
+  option (alpha_message) = true;
+
+  // The ID of the volume to fetch health information for.
+  // This field is REQUIRED.
+  string volume_id = 1;
+
+  // Secrets required by plugin to complete the request.
+  // This field is OPTIONAL. Refer to the `Secrets Requirements`
+  // section on how to use this field.
+  map<string, string> secrets = 2 [(csi_secret) = true];
+}
+
+message ControllerGetVolumeHealthResponse {
+  option (alpha_message) = true;
+
+  // The health information for the requested volume.
+  // This field is REQUIRED.
+  VolumeHealth volume_health = 1;
+}
+```
+
+##### ControllerGetVolumeHealth Errors
+
+If the plugin is unable to complete the ControllerGetVolumeHealth call
+successfully, it MUST return a non-ok gRPC code in the gRPC status.
+If the conditions defined below are encountered, the plugin MUST return
+the specified gRPC error code. The CO MUST implement the specified error
+recovery behavior when it encounters the gRPC error code.
+
+| Condition | gRPC Code | Description | Recovery Behavior |
+|-----------|-----------|-------------|-------------------|
+| Volume does not exist | 5 NOT_FOUND | Indicates that a volume corresponding to the specified `volume_id` does not exist. | Caller MUST verify that the `volume_id` is correct and that the volume is accessible and has not been deleted before retrying with exponential back off. |
+
 #### `ControllerGetVolume`
 
 **ALPHA FEATURE**
@@ -1615,8 +1838,6 @@ The CO MUST implement the specified error recovery behavior when it encounters t
 This optional RPC MAY be called by the CO to fetch current information about a volume.
 
 A Controller Plugin MUST implement this `ControllerGetVolume` RPC call if it has `GET_VOLUME` capability.
-
-A Controller Plugin MUST provide a non-empty `volume_condition` field in `ControllerGetVolumeResponse` if it has `VOLUME_CONDITION` capability.
 
 `ControllerGetVolumeResponse` should contain current information of a volume if it exists.
 If the volume does not exist any more, `ControllerGetVolume` should return gRPC error code `NOT_FOUND`.
@@ -1643,11 +1864,8 @@ message ControllerGetVolumeResponse {
     // reported by the SP. The CO MUST be resilient to that.
     repeated string published_node_ids = 1;
 
-    // Information about the current condition of the volume.
-    // This field is OPTIONAL.
-    // This field MUST be specified if the
-    // VOLUME_CONDITION controller capability is supported.
-    VolumeCondition volume_condition = 2;
+    // Field 2 was VolumeCondition, an alpha API that has been removed.
+    reserved 2;
   }
 
   // This field is REQUIRED
@@ -1841,22 +2059,13 @@ message ControllerServiceCapability {
       // The SP MUST also support PUBLISH_UNPUBLISH_VOLUME.
       LIST_VOLUMES_PUBLISHED_NODES = 10;
 
-      // Indicates that the Controller service can report volume
-      // conditions.
-      // An SP MAY implement `VolumeCondition` in only the Controller
-      // Plugin, only the Node Plugin, or both.
-      // If `VolumeCondition` is implemented in both the Controller and
-      // Node Plugins, it SHALL report from different perspectives.
-      // If for some reason Controller and Node Plugins report
-      // misaligned volume conditions, CO SHALL assume the worst case
-      // is the truth.
-      // Note that, for alpha, `VolumeCondition` is intended be
-      // informative for humans only, not for automation.
-      VOLUME_CONDITION = 11 [(alpha_enum_value) = true];
+      // Value 11 was VOLUME_CONDITION, an alpha API that has been
+      // removed.
+      reserved 11;
 
       // Indicates the SP supports the ControllerGetVolume RPC.
       // This enables COs to, for example, fetch per volume
-      // condition after a volume is provisioned.
+      // information after a volume is provisioned.
       GET_VOLUME = 12 [(alpha_enum_value) = true];
 
       // Indicates the SP supports the SINGLE_NODE_SINGLE_WRITER and/or
@@ -1876,6 +2085,18 @@ message ControllerServiceCapability {
       // Indicates the SP supports the GetSnapshot RPC.
       // This enables COs to fetch an existing snapshot.
       GET_SNAPSHOT = 15 [(alpha_enum_value) = true];
+
+      // Indicates the SP supports the ControllerGetVolumeHealth RPC.
+      // This enables COs to fetch health information for a single
+      // volume from the Controller Plugin's perspective.
+      GET_VOLUME_HEALTH = 16 [(alpha_enum_value) = true];
+	  
+      // Indicates the SP supports the ControllerListVolumeHealth RPC.
+      // This enables COs to fetch volume health information from
+      // the Controller Plugin's perspective.
+      // A plugin which supports the LIST_VOLUME_HEALTH capability
+      // MUST also support the GET_VOLUME_HEALTH capability.
+      LIST_VOLUME_HEALTH = 17 [(alpha_enum_value) = true];
     }
 
     Type type = 1;
@@ -2621,7 +2842,7 @@ The CO MUST implement the specified error recovery behavior when it encounters t
 
 #### `NodeGetVolumeStats`
 
-A Node plugin MUST implement this RPC call if it has GET_VOLUME_STATS node capability or VOLUME_CONDITION node capability.
+A Node plugin MUST implement this RPC call if it has GET_VOLUME_STATS node capability.
 `NodeGetVolumeStats` RPC call returns the volume capacity statistics available for the volume.
 
 If the volume is being used in `BlockVolume` mode then `used` and `available` MAY be omitted from `usage` field of `NodeGetVolumeStatsResponse`.
@@ -2662,11 +2883,9 @@ message NodeGetVolumeStatsRequest {
 message NodeGetVolumeStatsResponse {
   // This field is OPTIONAL.
   repeated VolumeUsage usage = 1;
-  // Information about the current condition of the volume.
-  // This field is OPTIONAL.
-  // This field MUST be specified if the VOLUME_CONDITION node
-  // capability is supported.
-  VolumeCondition volume_condition = 2 [(alpha_field) = true];
+
+  // Field 2 was VolumeCondition, an alpha API that has been removed.
+  reserved 2;
 }
 
 message VolumeUsage {
@@ -2691,19 +2910,6 @@ message VolumeUsage {
   Unit unit = 4;
 }
 
-// VolumeCondition represents the current condition of a volume.
-message VolumeCondition {
-  option (alpha_message) = true;
-
-  // Normal volumes are available for use and operating optimally.
-  // An abnormal volume does not meet these criteria.
-  // This field is REQUIRED.
-  bool abnormal = 1;
-
-  // The message describing the condition of the volume.
-  // This field is REQUIRED.
-  string message = 2;
-}
 ```
 
 ##### NodeGetVolumeStats Errors
@@ -2716,6 +2922,145 @@ The CO MUST implement the specified error recovery behavior when it encounters t
 | Condition | gRPC Code | Description | Recovery Behavior |
 |-----------|-----------|-------------|-------------------|
 | Volume does not exist | 5 NOT_FOUND | Indicates that a volume corresponding to the specified `volume_id` does not exist on specified `volume_path`. | Caller MUST verify that the `volume_id` is correct and that the volume is accessible on specified `volume_path` and has not been deleted before retrying with exponential back off. |
+
+#### `NodeGetVolumeHealth`
+
+**ALPHA FEATURE**
+
+This optional RPC MAY be called by the CO to fetch volume health from
+the Node Plugin's perspective.
+
+A Node Plugin MUST implement this RPC call if it has `GET_VOLUME_HEALTH`
+node capability.
+
+Unlike `NodeGetVolumeStats`, this RPC MAY be called for a volume that is
+not currently staged or published on the node if the CO has recently
+attempted to stage or publish the volume on the node. This allows the
+Node Plugin to report health for a volume that could not be staged or
+published because of a health problem.
+
+```protobuf
+message NodeGetVolumeHealthRequest {
+  option (alpha_message) = true;
+
+  // The ID of the volume.
+  // This field is REQUIRED.
+  string volume_id = 1;
+
+  // The path where the volume was published or CO attempted to 
+  // publish on the node. If not empty, it MUST be an absolute path
+  // in the root filesystem of the process serving this request.
+  // This field is OPTIONAL.
+  // This field overrides the general CSI size limit.
+  // SP SHOULD support the maximum path length allowed by the operating
+  // system/filesystem, but, at a minimum, SP MUST accept a max path
+  // length of at least 128 bytes.
+  string volume_publish_path = 2;
+  
+  // The path where the volume was staged or CO attempted to
+  // stage the volume, if the plugin has the
+  // STAGE_UNSTAGE_VOLUME capability, otherwise empty.
+  // If not empty, it MUST be an absolute path in the root
+  // filesystem of the process serving this request.
+  // This field is OPTIONAL.
+  // This field overrides the general CSI size limit.
+  // SP SHOULD support the maximum path length allowed by the operating
+  // system/filesystem, but, at a minimum, SP MUST accept a max path
+  // length of at least 128 bytes.
+  string staging_target_path = 3;
+}
+
+message NodeGetVolumeHealthResponse {
+  option (alpha_message) = true;
+
+  // The health information for the requested volume.
+  // This field is REQUIRED.
+  VolumeHealth volume_health = 1;
+}
+```
+
+##### NodeGetVolumeHealth Errors
+
+If the plugin is unable to complete the `NodeGetVolumeHealth` call
+successfully, it MUST return a non-ok gRPC code in the gRPC status.
+If the conditions defined below are encountered, the plugin MUST return
+the specified gRPC error code. The CO MUST implement the specified error
+recovery behavior when it encounters the gRPC error code.
+
+| Condition | gRPC Code | Description | Recovery Behavior |
+|-----------|-----------|-------------|-------------------|
+| Volume does not exist | 5 NOT_FOUND | Indicates that a volume corresponding to the specified `volume_id` does not exist on the node. | Caller MUST verify that the `volume_id` is correct and that the volume is accessible on the node and has not been deleted before retrying with exponential back off. |
+
+#### `NodeGetStorageHealth`
+
+**ALPHA FEATURE**
+
+This optional RPC MAY be called by the CO to fetch storage system health 
+from the Node Plugin's perspective. The response describes health 
+conditions that can affect one or more volumes on the node, including 
+backend or protocol health that is not specific to a single volume.
+
+A Node Plugin MUST implement this RPC call if it has `GET_STORAGE_HEALTH`
+node capability.
+
+```protobuf
+message NodeGetStorageHealthRequest {
+  option (alpha_message) = true;
+
+  // Secrets required by the plugin to complete the request.
+  // This field is OPTIONAL. Refer to the `Secrets Requirements`
+  // section on how to use this field.
+  map<string, string> secrets = 1 [(csi_secret) = true];
+}
+
+message NodeGetStorageHealthResponse {
+  option (alpha_message) = true;
+
+  message StorageBackendHealth {
+    // Health status for this storage backend.
+    // This field is REQUIRED.
+    StorageHealthErrorType status = 1;
+
+    // A brief CamelCase string that describes the condition and is
+    // suitable for machine parsing and concise CLI display.
+    // The Plugin MUST NOT return multiple StorageBackendHealth messages
+    // with the same (status, reason, volume_capability) combination.
+    // This field is REQUIRED.
+    string reason = 2;
+
+    // A user friendly description of the storage health condition.
+    // This field is OPTIONAL.
+    string message = 3;
+
+    // Volume capability affected by this storage health condition.
+    // This field is OPTIONAL.
+    VolumeCapability volume_capability = 4;
+  }
+
+  // Health information for storage backends or classes available from
+  // this node.
+  // This field is OPTIONAL.
+  repeated StorageBackendHealth backend_health = 1;
+}
+
+enum StorageHealthErrorType {
+  UNKNOWN_STORAGE_HEALTH_ERROR_TYPE = 0;
+
+  // The storage backend is operating in a degraded
+  // state (e.g. reduced path count, high latency).
+  // Volumes using this backend may experience reduced performance.
+  STORAGE_DEGRADED = 1;
+  
+  // The storage backend is completely unreachable from this node.
+  // Volumes using this backend are expected to be unavailable.
+  STORAGE_UNREACHABLE = 2;
+}
+```
+
+##### NodeGetStorageHealth Errors
+
+If the plugin is unable to complete the `NodeGetStorageHealth` call
+successfully, it MUST return a non-ok gRPC code in the gRPC status.
 
 #### `NodeGetCapabilities`
 
@@ -2745,18 +3090,10 @@ message NodeServiceCapability {
       GET_VOLUME_STATS = 2;
       // See VolumeExpansion for details.
       EXPAND_VOLUME = 3;
-      // Indicates that the Node service can report volume conditions.
-      // An SP MAY implement `VolumeCondition` in only the Node
-      // Plugin, only the Controller Plugin, or both.
-      // If `VolumeCondition` is implemented in both the Node and
-      // Controller Plugins, it SHALL report from different
-      // perspectives.
-      // If for some reason Node and Controller Plugins report
-      // misaligned volume conditions, CO SHALL assume the worst case
-      // is the truth.
-      // Note that, for alpha, `VolumeCondition` is intended to be
-      // informative for humans only, not for automation.
-      VOLUME_CONDITION = 4 [(alpha_enum_value) = true];
+
+      // Value 4 was VOLUME_CONDITION, an alpha API that has been
+      // removed.
+      reserved 4;
 
       // Indicates the SP supports the SINGLE_NODE_SINGLE_WRITER and/or
       // SINGLE_NODE_MULTI_WRITER access modes.
@@ -2773,6 +3110,16 @@ message NodeServiceCapability {
       // with provided volume group identifier during node stage
       // or node publish RPC calls.
       VOLUME_MOUNT_GROUP = 6;
+
+      // Indicates the SP supports the NodeGetVolumeHealth RPC.
+      // This enables COs to fetch per-volume health information from
+      // the Node Plugin's perspective.
+      GET_VOLUME_HEALTH = 7 [(alpha_enum_value) = true];
+
+      // Indicates the SP supports the NodeGetStorageHealth RPC.
+      // This enables COs to fetch health of entire storage subsystem
+	  // from node's perspective. 
+      GET_STORAGE_HEALTH = 8 [(alpha_enum_value) = true];
     }
 
     Type type = 1;
