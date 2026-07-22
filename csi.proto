@@ -256,6 +256,17 @@ message PluginCapability {
       // The presence of this capability determines whether the CO will
       // attempt to invoke the OPTIONAL SnapshotMetadata service RPCs.
       SNAPSHOT_METADATA_SERVICE = 4 [(alpha_enum_value) = true];
+
+      // SNAPSHOT_ACCESSIBILITY_CONSTRAINTS indicates that the snapshots
+      // for this plugin MAY NOT be equally usable from all
+      // topologies in the cluster. A snapshot is usable from a location
+      // if volumes created from that snapshot are guaranteed to be
+      // accessible from that location. The CO MUST use the topology
+      // information returned in the CreateSnapshotResponse to ensure
+      // that a desired volume can be provisioned from a given snapshot
+      // when scheduling workloads.
+      SNAPSHOT_ACCESSIBILITY_CONSTRAINTS = 5
+        [(alpha_enum_value) = true];
     }
     Type type = 1;
   }
@@ -1382,6 +1393,22 @@ message CreateSnapshotRequest {
   // - Specify primary or secondary for replication systems that
   //   support snapshotting only on primary.
   map<string, string> parameters = 4;
+
+  // Specifies where (regions, zones, racks, etc.) the provisioned
+  // snapshot MUST be usable from. A snapshot is usable from a location
+  // if volumes created from that snapshot are guaranteed to be
+  // accessible from that location.
+  // An SP SHALL advertise the requirements for topological
+  // accessibility information in documentation. COs SHALL only specify
+  // topological accessibility information supported by the SP.
+  // This field is OPTIONAL.
+  // This field SHALL NOT be specified unless the SP has the
+  // SNAPSHOT_ACCESSIBILITY_CONSTRAINTS plugin capability.
+  // If this field is not specified and the SP has the
+  // SNAPSHOT_ACCESSIBILITY_CONSTRAINTS plugin capability, the SP MAY
+  // choose where the provisioned snapshot is usable from.
+  TopologyRequirement accessibility_requirements = 5
+    [(alpha_field) = true];
 }
 
 message CreateSnapshotResponse {
@@ -1441,6 +1468,22 @@ message Snapshot {
   // If this message is inside a VolumeGroupSnapshot message, the value
   // MUST be the same as the group_snapshot_id in that message.
   string group_snapshot_id = 6;
+
+  // Specifies where (regions, zones, racks, etc.) the provisioned
+  // snapshot is usable from. A snapshot is usable from a location if
+  // volumes created from that snapshot are guaranteed to be accessible
+  // from that location.
+  // A plugin that returns this field MUST also set the
+  // SNAPSHOT_ACCESSIBILITY_CONSTRAINTS plugin capability.
+  // An SP MAY specify multiple topologies to indicate the snapshot is
+  // usable from multiple locations.
+  // COs MAY use this information to ensure that a desired volume can
+  // be provisioned from a given snapshot when scheduling workloads.
+  // This field is OPTIONAL. If it is not specified, the CO MAY assume
+  // the snapshot is equally usable from all topologies in the
+  // cluster and MAY provision volumes referencing the snapshot as a
+  // source without topology constraints.
+  repeated Topology accessible_topology = 7 [(alpha_field) = true];
 }
 message DeleteSnapshotRequest {
   // The ID of the snapshot to be deleted.
