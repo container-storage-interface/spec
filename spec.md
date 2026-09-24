@@ -1425,6 +1425,7 @@ The CO MUST implement the specified error recovery behavior when it encounters t
 Controller Plugin MUST implement this RPC call if it has `PUBLISH_UNPUBLISH_VOLUME` controller capability.
 This RPC is a reverse operation of `ControllerPublishVolume`.
 It MUST be called after all `NodeUnstageVolume` and `NodeUnpublishVolume` on the volume are called and succeed.
+If the CO calls this RPC before all `NodeUnstageVolume` and `NodeUnpublishVolume` calls on the volume have succeeded, it SHOULD set `reason` to indicate why.
 The Plugin SHOULD perform the work that is necessary for making the volume ready to be consumed by a different node.
 The Plugin MUST NOT assume that this RPC will be executed on the node where the volume was previously used.
 
@@ -1437,6 +1438,23 @@ If this operation failed, or the CO does not know if the operation failed or not
 
 ```protobuf
 message ControllerUnpublishVolumeRequest {
+  enum Reason {
+    UNKNOWN = 0;
+
+    // The CO stopped waiting for `NodeUnstageVolume` and
+    // `NodeUnpublishVolume` to succeed, for example because a timeout
+    // expired or the node is unreachable, and has not taken the node
+    // out of service. The node might still be able to access the
+    // volume.
+    NODE_CLEANUP_TIMEOUT = 1;
+
+    // The CO has taken the node out of service after determining that
+    // the node is shut down or otherwise unable to access the volume.
+    // The CO MUST NOT use this value solely because the node is
+    // unreachable or a timeout has expired.
+    NODE_OUT_OF_SERVICE = 2;
+  }
+
   // The ID of the volume. This field is REQUIRED.
   string volume_id = 1;
 
@@ -1453,6 +1471,14 @@ message ControllerUnpublishVolumeRequest {
   // This field is OPTIONAL. Refer to the `Secrets Requirements`
   // section on how to use this field.
   map<string, string> secrets = 3 [(csi_secret) = true];
+
+  // Indicates why the CO is calling `ControllerUnpublishVolume`
+  // before all `NodeUnstageVolume` and `NodeUnpublishVolume` calls
+  // on the volume have succeeded. The SP MAY use this information
+  // when deciding how to unpublish the volume.
+  // This field is OPTIONAL. The CO MUST NOT set this field if
+  // `node_id` is unset.
+  Reason reason = 4 [(alpha_field) = true];
 }
 
 message ControllerUnpublishVolumeResponse {
