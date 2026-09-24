@@ -461,6 +461,64 @@ func (VolumeCapability_AccessMode_Mode) EnumDescriptor() ([]byte, []int) {
 	return file_csi_proto_rawDescGZIP(), []int{10, 2, 0}
 }
 
+type ControllerUnpublishVolumeRequest_Reason int32
+
+const (
+	ControllerUnpublishVolumeRequest_UNKNOWN ControllerUnpublishVolumeRequest_Reason = 0
+	// The CO stopped waiting for `NodeUnstageVolume` and
+	// `NodeUnpublishVolume` to succeed, for example because a timeout
+	// expired or the node is unreachable, and has not taken the node
+	// out of service. The node might still be able to access the
+	// volume.
+	ControllerUnpublishVolumeRequest_NODE_CLEANUP_TIMEOUT ControllerUnpublishVolumeRequest_Reason = 1
+	// The CO has taken the node out of service after determining that
+	// the node is shut down or otherwise unable to access the volume.
+	// The CO MUST NOT use this value solely because the node is
+	// unreachable or a timeout has expired.
+	ControllerUnpublishVolumeRequest_NODE_OUT_OF_SERVICE ControllerUnpublishVolumeRequest_Reason = 2
+)
+
+// Enum value maps for ControllerUnpublishVolumeRequest_Reason.
+var (
+	ControllerUnpublishVolumeRequest_Reason_name = map[int32]string{
+		0: "UNKNOWN",
+		1: "NODE_CLEANUP_TIMEOUT",
+		2: "NODE_OUT_OF_SERVICE",
+	}
+	ControllerUnpublishVolumeRequest_Reason_value = map[string]int32{
+		"UNKNOWN":              0,
+		"NODE_CLEANUP_TIMEOUT": 1,
+		"NODE_OUT_OF_SERVICE":  2,
+	}
+)
+
+func (x ControllerUnpublishVolumeRequest_Reason) Enum() *ControllerUnpublishVolumeRequest_Reason {
+	p := new(ControllerUnpublishVolumeRequest_Reason)
+	*p = x
+	return p
+}
+
+func (x ControllerUnpublishVolumeRequest_Reason) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (ControllerUnpublishVolumeRequest_Reason) Descriptor() protoreflect.EnumDescriptor {
+	return file_csi_proto_enumTypes[6].Descriptor()
+}
+
+func (ControllerUnpublishVolumeRequest_Reason) Type() protoreflect.EnumType {
+	return &file_csi_proto_enumTypes[6]
+}
+
+func (x ControllerUnpublishVolumeRequest_Reason) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use ControllerUnpublishVolumeRequest_Reason.Descriptor instead.
+func (ControllerUnpublishVolumeRequest_Reason) EnumDescriptor() ([]byte, []int) {
+	return file_csi_proto_rawDescGZIP(), []int{19, 0}
+}
+
 type ControllerServiceCapability_RPC_Type int32
 
 const (
@@ -574,11 +632,11 @@ func (x ControllerServiceCapability_RPC_Type) String() string {
 }
 
 func (ControllerServiceCapability_RPC_Type) Descriptor() protoreflect.EnumDescriptor {
-	return file_csi_proto_enumTypes[6].Descriptor()
+	return file_csi_proto_enumTypes[7].Descriptor()
 }
 
 func (ControllerServiceCapability_RPC_Type) Type() protoreflect.EnumType {
-	return &file_csi_proto_enumTypes[6]
+	return &file_csi_proto_enumTypes[7]
 }
 
 func (x ControllerServiceCapability_RPC_Type) Number() protoreflect.EnumNumber {
@@ -623,11 +681,11 @@ func (x VolumeUsage_Unit) String() string {
 }
 
 func (VolumeUsage_Unit) Descriptor() protoreflect.EnumDescriptor {
-	return file_csi_proto_enumTypes[7].Descriptor()
+	return file_csi_proto_enumTypes[8].Descriptor()
 }
 
 func (VolumeUsage_Unit) Type() protoreflect.EnumType {
-	return &file_csi_proto_enumTypes[7]
+	return &file_csi_proto_enumTypes[8]
 }
 
 func (x VolumeUsage_Unit) Number() protoreflect.EnumNumber {
@@ -709,11 +767,11 @@ func (x NodeServiceCapability_RPC_Type) String() string {
 }
 
 func (NodeServiceCapability_RPC_Type) Descriptor() protoreflect.EnumDescriptor {
-	return file_csi_proto_enumTypes[8].Descriptor()
+	return file_csi_proto_enumTypes[9].Descriptor()
 }
 
 func (NodeServiceCapability_RPC_Type) Type() protoreflect.EnumType {
-	return &file_csi_proto_enumTypes[8]
+	return &file_csi_proto_enumTypes[9]
 }
 
 func (x NodeServiceCapability_RPC_Type) Number() protoreflect.EnumNumber {
@@ -758,11 +816,11 @@ func (x GroupControllerServiceCapability_RPC_Type) String() string {
 }
 
 func (GroupControllerServiceCapability_RPC_Type) Descriptor() protoreflect.EnumDescriptor {
-	return file_csi_proto_enumTypes[9].Descriptor()
+	return file_csi_proto_enumTypes[10].Descriptor()
 }
 
 func (GroupControllerServiceCapability_RPC_Type) Type() protoreflect.EnumType {
-	return &file_csi_proto_enumTypes[9]
+	return &file_csi_proto_enumTypes[10]
 }
 
 func (x GroupControllerServiceCapability_RPC_Type) Number() protoreflect.EnumNumber {
@@ -2282,7 +2340,14 @@ type ControllerUnpublishVolumeRequest struct {
 	// ControllerPublishVolume call for the specified volume.
 	// This field is OPTIONAL. Refer to the `Secrets Requirements`
 	// section on how to use this field.
-	Secrets       map[string]string `protobuf:"bytes,3,rep,name=secrets,proto3" json:"secrets,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	Secrets map[string]string `protobuf:"bytes,3,rep,name=secrets,proto3" json:"secrets,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	// Indicates why the CO is calling `ControllerUnpublishVolume`
+	// before all `NodeUnstageVolume` and `NodeUnpublishVolume` calls
+	// on the volume have succeeded. The SP MAY use this information
+	// when deciding how to unpublish the volume.
+	// This field is OPTIONAL. The CO MUST NOT set this field if
+	// `node_id` is unset.
+	Reason        ControllerUnpublishVolumeRequest_Reason `protobuf:"varint,4,opt,name=reason,proto3,enum=csi.v1.ControllerUnpublishVolumeRequest_Reason" json:"reason,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -2336,6 +2401,13 @@ func (x *ControllerUnpublishVolumeRequest) GetSecrets() map[string]string {
 		return x.Secrets
 	}
 	return nil
+}
+
+func (x *ControllerUnpublishVolumeRequest) GetReason() ControllerUnpublishVolumeRequest_Reason {
+	if x != nil {
+		return x.Reason
+	}
+	return ControllerUnpublishVolumeRequest_UNKNOWN
 }
 
 type ControllerUnpublishVolumeResponse struct {
@@ -7894,14 +7966,19 @@ const file_csi_proto_rawDesc = "" +
 	"\x0fpublish_context\x18\x01 \x03(\v2;.csi.v1.ControllerPublishVolumeResponse.PublishContextEntryR\x0epublishContext\x1aA\n" +
 	"\x13PublishContextEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
-	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"\xea\x01\n" +
+	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"\x82\x03\n" +
 	" ControllerUnpublishVolumeRequest\x12\x1b\n" +
 	"\tvolume_id\x18\x01 \x01(\tR\bvolumeId\x12\x17\n" +
 	"\anode_id\x18\x02 \x01(\tR\x06nodeId\x12T\n" +
-	"\asecrets\x18\x03 \x03(\v25.csi.v1.ControllerUnpublishVolumeRequest.SecretsEntryB\x03\x98B\x01R\asecrets\x1a:\n" +
+	"\asecrets\x18\x03 \x03(\v25.csi.v1.ControllerUnpublishVolumeRequest.SecretsEntryB\x03\x98B\x01R\asecrets\x12L\n" +
+	"\x06reason\x18\x04 \x01(\x0e2/.csi.v1.ControllerUnpublishVolumeRequest.ReasonB\x03\xa0B\x01R\x06reason\x1a:\n" +
 	"\fSecretsEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
-	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"#\n" +
+	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"H\n" +
+	"\x06Reason\x12\v\n" +
+	"\aUNKNOWN\x10\x00\x12\x18\n" +
+	"\x14NODE_CLEANUP_TIMEOUT\x10\x01\x12\x17\n" +
+	"\x13NODE_OUT_OF_SERVICE\x10\x02\"#\n" +
 	"!ControllerUnpublishVolumeResponse\"\x96\x06\n" +
 	"!ValidateVolumeCapabilitiesRequest\x12\x1b\n" +
 	"\tvolume_id\x18\x01 \x01(\tR\bvolumeId\x12c\n" +
@@ -8390,7 +8467,7 @@ func file_csi_proto_rawDescGZIP() []byte {
 	return file_csi_proto_rawDescData
 }
 
-var file_csi_proto_enumTypes = make([]protoimpl.EnumInfo, 10)
+var file_csi_proto_enumTypes = make([]protoimpl.EnumInfo, 11)
 var file_csi_proto_msgTypes = make([]protoimpl.MessageInfo, 147)
 var file_csi_proto_goTypes = []any{
 	(VolumeHealthErrorType)(0),                           // 0: csi.v1.VolumeHealthErrorType
@@ -8399,370 +8476,372 @@ var file_csi_proto_goTypes = []any{
 	(PluginCapability_Service_Type)(0),                   // 3: csi.v1.PluginCapability.Service.Type
 	(PluginCapability_VolumeExpansion_Type)(0),           // 4: csi.v1.PluginCapability.VolumeExpansion.Type
 	(VolumeCapability_AccessMode_Mode)(0),                // 5: csi.v1.VolumeCapability.AccessMode.Mode
-	(ControllerServiceCapability_RPC_Type)(0),            // 6: csi.v1.ControllerServiceCapability.RPC.Type
-	(VolumeUsage_Unit)(0),                                // 7: csi.v1.VolumeUsage.Unit
-	(NodeServiceCapability_RPC_Type)(0),                  // 8: csi.v1.NodeServiceCapability.RPC.Type
-	(GroupControllerServiceCapability_RPC_Type)(0),       // 9: csi.v1.GroupControllerServiceCapability.RPC.Type
-	(*GetPluginInfoRequest)(nil),                         // 10: csi.v1.GetPluginInfoRequest
-	(*GetPluginInfoResponse)(nil),                        // 11: csi.v1.GetPluginInfoResponse
-	(*GetPluginCapabilitiesRequest)(nil),                 // 12: csi.v1.GetPluginCapabilitiesRequest
-	(*GetPluginCapabilitiesResponse)(nil),                // 13: csi.v1.GetPluginCapabilitiesResponse
-	(*PluginCapability)(nil),                             // 14: csi.v1.PluginCapability
-	(*ProbeRequest)(nil),                                 // 15: csi.v1.ProbeRequest
-	(*ProbeResponse)(nil),                                // 16: csi.v1.ProbeResponse
-	(*CreateVolumeRequest)(nil),                          // 17: csi.v1.CreateVolumeRequest
-	(*VolumeContentSource)(nil),                          // 18: csi.v1.VolumeContentSource
-	(*CreateVolumeResponse)(nil),                         // 19: csi.v1.CreateVolumeResponse
-	(*VolumeCapability)(nil),                             // 20: csi.v1.VolumeCapability
-	(*CapacityRange)(nil),                                // 21: csi.v1.CapacityRange
-	(*Volume)(nil),                                       // 22: csi.v1.Volume
-	(*TopologyRequirement)(nil),                          // 23: csi.v1.TopologyRequirement
-	(*Topology)(nil),                                     // 24: csi.v1.Topology
-	(*DeleteVolumeRequest)(nil),                          // 25: csi.v1.DeleteVolumeRequest
-	(*DeleteVolumeResponse)(nil),                         // 26: csi.v1.DeleteVolumeResponse
-	(*ControllerPublishVolumeRequest)(nil),               // 27: csi.v1.ControllerPublishVolumeRequest
-	(*ControllerPublishVolumeResponse)(nil),              // 28: csi.v1.ControllerPublishVolumeResponse
-	(*ControllerUnpublishVolumeRequest)(nil),             // 29: csi.v1.ControllerUnpublishVolumeRequest
-	(*ControllerUnpublishVolumeResponse)(nil),            // 30: csi.v1.ControllerUnpublishVolumeResponse
-	(*ValidateVolumeCapabilitiesRequest)(nil),            // 31: csi.v1.ValidateVolumeCapabilitiesRequest
-	(*ValidateVolumeCapabilitiesResponse)(nil),           // 32: csi.v1.ValidateVolumeCapabilitiesResponse
-	(*ListVolumesRequest)(nil),                           // 33: csi.v1.ListVolumesRequest
-	(*ListVolumesResponse)(nil),                          // 34: csi.v1.ListVolumesResponse
-	(*ControllerListVolumeHealthRequest)(nil),            // 35: csi.v1.ControllerListVolumeHealthRequest
-	(*ControllerListVolumeHealthResponse)(nil),           // 36: csi.v1.ControllerListVolumeHealthResponse
-	(*VolumeHealth)(nil),                                 // 37: csi.v1.VolumeHealth
-	(*ControllerGetVolumeHealthRequest)(nil),             // 38: csi.v1.ControllerGetVolumeHealthRequest
-	(*ControllerGetVolumeHealthResponse)(nil),            // 39: csi.v1.ControllerGetVolumeHealthResponse
-	(*ControllerGetVolumeRequest)(nil),                   // 40: csi.v1.ControllerGetVolumeRequest
-	(*ControllerGetVolumeResponse)(nil),                  // 41: csi.v1.ControllerGetVolumeResponse
-	(*ControllerModifyVolumeRequest)(nil),                // 42: csi.v1.ControllerModifyVolumeRequest
-	(*ControllerModifyVolumeResponse)(nil),               // 43: csi.v1.ControllerModifyVolumeResponse
-	(*GetCapacityRequest)(nil),                           // 44: csi.v1.GetCapacityRequest
-	(*GetCapacityResponse)(nil),                          // 45: csi.v1.GetCapacityResponse
-	(*ControllerGetCapabilitiesRequest)(nil),             // 46: csi.v1.ControllerGetCapabilitiesRequest
-	(*ControllerGetCapabilitiesResponse)(nil),            // 47: csi.v1.ControllerGetCapabilitiesResponse
-	(*ControllerServiceCapability)(nil),                  // 48: csi.v1.ControllerServiceCapability
-	(*CreateSnapshotRequest)(nil),                        // 49: csi.v1.CreateSnapshotRequest
-	(*CreateSnapshotResponse)(nil),                       // 50: csi.v1.CreateSnapshotResponse
-	(*Snapshot)(nil),                                     // 51: csi.v1.Snapshot
-	(*DeleteSnapshotRequest)(nil),                        // 52: csi.v1.DeleteSnapshotRequest
-	(*DeleteSnapshotResponse)(nil),                       // 53: csi.v1.DeleteSnapshotResponse
-	(*ListSnapshotsRequest)(nil),                         // 54: csi.v1.ListSnapshotsRequest
-	(*ListSnapshotsResponse)(nil),                        // 55: csi.v1.ListSnapshotsResponse
-	(*GetSnapshotRequest)(nil),                           // 56: csi.v1.GetSnapshotRequest
-	(*GetSnapshotResponse)(nil),                          // 57: csi.v1.GetSnapshotResponse
-	(*ControllerExpandVolumeRequest)(nil),                // 58: csi.v1.ControllerExpandVolumeRequest
-	(*ControllerExpandVolumeResponse)(nil),               // 59: csi.v1.ControllerExpandVolumeResponse
-	(*NodeStageVolumeRequest)(nil),                       // 60: csi.v1.NodeStageVolumeRequest
-	(*NodeStageVolumeResponse)(nil),                      // 61: csi.v1.NodeStageVolumeResponse
-	(*NodeUnstageVolumeRequest)(nil),                     // 62: csi.v1.NodeUnstageVolumeRequest
-	(*NodeUnstageVolumeResponse)(nil),                    // 63: csi.v1.NodeUnstageVolumeResponse
-	(*NodePublishVolumeRequest)(nil),                     // 64: csi.v1.NodePublishVolumeRequest
-	(*NodePublishVolumeResponse)(nil),                    // 65: csi.v1.NodePublishVolumeResponse
-	(*NodeUnpublishVolumeRequest)(nil),                   // 66: csi.v1.NodeUnpublishVolumeRequest
-	(*NodeUnpublishVolumeResponse)(nil),                  // 67: csi.v1.NodeUnpublishVolumeResponse
-	(*NodeGetVolumeStatsRequest)(nil),                    // 68: csi.v1.NodeGetVolumeStatsRequest
-	(*NodeGetVolumeStatsResponse)(nil),                   // 69: csi.v1.NodeGetVolumeStatsResponse
-	(*VolumeUsage)(nil),                                  // 70: csi.v1.VolumeUsage
-	(*NodeGetVolumeHealthRequest)(nil),                   // 71: csi.v1.NodeGetVolumeHealthRequest
-	(*NodeGetVolumeHealthResponse)(nil),                  // 72: csi.v1.NodeGetVolumeHealthResponse
-	(*NodeGetStorageHealthRequest)(nil),                  // 73: csi.v1.NodeGetStorageHealthRequest
-	(*NodeGetStorageHealthResponse)(nil),                 // 74: csi.v1.NodeGetStorageHealthResponse
-	(*NodeGetCapabilitiesRequest)(nil),                   // 75: csi.v1.NodeGetCapabilitiesRequest
-	(*NodeGetCapabilitiesResponse)(nil),                  // 76: csi.v1.NodeGetCapabilitiesResponse
-	(*NodeServiceCapability)(nil),                        // 77: csi.v1.NodeServiceCapability
-	(*NodeGetInfoRequest)(nil),                           // 78: csi.v1.NodeGetInfoRequest
-	(*NodeGetInfoResponse)(nil),                          // 79: csi.v1.NodeGetInfoResponse
-	(*NodeExpandVolumeRequest)(nil),                      // 80: csi.v1.NodeExpandVolumeRequest
-	(*NodeExpandVolumeResponse)(nil),                     // 81: csi.v1.NodeExpandVolumeResponse
-	(*GroupControllerGetCapabilitiesRequest)(nil),        // 82: csi.v1.GroupControllerGetCapabilitiesRequest
-	(*GroupControllerGetCapabilitiesResponse)(nil),       // 83: csi.v1.GroupControllerGetCapabilitiesResponse
-	(*GroupControllerServiceCapability)(nil),             // 84: csi.v1.GroupControllerServiceCapability
-	(*CreateVolumeGroupSnapshotRequest)(nil),             // 85: csi.v1.CreateVolumeGroupSnapshotRequest
-	(*CreateVolumeGroupSnapshotResponse)(nil),            // 86: csi.v1.CreateVolumeGroupSnapshotResponse
-	(*VolumeGroupSnapshot)(nil),                          // 87: csi.v1.VolumeGroupSnapshot
-	(*DeleteVolumeGroupSnapshotRequest)(nil),             // 88: csi.v1.DeleteVolumeGroupSnapshotRequest
-	(*DeleteVolumeGroupSnapshotResponse)(nil),            // 89: csi.v1.DeleteVolumeGroupSnapshotResponse
-	(*GetVolumeGroupSnapshotRequest)(nil),                // 90: csi.v1.GetVolumeGroupSnapshotRequest
-	(*GetVolumeGroupSnapshotResponse)(nil),               // 91: csi.v1.GetVolumeGroupSnapshotResponse
-	(*BlockMetadata)(nil),                                // 92: csi.v1.BlockMetadata
-	(*GetMetadataAllocatedRequest)(nil),                  // 93: csi.v1.GetMetadataAllocatedRequest
-	(*GetMetadataAllocatedResponse)(nil),                 // 94: csi.v1.GetMetadataAllocatedResponse
-	(*GetMetadataDeltaRequest)(nil),                      // 95: csi.v1.GetMetadataDeltaRequest
-	(*GetMetadataDeltaResponse)(nil),                     // 96: csi.v1.GetMetadataDeltaResponse
-	nil,                                                  // 97: csi.v1.GetPluginInfoResponse.ManifestEntry
-	(*PluginCapability_Service)(nil),                     // 98: csi.v1.PluginCapability.Service
-	(*PluginCapability_VolumeExpansion)(nil),             // 99: csi.v1.PluginCapability.VolumeExpansion
-	nil,                                                  // 100: csi.v1.CreateVolumeRequest.ParametersEntry
-	nil,                                                  // 101: csi.v1.CreateVolumeRequest.SecretsEntry
-	nil,                                                  // 102: csi.v1.CreateVolumeRequest.MutableParametersEntry
-	(*VolumeContentSource_SnapshotSource)(nil),           // 103: csi.v1.VolumeContentSource.SnapshotSource
-	(*VolumeContentSource_VolumeSource)(nil),             // 104: csi.v1.VolumeContentSource.VolumeSource
-	(*VolumeCapability_BlockVolume)(nil),                 // 105: csi.v1.VolumeCapability.BlockVolume
-	(*VolumeCapability_MountVolume)(nil),                 // 106: csi.v1.VolumeCapability.MountVolume
-	(*VolumeCapability_AccessMode)(nil),                  // 107: csi.v1.VolumeCapability.AccessMode
-	nil,                                                  // 108: csi.v1.Volume.VolumeContextEntry
-	nil,                                                  // 109: csi.v1.Topology.SegmentsEntry
-	nil,                                                  // 110: csi.v1.DeleteVolumeRequest.SecretsEntry
-	nil,                                                  // 111: csi.v1.ControllerPublishVolumeRequest.SecretsEntry
-	nil,                                                  // 112: csi.v1.ControllerPublishVolumeRequest.VolumeContextEntry
-	nil,                                                  // 113: csi.v1.ControllerPublishVolumeResponse.PublishContextEntry
-	nil,                                                  // 114: csi.v1.ControllerUnpublishVolumeRequest.SecretsEntry
-	nil,                                                  // 115: csi.v1.ValidateVolumeCapabilitiesRequest.VolumeContextEntry
-	nil,                                                  // 116: csi.v1.ValidateVolumeCapabilitiesRequest.ParametersEntry
-	nil,                                                  // 117: csi.v1.ValidateVolumeCapabilitiesRequest.SecretsEntry
-	nil,                                                  // 118: csi.v1.ValidateVolumeCapabilitiesRequest.MutableParametersEntry
-	(*ValidateVolumeCapabilitiesResponse_Confirmed)(nil), // 119: csi.v1.ValidateVolumeCapabilitiesResponse.Confirmed
-	nil,                                      // 120: csi.v1.ValidateVolumeCapabilitiesResponse.Confirmed.VolumeContextEntry
-	nil,                                      // 121: csi.v1.ValidateVolumeCapabilitiesResponse.Confirmed.ParametersEntry
-	nil,                                      // 122: csi.v1.ValidateVolumeCapabilitiesResponse.Confirmed.MutableParametersEntry
-	(*ListVolumesResponse_VolumeStatus)(nil), // 123: csi.v1.ListVolumesResponse.VolumeStatus
-	(*ListVolumesResponse_Entry)(nil),        // 124: csi.v1.ListVolumesResponse.Entry
-	nil,                                      // 125: csi.v1.ControllerListVolumeHealthRequest.SecretsEntry
-	(*VolumeHealth_VolumeHealthEntry)(nil),   // 126: csi.v1.VolumeHealth.VolumeHealthEntry
-	nil,                                      // 127: csi.v1.ControllerGetVolumeHealthRequest.SecretsEntry
-	(*ControllerGetVolumeResponse_VolumeStatus)(nil), // 128: csi.v1.ControllerGetVolumeResponse.VolumeStatus
-	nil,                                     // 129: csi.v1.ControllerModifyVolumeRequest.SecretsEntry
-	nil,                                     // 130: csi.v1.ControllerModifyVolumeRequest.MutableParametersEntry
-	nil,                                     // 131: csi.v1.GetCapacityRequest.ParametersEntry
-	(*ControllerServiceCapability_RPC)(nil), // 132: csi.v1.ControllerServiceCapability.RPC
-	nil,                                     // 133: csi.v1.CreateSnapshotRequest.SecretsEntry
-	nil,                                     // 134: csi.v1.CreateSnapshotRequest.ParametersEntry
-	nil,                                     // 135: csi.v1.DeleteSnapshotRequest.SecretsEntry
-	nil,                                     // 136: csi.v1.ListSnapshotsRequest.SecretsEntry
-	(*ListSnapshotsResponse_Entry)(nil),     // 137: csi.v1.ListSnapshotsResponse.Entry
-	nil,                                     // 138: csi.v1.GetSnapshotRequest.SecretsEntry
-	nil,                                     // 139: csi.v1.ControllerExpandVolumeRequest.SecretsEntry
-	nil,                                     // 140: csi.v1.NodeStageVolumeRequest.PublishContextEntry
-	nil,                                     // 141: csi.v1.NodeStageVolumeRequest.SecretsEntry
-	nil,                                     // 142: csi.v1.NodeStageVolumeRequest.VolumeContextEntry
-	nil,                                     // 143: csi.v1.NodePublishVolumeRequest.PublishContextEntry
-	nil,                                     // 144: csi.v1.NodePublishVolumeRequest.SecretsEntry
-	nil,                                     // 145: csi.v1.NodePublishVolumeRequest.VolumeContextEntry
-	nil,                                     // 146: csi.v1.NodeGetStorageHealthRequest.SecretsEntry
-	(*NodeGetStorageHealthResponse_StorageBackendHealth)(nil), // 147: csi.v1.NodeGetStorageHealthResponse.StorageBackendHealth
-	(*NodeServiceCapability_RPC)(nil),                         // 148: csi.v1.NodeServiceCapability.RPC
-	nil,                                                       // 149: csi.v1.NodeExpandVolumeRequest.SecretsEntry
-	(*GroupControllerServiceCapability_RPC)(nil),              // 150: csi.v1.GroupControllerServiceCapability.RPC
-	nil,                                   // 151: csi.v1.CreateVolumeGroupSnapshotRequest.SecretsEntry
-	nil,                                   // 152: csi.v1.CreateVolumeGroupSnapshotRequest.ParametersEntry
-	nil,                                   // 153: csi.v1.DeleteVolumeGroupSnapshotRequest.SecretsEntry
-	nil,                                   // 154: csi.v1.GetVolumeGroupSnapshotRequest.SecretsEntry
-	nil,                                   // 155: csi.v1.GetMetadataAllocatedRequest.SecretsEntry
-	nil,                                   // 156: csi.v1.GetMetadataDeltaRequest.SecretsEntry
-	(*wrapperspb.BoolValue)(nil),          // 157: google.protobuf.BoolValue
-	(*wrapperspb.Int64Value)(nil),         // 158: google.protobuf.Int64Value
-	(*timestamppb.Timestamp)(nil),         // 159: google.protobuf.Timestamp
-	(*descriptorpb.EnumOptions)(nil),      // 160: google.protobuf.EnumOptions
-	(*descriptorpb.EnumValueOptions)(nil), // 161: google.protobuf.EnumValueOptions
-	(*descriptorpb.FieldOptions)(nil),     // 162: google.protobuf.FieldOptions
-	(*descriptorpb.MessageOptions)(nil),   // 163: google.protobuf.MessageOptions
-	(*descriptorpb.MethodOptions)(nil),    // 164: google.protobuf.MethodOptions
-	(*descriptorpb.ServiceOptions)(nil),   // 165: google.protobuf.ServiceOptions
+	(ControllerUnpublishVolumeRequest_Reason)(0),         // 6: csi.v1.ControllerUnpublishVolumeRequest.Reason
+	(ControllerServiceCapability_RPC_Type)(0),            // 7: csi.v1.ControllerServiceCapability.RPC.Type
+	(VolumeUsage_Unit)(0),                                // 8: csi.v1.VolumeUsage.Unit
+	(NodeServiceCapability_RPC_Type)(0),                  // 9: csi.v1.NodeServiceCapability.RPC.Type
+	(GroupControllerServiceCapability_RPC_Type)(0),       // 10: csi.v1.GroupControllerServiceCapability.RPC.Type
+	(*GetPluginInfoRequest)(nil),                         // 11: csi.v1.GetPluginInfoRequest
+	(*GetPluginInfoResponse)(nil),                        // 12: csi.v1.GetPluginInfoResponse
+	(*GetPluginCapabilitiesRequest)(nil),                 // 13: csi.v1.GetPluginCapabilitiesRequest
+	(*GetPluginCapabilitiesResponse)(nil),                // 14: csi.v1.GetPluginCapabilitiesResponse
+	(*PluginCapability)(nil),                             // 15: csi.v1.PluginCapability
+	(*ProbeRequest)(nil),                                 // 16: csi.v1.ProbeRequest
+	(*ProbeResponse)(nil),                                // 17: csi.v1.ProbeResponse
+	(*CreateVolumeRequest)(nil),                          // 18: csi.v1.CreateVolumeRequest
+	(*VolumeContentSource)(nil),                          // 19: csi.v1.VolumeContentSource
+	(*CreateVolumeResponse)(nil),                         // 20: csi.v1.CreateVolumeResponse
+	(*VolumeCapability)(nil),                             // 21: csi.v1.VolumeCapability
+	(*CapacityRange)(nil),                                // 22: csi.v1.CapacityRange
+	(*Volume)(nil),                                       // 23: csi.v1.Volume
+	(*TopologyRequirement)(nil),                          // 24: csi.v1.TopologyRequirement
+	(*Topology)(nil),                                     // 25: csi.v1.Topology
+	(*DeleteVolumeRequest)(nil),                          // 26: csi.v1.DeleteVolumeRequest
+	(*DeleteVolumeResponse)(nil),                         // 27: csi.v1.DeleteVolumeResponse
+	(*ControllerPublishVolumeRequest)(nil),               // 28: csi.v1.ControllerPublishVolumeRequest
+	(*ControllerPublishVolumeResponse)(nil),              // 29: csi.v1.ControllerPublishVolumeResponse
+	(*ControllerUnpublishVolumeRequest)(nil),             // 30: csi.v1.ControllerUnpublishVolumeRequest
+	(*ControllerUnpublishVolumeResponse)(nil),            // 31: csi.v1.ControllerUnpublishVolumeResponse
+	(*ValidateVolumeCapabilitiesRequest)(nil),            // 32: csi.v1.ValidateVolumeCapabilitiesRequest
+	(*ValidateVolumeCapabilitiesResponse)(nil),           // 33: csi.v1.ValidateVolumeCapabilitiesResponse
+	(*ListVolumesRequest)(nil),                           // 34: csi.v1.ListVolumesRequest
+	(*ListVolumesResponse)(nil),                          // 35: csi.v1.ListVolumesResponse
+	(*ControllerListVolumeHealthRequest)(nil),            // 36: csi.v1.ControllerListVolumeHealthRequest
+	(*ControllerListVolumeHealthResponse)(nil),           // 37: csi.v1.ControllerListVolumeHealthResponse
+	(*VolumeHealth)(nil),                                 // 38: csi.v1.VolumeHealth
+	(*ControllerGetVolumeHealthRequest)(nil),             // 39: csi.v1.ControllerGetVolumeHealthRequest
+	(*ControllerGetVolumeHealthResponse)(nil),            // 40: csi.v1.ControllerGetVolumeHealthResponse
+	(*ControllerGetVolumeRequest)(nil),                   // 41: csi.v1.ControllerGetVolumeRequest
+	(*ControllerGetVolumeResponse)(nil),                  // 42: csi.v1.ControllerGetVolumeResponse
+	(*ControllerModifyVolumeRequest)(nil),                // 43: csi.v1.ControllerModifyVolumeRequest
+	(*ControllerModifyVolumeResponse)(nil),               // 44: csi.v1.ControllerModifyVolumeResponse
+	(*GetCapacityRequest)(nil),                           // 45: csi.v1.GetCapacityRequest
+	(*GetCapacityResponse)(nil),                          // 46: csi.v1.GetCapacityResponse
+	(*ControllerGetCapabilitiesRequest)(nil),             // 47: csi.v1.ControllerGetCapabilitiesRequest
+	(*ControllerGetCapabilitiesResponse)(nil),            // 48: csi.v1.ControllerGetCapabilitiesResponse
+	(*ControllerServiceCapability)(nil),                  // 49: csi.v1.ControllerServiceCapability
+	(*CreateSnapshotRequest)(nil),                        // 50: csi.v1.CreateSnapshotRequest
+	(*CreateSnapshotResponse)(nil),                       // 51: csi.v1.CreateSnapshotResponse
+	(*Snapshot)(nil),                                     // 52: csi.v1.Snapshot
+	(*DeleteSnapshotRequest)(nil),                        // 53: csi.v1.DeleteSnapshotRequest
+	(*DeleteSnapshotResponse)(nil),                       // 54: csi.v1.DeleteSnapshotResponse
+	(*ListSnapshotsRequest)(nil),                         // 55: csi.v1.ListSnapshotsRequest
+	(*ListSnapshotsResponse)(nil),                        // 56: csi.v1.ListSnapshotsResponse
+	(*GetSnapshotRequest)(nil),                           // 57: csi.v1.GetSnapshotRequest
+	(*GetSnapshotResponse)(nil),                          // 58: csi.v1.GetSnapshotResponse
+	(*ControllerExpandVolumeRequest)(nil),                // 59: csi.v1.ControllerExpandVolumeRequest
+	(*ControllerExpandVolumeResponse)(nil),               // 60: csi.v1.ControllerExpandVolumeResponse
+	(*NodeStageVolumeRequest)(nil),                       // 61: csi.v1.NodeStageVolumeRequest
+	(*NodeStageVolumeResponse)(nil),                      // 62: csi.v1.NodeStageVolumeResponse
+	(*NodeUnstageVolumeRequest)(nil),                     // 63: csi.v1.NodeUnstageVolumeRequest
+	(*NodeUnstageVolumeResponse)(nil),                    // 64: csi.v1.NodeUnstageVolumeResponse
+	(*NodePublishVolumeRequest)(nil),                     // 65: csi.v1.NodePublishVolumeRequest
+	(*NodePublishVolumeResponse)(nil),                    // 66: csi.v1.NodePublishVolumeResponse
+	(*NodeUnpublishVolumeRequest)(nil),                   // 67: csi.v1.NodeUnpublishVolumeRequest
+	(*NodeUnpublishVolumeResponse)(nil),                  // 68: csi.v1.NodeUnpublishVolumeResponse
+	(*NodeGetVolumeStatsRequest)(nil),                    // 69: csi.v1.NodeGetVolumeStatsRequest
+	(*NodeGetVolumeStatsResponse)(nil),                   // 70: csi.v1.NodeGetVolumeStatsResponse
+	(*VolumeUsage)(nil),                                  // 71: csi.v1.VolumeUsage
+	(*NodeGetVolumeHealthRequest)(nil),                   // 72: csi.v1.NodeGetVolumeHealthRequest
+	(*NodeGetVolumeHealthResponse)(nil),                  // 73: csi.v1.NodeGetVolumeHealthResponse
+	(*NodeGetStorageHealthRequest)(nil),                  // 74: csi.v1.NodeGetStorageHealthRequest
+	(*NodeGetStorageHealthResponse)(nil),                 // 75: csi.v1.NodeGetStorageHealthResponse
+	(*NodeGetCapabilitiesRequest)(nil),                   // 76: csi.v1.NodeGetCapabilitiesRequest
+	(*NodeGetCapabilitiesResponse)(nil),                  // 77: csi.v1.NodeGetCapabilitiesResponse
+	(*NodeServiceCapability)(nil),                        // 78: csi.v1.NodeServiceCapability
+	(*NodeGetInfoRequest)(nil),                           // 79: csi.v1.NodeGetInfoRequest
+	(*NodeGetInfoResponse)(nil),                          // 80: csi.v1.NodeGetInfoResponse
+	(*NodeExpandVolumeRequest)(nil),                      // 81: csi.v1.NodeExpandVolumeRequest
+	(*NodeExpandVolumeResponse)(nil),                     // 82: csi.v1.NodeExpandVolumeResponse
+	(*GroupControllerGetCapabilitiesRequest)(nil),        // 83: csi.v1.GroupControllerGetCapabilitiesRequest
+	(*GroupControllerGetCapabilitiesResponse)(nil),       // 84: csi.v1.GroupControllerGetCapabilitiesResponse
+	(*GroupControllerServiceCapability)(nil),             // 85: csi.v1.GroupControllerServiceCapability
+	(*CreateVolumeGroupSnapshotRequest)(nil),             // 86: csi.v1.CreateVolumeGroupSnapshotRequest
+	(*CreateVolumeGroupSnapshotResponse)(nil),            // 87: csi.v1.CreateVolumeGroupSnapshotResponse
+	(*VolumeGroupSnapshot)(nil),                          // 88: csi.v1.VolumeGroupSnapshot
+	(*DeleteVolumeGroupSnapshotRequest)(nil),             // 89: csi.v1.DeleteVolumeGroupSnapshotRequest
+	(*DeleteVolumeGroupSnapshotResponse)(nil),            // 90: csi.v1.DeleteVolumeGroupSnapshotResponse
+	(*GetVolumeGroupSnapshotRequest)(nil),                // 91: csi.v1.GetVolumeGroupSnapshotRequest
+	(*GetVolumeGroupSnapshotResponse)(nil),               // 92: csi.v1.GetVolumeGroupSnapshotResponse
+	(*BlockMetadata)(nil),                                // 93: csi.v1.BlockMetadata
+	(*GetMetadataAllocatedRequest)(nil),                  // 94: csi.v1.GetMetadataAllocatedRequest
+	(*GetMetadataAllocatedResponse)(nil),                 // 95: csi.v1.GetMetadataAllocatedResponse
+	(*GetMetadataDeltaRequest)(nil),                      // 96: csi.v1.GetMetadataDeltaRequest
+	(*GetMetadataDeltaResponse)(nil),                     // 97: csi.v1.GetMetadataDeltaResponse
+	nil,                                                  // 98: csi.v1.GetPluginInfoResponse.ManifestEntry
+	(*PluginCapability_Service)(nil),                     // 99: csi.v1.PluginCapability.Service
+	(*PluginCapability_VolumeExpansion)(nil),             // 100: csi.v1.PluginCapability.VolumeExpansion
+	nil,                                                  // 101: csi.v1.CreateVolumeRequest.ParametersEntry
+	nil,                                                  // 102: csi.v1.CreateVolumeRequest.SecretsEntry
+	nil,                                                  // 103: csi.v1.CreateVolumeRequest.MutableParametersEntry
+	(*VolumeContentSource_SnapshotSource)(nil),           // 104: csi.v1.VolumeContentSource.SnapshotSource
+	(*VolumeContentSource_VolumeSource)(nil),             // 105: csi.v1.VolumeContentSource.VolumeSource
+	(*VolumeCapability_BlockVolume)(nil),                 // 106: csi.v1.VolumeCapability.BlockVolume
+	(*VolumeCapability_MountVolume)(nil),                 // 107: csi.v1.VolumeCapability.MountVolume
+	(*VolumeCapability_AccessMode)(nil),                  // 108: csi.v1.VolumeCapability.AccessMode
+	nil,                                                  // 109: csi.v1.Volume.VolumeContextEntry
+	nil,                                                  // 110: csi.v1.Topology.SegmentsEntry
+	nil,                                                  // 111: csi.v1.DeleteVolumeRequest.SecretsEntry
+	nil,                                                  // 112: csi.v1.ControllerPublishVolumeRequest.SecretsEntry
+	nil,                                                  // 113: csi.v1.ControllerPublishVolumeRequest.VolumeContextEntry
+	nil,                                                  // 114: csi.v1.ControllerPublishVolumeResponse.PublishContextEntry
+	nil,                                                  // 115: csi.v1.ControllerUnpublishVolumeRequest.SecretsEntry
+	nil,                                                  // 116: csi.v1.ValidateVolumeCapabilitiesRequest.VolumeContextEntry
+	nil,                                                  // 117: csi.v1.ValidateVolumeCapabilitiesRequest.ParametersEntry
+	nil,                                                  // 118: csi.v1.ValidateVolumeCapabilitiesRequest.SecretsEntry
+	nil,                                                  // 119: csi.v1.ValidateVolumeCapabilitiesRequest.MutableParametersEntry
+	(*ValidateVolumeCapabilitiesResponse_Confirmed)(nil), // 120: csi.v1.ValidateVolumeCapabilitiesResponse.Confirmed
+	nil,                                      // 121: csi.v1.ValidateVolumeCapabilitiesResponse.Confirmed.VolumeContextEntry
+	nil,                                      // 122: csi.v1.ValidateVolumeCapabilitiesResponse.Confirmed.ParametersEntry
+	nil,                                      // 123: csi.v1.ValidateVolumeCapabilitiesResponse.Confirmed.MutableParametersEntry
+	(*ListVolumesResponse_VolumeStatus)(nil), // 124: csi.v1.ListVolumesResponse.VolumeStatus
+	(*ListVolumesResponse_Entry)(nil),        // 125: csi.v1.ListVolumesResponse.Entry
+	nil,                                      // 126: csi.v1.ControllerListVolumeHealthRequest.SecretsEntry
+	(*VolumeHealth_VolumeHealthEntry)(nil),   // 127: csi.v1.VolumeHealth.VolumeHealthEntry
+	nil,                                      // 128: csi.v1.ControllerGetVolumeHealthRequest.SecretsEntry
+	(*ControllerGetVolumeResponse_VolumeStatus)(nil), // 129: csi.v1.ControllerGetVolumeResponse.VolumeStatus
+	nil,                                     // 130: csi.v1.ControllerModifyVolumeRequest.SecretsEntry
+	nil,                                     // 131: csi.v1.ControllerModifyVolumeRequest.MutableParametersEntry
+	nil,                                     // 132: csi.v1.GetCapacityRequest.ParametersEntry
+	(*ControllerServiceCapability_RPC)(nil), // 133: csi.v1.ControllerServiceCapability.RPC
+	nil,                                     // 134: csi.v1.CreateSnapshotRequest.SecretsEntry
+	nil,                                     // 135: csi.v1.CreateSnapshotRequest.ParametersEntry
+	nil,                                     // 136: csi.v1.DeleteSnapshotRequest.SecretsEntry
+	nil,                                     // 137: csi.v1.ListSnapshotsRequest.SecretsEntry
+	(*ListSnapshotsResponse_Entry)(nil),     // 138: csi.v1.ListSnapshotsResponse.Entry
+	nil,                                     // 139: csi.v1.GetSnapshotRequest.SecretsEntry
+	nil,                                     // 140: csi.v1.ControllerExpandVolumeRequest.SecretsEntry
+	nil,                                     // 141: csi.v1.NodeStageVolumeRequest.PublishContextEntry
+	nil,                                     // 142: csi.v1.NodeStageVolumeRequest.SecretsEntry
+	nil,                                     // 143: csi.v1.NodeStageVolumeRequest.VolumeContextEntry
+	nil,                                     // 144: csi.v1.NodePublishVolumeRequest.PublishContextEntry
+	nil,                                     // 145: csi.v1.NodePublishVolumeRequest.SecretsEntry
+	nil,                                     // 146: csi.v1.NodePublishVolumeRequest.VolumeContextEntry
+	nil,                                     // 147: csi.v1.NodeGetStorageHealthRequest.SecretsEntry
+	(*NodeGetStorageHealthResponse_StorageBackendHealth)(nil), // 148: csi.v1.NodeGetStorageHealthResponse.StorageBackendHealth
+	(*NodeServiceCapability_RPC)(nil),                         // 149: csi.v1.NodeServiceCapability.RPC
+	nil,                                                       // 150: csi.v1.NodeExpandVolumeRequest.SecretsEntry
+	(*GroupControllerServiceCapability_RPC)(nil),              // 151: csi.v1.GroupControllerServiceCapability.RPC
+	nil,                                   // 152: csi.v1.CreateVolumeGroupSnapshotRequest.SecretsEntry
+	nil,                                   // 153: csi.v1.CreateVolumeGroupSnapshotRequest.ParametersEntry
+	nil,                                   // 154: csi.v1.DeleteVolumeGroupSnapshotRequest.SecretsEntry
+	nil,                                   // 155: csi.v1.GetVolumeGroupSnapshotRequest.SecretsEntry
+	nil,                                   // 156: csi.v1.GetMetadataAllocatedRequest.SecretsEntry
+	nil,                                   // 157: csi.v1.GetMetadataDeltaRequest.SecretsEntry
+	(*wrapperspb.BoolValue)(nil),          // 158: google.protobuf.BoolValue
+	(*wrapperspb.Int64Value)(nil),         // 159: google.protobuf.Int64Value
+	(*timestamppb.Timestamp)(nil),         // 160: google.protobuf.Timestamp
+	(*descriptorpb.EnumOptions)(nil),      // 161: google.protobuf.EnumOptions
+	(*descriptorpb.EnumValueOptions)(nil), // 162: google.protobuf.EnumValueOptions
+	(*descriptorpb.FieldOptions)(nil),     // 163: google.protobuf.FieldOptions
+	(*descriptorpb.MessageOptions)(nil),   // 164: google.protobuf.MessageOptions
+	(*descriptorpb.MethodOptions)(nil),    // 165: google.protobuf.MethodOptions
+	(*descriptorpb.ServiceOptions)(nil),   // 166: google.protobuf.ServiceOptions
 }
 var file_csi_proto_depIdxs = []int32{
-	97,  // 0: csi.v1.GetPluginInfoResponse.manifest:type_name -> csi.v1.GetPluginInfoResponse.ManifestEntry
-	14,  // 1: csi.v1.GetPluginCapabilitiesResponse.capabilities:type_name -> csi.v1.PluginCapability
-	98,  // 2: csi.v1.PluginCapability.service:type_name -> csi.v1.PluginCapability.Service
-	99,  // 3: csi.v1.PluginCapability.volume_expansion:type_name -> csi.v1.PluginCapability.VolumeExpansion
-	157, // 4: csi.v1.ProbeResponse.ready:type_name -> google.protobuf.BoolValue
-	21,  // 5: csi.v1.CreateVolumeRequest.capacity_range:type_name -> csi.v1.CapacityRange
-	20,  // 6: csi.v1.CreateVolumeRequest.volume_capabilities:type_name -> csi.v1.VolumeCapability
-	100, // 7: csi.v1.CreateVolumeRequest.parameters:type_name -> csi.v1.CreateVolumeRequest.ParametersEntry
-	101, // 8: csi.v1.CreateVolumeRequest.secrets:type_name -> csi.v1.CreateVolumeRequest.SecretsEntry
-	18,  // 9: csi.v1.CreateVolumeRequest.volume_content_source:type_name -> csi.v1.VolumeContentSource
-	23,  // 10: csi.v1.CreateVolumeRequest.accessibility_requirements:type_name -> csi.v1.TopologyRequirement
-	102, // 11: csi.v1.CreateVolumeRequest.mutable_parameters:type_name -> csi.v1.CreateVolumeRequest.MutableParametersEntry
-	103, // 12: csi.v1.VolumeContentSource.snapshot:type_name -> csi.v1.VolumeContentSource.SnapshotSource
-	104, // 13: csi.v1.VolumeContentSource.volume:type_name -> csi.v1.VolumeContentSource.VolumeSource
-	22,  // 14: csi.v1.CreateVolumeResponse.volume:type_name -> csi.v1.Volume
-	105, // 15: csi.v1.VolumeCapability.block:type_name -> csi.v1.VolumeCapability.BlockVolume
-	106, // 16: csi.v1.VolumeCapability.mount:type_name -> csi.v1.VolumeCapability.MountVolume
-	107, // 17: csi.v1.VolumeCapability.access_mode:type_name -> csi.v1.VolumeCapability.AccessMode
-	108, // 18: csi.v1.Volume.volume_context:type_name -> csi.v1.Volume.VolumeContextEntry
-	18,  // 19: csi.v1.Volume.content_source:type_name -> csi.v1.VolumeContentSource
-	24,  // 20: csi.v1.Volume.accessible_topology:type_name -> csi.v1.Topology
-	24,  // 21: csi.v1.TopologyRequirement.requisite:type_name -> csi.v1.Topology
-	24,  // 22: csi.v1.TopologyRequirement.preferred:type_name -> csi.v1.Topology
-	109, // 23: csi.v1.Topology.segments:type_name -> csi.v1.Topology.SegmentsEntry
-	110, // 24: csi.v1.DeleteVolumeRequest.secrets:type_name -> csi.v1.DeleteVolumeRequest.SecretsEntry
-	20,  // 25: csi.v1.ControllerPublishVolumeRequest.volume_capability:type_name -> csi.v1.VolumeCapability
-	111, // 26: csi.v1.ControllerPublishVolumeRequest.secrets:type_name -> csi.v1.ControllerPublishVolumeRequest.SecretsEntry
-	112, // 27: csi.v1.ControllerPublishVolumeRequest.volume_context:type_name -> csi.v1.ControllerPublishVolumeRequest.VolumeContextEntry
-	113, // 28: csi.v1.ControllerPublishVolumeResponse.publish_context:type_name -> csi.v1.ControllerPublishVolumeResponse.PublishContextEntry
-	114, // 29: csi.v1.ControllerUnpublishVolumeRequest.secrets:type_name -> csi.v1.ControllerUnpublishVolumeRequest.SecretsEntry
-	115, // 30: csi.v1.ValidateVolumeCapabilitiesRequest.volume_context:type_name -> csi.v1.ValidateVolumeCapabilitiesRequest.VolumeContextEntry
-	20,  // 31: csi.v1.ValidateVolumeCapabilitiesRequest.volume_capabilities:type_name -> csi.v1.VolumeCapability
-	116, // 32: csi.v1.ValidateVolumeCapabilitiesRequest.parameters:type_name -> csi.v1.ValidateVolumeCapabilitiesRequest.ParametersEntry
-	117, // 33: csi.v1.ValidateVolumeCapabilitiesRequest.secrets:type_name -> csi.v1.ValidateVolumeCapabilitiesRequest.SecretsEntry
-	118, // 34: csi.v1.ValidateVolumeCapabilitiesRequest.mutable_parameters:type_name -> csi.v1.ValidateVolumeCapabilitiesRequest.MutableParametersEntry
-	119, // 35: csi.v1.ValidateVolumeCapabilitiesResponse.confirmed:type_name -> csi.v1.ValidateVolumeCapabilitiesResponse.Confirmed
-	124, // 36: csi.v1.ListVolumesResponse.entries:type_name -> csi.v1.ListVolumesResponse.Entry
-	125, // 37: csi.v1.ControllerListVolumeHealthRequest.secrets:type_name -> csi.v1.ControllerListVolumeHealthRequest.SecretsEntry
-	37,  // 38: csi.v1.ControllerListVolumeHealthResponse.entries:type_name -> csi.v1.VolumeHealth
-	126, // 39: csi.v1.VolumeHealth.health_statuses:type_name -> csi.v1.VolumeHealth.VolumeHealthEntry
-	127, // 40: csi.v1.ControllerGetVolumeHealthRequest.secrets:type_name -> csi.v1.ControllerGetVolumeHealthRequest.SecretsEntry
-	37,  // 41: csi.v1.ControllerGetVolumeHealthResponse.volume_health:type_name -> csi.v1.VolumeHealth
-	22,  // 42: csi.v1.ControllerGetVolumeResponse.volume:type_name -> csi.v1.Volume
-	128, // 43: csi.v1.ControllerGetVolumeResponse.status:type_name -> csi.v1.ControllerGetVolumeResponse.VolumeStatus
-	129, // 44: csi.v1.ControllerModifyVolumeRequest.secrets:type_name -> csi.v1.ControllerModifyVolumeRequest.SecretsEntry
-	130, // 45: csi.v1.ControllerModifyVolumeRequest.mutable_parameters:type_name -> csi.v1.ControllerModifyVolumeRequest.MutableParametersEntry
-	20,  // 46: csi.v1.GetCapacityRequest.volume_capabilities:type_name -> csi.v1.VolumeCapability
-	131, // 47: csi.v1.GetCapacityRequest.parameters:type_name -> csi.v1.GetCapacityRequest.ParametersEntry
-	24,  // 48: csi.v1.GetCapacityRequest.accessible_topology:type_name -> csi.v1.Topology
-	158, // 49: csi.v1.GetCapacityResponse.maximum_volume_size:type_name -> google.protobuf.Int64Value
-	158, // 50: csi.v1.GetCapacityResponse.minimum_volume_size:type_name -> google.protobuf.Int64Value
-	48,  // 51: csi.v1.ControllerGetCapabilitiesResponse.capabilities:type_name -> csi.v1.ControllerServiceCapability
-	132, // 52: csi.v1.ControllerServiceCapability.rpc:type_name -> csi.v1.ControllerServiceCapability.RPC
-	133, // 53: csi.v1.CreateSnapshotRequest.secrets:type_name -> csi.v1.CreateSnapshotRequest.SecretsEntry
-	134, // 54: csi.v1.CreateSnapshotRequest.parameters:type_name -> csi.v1.CreateSnapshotRequest.ParametersEntry
-	23,  // 55: csi.v1.CreateSnapshotRequest.accessibility_requirements:type_name -> csi.v1.TopologyRequirement
-	51,  // 56: csi.v1.CreateSnapshotResponse.snapshot:type_name -> csi.v1.Snapshot
-	159, // 57: csi.v1.Snapshot.creation_time:type_name -> google.protobuf.Timestamp
-	24,  // 58: csi.v1.Snapshot.accessible_topology:type_name -> csi.v1.Topology
-	135, // 59: csi.v1.DeleteSnapshotRequest.secrets:type_name -> csi.v1.DeleteSnapshotRequest.SecretsEntry
-	136, // 60: csi.v1.ListSnapshotsRequest.secrets:type_name -> csi.v1.ListSnapshotsRequest.SecretsEntry
-	137, // 61: csi.v1.ListSnapshotsResponse.entries:type_name -> csi.v1.ListSnapshotsResponse.Entry
-	138, // 62: csi.v1.GetSnapshotRequest.secrets:type_name -> csi.v1.GetSnapshotRequest.SecretsEntry
-	51,  // 63: csi.v1.GetSnapshotResponse.snapshot:type_name -> csi.v1.Snapshot
-	21,  // 64: csi.v1.ControllerExpandVolumeRequest.capacity_range:type_name -> csi.v1.CapacityRange
-	139, // 65: csi.v1.ControllerExpandVolumeRequest.secrets:type_name -> csi.v1.ControllerExpandVolumeRequest.SecretsEntry
-	20,  // 66: csi.v1.ControllerExpandVolumeRequest.volume_capability:type_name -> csi.v1.VolumeCapability
-	140, // 67: csi.v1.NodeStageVolumeRequest.publish_context:type_name -> csi.v1.NodeStageVolumeRequest.PublishContextEntry
-	20,  // 68: csi.v1.NodeStageVolumeRequest.volume_capability:type_name -> csi.v1.VolumeCapability
-	141, // 69: csi.v1.NodeStageVolumeRequest.secrets:type_name -> csi.v1.NodeStageVolumeRequest.SecretsEntry
-	142, // 70: csi.v1.NodeStageVolumeRequest.volume_context:type_name -> csi.v1.NodeStageVolumeRequest.VolumeContextEntry
-	143, // 71: csi.v1.NodePublishVolumeRequest.publish_context:type_name -> csi.v1.NodePublishVolumeRequest.PublishContextEntry
-	20,  // 72: csi.v1.NodePublishVolumeRequest.volume_capability:type_name -> csi.v1.VolumeCapability
-	144, // 73: csi.v1.NodePublishVolumeRequest.secrets:type_name -> csi.v1.NodePublishVolumeRequest.SecretsEntry
-	145, // 74: csi.v1.NodePublishVolumeRequest.volume_context:type_name -> csi.v1.NodePublishVolumeRequest.VolumeContextEntry
-	70,  // 75: csi.v1.NodeGetVolumeStatsResponse.usage:type_name -> csi.v1.VolumeUsage
-	7,   // 76: csi.v1.VolumeUsage.unit:type_name -> csi.v1.VolumeUsage.Unit
-	37,  // 77: csi.v1.NodeGetVolumeHealthResponse.volume_health:type_name -> csi.v1.VolumeHealth
-	146, // 78: csi.v1.NodeGetStorageHealthRequest.secrets:type_name -> csi.v1.NodeGetStorageHealthRequest.SecretsEntry
-	147, // 79: csi.v1.NodeGetStorageHealthResponse.backend_health:type_name -> csi.v1.NodeGetStorageHealthResponse.StorageBackendHealth
-	77,  // 80: csi.v1.NodeGetCapabilitiesResponse.capabilities:type_name -> csi.v1.NodeServiceCapability
-	148, // 81: csi.v1.NodeServiceCapability.rpc:type_name -> csi.v1.NodeServiceCapability.RPC
-	24,  // 82: csi.v1.NodeGetInfoResponse.accessible_topology:type_name -> csi.v1.Topology
-	21,  // 83: csi.v1.NodeExpandVolumeRequest.capacity_range:type_name -> csi.v1.CapacityRange
-	20,  // 84: csi.v1.NodeExpandVolumeRequest.volume_capability:type_name -> csi.v1.VolumeCapability
-	149, // 85: csi.v1.NodeExpandVolumeRequest.secrets:type_name -> csi.v1.NodeExpandVolumeRequest.SecretsEntry
-	84,  // 86: csi.v1.GroupControllerGetCapabilitiesResponse.capabilities:type_name -> csi.v1.GroupControllerServiceCapability
-	150, // 87: csi.v1.GroupControllerServiceCapability.rpc:type_name -> csi.v1.GroupControllerServiceCapability.RPC
-	151, // 88: csi.v1.CreateVolumeGroupSnapshotRequest.secrets:type_name -> csi.v1.CreateVolumeGroupSnapshotRequest.SecretsEntry
-	152, // 89: csi.v1.CreateVolumeGroupSnapshotRequest.parameters:type_name -> csi.v1.CreateVolumeGroupSnapshotRequest.ParametersEntry
-	87,  // 90: csi.v1.CreateVolumeGroupSnapshotResponse.group_snapshot:type_name -> csi.v1.VolumeGroupSnapshot
-	51,  // 91: csi.v1.VolumeGroupSnapshot.snapshots:type_name -> csi.v1.Snapshot
-	159, // 92: csi.v1.VolumeGroupSnapshot.creation_time:type_name -> google.protobuf.Timestamp
-	153, // 93: csi.v1.DeleteVolumeGroupSnapshotRequest.secrets:type_name -> csi.v1.DeleteVolumeGroupSnapshotRequest.SecretsEntry
-	154, // 94: csi.v1.GetVolumeGroupSnapshotRequest.secrets:type_name -> csi.v1.GetVolumeGroupSnapshotRequest.SecretsEntry
-	87,  // 95: csi.v1.GetVolumeGroupSnapshotResponse.group_snapshot:type_name -> csi.v1.VolumeGroupSnapshot
-	155, // 96: csi.v1.GetMetadataAllocatedRequest.secrets:type_name -> csi.v1.GetMetadataAllocatedRequest.SecretsEntry
-	2,   // 97: csi.v1.GetMetadataAllocatedResponse.block_metadata_type:type_name -> csi.v1.BlockMetadataType
-	92,  // 98: csi.v1.GetMetadataAllocatedResponse.block_metadata:type_name -> csi.v1.BlockMetadata
-	156, // 99: csi.v1.GetMetadataDeltaRequest.secrets:type_name -> csi.v1.GetMetadataDeltaRequest.SecretsEntry
-	2,   // 100: csi.v1.GetMetadataDeltaResponse.block_metadata_type:type_name -> csi.v1.BlockMetadataType
-	92,  // 101: csi.v1.GetMetadataDeltaResponse.block_metadata:type_name -> csi.v1.BlockMetadata
-	3,   // 102: csi.v1.PluginCapability.Service.type:type_name -> csi.v1.PluginCapability.Service.Type
-	4,   // 103: csi.v1.PluginCapability.VolumeExpansion.type:type_name -> csi.v1.PluginCapability.VolumeExpansion.Type
-	5,   // 104: csi.v1.VolumeCapability.AccessMode.mode:type_name -> csi.v1.VolumeCapability.AccessMode.Mode
-	120, // 105: csi.v1.ValidateVolumeCapabilitiesResponse.Confirmed.volume_context:type_name -> csi.v1.ValidateVolumeCapabilitiesResponse.Confirmed.VolumeContextEntry
-	20,  // 106: csi.v1.ValidateVolumeCapabilitiesResponse.Confirmed.volume_capabilities:type_name -> csi.v1.VolumeCapability
-	121, // 107: csi.v1.ValidateVolumeCapabilitiesResponse.Confirmed.parameters:type_name -> csi.v1.ValidateVolumeCapabilitiesResponse.Confirmed.ParametersEntry
-	122, // 108: csi.v1.ValidateVolumeCapabilitiesResponse.Confirmed.mutable_parameters:type_name -> csi.v1.ValidateVolumeCapabilitiesResponse.Confirmed.MutableParametersEntry
-	22,  // 109: csi.v1.ListVolumesResponse.Entry.volume:type_name -> csi.v1.Volume
-	123, // 110: csi.v1.ListVolumesResponse.Entry.status:type_name -> csi.v1.ListVolumesResponse.VolumeStatus
-	0,   // 111: csi.v1.VolumeHealth.VolumeHealthEntry.status:type_name -> csi.v1.VolumeHealthErrorType
-	6,   // 112: csi.v1.ControllerServiceCapability.RPC.type:type_name -> csi.v1.ControllerServiceCapability.RPC.Type
-	51,  // 113: csi.v1.ListSnapshotsResponse.Entry.snapshot:type_name -> csi.v1.Snapshot
-	1,   // 114: csi.v1.NodeGetStorageHealthResponse.StorageBackendHealth.status:type_name -> csi.v1.StorageHealthErrorType
-	20,  // 115: csi.v1.NodeGetStorageHealthResponse.StorageBackendHealth.volume_capability:type_name -> csi.v1.VolumeCapability
-	8,   // 116: csi.v1.NodeServiceCapability.RPC.type:type_name -> csi.v1.NodeServiceCapability.RPC.Type
-	9,   // 117: csi.v1.GroupControllerServiceCapability.RPC.type:type_name -> csi.v1.GroupControllerServiceCapability.RPC.Type
-	160, // 118: csi.v1.alpha_enum:extendee -> google.protobuf.EnumOptions
-	161, // 119: csi.v1.alpha_enum_value:extendee -> google.protobuf.EnumValueOptions
-	162, // 120: csi.v1.csi_secret:extendee -> google.protobuf.FieldOptions
-	162, // 121: csi.v1.alpha_field:extendee -> google.protobuf.FieldOptions
-	163, // 122: csi.v1.alpha_message:extendee -> google.protobuf.MessageOptions
-	164, // 123: csi.v1.alpha_method:extendee -> google.protobuf.MethodOptions
-	165, // 124: csi.v1.alpha_service:extendee -> google.protobuf.ServiceOptions
-	10,  // 125: csi.v1.Identity.GetPluginInfo:input_type -> csi.v1.GetPluginInfoRequest
-	12,  // 126: csi.v1.Identity.GetPluginCapabilities:input_type -> csi.v1.GetPluginCapabilitiesRequest
-	15,  // 127: csi.v1.Identity.Probe:input_type -> csi.v1.ProbeRequest
-	17,  // 128: csi.v1.Controller.CreateVolume:input_type -> csi.v1.CreateVolumeRequest
-	25,  // 129: csi.v1.Controller.DeleteVolume:input_type -> csi.v1.DeleteVolumeRequest
-	27,  // 130: csi.v1.Controller.ControllerPublishVolume:input_type -> csi.v1.ControllerPublishVolumeRequest
-	29,  // 131: csi.v1.Controller.ControllerUnpublishVolume:input_type -> csi.v1.ControllerUnpublishVolumeRequest
-	31,  // 132: csi.v1.Controller.ValidateVolumeCapabilities:input_type -> csi.v1.ValidateVolumeCapabilitiesRequest
-	33,  // 133: csi.v1.Controller.ListVolumes:input_type -> csi.v1.ListVolumesRequest
-	35,  // 134: csi.v1.Controller.ControllerListVolumeHealth:input_type -> csi.v1.ControllerListVolumeHealthRequest
-	38,  // 135: csi.v1.Controller.ControllerGetVolumeHealth:input_type -> csi.v1.ControllerGetVolumeHealthRequest
-	44,  // 136: csi.v1.Controller.GetCapacity:input_type -> csi.v1.GetCapacityRequest
-	46,  // 137: csi.v1.Controller.ControllerGetCapabilities:input_type -> csi.v1.ControllerGetCapabilitiesRequest
-	49,  // 138: csi.v1.Controller.CreateSnapshot:input_type -> csi.v1.CreateSnapshotRequest
-	52,  // 139: csi.v1.Controller.DeleteSnapshot:input_type -> csi.v1.DeleteSnapshotRequest
-	54,  // 140: csi.v1.Controller.ListSnapshots:input_type -> csi.v1.ListSnapshotsRequest
-	56,  // 141: csi.v1.Controller.GetSnapshot:input_type -> csi.v1.GetSnapshotRequest
-	58,  // 142: csi.v1.Controller.ControllerExpandVolume:input_type -> csi.v1.ControllerExpandVolumeRequest
-	40,  // 143: csi.v1.Controller.ControllerGetVolume:input_type -> csi.v1.ControllerGetVolumeRequest
-	42,  // 144: csi.v1.Controller.ControllerModifyVolume:input_type -> csi.v1.ControllerModifyVolumeRequest
-	82,  // 145: csi.v1.GroupController.GroupControllerGetCapabilities:input_type -> csi.v1.GroupControllerGetCapabilitiesRequest
-	85,  // 146: csi.v1.GroupController.CreateVolumeGroupSnapshot:input_type -> csi.v1.CreateVolumeGroupSnapshotRequest
-	88,  // 147: csi.v1.GroupController.DeleteVolumeGroupSnapshot:input_type -> csi.v1.DeleteVolumeGroupSnapshotRequest
-	90,  // 148: csi.v1.GroupController.GetVolumeGroupSnapshot:input_type -> csi.v1.GetVolumeGroupSnapshotRequest
-	93,  // 149: csi.v1.SnapshotMetadata.GetMetadataAllocated:input_type -> csi.v1.GetMetadataAllocatedRequest
-	95,  // 150: csi.v1.SnapshotMetadata.GetMetadataDelta:input_type -> csi.v1.GetMetadataDeltaRequest
-	60,  // 151: csi.v1.Node.NodeStageVolume:input_type -> csi.v1.NodeStageVolumeRequest
-	62,  // 152: csi.v1.Node.NodeUnstageVolume:input_type -> csi.v1.NodeUnstageVolumeRequest
-	64,  // 153: csi.v1.Node.NodePublishVolume:input_type -> csi.v1.NodePublishVolumeRequest
-	66,  // 154: csi.v1.Node.NodeUnpublishVolume:input_type -> csi.v1.NodeUnpublishVolumeRequest
-	68,  // 155: csi.v1.Node.NodeGetVolumeStats:input_type -> csi.v1.NodeGetVolumeStatsRequest
-	71,  // 156: csi.v1.Node.NodeGetVolumeHealth:input_type -> csi.v1.NodeGetVolumeHealthRequest
-	73,  // 157: csi.v1.Node.NodeGetStorageHealth:input_type -> csi.v1.NodeGetStorageHealthRequest
-	80,  // 158: csi.v1.Node.NodeExpandVolume:input_type -> csi.v1.NodeExpandVolumeRequest
-	75,  // 159: csi.v1.Node.NodeGetCapabilities:input_type -> csi.v1.NodeGetCapabilitiesRequest
-	78,  // 160: csi.v1.Node.NodeGetInfo:input_type -> csi.v1.NodeGetInfoRequest
-	11,  // 161: csi.v1.Identity.GetPluginInfo:output_type -> csi.v1.GetPluginInfoResponse
-	13,  // 162: csi.v1.Identity.GetPluginCapabilities:output_type -> csi.v1.GetPluginCapabilitiesResponse
-	16,  // 163: csi.v1.Identity.Probe:output_type -> csi.v1.ProbeResponse
-	19,  // 164: csi.v1.Controller.CreateVolume:output_type -> csi.v1.CreateVolumeResponse
-	26,  // 165: csi.v1.Controller.DeleteVolume:output_type -> csi.v1.DeleteVolumeResponse
-	28,  // 166: csi.v1.Controller.ControllerPublishVolume:output_type -> csi.v1.ControllerPublishVolumeResponse
-	30,  // 167: csi.v1.Controller.ControllerUnpublishVolume:output_type -> csi.v1.ControllerUnpublishVolumeResponse
-	32,  // 168: csi.v1.Controller.ValidateVolumeCapabilities:output_type -> csi.v1.ValidateVolumeCapabilitiesResponse
-	34,  // 169: csi.v1.Controller.ListVolumes:output_type -> csi.v1.ListVolumesResponse
-	36,  // 170: csi.v1.Controller.ControllerListVolumeHealth:output_type -> csi.v1.ControllerListVolumeHealthResponse
-	39,  // 171: csi.v1.Controller.ControllerGetVolumeHealth:output_type -> csi.v1.ControllerGetVolumeHealthResponse
-	45,  // 172: csi.v1.Controller.GetCapacity:output_type -> csi.v1.GetCapacityResponse
-	47,  // 173: csi.v1.Controller.ControllerGetCapabilities:output_type -> csi.v1.ControllerGetCapabilitiesResponse
-	50,  // 174: csi.v1.Controller.CreateSnapshot:output_type -> csi.v1.CreateSnapshotResponse
-	53,  // 175: csi.v1.Controller.DeleteSnapshot:output_type -> csi.v1.DeleteSnapshotResponse
-	55,  // 176: csi.v1.Controller.ListSnapshots:output_type -> csi.v1.ListSnapshotsResponse
-	57,  // 177: csi.v1.Controller.GetSnapshot:output_type -> csi.v1.GetSnapshotResponse
-	59,  // 178: csi.v1.Controller.ControllerExpandVolume:output_type -> csi.v1.ControllerExpandVolumeResponse
-	41,  // 179: csi.v1.Controller.ControllerGetVolume:output_type -> csi.v1.ControllerGetVolumeResponse
-	43,  // 180: csi.v1.Controller.ControllerModifyVolume:output_type -> csi.v1.ControllerModifyVolumeResponse
-	83,  // 181: csi.v1.GroupController.GroupControllerGetCapabilities:output_type -> csi.v1.GroupControllerGetCapabilitiesResponse
-	86,  // 182: csi.v1.GroupController.CreateVolumeGroupSnapshot:output_type -> csi.v1.CreateVolumeGroupSnapshotResponse
-	89,  // 183: csi.v1.GroupController.DeleteVolumeGroupSnapshot:output_type -> csi.v1.DeleteVolumeGroupSnapshotResponse
-	91,  // 184: csi.v1.GroupController.GetVolumeGroupSnapshot:output_type -> csi.v1.GetVolumeGroupSnapshotResponse
-	94,  // 185: csi.v1.SnapshotMetadata.GetMetadataAllocated:output_type -> csi.v1.GetMetadataAllocatedResponse
-	96,  // 186: csi.v1.SnapshotMetadata.GetMetadataDelta:output_type -> csi.v1.GetMetadataDeltaResponse
-	61,  // 187: csi.v1.Node.NodeStageVolume:output_type -> csi.v1.NodeStageVolumeResponse
-	63,  // 188: csi.v1.Node.NodeUnstageVolume:output_type -> csi.v1.NodeUnstageVolumeResponse
-	65,  // 189: csi.v1.Node.NodePublishVolume:output_type -> csi.v1.NodePublishVolumeResponse
-	67,  // 190: csi.v1.Node.NodeUnpublishVolume:output_type -> csi.v1.NodeUnpublishVolumeResponse
-	69,  // 191: csi.v1.Node.NodeGetVolumeStats:output_type -> csi.v1.NodeGetVolumeStatsResponse
-	72,  // 192: csi.v1.Node.NodeGetVolumeHealth:output_type -> csi.v1.NodeGetVolumeHealthResponse
-	74,  // 193: csi.v1.Node.NodeGetStorageHealth:output_type -> csi.v1.NodeGetStorageHealthResponse
-	81,  // 194: csi.v1.Node.NodeExpandVolume:output_type -> csi.v1.NodeExpandVolumeResponse
-	76,  // 195: csi.v1.Node.NodeGetCapabilities:output_type -> csi.v1.NodeGetCapabilitiesResponse
-	79,  // 196: csi.v1.Node.NodeGetInfo:output_type -> csi.v1.NodeGetInfoResponse
-	161, // [161:197] is the sub-list for method output_type
-	125, // [125:161] is the sub-list for method input_type
-	125, // [125:125] is the sub-list for extension type_name
-	118, // [118:125] is the sub-list for extension extendee
-	0,   // [0:118] is the sub-list for field type_name
+	98,  // 0: csi.v1.GetPluginInfoResponse.manifest:type_name -> csi.v1.GetPluginInfoResponse.ManifestEntry
+	15,  // 1: csi.v1.GetPluginCapabilitiesResponse.capabilities:type_name -> csi.v1.PluginCapability
+	99,  // 2: csi.v1.PluginCapability.service:type_name -> csi.v1.PluginCapability.Service
+	100, // 3: csi.v1.PluginCapability.volume_expansion:type_name -> csi.v1.PluginCapability.VolumeExpansion
+	158, // 4: csi.v1.ProbeResponse.ready:type_name -> google.protobuf.BoolValue
+	22,  // 5: csi.v1.CreateVolumeRequest.capacity_range:type_name -> csi.v1.CapacityRange
+	21,  // 6: csi.v1.CreateVolumeRequest.volume_capabilities:type_name -> csi.v1.VolumeCapability
+	101, // 7: csi.v1.CreateVolumeRequest.parameters:type_name -> csi.v1.CreateVolumeRequest.ParametersEntry
+	102, // 8: csi.v1.CreateVolumeRequest.secrets:type_name -> csi.v1.CreateVolumeRequest.SecretsEntry
+	19,  // 9: csi.v1.CreateVolumeRequest.volume_content_source:type_name -> csi.v1.VolumeContentSource
+	24,  // 10: csi.v1.CreateVolumeRequest.accessibility_requirements:type_name -> csi.v1.TopologyRequirement
+	103, // 11: csi.v1.CreateVolumeRequest.mutable_parameters:type_name -> csi.v1.CreateVolumeRequest.MutableParametersEntry
+	104, // 12: csi.v1.VolumeContentSource.snapshot:type_name -> csi.v1.VolumeContentSource.SnapshotSource
+	105, // 13: csi.v1.VolumeContentSource.volume:type_name -> csi.v1.VolumeContentSource.VolumeSource
+	23,  // 14: csi.v1.CreateVolumeResponse.volume:type_name -> csi.v1.Volume
+	106, // 15: csi.v1.VolumeCapability.block:type_name -> csi.v1.VolumeCapability.BlockVolume
+	107, // 16: csi.v1.VolumeCapability.mount:type_name -> csi.v1.VolumeCapability.MountVolume
+	108, // 17: csi.v1.VolumeCapability.access_mode:type_name -> csi.v1.VolumeCapability.AccessMode
+	109, // 18: csi.v1.Volume.volume_context:type_name -> csi.v1.Volume.VolumeContextEntry
+	19,  // 19: csi.v1.Volume.content_source:type_name -> csi.v1.VolumeContentSource
+	25,  // 20: csi.v1.Volume.accessible_topology:type_name -> csi.v1.Topology
+	25,  // 21: csi.v1.TopologyRequirement.requisite:type_name -> csi.v1.Topology
+	25,  // 22: csi.v1.TopologyRequirement.preferred:type_name -> csi.v1.Topology
+	110, // 23: csi.v1.Topology.segments:type_name -> csi.v1.Topology.SegmentsEntry
+	111, // 24: csi.v1.DeleteVolumeRequest.secrets:type_name -> csi.v1.DeleteVolumeRequest.SecretsEntry
+	21,  // 25: csi.v1.ControllerPublishVolumeRequest.volume_capability:type_name -> csi.v1.VolumeCapability
+	112, // 26: csi.v1.ControllerPublishVolumeRequest.secrets:type_name -> csi.v1.ControllerPublishVolumeRequest.SecretsEntry
+	113, // 27: csi.v1.ControllerPublishVolumeRequest.volume_context:type_name -> csi.v1.ControllerPublishVolumeRequest.VolumeContextEntry
+	114, // 28: csi.v1.ControllerPublishVolumeResponse.publish_context:type_name -> csi.v1.ControllerPublishVolumeResponse.PublishContextEntry
+	115, // 29: csi.v1.ControllerUnpublishVolumeRequest.secrets:type_name -> csi.v1.ControllerUnpublishVolumeRequest.SecretsEntry
+	6,   // 30: csi.v1.ControllerUnpublishVolumeRequest.reason:type_name -> csi.v1.ControllerUnpublishVolumeRequest.Reason
+	116, // 31: csi.v1.ValidateVolumeCapabilitiesRequest.volume_context:type_name -> csi.v1.ValidateVolumeCapabilitiesRequest.VolumeContextEntry
+	21,  // 32: csi.v1.ValidateVolumeCapabilitiesRequest.volume_capabilities:type_name -> csi.v1.VolumeCapability
+	117, // 33: csi.v1.ValidateVolumeCapabilitiesRequest.parameters:type_name -> csi.v1.ValidateVolumeCapabilitiesRequest.ParametersEntry
+	118, // 34: csi.v1.ValidateVolumeCapabilitiesRequest.secrets:type_name -> csi.v1.ValidateVolumeCapabilitiesRequest.SecretsEntry
+	119, // 35: csi.v1.ValidateVolumeCapabilitiesRequest.mutable_parameters:type_name -> csi.v1.ValidateVolumeCapabilitiesRequest.MutableParametersEntry
+	120, // 36: csi.v1.ValidateVolumeCapabilitiesResponse.confirmed:type_name -> csi.v1.ValidateVolumeCapabilitiesResponse.Confirmed
+	125, // 37: csi.v1.ListVolumesResponse.entries:type_name -> csi.v1.ListVolumesResponse.Entry
+	126, // 38: csi.v1.ControllerListVolumeHealthRequest.secrets:type_name -> csi.v1.ControllerListVolumeHealthRequest.SecretsEntry
+	38,  // 39: csi.v1.ControllerListVolumeHealthResponse.entries:type_name -> csi.v1.VolumeHealth
+	127, // 40: csi.v1.VolumeHealth.health_statuses:type_name -> csi.v1.VolumeHealth.VolumeHealthEntry
+	128, // 41: csi.v1.ControllerGetVolumeHealthRequest.secrets:type_name -> csi.v1.ControllerGetVolumeHealthRequest.SecretsEntry
+	38,  // 42: csi.v1.ControllerGetVolumeHealthResponse.volume_health:type_name -> csi.v1.VolumeHealth
+	23,  // 43: csi.v1.ControllerGetVolumeResponse.volume:type_name -> csi.v1.Volume
+	129, // 44: csi.v1.ControllerGetVolumeResponse.status:type_name -> csi.v1.ControllerGetVolumeResponse.VolumeStatus
+	130, // 45: csi.v1.ControllerModifyVolumeRequest.secrets:type_name -> csi.v1.ControllerModifyVolumeRequest.SecretsEntry
+	131, // 46: csi.v1.ControllerModifyVolumeRequest.mutable_parameters:type_name -> csi.v1.ControllerModifyVolumeRequest.MutableParametersEntry
+	21,  // 47: csi.v1.GetCapacityRequest.volume_capabilities:type_name -> csi.v1.VolumeCapability
+	132, // 48: csi.v1.GetCapacityRequest.parameters:type_name -> csi.v1.GetCapacityRequest.ParametersEntry
+	25,  // 49: csi.v1.GetCapacityRequest.accessible_topology:type_name -> csi.v1.Topology
+	159, // 50: csi.v1.GetCapacityResponse.maximum_volume_size:type_name -> google.protobuf.Int64Value
+	159, // 51: csi.v1.GetCapacityResponse.minimum_volume_size:type_name -> google.protobuf.Int64Value
+	49,  // 52: csi.v1.ControllerGetCapabilitiesResponse.capabilities:type_name -> csi.v1.ControllerServiceCapability
+	133, // 53: csi.v1.ControllerServiceCapability.rpc:type_name -> csi.v1.ControllerServiceCapability.RPC
+	134, // 54: csi.v1.CreateSnapshotRequest.secrets:type_name -> csi.v1.CreateSnapshotRequest.SecretsEntry
+	135, // 55: csi.v1.CreateSnapshotRequest.parameters:type_name -> csi.v1.CreateSnapshotRequest.ParametersEntry
+	24,  // 56: csi.v1.CreateSnapshotRequest.accessibility_requirements:type_name -> csi.v1.TopologyRequirement
+	52,  // 57: csi.v1.CreateSnapshotResponse.snapshot:type_name -> csi.v1.Snapshot
+	160, // 58: csi.v1.Snapshot.creation_time:type_name -> google.protobuf.Timestamp
+	25,  // 59: csi.v1.Snapshot.accessible_topology:type_name -> csi.v1.Topology
+	136, // 60: csi.v1.DeleteSnapshotRequest.secrets:type_name -> csi.v1.DeleteSnapshotRequest.SecretsEntry
+	137, // 61: csi.v1.ListSnapshotsRequest.secrets:type_name -> csi.v1.ListSnapshotsRequest.SecretsEntry
+	138, // 62: csi.v1.ListSnapshotsResponse.entries:type_name -> csi.v1.ListSnapshotsResponse.Entry
+	139, // 63: csi.v1.GetSnapshotRequest.secrets:type_name -> csi.v1.GetSnapshotRequest.SecretsEntry
+	52,  // 64: csi.v1.GetSnapshotResponse.snapshot:type_name -> csi.v1.Snapshot
+	22,  // 65: csi.v1.ControllerExpandVolumeRequest.capacity_range:type_name -> csi.v1.CapacityRange
+	140, // 66: csi.v1.ControllerExpandVolumeRequest.secrets:type_name -> csi.v1.ControllerExpandVolumeRequest.SecretsEntry
+	21,  // 67: csi.v1.ControllerExpandVolumeRequest.volume_capability:type_name -> csi.v1.VolumeCapability
+	141, // 68: csi.v1.NodeStageVolumeRequest.publish_context:type_name -> csi.v1.NodeStageVolumeRequest.PublishContextEntry
+	21,  // 69: csi.v1.NodeStageVolumeRequest.volume_capability:type_name -> csi.v1.VolumeCapability
+	142, // 70: csi.v1.NodeStageVolumeRequest.secrets:type_name -> csi.v1.NodeStageVolumeRequest.SecretsEntry
+	143, // 71: csi.v1.NodeStageVolumeRequest.volume_context:type_name -> csi.v1.NodeStageVolumeRequest.VolumeContextEntry
+	144, // 72: csi.v1.NodePublishVolumeRequest.publish_context:type_name -> csi.v1.NodePublishVolumeRequest.PublishContextEntry
+	21,  // 73: csi.v1.NodePublishVolumeRequest.volume_capability:type_name -> csi.v1.VolumeCapability
+	145, // 74: csi.v1.NodePublishVolumeRequest.secrets:type_name -> csi.v1.NodePublishVolumeRequest.SecretsEntry
+	146, // 75: csi.v1.NodePublishVolumeRequest.volume_context:type_name -> csi.v1.NodePublishVolumeRequest.VolumeContextEntry
+	71,  // 76: csi.v1.NodeGetVolumeStatsResponse.usage:type_name -> csi.v1.VolumeUsage
+	8,   // 77: csi.v1.VolumeUsage.unit:type_name -> csi.v1.VolumeUsage.Unit
+	38,  // 78: csi.v1.NodeGetVolumeHealthResponse.volume_health:type_name -> csi.v1.VolumeHealth
+	147, // 79: csi.v1.NodeGetStorageHealthRequest.secrets:type_name -> csi.v1.NodeGetStorageHealthRequest.SecretsEntry
+	148, // 80: csi.v1.NodeGetStorageHealthResponse.backend_health:type_name -> csi.v1.NodeGetStorageHealthResponse.StorageBackendHealth
+	78,  // 81: csi.v1.NodeGetCapabilitiesResponse.capabilities:type_name -> csi.v1.NodeServiceCapability
+	149, // 82: csi.v1.NodeServiceCapability.rpc:type_name -> csi.v1.NodeServiceCapability.RPC
+	25,  // 83: csi.v1.NodeGetInfoResponse.accessible_topology:type_name -> csi.v1.Topology
+	22,  // 84: csi.v1.NodeExpandVolumeRequest.capacity_range:type_name -> csi.v1.CapacityRange
+	21,  // 85: csi.v1.NodeExpandVolumeRequest.volume_capability:type_name -> csi.v1.VolumeCapability
+	150, // 86: csi.v1.NodeExpandVolumeRequest.secrets:type_name -> csi.v1.NodeExpandVolumeRequest.SecretsEntry
+	85,  // 87: csi.v1.GroupControllerGetCapabilitiesResponse.capabilities:type_name -> csi.v1.GroupControllerServiceCapability
+	151, // 88: csi.v1.GroupControllerServiceCapability.rpc:type_name -> csi.v1.GroupControllerServiceCapability.RPC
+	152, // 89: csi.v1.CreateVolumeGroupSnapshotRequest.secrets:type_name -> csi.v1.CreateVolumeGroupSnapshotRequest.SecretsEntry
+	153, // 90: csi.v1.CreateVolumeGroupSnapshotRequest.parameters:type_name -> csi.v1.CreateVolumeGroupSnapshotRequest.ParametersEntry
+	88,  // 91: csi.v1.CreateVolumeGroupSnapshotResponse.group_snapshot:type_name -> csi.v1.VolumeGroupSnapshot
+	52,  // 92: csi.v1.VolumeGroupSnapshot.snapshots:type_name -> csi.v1.Snapshot
+	160, // 93: csi.v1.VolumeGroupSnapshot.creation_time:type_name -> google.protobuf.Timestamp
+	154, // 94: csi.v1.DeleteVolumeGroupSnapshotRequest.secrets:type_name -> csi.v1.DeleteVolumeGroupSnapshotRequest.SecretsEntry
+	155, // 95: csi.v1.GetVolumeGroupSnapshotRequest.secrets:type_name -> csi.v1.GetVolumeGroupSnapshotRequest.SecretsEntry
+	88,  // 96: csi.v1.GetVolumeGroupSnapshotResponse.group_snapshot:type_name -> csi.v1.VolumeGroupSnapshot
+	156, // 97: csi.v1.GetMetadataAllocatedRequest.secrets:type_name -> csi.v1.GetMetadataAllocatedRequest.SecretsEntry
+	2,   // 98: csi.v1.GetMetadataAllocatedResponse.block_metadata_type:type_name -> csi.v1.BlockMetadataType
+	93,  // 99: csi.v1.GetMetadataAllocatedResponse.block_metadata:type_name -> csi.v1.BlockMetadata
+	157, // 100: csi.v1.GetMetadataDeltaRequest.secrets:type_name -> csi.v1.GetMetadataDeltaRequest.SecretsEntry
+	2,   // 101: csi.v1.GetMetadataDeltaResponse.block_metadata_type:type_name -> csi.v1.BlockMetadataType
+	93,  // 102: csi.v1.GetMetadataDeltaResponse.block_metadata:type_name -> csi.v1.BlockMetadata
+	3,   // 103: csi.v1.PluginCapability.Service.type:type_name -> csi.v1.PluginCapability.Service.Type
+	4,   // 104: csi.v1.PluginCapability.VolumeExpansion.type:type_name -> csi.v1.PluginCapability.VolumeExpansion.Type
+	5,   // 105: csi.v1.VolumeCapability.AccessMode.mode:type_name -> csi.v1.VolumeCapability.AccessMode.Mode
+	121, // 106: csi.v1.ValidateVolumeCapabilitiesResponse.Confirmed.volume_context:type_name -> csi.v1.ValidateVolumeCapabilitiesResponse.Confirmed.VolumeContextEntry
+	21,  // 107: csi.v1.ValidateVolumeCapabilitiesResponse.Confirmed.volume_capabilities:type_name -> csi.v1.VolumeCapability
+	122, // 108: csi.v1.ValidateVolumeCapabilitiesResponse.Confirmed.parameters:type_name -> csi.v1.ValidateVolumeCapabilitiesResponse.Confirmed.ParametersEntry
+	123, // 109: csi.v1.ValidateVolumeCapabilitiesResponse.Confirmed.mutable_parameters:type_name -> csi.v1.ValidateVolumeCapabilitiesResponse.Confirmed.MutableParametersEntry
+	23,  // 110: csi.v1.ListVolumesResponse.Entry.volume:type_name -> csi.v1.Volume
+	124, // 111: csi.v1.ListVolumesResponse.Entry.status:type_name -> csi.v1.ListVolumesResponse.VolumeStatus
+	0,   // 112: csi.v1.VolumeHealth.VolumeHealthEntry.status:type_name -> csi.v1.VolumeHealthErrorType
+	7,   // 113: csi.v1.ControllerServiceCapability.RPC.type:type_name -> csi.v1.ControllerServiceCapability.RPC.Type
+	52,  // 114: csi.v1.ListSnapshotsResponse.Entry.snapshot:type_name -> csi.v1.Snapshot
+	1,   // 115: csi.v1.NodeGetStorageHealthResponse.StorageBackendHealth.status:type_name -> csi.v1.StorageHealthErrorType
+	21,  // 116: csi.v1.NodeGetStorageHealthResponse.StorageBackendHealth.volume_capability:type_name -> csi.v1.VolumeCapability
+	9,   // 117: csi.v1.NodeServiceCapability.RPC.type:type_name -> csi.v1.NodeServiceCapability.RPC.Type
+	10,  // 118: csi.v1.GroupControllerServiceCapability.RPC.type:type_name -> csi.v1.GroupControllerServiceCapability.RPC.Type
+	161, // 119: csi.v1.alpha_enum:extendee -> google.protobuf.EnumOptions
+	162, // 120: csi.v1.alpha_enum_value:extendee -> google.protobuf.EnumValueOptions
+	163, // 121: csi.v1.csi_secret:extendee -> google.protobuf.FieldOptions
+	163, // 122: csi.v1.alpha_field:extendee -> google.protobuf.FieldOptions
+	164, // 123: csi.v1.alpha_message:extendee -> google.protobuf.MessageOptions
+	165, // 124: csi.v1.alpha_method:extendee -> google.protobuf.MethodOptions
+	166, // 125: csi.v1.alpha_service:extendee -> google.protobuf.ServiceOptions
+	11,  // 126: csi.v1.Identity.GetPluginInfo:input_type -> csi.v1.GetPluginInfoRequest
+	13,  // 127: csi.v1.Identity.GetPluginCapabilities:input_type -> csi.v1.GetPluginCapabilitiesRequest
+	16,  // 128: csi.v1.Identity.Probe:input_type -> csi.v1.ProbeRequest
+	18,  // 129: csi.v1.Controller.CreateVolume:input_type -> csi.v1.CreateVolumeRequest
+	26,  // 130: csi.v1.Controller.DeleteVolume:input_type -> csi.v1.DeleteVolumeRequest
+	28,  // 131: csi.v1.Controller.ControllerPublishVolume:input_type -> csi.v1.ControllerPublishVolumeRequest
+	30,  // 132: csi.v1.Controller.ControllerUnpublishVolume:input_type -> csi.v1.ControllerUnpublishVolumeRequest
+	32,  // 133: csi.v1.Controller.ValidateVolumeCapabilities:input_type -> csi.v1.ValidateVolumeCapabilitiesRequest
+	34,  // 134: csi.v1.Controller.ListVolumes:input_type -> csi.v1.ListVolumesRequest
+	36,  // 135: csi.v1.Controller.ControllerListVolumeHealth:input_type -> csi.v1.ControllerListVolumeHealthRequest
+	39,  // 136: csi.v1.Controller.ControllerGetVolumeHealth:input_type -> csi.v1.ControllerGetVolumeHealthRequest
+	45,  // 137: csi.v1.Controller.GetCapacity:input_type -> csi.v1.GetCapacityRequest
+	47,  // 138: csi.v1.Controller.ControllerGetCapabilities:input_type -> csi.v1.ControllerGetCapabilitiesRequest
+	50,  // 139: csi.v1.Controller.CreateSnapshot:input_type -> csi.v1.CreateSnapshotRequest
+	53,  // 140: csi.v1.Controller.DeleteSnapshot:input_type -> csi.v1.DeleteSnapshotRequest
+	55,  // 141: csi.v1.Controller.ListSnapshots:input_type -> csi.v1.ListSnapshotsRequest
+	57,  // 142: csi.v1.Controller.GetSnapshot:input_type -> csi.v1.GetSnapshotRequest
+	59,  // 143: csi.v1.Controller.ControllerExpandVolume:input_type -> csi.v1.ControllerExpandVolumeRequest
+	41,  // 144: csi.v1.Controller.ControllerGetVolume:input_type -> csi.v1.ControllerGetVolumeRequest
+	43,  // 145: csi.v1.Controller.ControllerModifyVolume:input_type -> csi.v1.ControllerModifyVolumeRequest
+	83,  // 146: csi.v1.GroupController.GroupControllerGetCapabilities:input_type -> csi.v1.GroupControllerGetCapabilitiesRequest
+	86,  // 147: csi.v1.GroupController.CreateVolumeGroupSnapshot:input_type -> csi.v1.CreateVolumeGroupSnapshotRequest
+	89,  // 148: csi.v1.GroupController.DeleteVolumeGroupSnapshot:input_type -> csi.v1.DeleteVolumeGroupSnapshotRequest
+	91,  // 149: csi.v1.GroupController.GetVolumeGroupSnapshot:input_type -> csi.v1.GetVolumeGroupSnapshotRequest
+	94,  // 150: csi.v1.SnapshotMetadata.GetMetadataAllocated:input_type -> csi.v1.GetMetadataAllocatedRequest
+	96,  // 151: csi.v1.SnapshotMetadata.GetMetadataDelta:input_type -> csi.v1.GetMetadataDeltaRequest
+	61,  // 152: csi.v1.Node.NodeStageVolume:input_type -> csi.v1.NodeStageVolumeRequest
+	63,  // 153: csi.v1.Node.NodeUnstageVolume:input_type -> csi.v1.NodeUnstageVolumeRequest
+	65,  // 154: csi.v1.Node.NodePublishVolume:input_type -> csi.v1.NodePublishVolumeRequest
+	67,  // 155: csi.v1.Node.NodeUnpublishVolume:input_type -> csi.v1.NodeUnpublishVolumeRequest
+	69,  // 156: csi.v1.Node.NodeGetVolumeStats:input_type -> csi.v1.NodeGetVolumeStatsRequest
+	72,  // 157: csi.v1.Node.NodeGetVolumeHealth:input_type -> csi.v1.NodeGetVolumeHealthRequest
+	74,  // 158: csi.v1.Node.NodeGetStorageHealth:input_type -> csi.v1.NodeGetStorageHealthRequest
+	81,  // 159: csi.v1.Node.NodeExpandVolume:input_type -> csi.v1.NodeExpandVolumeRequest
+	76,  // 160: csi.v1.Node.NodeGetCapabilities:input_type -> csi.v1.NodeGetCapabilitiesRequest
+	79,  // 161: csi.v1.Node.NodeGetInfo:input_type -> csi.v1.NodeGetInfoRequest
+	12,  // 162: csi.v1.Identity.GetPluginInfo:output_type -> csi.v1.GetPluginInfoResponse
+	14,  // 163: csi.v1.Identity.GetPluginCapabilities:output_type -> csi.v1.GetPluginCapabilitiesResponse
+	17,  // 164: csi.v1.Identity.Probe:output_type -> csi.v1.ProbeResponse
+	20,  // 165: csi.v1.Controller.CreateVolume:output_type -> csi.v1.CreateVolumeResponse
+	27,  // 166: csi.v1.Controller.DeleteVolume:output_type -> csi.v1.DeleteVolumeResponse
+	29,  // 167: csi.v1.Controller.ControllerPublishVolume:output_type -> csi.v1.ControllerPublishVolumeResponse
+	31,  // 168: csi.v1.Controller.ControllerUnpublishVolume:output_type -> csi.v1.ControllerUnpublishVolumeResponse
+	33,  // 169: csi.v1.Controller.ValidateVolumeCapabilities:output_type -> csi.v1.ValidateVolumeCapabilitiesResponse
+	35,  // 170: csi.v1.Controller.ListVolumes:output_type -> csi.v1.ListVolumesResponse
+	37,  // 171: csi.v1.Controller.ControllerListVolumeHealth:output_type -> csi.v1.ControllerListVolumeHealthResponse
+	40,  // 172: csi.v1.Controller.ControllerGetVolumeHealth:output_type -> csi.v1.ControllerGetVolumeHealthResponse
+	46,  // 173: csi.v1.Controller.GetCapacity:output_type -> csi.v1.GetCapacityResponse
+	48,  // 174: csi.v1.Controller.ControllerGetCapabilities:output_type -> csi.v1.ControllerGetCapabilitiesResponse
+	51,  // 175: csi.v1.Controller.CreateSnapshot:output_type -> csi.v1.CreateSnapshotResponse
+	54,  // 176: csi.v1.Controller.DeleteSnapshot:output_type -> csi.v1.DeleteSnapshotResponse
+	56,  // 177: csi.v1.Controller.ListSnapshots:output_type -> csi.v1.ListSnapshotsResponse
+	58,  // 178: csi.v1.Controller.GetSnapshot:output_type -> csi.v1.GetSnapshotResponse
+	60,  // 179: csi.v1.Controller.ControllerExpandVolume:output_type -> csi.v1.ControllerExpandVolumeResponse
+	42,  // 180: csi.v1.Controller.ControllerGetVolume:output_type -> csi.v1.ControllerGetVolumeResponse
+	44,  // 181: csi.v1.Controller.ControllerModifyVolume:output_type -> csi.v1.ControllerModifyVolumeResponse
+	84,  // 182: csi.v1.GroupController.GroupControllerGetCapabilities:output_type -> csi.v1.GroupControllerGetCapabilitiesResponse
+	87,  // 183: csi.v1.GroupController.CreateVolumeGroupSnapshot:output_type -> csi.v1.CreateVolumeGroupSnapshotResponse
+	90,  // 184: csi.v1.GroupController.DeleteVolumeGroupSnapshot:output_type -> csi.v1.DeleteVolumeGroupSnapshotResponse
+	92,  // 185: csi.v1.GroupController.GetVolumeGroupSnapshot:output_type -> csi.v1.GetVolumeGroupSnapshotResponse
+	95,  // 186: csi.v1.SnapshotMetadata.GetMetadataAllocated:output_type -> csi.v1.GetMetadataAllocatedResponse
+	97,  // 187: csi.v1.SnapshotMetadata.GetMetadataDelta:output_type -> csi.v1.GetMetadataDeltaResponse
+	62,  // 188: csi.v1.Node.NodeStageVolume:output_type -> csi.v1.NodeStageVolumeResponse
+	64,  // 189: csi.v1.Node.NodeUnstageVolume:output_type -> csi.v1.NodeUnstageVolumeResponse
+	66,  // 190: csi.v1.Node.NodePublishVolume:output_type -> csi.v1.NodePublishVolumeResponse
+	68,  // 191: csi.v1.Node.NodeUnpublishVolume:output_type -> csi.v1.NodeUnpublishVolumeResponse
+	70,  // 192: csi.v1.Node.NodeGetVolumeStats:output_type -> csi.v1.NodeGetVolumeStatsResponse
+	73,  // 193: csi.v1.Node.NodeGetVolumeHealth:output_type -> csi.v1.NodeGetVolumeHealthResponse
+	75,  // 194: csi.v1.Node.NodeGetStorageHealth:output_type -> csi.v1.NodeGetStorageHealthResponse
+	82,  // 195: csi.v1.Node.NodeExpandVolume:output_type -> csi.v1.NodeExpandVolumeResponse
+	77,  // 196: csi.v1.Node.NodeGetCapabilities:output_type -> csi.v1.NodeGetCapabilitiesResponse
+	80,  // 197: csi.v1.Node.NodeGetInfo:output_type -> csi.v1.NodeGetInfoResponse
+	162, // [162:198] is the sub-list for method output_type
+	126, // [126:162] is the sub-list for method input_type
+	126, // [126:126] is the sub-list for extension type_name
+	119, // [119:126] is the sub-list for extension extendee
+	0,   // [0:119] is the sub-list for field type_name
 }
 
 func init() { file_csi_proto_init() }
@@ -8796,7 +8875,7 @@ func file_csi_proto_init() {
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_csi_proto_rawDesc), len(file_csi_proto_rawDesc)),
-			NumEnums:      10,
+			NumEnums:      11,
 			NumMessages:   147,
 			NumExtensions: 7,
 			NumServices:   5,
