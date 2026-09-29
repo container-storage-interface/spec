@@ -1417,6 +1417,7 @@ message ControllerServiceCapability {
       // This enables COs to fetch node topology and capacity
       // information from the controller side, avoiding the need for
       // cloud API credentials on the node side.
+      // The SP MUST also support PUBLISH_UNPUBLISH_VOLUME.
       GET_NODE_INFO = 18 [(alpha_enum_value) = true];
     }
 

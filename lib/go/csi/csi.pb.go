@@ -523,6 +523,7 @@ const (
 	// This enables COs to fetch node topology and capacity
 	// information from the controller side, avoiding the need for
 	// cloud API credentials on the node side.
+	// The SP MUST also support PUBLISH_UNPUBLISH_VOLUME.
 	ControllerServiceCapability_RPC_GET_NODE_INFO ControllerServiceCapability_RPC_Type = 18
 )
 

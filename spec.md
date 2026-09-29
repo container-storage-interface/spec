@@ -1954,7 +1954,8 @@ A Controller Plugin MUST implement this RPC call if it has `GET_NODE_INFO` contr
 This RPC allows the CO to fetch node information (topology, published volumes, and maximum attachable volumes) from the controller side.
 This is useful when the node side plugin cannot or should not access cloud APIs to retrieve this information (e.g., for security reasons where cloud API credentials should not be distributed to nodes).
 
-If the SP also supports `PUBLISH_UNPUBLISH_VOLUME` controller capability, the CO MAY call this RPC to dynamically update `max_volumes_per_node` when volume attachment fails with `RESOURCE_EXHAUSTED`.
+The SP MUST also support `PUBLISH_UNPUBLISH_VOLUME` controller capability.
+The CO MAY call this RPC to dynamically update `max_volumes_per_node` when volume attachment fails with `RESOURCE_EXHAUSTED`.
 
 The CO SHOULD call this RPC after obtaining the node ID via `NodeGetInfo`.
 
@@ -2209,6 +2210,7 @@ message ControllerServiceCapability {
       // This enables COs to fetch node topology and capacity
       // information from the controller side, avoiding the need for
       // cloud API credentials on the node side.
+      // The SP MUST also support PUBLISH_UNPUBLISH_VOLUME.
       GET_NODE_INFO = 18 [(alpha_enum_value) = true];
     }
 
