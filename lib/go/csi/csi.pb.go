@@ -3281,6 +3281,8 @@ type ControllerGetNodeInfoResponse struct {
 	// "Z2".
 	AccessibleTopology *Topology `protobuf:"bytes,2,opt,name=accessible_topology,json=accessibleTopology,proto3" json:"accessible_topology,omitempty"`
 	// The volume IDs that are currently published to this node.
+	// For volumes published by the CO, these MUST be the same volume_id
+	// values used in ControllerPublishVolume.
 	// These volumes may not be published by CO, but still occupy slots
 	// reported by max_volumes_per_node.
 	//
