@@ -879,6 +879,34 @@ message ControllerPublishVolumeResponse {
   map<string, string> publish_context = 1;
 }
 message ControllerUnpublishVolumeRequest {
+  enum Reason {
+    UNKNOWN = 0;
+
+    // All `NodeUnstageVolume` and `NodeUnpublishVolume` calls for the
+    // volume on the node succeeded. This is the normal case.
+    NODE_CLEANUP_SUCCEEDED = 1;
+
+    // The CO stopped waiting for `NodeUnstageVolume` and
+    // `NodeUnpublishVolume` to succeed, for example because the node
+    // is unreachable and a timeout expired. The CO makes no guarantees
+    // about whether the node can still access the volume and the node
+    // MAY retain cached state which could result in stale reads or
+    // stale writes if the SP does not take precautions to prevent
+    // improper or corrupted I/O.
+    // This reason is inherently dangerous and COs SHOULD NOT use it.
+    // It is included here to allow SPs to know that the CO is doing
+    // something dangerous in the case when the CO can't avoid it.
+    NODE_CLEANUP_TIMEOUT = 2;
+
+    // The CO is asserting that the node is either permanently
+    // removed from the cluster, powered down, or rebooting.
+    // This reason MUST NOT be used if it is possible that the node
+    // may retain any open connection to the volume such that
+    // stale cached reads or stale cached writes to the volume
+    // could occur from the node.
+    NODE_OUT_OF_SERVICE = 3;
+  }
+
   // The ID of the volume. This field is REQUIRED.
   string volume_id = 1;
 
@@ -895,6 +923,17 @@ message ControllerUnpublishVolumeRequest {
   // This field is OPTIONAL. Refer to the `Secrets Requirements`
   // section on how to use this field.
   map<string, string> secrets = 3 [(csi_secret) = true];
+
+  // Indicates why the CO is calling `ControllerUnpublishVolume`.
+  // If `node_id` is set, the CO SHOULD set this field, including when
+  // all `NodeUnstageVolume` and `NodeUnpublishVolume` calls for the
+  // volume on the node have succeeded. The SP MAY use this information
+  // when deciding how to unpublish the volume. Older plugins may
+  // ignore this field. The CO MUST NOT assume that setting this field
+  // causes the SP to take any particular precautions.
+  // This field is OPTIONAL. If it is unset, the CO is not indicating
+  // a reason. The CO MUST NOT set this field if `node_id` is unset.
+  Reason reason = 4 [(alpha_field) = true];
 }
 
 message ControllerUnpublishVolumeResponse {
