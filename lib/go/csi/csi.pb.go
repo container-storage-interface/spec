@@ -215,9 +215,10 @@ const (
 	// VOLUME_ACCESSIBILITY_CONSTRAINTS indicates that the volumes for
 	// this plugin MAY NOT be equally accessible by all nodes in the
 	// cluster. The CO MUST use the topology information returned by
-	// CreateVolumeRequest along with the topology information
-	// returned by NodeGetInfo to ensure that a given volume is
-	// accessible from a given node when scheduling workloads.
+	// CreateVolume along with the node topology information returned
+	// by NodeGetInfo or ControllerGetNodeInfo to ensure that a given
+	// volume is accessible from a given node when scheduling
+	// workloads.
 	PluginCapability_Service_VOLUME_ACCESSIBILITY_CONSTRAINTS PluginCapability_Service_Type = 2
 	// GROUP_CONTROLLER_SERVICE indicates that the Plugin provides
 	// RPCs for operating on groups of volumes. Plugins MAY provide
@@ -520,9 +521,9 @@ const (
 	// MUST also support the GET_VOLUME_HEALTH capability.
 	ControllerServiceCapability_RPC_LIST_VOLUME_HEALTH ControllerServiceCapability_RPC_Type = 17
 	// Indicates the SP supports the ControllerGetNodeInfo RPC.
-	// This enables COs to fetch node topology and capacity
-	// information from the controller plugin, which may be able
-	// to access such information more securely than the node plugin.
+	// This enables COs to fetch node topology and per-node volume
+	// limits from the controller plugin, which may be able to access
+	// such information more securely than the node plugin.
 	// The SP MUST also support PUBLISH_UNPUBLISH_VOLUME.
 	ControllerServiceCapability_RPC_GET_NODE_INFO ControllerServiceCapability_RPC_Type = 18
 )
@@ -1663,9 +1664,10 @@ type Volume struct {
 	// VOLUME_ACCESSIBILITY_CONSTRAINTS plugin capability.
 	// An SP MAY specify multiple topologies to indicate the volume is
 	// accessible from multiple locations.
-	// COs MAY use this information along with the topology information
-	// returned by NodeGetInfo to ensure that a given volume is accessible
-	// from a given node when scheduling workloads.
+	// COs MAY use this information along with the node topology
+	// information returned by NodeGetInfo or ControllerGetNodeInfo to
+	// ensure that a given volume is accessible from a given node when
+	// scheduling workloads.
 	// This field is OPTIONAL. If it is not specified, the CO MAY assume
 	// the volume is equally accessible from all nodes in the cluster and
 	// MAY schedule workloads referencing the volume on any available
@@ -7554,8 +7556,10 @@ func (x *ControllerGetVolumeResponse_VolumeStatus) GetPublishedNodeIds() []strin
 
 type ControllerGetNodeInfoResponse_PublishedVolume struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
+	// The unique identifier of a volume published to the node.
 	// For volumes published by the CO, this MUST be the same volume_id
 	// value used in ControllerPublishVolume.
+	// This field is REQUIRED.
 	VolumeId      string `protobuf:"bytes,1,opt,name=volume_id,json=volumeId,proto3" json:"volume_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache

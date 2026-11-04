@@ -240,9 +240,10 @@ message PluginCapability {
       // VOLUME_ACCESSIBILITY_CONSTRAINTS indicates that the volumes for
       // this plugin MAY NOT be equally accessible by all nodes in the
       // cluster. The CO MUST use the topology information returned by
-      // CreateVolumeRequest along with the topology information
-      // returned by NodeGetInfo to ensure that a given volume is
-      // accessible from a given node when scheduling workloads.
+      // CreateVolume along with the node topology information returned
+      // by NodeGetInfo or ControllerGetNodeInfo to ensure that a given
+      // volume is accessible from a given node when scheduling
+      // workloads.
       VOLUME_ACCESSIBILITY_CONSTRAINTS = 2;
 
       // GROUP_CONTROLLER_SERVICE indicates that the Plugin provides
@@ -628,9 +629,10 @@ message Volume {
   // VOLUME_ACCESSIBILITY_CONSTRAINTS plugin capability.
   // An SP MAY specify multiple topologies to indicate the volume is
   // accessible from multiple locations.
-  // COs MAY use this information along with the topology information
-  // returned by NodeGetInfo to ensure that a given volume is accessible
-  // from a given node when scheduling workloads.
+  // COs MAY use this information along with the node topology
+  // information returned by NodeGetInfo or ControllerGetNodeInfo to
+  // ensure that a given volume is accessible from a given node when
+  // scheduling workloads.
   // This field is OPTIONAL. If it is not specified, the CO MAY assume
   // the volume is equally accessible from all nodes in the cluster and
   // MAY schedule workloads referencing the volume on any available
@@ -1225,8 +1227,10 @@ message ControllerGetNodeInfoResponse {
   option (alpha_message) = true;
 
   message PublishedVolume {
+    // The unique identifier of a volume published to the node.
     // For volumes published by the CO, this MUST be the same volume_id
     // value used in ControllerPublishVolume.
+    // This field is REQUIRED.
     string volume_id = 1;
   }
 
@@ -1418,9 +1422,9 @@ message ControllerServiceCapability {
       LIST_VOLUME_HEALTH = 17 [(alpha_enum_value) = true];
 
       // Indicates the SP supports the ControllerGetNodeInfo RPC.
-      // This enables COs to fetch node topology and capacity
-      // information from the controller plugin, which may be able
-      // to access such information more securely than the node plugin.
+      // This enables COs to fetch node topology and per-node volume
+      // limits from the controller plugin, which may be able to access
+      // such information more securely than the node plugin.
       // The SP MUST also support PUBLISH_UNPUBLISH_VOLUME.
       GET_NODE_INFO = 18 [(alpha_enum_value) = true];
     }
