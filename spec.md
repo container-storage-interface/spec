@@ -1965,7 +1965,7 @@ message GetCapacityRequest {
   // If specified, the Plugin SHALL report the capacity of the storage
   // that can be used to provision volumes that in the specified
   // `accessible_topology`. This is the same as the
-  // `accessible_topology` the CO returns in a `CreateVolumeResponse`.
+  // `accessible_topology` the SP returns in a `CreateVolumeResponse`.
   // This field is OPTIONAL. This field SHALL NOT be set unless the
   // plugin advertises the VOLUME_ACCESSIBILITY_CONSTRAINTS capability.
   Topology accessible_topology = 3;
