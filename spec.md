@@ -401,6 +401,11 @@ service Controller {
   rpc ControllerModifyVolume (ControllerModifyVolumeRequest)
     returns (ControllerModifyVolumeResponse) {
     }
+
+  rpc ControllerGetNodeInfo (ControllerGetNodeInfoRequest)
+    returns (ControllerGetNodeInfoResponse) {
+        option (alpha_method) = true;
+    }
 }
 
 service GroupController {
@@ -645,9 +650,10 @@ message PluginCapability {
       // VOLUME_ACCESSIBILITY_CONSTRAINTS indicates that the volumes for
       // this plugin MAY NOT be equally accessible by all nodes in the
       // cluster. The CO MUST use the topology information returned by
-      // CreateVolumeRequest along with the topology information
-      // returned by NodeGetInfo to ensure that a given volume is
-      // accessible from a given node when scheduling workloads.
+      // CreateVolume along with the node topology information returned
+      // by NodeGetInfo or ControllerGetNodeInfo to ensure that a given
+      // volume is accessible from a given node when scheduling
+      // workloads.
       VOLUME_ACCESSIBILITY_CONSTRAINTS = 2;
 
       // GROUP_CONTROLLER_SERVICE indicates that the Plugin provides
@@ -1096,9 +1102,10 @@ message Volume {
   // VOLUME_ACCESSIBILITY_CONSTRAINTS plugin capability.
   // An SP MAY specify multiple topologies to indicate the volume is
   // accessible from multiple locations.
-  // COs MAY use this information along with the topology information
-  // returned by NodeGetInfo to ensure that a given volume is accessible
-  // from a given node when scheduling workloads.
+  // COs MAY use this information along with the node topology
+  // information returned by NodeGetInfo or ControllerGetNodeInfo to
+  // ensure that a given volume is accessible from a given node when
+  // scheduling workloads.
   // This field is OPTIONAL. If it is not specified, the CO MAY assume
   // the volume is equally accessible from all nodes in the cluster and
   // MAY schedule workloads referencing the volume on any available
@@ -1942,6 +1949,103 @@ message ControllerModifyVolumeResponse {
 | Parameters not supported | 3 INVALID_ARGUMENT | Indicates that the CO has specified invalid mutable parameter keys or values, or the specified volume cannot support the specified parameters. The SP MUST NOT have applied any modification to the volume as part of this specific call. | A caller may verify volume capabilities by calling ValidateVolumeCapabilities and then retry the request with valid mutable parameters. |
 | Volume does not exist | 5 NOT_FOUND | Indicates that a volume corresponding to the specified volume_id does not exist. | Caller MUST verify that the volume_id is correct and that the volume is accessible and has not been deleted before retrying with exponential back off. |
 
+#### `ControllerGetNodeInfo`
+
+A Controller Plugin MUST implement this RPC call if it has `GET_NODE_INFO` controller capability.
+
+This RPC allows the CO to fetch node information (topology, published volumes, and maximum number of volumes) from the controller side.
+This is useful when the controller plugin is able to access such information more securely than the node plugin (e.g., when credentials needed to obtain this information should not be distributed to nodes).
+
+The SP MUST also support `PUBLISH_UNPUBLISH_VOLUME` controller capability.
+The CO MAY call this RPC to dynamically update `max_volumes_per_node` when `ControllerPublishVolume` fails with `RESOURCE_EXHAUSTED`.
+
+The CO SHOULD call this RPC after obtaining the node ID via `NodeGetInfo`.
+
+The SP MAY also return the list of volumes that are currently published to the node according to the SP, including volumes not published by the CO (e.g., published out-of-band).
+`max_volumes_per_node` is the limit on the union of these volumes and the volumes published to the node by the CO.
+The CO MUST NOT attempt to unpublish or otherwise operate on volumes it did not publish.
+
+For example, suppose a node supports at most eight volumes and currently has three published volumes, one of which was published out-of-band rather than by the CO.
+The SP returns `max_volumes_per_node = 8` and all three volume IDs in `published_volumes`.
+The CO can therefore publish five additional volumes.
+
+The SP MAY include or exclude volumes being published or unpublished during the `ControllerGetNodeInfo` call.
+The CO MUST be resilient to that.
+For `ControllerGetNodeInfo` calls that start after `ControllerUnpublishVolume` succeeds, the SP MUST exclude the volume from `published_volumes` for each affected node, unless a new publish operation for that volume on that node has since started.
+
+This operation MUST be idempotent.
+The CO MAY call this RPC multiple times for the same node.
+
+```protobuf
+message ControllerGetNodeInfoRequest {
+  option (alpha_message) = true;
+
+  // The identifier of the node as understood by the SP.
+  // This field is REQUIRED.
+  // This field MUST match the node_id returned by `NodeGetInfo`.
+  // This field overrides the general CSI size limit.
+  // The size of this field SHALL NOT exceed 256 bytes.
+  string node_id = 1;
+}
+
+message ControllerGetNodeInfoResponse {
+  option (alpha_message) = true;
+
+  message PublishedVolume {
+    // The unique identifier of a volume published to the node.
+    // For volumes published by the CO, this MUST be the same volume_id
+    // value used in ControllerPublishVolume.
+    // This field is REQUIRED.
+    string volume_id = 1;
+  }
+
+  // Maximum number of volumes that controller can publish to the node.
+  // If value is not set or zero CO SHALL decide how many volumes of
+  // this type can be published by the controller to the node. The
+  // plugin MUST NOT set negative values here.
+  // This field is OPTIONAL.
+  int64 max_volumes_per_node = 1;
+
+  // Specifies where (regions, zones, racks, etc.) the node is
+  // accessible from.
+  // A plugin that returns this field MUST also set the
+  // VOLUME_ACCESSIBILITY_CONSTRAINTS plugin capability.
+  // COs MAY use this information along with the topology information
+  // returned in CreateVolumeResponse to ensure that a given volume is
+  // accessible from a given node when scheduling workloads.
+  // This field is OPTIONAL. If it is not specified, the CO MAY assume
+  // the node is not subject to any topological constraint, and MAY
+  // schedule workloads that reference any volume V, such that there are
+  // no topological constraints declared for V.
+  //
+  // Example 1:
+  //   accessible_topology =
+  //     {"region": "R1", "zone": "Z2"}
+  // Indicates the node exists within the "region" "R1" and the "zone"
+  // "Z2".
+  Topology accessible_topology = 2;
+
+  // The volumes that are currently published to this node.
+  // This MAY include volumes not published by the CO.
+  // max_volumes_per_node is the limit on the union of these volumes
+  // and the volumes published to the node by the CO.
+  // This field is OPTIONAL.
+  //
+  // The CO MUST NOT attempt to unpublish or otherwise operate on
+  // volumes it did not publish.
+  repeated PublishedVolume published_volumes = 3;
+}
+```
+
+##### ControllerGetNodeInfo Errors
+
+If the plugin is unable to complete the ControllerGetNodeInfo call successfully, it MUST return a non-ok gRPC code in the gRPC status.
+The CO MUST implement the specified error recovery behavior when it encounters the gRPC error code.
+
+| Condition | gRPC Code | Description | Recovery Behavior |
+|-----------|-----------|-------------|-------------------|
+| Node does not exist | 5 NOT_FOUND | Indicates that a node corresponding to the specified node_id does not exist. | Caller MUST verify that the node_id is correct and that the node exists before retrying with exponential back off. |
+
 #### `GetCapacity`
 
 A Controller Plugin MUST implement this RPC call if it has `GET_CAPACITY` controller capability.
@@ -2109,6 +2213,13 @@ message ControllerServiceCapability {
       // A plugin which supports the LIST_VOLUME_HEALTH capability
       // MUST also support the GET_VOLUME_HEALTH capability.
       LIST_VOLUME_HEALTH = 17 [(alpha_enum_value) = true];
+
+      // Indicates the SP supports the ControllerGetNodeInfo RPC.
+      // This enables COs to fetch node topology and per-node volume
+      // limits from the controller plugin, which may be able to access
+      // such information more securely than the node plugin.
+      // The SP MUST also support PUBLISH_UNPUBLISH_VOLUME.
+      GET_NODE_INFO = 18 [(alpha_enum_value) = true];
     }
 
     Type type = 1;
@@ -3162,8 +3273,16 @@ message NodeServiceCapability {
 
       // Indicates the SP supports the NodeGetStorageHealth RPC.
       // This enables COs to fetch health of entire storage subsystem
-	  // from node's perspective. 
+      // from node's perspective.
       GET_STORAGE_HEALTH = 8 [(alpha_enum_value) = true];
+
+      // Indicates the SP supports the controller_get_node_info field
+      // in NodeGetInfoRequest. When the CO sets that field, it will
+      // obtain accessible_topology and max_volumes_per_node via
+      // ControllerGetNodeInfo.
+      // If the SP supports NODE_INFO_FROM_CONTROLLER, it MUST also
+      // support the GET_NODE_INFO controller capability.
+      NODE_INFO_FROM_CONTROLLER = 9 [(alpha_enum_value) = true];
     }
 
     Type type = 1;
@@ -3189,8 +3308,23 @@ The CO MAY call this RPC more than once for a given node.
 The SP SHALL NOT expect the CO to call this RPC more than once.
 The result of this call will be used by CO in `ControllerPublishVolume`.
 
+If the SP has the `NODE_INFO_FROM_CONTROLLER` node capability, the CO MAY set the `controller_get_node_info` field in the request.
+When set, the SP MAY omit `accessible_topology` and `max_volumes_per_node` from the response and return only `node_id`.
+The CO obtains `accessible_topology` and `max_volumes_per_node` via `ControllerGetNodeInfo` instead, and MUST ignore those fields in the `NodeGetInfoResponse`.
+
 ```protobuf
 message NodeGetInfoRequest {
+  // When true, the CO will obtain accessible_topology and
+  // max_volumes_per_node from the controller plugin using
+  // ControllerGetNodeInfo.
+  // The CO MUST ignore the accessible_topology and
+  // max_volumes_per_node in NodeGetInfoResponse if this field
+  // is true. The SP MAY omit those two fields from
+  // NodeGetInfoResponse and return only node_id in that case.
+  // The CO MUST NOT set this field to true unless the SP has the
+  // NODE_INFO_FROM_CONTROLLER node capability.
+  // This field is OPTIONAL.
+  bool controller_get_node_info = 1 [(alpha_field) = true];
 }
 
 message NodeGetInfoResponse {
